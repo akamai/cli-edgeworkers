@@ -1,0 +1,3 @@
+#!/usr/bin/env node
+// stub file to kick off compiled app
+require('./bin/cli-main.js');

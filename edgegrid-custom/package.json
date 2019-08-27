@@ -1,0 +1,74 @@
+{
+  "_from": "edgegrid@3.0.5",
+  "_id": "edgegrid@3.0.5",
+  "_inBundle": false,
+  "_integrity": "sha512-eR2TewoqN7OYhT26W9iojSiygNaoPiWyiQD3hXckHRGzX7abBbawesPDI3WziVvAgMySas9VD022ibJtJ+gnnQ==",
+  "_location": "/edgegrid",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "version",
+    "registry": true,
+    "raw": "edgegrid@3.0.5",
+    "name": "edgegrid",
+    "escapedName": "edgegrid",
+    "rawSpec": "3.0.5",
+    "saveSpec": null,
+    "fetchSpec": "3.0.5"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/edgegrid/-/edgegrid-3.0.5.tgz",
+  "_shasum": "c21f734bc3f3e524783cbc2f714fd38b1ffbe079",
+  "_spec": "edgegrid@3.0.5",
+  "_where": "/mnt/c/Users/dtheobal/Documents/Akamai_as_Code/mydev/cli-edgeworkers",
+  "author": {
+    "name": "Jonathan Bennett"
+  },
+  "bugs": {
+    "url": "https://github.com/akamai-open/AkamaiOPEN-edgegrid-node/issues"
+  },
+  "bundleDependencies": false,
+  "contributors": [
+    {
+      "name": "Darius Kazemi"
+    },
+    {
+      "name": "Mike Ball"
+    },
+    {
+      "name": "Kyle Tyacke"
+    }
+  ],
+  "dependencies": {
+    "log4js": "^0.6.14",
+    "moment": "^2.22.2",
+    "request": "^2.88.0",
+    "uuid": "^3.0.0"
+  },
+  "deprecated": false,
+  "description": "Authentication handler for the Akamai OPEN EdgeGrid Authentication scheme in Node.js",
+  "devDependencies": {
+    "mocha": "^5.2.0",
+    "nock": "^10.0.1"
+  },
+  "homepage": "https://github.com/akamai-open/AkamaiOPEN-edgegrid-node#readme",
+  "keywords": [
+    "akamai",
+    "open",
+    "api",
+    "edgegrid"
+  ],
+  "license": "Apache-2.0",
+  "main": "index.js",
+  "name": "edgegrid",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/akamai-open/AkamaiOPEN-edgegrid-node.git"
+  },
+  "scripts": {
+    "test": "EDGEGRID_ENV=test ./node_modules/.bin/mocha $(find test -name '*.js')"
+  },
+  "version": "3.0.5"
+}

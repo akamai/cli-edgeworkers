@@ -1,0 +1,32 @@
+[default]
+host = example.luna.akamaiapis.net
+client_token = clientToken
+client_secret = "clientSecret"
+access_token = accessToken
+max-body = 131072
+
+[section]
+host = sectionexample.luna.akamaiapis.net
+client_token = sectionClientToken
+client_secret = sectionClientSecret
+access_token = sectionAccessToken
+max-body = 131072
+
+[https]
+host = https://example.luna.akamaiapis.net
+client_token = sectionClientToken
+client_secret = sectionClientSecret
+access_token = sectionAccessToken
+max-body = 131072
+
+; comment
+[comment-test] ; comment
+;comment
+; comment
+host = "sectionexample.luna.akamaiapis.net" ; comment
+client_token = "client token" ;comment
+client_secret = "client;secret" ; comment
+access_token = "access; token" ;comment
+max-body = 131072
+other = 'The "most" \'interesting\' ; value in the \";world\"' ; comment
+; comment
