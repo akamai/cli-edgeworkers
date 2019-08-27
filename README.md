@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # EdgeWorkers CLI
 The EdgeWorkers command line interface (CLI) expedites the process of creating, testing and deploying EdgeWorkers functions to the Akamai Edge network.
 
@@ -47,3 +48,7 @@ Commands:
 
 ## Resources
 For more information on EdgeWorkers, refer to the [User Guide](https://learn.akamai.com/en-us/webhelp/edgeworkers/edgeworkers-user-guide/GUID-4CC14D7E-D92D-4F2D-9292-17F8BE6E2DAE.html).
+=======
+# cli-edgeworkers
+Akamai CLI for Edgeworkers, allows you to interact with EdgeWorkers APIs via a command line interface
+>>>>>>> 054b97bfc906e9c952cd93bb2e4b43e426f08f29
