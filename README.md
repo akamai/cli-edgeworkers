@@ -11,9 +11,6 @@ To use this tool you need:
 Use the following Akamai CLI command to install the latest EdgeWorkers CLI package:
 
 `akamai install edgeworkers`
-
-### Debug and report issues
-You are all set, happy coding! If you experience any issues with the EdgeWorkers CLI, raise them as a [github issue](https://github.com/akamai/cli-edgeworkers/issues). Feel free to create a pull request with the fix or suggestion.
 ___
 
 ## Overview of Commands
@@ -33,7 +30,7 @@ Options:
 | -V, --version | Display the version number for the EdgeWorkers CLI program. |
 | --debug | Show debug information. |
 | --edgerc `<path>` | Use credentials in `edgerc` file for command. (Default file location is _~/.edgerc_) |
-| --section `<name>` | Use this section in `edgerc` file. (Default section is _[default]_|
+| --section `<name>` | Use this section in `edgerc` file. (Default section is _[default]_)|
 | -h, --help | Display usage information for EdgeWorkers CLI. |
  
 Commands:
@@ -243,3 +240,6 @@ For more information on EdgeWorkers, refer to the following resources:
 * [EdgeWorkers Developer Page](https://developer.akamai.com/edgeworkers)
 * [EdgeWorkers User Guide](https://learn.akamai.com/en-us/webhelp/edgeworkers/edgeworkers-user-guide/GUID-4CC14D7E-D92D-4F2D-9292-17F8BE6E2DAE.html)
 * [EdgeWorkers API Guide](https://developer.akamai.com/api/web_performance/edgeworkers/v1.html)
+
+## Reporting Issues
+You are all set, happy coding! If you experience any issues with the EdgeWorkers CLI, raise them as a [github issue](https://github.com/akamai/cli-edgeworkers/issues). Feel free to create a pull request with the fix or suggestion.
