@@ -14,6 +14,7 @@ const idColumnsToKeep = ["edgeWorkerId", "name", "groupId"];
 const versionColumnsToKeep = ["edgeWorkerId", "version", "checksum", "createdBy", "createdTime", "sequenceNumber"];
 const activationColumnsToKeep = ["edgeWorkerId", "version", "activationId", "status", "network", "createdBy", "createdTime"];
 const CLI_CACHE_PATH = process.env.AKAMAI_CLI_CACHE_PATH;
+const copywrite = '\nCopyright (C) Akamai Technologies, Inc\nVisit http://github.com/akamai/cli-edgeworkers for detailed documentation';
 
 if (!CLI_CACHE_PATH) {
   logAndExit("ERROR: AKAMAI_CLI_CACHE_PATH is not set.");
@@ -68,7 +69,21 @@ program
   })
   .on("option:debug", function () {
     envUtils.setDebugMode(true);
-  });
+  })
+  .on("--help", function () {
+    console.log(copywrite);
+  })
+  .on("-h", function () {
+    console.log(copywrite);
+  })
+  .on('command:*', function (command) {
+    const firstCommand = command[0];
+    if (!this.commands.find(c => c._name == firstCommand)) {
+      console.error('Invalid command: %s\nSee --help for a list of available commands.', program.args.join(' '));
+      process.exit(1);
+    }
+  })
+  ;
 
 program
   .command('help [command]')
@@ -77,18 +92,25 @@ program
     if (!arg) {
       program.outputHelp();
     } else {
-      var command = program.commands.find(c => c._name == arg);
+      var command = (!!program.commands.find(c => c._name == arg)) ? program.commands.find(c => c._name == arg) : program.commands.find(c => c._alias == arg);
       if (!command) {
         console.log(`ERROR: Could not find a command for ${arg}`);
       } else {
         command.outputHelp();
+        console.log(copywrite);
       }
     }
+  })
+  .on("--help", function () {
+    console.log(copywrite);
+  })
+  .on("-h", function () {
+    console.log(copywrite);
   });
 
 program
   .command("list-groups [group-identifier]")
-  .description("List groups available to current user credentials and setup")
+  .description("Customer Developer can find their EdgeWorkers access level per Luna Access Control Group.")
   .alias("lg")
   .action(async function (groupId) {
     try {
@@ -96,36 +118,54 @@ program
     } catch (e) {
       console.error(e);
     }
+  })
+  .on("--help", function () {
+    console.log(copywrite);
+  })
+  .on("-h", function () {
+    console.log(copywrite);
   });
 
 program
   .command("list-ids [edgeworker-identifier]")
-  .description("List EdgeWorker ids currently registered")
+  .description("List EdgeWorker ids currently registered.")
   .alias("li")
-  .option("--groupId <groupId>", "Permission Group")
+  .option("--groupId <groupId>", "Filter EdgeWorker Id list by Permission Group")
   .action(async function (ewId, options) {
     try {
       await showEdgeWorkerIdOverview(ewId, options.groupId);
     } catch (e) {
       console.log(e);
     }
+  })
+  .on("--help", function () {
+    console.log(copywrite);
+  })
+  .on("-h", function () {
+    console.log(copywrite);
   });
 
 program
-  .command("create-id <group-identifier> <edgeworker-name>")
-  .description("Create a new EdgeWorker Identifier.")
-  .alias("ci")
+  .command("register <group-identifier> <edgeworker-name>")
+  .description("Register a new EdgeWorker id to reference in Property Manager behavior.")
+  .alias("create-id")
   .action(async function (groupId, name) {
     try {
       await createEdgeWorkerId(groupId, name);
     } catch (e) {
       console.log(e);
     }
+  })
+  .on("--help", function () {
+    console.log(copywrite);
+  })
+  .on("-h", function () {
+    console.log(copywrite);
   });
 
 program
   .command("update-id <edgeworker-identifier> <group-identifier> <edgeworker-name>")
-  .description("Update EdgeWorker Id's group and name")
+  .description("Allows Customer Developer to update an existing EdgeWorker Identifier's Luna ACG or Name attributes.")
   .alias("ui")
   .action(async function (ewId, groupId, name) {
     try {
@@ -133,11 +173,17 @@ program
     } catch (e) {
       console.log(e);
     }
+  })
+  .on("--help", function () {
+    console.log(copywrite);
+  })
+  .on("-h", function () {
+    console.log(copywrite);
   });
 
 program
   .command("list-versions <edgeworker-identifier> [version-identifier]")
-  .description("List Version information of a given EdgeWorker Id")
+  .description("List Version information of a given EdgeWorker Id.")
   .alias("lv")
   .action(async function (ewId, versionId) {
     try {
@@ -145,38 +191,56 @@ program
     } catch (e) {
       console.log(e);
     }
+  })
+  .on("--help", function () {
+    console.log(copywrite);
+  })
+  .on("-h", function () {
+    console.log(copywrite);
   });
 
 program
-  .command("create-verison <edgeworker-identifier>")
-  .description("Create a new version of an EdgeWorker.")
-  .alias("cv")
+  .command("upload <edgeworker-identifier>")
+  .description("Creates a new version of a given EdgeWorker Id which includes the code bundle.")
+  .alias("create-id")
   .option("--bundle <bundlePath>", "Path to bundle file in tgz format")
   .option("--codeDir <workingDirectory>", "Working directory that includes main.js and bundle.json files")
   .action(async function (ewId, options) {
 
     //either bundle or code working directory must be provided or fail
     if ((!options.bundle && !options.codeDir) || (options.bundle && options.codeDir))
-      logAndExit("ERROR: You must provide the EdgeWorkers bundle tgz OR the working directory for mainjs and manifest file to create a new version!");
+      logAndExit("ERROR: You must provide the EdgeWorkers bundle tgz (--bundle) OR the working directory for mainjs and manifest file (--codeDir) to create a new version!");
 
     try {
       await createNewVersion(ewId, options);
     } catch (e) {
       console.log(e);
     }
+  })
+  .on("--help", function () {
+    console.log(copywrite);
+  })
+  .on("-h", function () {
+    console.log(copywrite);
   });
 
 program
-  .command("download-verison <edgeworker-identifier> <version-identifier>")
+  .command("download <edgeworker-identifier> <version-identifier>")
   .description("Download the code bundle of an EdgeWorker version.")
-  .alias("dv")
-  .option("--downloadPath <downloadPath>", "Path to store downloaded bundle file.")
+  .alias("download-version")
+  .option("--downloadPath <downloadPath>", "Path to store downloaded bundle file; defaults to CLI home directory if not provided")
   .action(async function (ewId, versionId, options) {
     try {
       await downloadTarball(ewId, versionId, options.downloadPath);
     } catch (e) {
       console.log(e);
     }
+  })
+  .on("--help", function () {
+    console.log(copywrite);
+  })
+  .on("-h", function () {
+    console.log(copywrite);
   });
 
 program
@@ -195,10 +259,16 @@ program
     } catch (e) {
       console.log(e);
     }
+  })
+  .on("--help", function () {
+    console.log(copywrite);
+  })
+  .on("-h", function () {
+    console.log(copywrite);
   });
 
-  program
-  .command("activate <edgeworker-identifier> <network> <versionId>")
+program
+  .command("activate <edgeworker-identifier> <network> <version-identifier>")
   .description("Activate a Version for a given EdgeWorker Id on an Akamai Network")
   .alias("av")
   .action(async function (ewId, network, versionId) {
@@ -211,7 +281,20 @@ program
     } catch (e) {
       console.log(e);
     }
+  })
+  .on("--help", function () {
+    console.log(copywrite);
+  })
+  .on("-h", function () {
+    console.log(copywrite);
   });
+
+  if (!process.argv.slice(2).length) {
+    program.outputHelp();
+    process.exit();
+  }
+
+  program.parse(process.argv);
 
 /* ========== Async Fetch and Formatters ========== */
 async function showGroupOverview(groupId: string) {
@@ -260,6 +343,8 @@ async function showEdgeWorkerIdOverview(ewId: string, groupId: string) {
       ids = ids["edgeWorkerIds"];
   }
   else {
+    console.log(`INFO: Since EdgeWorker Id (${ewId}) was provided, ignoring unnecessary Group Id, group: ${groupId}...`);
+    groupId = null;
     ids = await cliUtils.spinner(edgeWorkersSvc.getEdgeWorkerId(ewId), `Fetching info for EdgeWorker Id ${ewId}`);
     ids = [ids];
   }
@@ -373,7 +458,7 @@ async function showEdgeWorkerIdVersionOverview(ewId: string, options?: { version
   }
   else {
     if (showResult) {
-      logAndExit(`INFO: There are currently no Versions for ewId: ${ewId}`);
+      logAndExit(`INFO: There are currently no Versions for this EdgeWorker Id: ${ewId}`);
     }
     else {
       return [];
@@ -533,10 +618,3 @@ async function createNewActivation(ewId: string, network: string, versionId: str
   }
 
 }
-
-if (!process.argv.slice(2).length) {
-  program.outputHelp();
-  process.exit();
-}
-
-program.parse(process.argv);

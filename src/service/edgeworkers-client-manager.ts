@@ -136,16 +136,16 @@ function validateManifest(manifest: string) {
     }
   }
 
-  // only checks the three required fields are found, ignores optional fields (for now)
   var tarballVersion = manifest[TARBALL_VERSION_KEY];
   var manifestFormat = manifest[BUNDLE_FORMAT_VERSION_KEY];
   var jsAPIVersion = manifest[JSAPI_VERSION_KEY];
 
-  if (!tarballVersion || !manifestFormat || !jsAPIVersion) {
+  // only checks the one required field is found, ignores optional fields (for now)
+  if (!tarballVersion) {
     return {
       isValid: false,
       version: undefined,
-      error_reason: `ERROR: At least one of the required fields are missing: ${TARBALL_VERSION_KEY}, ${BUNDLE_FORMAT_VERSION_KEY}, or ${JSAPI_VERSION_KEY}`
+      error_reason: `ERROR: Required field is missing: ${TARBALL_VERSION_KEY}`
     }
   }
 
