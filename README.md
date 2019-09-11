@@ -45,7 +45,7 @@ Commands:
 | list-versions \| lv `<edgeworker-identifier> [version-identifier]` | List Version information of a given EdgeWorker Id. |
 | upload \| create-id `[options] <edgeworker-identifier>` | Creates a new version of a given EdgeWorker Id which includes the code bundle. |
 | download \| download-version `[options] <edgeworker-identifier> <version-identifier>` | Download the code bundle of an EdgeWorker version. |
-| list-activations \| la `[options] <edgeworker-identifier>` | List Activation status of a given EdgeWorker Id. |
+| status \| list-activations `[options] <edgeworker-identifier>` | List Activation status of a given EdgeWorker Id. |
 | activate \| av `<edgeworker-identifier> <network> <versionId>` | Activate a Version for a given EdgeWorker Id on an Akamai Network. |
 
 ### List Permission Groups with EdgeWorkers Access
@@ -198,7 +198,7 @@ _`<CLI_CACHE_PATH>/edgeworkers-cli/edgeworkers/<ewid>/`_
 ### List EdgeWorker Version Activation Status
 List Activation status of a given EdgeWorker Id.
 
-Usage: `akamai edgeworkers list-activations [options] <edgeworker-identifier>`
+Usage: `akamai edgeworkers status [options] <edgeworker-identifier>`
 
 | Option | Description |
 | - | - |

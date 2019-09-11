@@ -244,9 +244,9 @@ program
   });
 
 program
-  .command("list-activations <edgeworker-identifier>")
+  .command("status <edgeworker-identifier>")
   .description("List Activation status of a given EdgeWorker Id.")
-  .alias("la")
+  .alias("list-activations")
   .option("--versionId <versionId>", "Version Identifier")
   .option("--activationId <activationId>", "Activation Identifier")
   .action(async function (ewId, options) {
