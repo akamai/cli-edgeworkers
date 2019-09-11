@@ -81,7 +81,7 @@ export function buildTarball(ewId: string, codePath: string) {
   var tarballVersion: string;
 
   // Validate Manifest and if valid, grab version identifier
-  var manifest = JSON.parse(fs.readFileSync(manifestPath).toString());
+  var manifest = fs.readFileSync(manifestPath).toString();
   var manifestValidationData = validateManifest(manifest);
 
   if (!manifestValidationData.isValid) {
@@ -100,7 +100,8 @@ export function buildTarball(ewId: string, codePath: string) {
     {
       gzip: true,
       sync: true,
-      C: codeWorkingDirectory
+      C: codeWorkingDirectory,
+      portable: true
     },
     [MAINJS_FILENAME, MANIFEST_FILENAME]
   ).pipe(fs.createWriteStream(tarballPath));
@@ -136,6 +137,8 @@ function validateManifest(manifest: string) {
     }
   }
 
+  manifest = JSON.parse(manifest);
+
   var tarballVersion = manifest[TARBALL_VERSION_KEY];
   var manifestFormat = manifest[BUNDLE_FORMAT_VERSION_KEY];
   var jsAPIVersion = manifest[JSAPI_VERSION_KEY];
@@ -152,7 +155,7 @@ function validateManifest(manifest: string) {
   // check formatting requirements
   // validation schema per https://git.source.akamai.com/projects/EDGEWORKERS/repos/portal-ew-validation/browse/src/main/resources/manifest-schema.json
   // edgeworker-version should be a string matching "^(?!.*?\\.{2})[.a-zA-Z0-9_~-]{1,32}$"
-  if (typeof tarballVersion !== 'string' || !!(/^(?!.*?\\.{2})[.a-zA-Z0-9_~-]{1,32}$/.test(tarballVersion))) {
+  if (typeof tarballVersion !== 'string' || !(/^(?!.*?\\.{2})[.a-zA-Z0-9_~-]{1,32}$/.test(tarballVersion))) {
     return {
       isValid: false,
       version: undefined,
@@ -168,7 +171,7 @@ function validateManifest(manifest: string) {
     }
   }
   // api-version should be a string matching "^[0-9.]*$"
-  if (typeof jsAPIVersion !== 'string' || !!(/^[0-9.]*$/.test(jsAPIVersion))) {
+  if (typeof jsAPIVersion !== 'string' || !(/^[0-9.]*$/.test(jsAPIVersion))) {
     return {
       isValid: false,
       version: undefined,
