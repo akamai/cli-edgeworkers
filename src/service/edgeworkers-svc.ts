@@ -33,39 +33,36 @@ function fetchTarball(pth: string, method: string, body, headers, downloadPath: 
         path,
         method,
         headers,
-        body
-      })
+        body,
+        encoding: null
+      });
 
-      var req = edge.send(() => { });
-
-      req.on('response', function (res) {
-        if (isOkStatus(res.statusCode)) {
-          var contentType = res.headers['content-type'];
+      edge.send(function (error, response, body) {
+        if (error) {
+          reject(error);
+        }
+        else if (isOkStatus(response.statusCode)) {
+          var contentType = response.headers['content-type'];
           if (contentType.indexOf('gzip') > -1) {
-            const outStream = fs.createWriteStream(downloadPath, { flags: "w" });
-            res.pipe(outStream);
+            const buffer = Buffer.from(body, 'utf8');
+            fs.writeFileSync(downloadPath, buffer);
+            resolve({state: true});
           }
           else {
             // this shouldn't happen unless Version API changes content-types to non-tarball format
             throw new Error(`ERROR: Unexpected content-type: ${contentType}`);
           }
-          res.on('end', function () {
-            resolve({ state: true });
-          });
         }
         else {
           try {
-            var errorObj = JSON.parse(res);
+            var errorObj = JSON.parse(body);
             reject(cliUtils.toJsonPretty(errorObj));
-          } catch (ex) {
-            console.error(`got error code: ${res.statusCode} calling ${res.method} ${res.path}\n${res.body}`);
-            reject(res);
+          }
+          catch (ex) {
+            console.error(`got error code: ${response.statusCode} calling ${method} ${path}\n${body}`);
+            reject(body);
           }
         }
-      });
-
-      req.on('error', function (err) {
-        reject(err);
       });
     });
 }
@@ -89,7 +86,7 @@ function sendEdgeRequest(pth: string, method: string, body, headers) {
         method,
         headers,
         body
-      })
+      });
 
       edge.send(function (error, response, body) {
         if (error) {

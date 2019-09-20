@@ -16,16 +16,16 @@
     "cli-spinner": "0.2.8",
     "commander": "2.18.0",
     "console.table": "0.10.0",
-    "edgegrid": "3.0.5",
+    "edgegrid": "^3.0.8",
     "inquirer": "6.2.0",
     "sha256-file": "^1.0.0",
-    "tar": "^4.4.10",
+    "tar": "^4.4.11",
     "untildify": "3.0.3"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.137",
-    "@types/node": "^9.6.51",
-    "@types/request": "^2.48.1",
+    "@types/lodash": "^4.14.138",
+    "@types/node": "^9.6.52",
+    "@types/request": "^2.48.3",
     "typescript": "^2.8.3"
   },
   "license": "Apache-2.0"
