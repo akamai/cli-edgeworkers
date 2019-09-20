@@ -179,7 +179,7 @@ Usage: `akamai edgeworkers upload [options] <edgeworker-identifier>`
 ### Download an EdgeWorkers Code Bundle
 Download the code bundle of an EdgeWorker version.
 
-Usage: `akamai edgeworkers [options] <edgeworker-identifier> <version-identifier>`
+Usage: `akamai edgeworkers download [options] <edgeworker-identifier> <version-identifier>`
 
 | Option | Description |
 | - | - |
