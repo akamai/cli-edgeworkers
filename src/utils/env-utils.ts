@@ -24,8 +24,16 @@ export function getEdgeGrid() {
   if (_edge != null) {
     return _edge;
   }
-  var s = getEdgeGridSection(edgeRcParams.section);
-  return new EdgeGrid(s.clientToken, s.clientSecret, s.accessToken, s.host, edgeRcParams.debug);
+
+  // Uses default built library of Akamai to handle all scenarios with
+  // loading of custom credentials.
+  // https://github.com/akamai/AkamaiOPEN-edgegrid-node
+  var eg = new EdgeGrid({
+    path: edgeRcParams.path,
+    section: edgeRcParams.section,
+  });
+
+  return eg
 }
 
 export function setDebugMode(debug: boolean) {
