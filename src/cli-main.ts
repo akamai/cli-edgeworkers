@@ -202,7 +202,7 @@ program
 program
   .command("upload <edgeworker-identifier>")
   .description("Creates a new version of a given EdgeWorker Id which includes the code bundle.")
-  .alias("create-id")
+  .alias("create-version")
   .option("--bundle <bundlePath>", "Path to bundle file in tgz format")
   .option("--codeDir <workingDirectory>", "Working directory that includes main.js and bundle.json files")
   .action(async function (ewId, options) {
