@@ -5,9 +5,9 @@
   "commands": [
     {
       "name": "edgeworkers",
-      "version": "0.1.0",
-      "description": "Manage Akamai EdgeWorkers function bundles.",
-      "bin": "https://github.com/akamai/cli-edgeworkers/releases/download/{{.Version}}/akamai-{{.Name}}-{{.Version}}-{{.OS}}-{{.Arch}}{{.BinSuffix}}"
+      "version": "0.1.1",
+      "aliases": ["ew", "edgeworkers"],
+      "description": "Manage Akamai EdgeWorkers function bundles."
     }
   ]
 }
