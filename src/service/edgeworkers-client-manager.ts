@@ -162,20 +162,26 @@ function validateManifest(manifest: string) {
       error_reason: `ERROR: Format for field '${TARBALL_VERSION_KEY}' is invalid`
     }
   }
-  // bundle-version should be an integer >=1
-  if (!Number.isInteger(manifestFormat) || manifestFormat < 1) {
-    return {
-      isValid: false,
-      version: undefined,
-      error_reason: `ERROR: Format for field '${BUNDLE_FORMAT_VERSION_KEY}' is invalid`
+  // Only validate bundle-version if provided as it is optional
+  if(manifestFormat) {
+    // bundle-version should be an integer >=1
+    if (!Number.isInteger(manifestFormat) || manifestFormat < 1) {
+      return {
+        isValid: false,
+        version: undefined,
+        error_reason: `ERROR: Format for field '${BUNDLE_FORMAT_VERSION_KEY}' is invalid`
+      }
     }
   }
-  // api-version should be a string matching "^[0-9.]*$"
-  if (typeof jsAPIVersion !== 'string' || !(/^[0-9.]*$/.test(jsAPIVersion))) {
-    return {
-      isValid: false,
-      version: undefined,
-      error_reason: `ERROR: Format for field '${JSAPI_VERSION_KEY}' is invalid`
+  // Only validate api-version if provided as it is optional
+  if(jsAPIVersion) {
+    // api-version should be a string matching "^[0-9.]*$"
+    if (typeof jsAPIVersion !== 'string' || !(/^[0-9.]*$/.test(jsAPIVersion))) {
+      return {
+        isValid: false,
+        version: undefined,
+        error_reason: `ERROR: Format for field '${JSAPI_VERSION_KEY}' is invalid`
+      }
     }
   }
 
