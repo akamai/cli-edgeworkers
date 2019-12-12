@@ -27,8 +27,7 @@ export function validateTarball(ewId: string, rawTarballPath: string) {
 
   // Check to make sure tarball exists
   if (!fs.existsSync(tarballPath)) {
-    console.log(`ERROR: EdgeWorkers bundle archive (${tarballPath}) provided is not found.`);
-    process.exit();
+    cliUtils.logAndExit(1, `ERROR: EdgeWorkers bundle archive (${tarballPath}) provided is not found.`);
   }
 
   // Check to make sure tarball contains main.js and bundle.json at root level of archive
@@ -45,8 +44,7 @@ export function validateTarball(ewId: string, rawTarballPath: string) {
 
   //if both files are not found throw an error and stop
   if (files.length != 2) {
-    console.log(`ERROR: EdgeWorkers ${MAINJS_FILENAME} and/or ${MANIFEST_FILENAME} is not found in provided bundle tgz!`);
-    process.exit();
+    cliUtils.logAndExit(1, `ERROR: EdgeWorkers ${MAINJS_FILENAME} and/or ${MANIFEST_FILENAME} is not found in provided bundle tgz!`);
   }
 
   /* DCT 8/19/19: Decided to punt on unpacking the tarball to check the individual files, thus letting the EdgeWorkers OPEN API validation catch those problems.
@@ -70,8 +68,7 @@ export function buildTarball(ewId: string, codePath: string) {
   var manifestPath = path.join(codeWorkingDirectory, MANIFEST_FILENAME);
 
   if (!fs.existsSync(mainjsPath) || !fs.existsSync(manifestPath)) {
-    console.log(`ERROR: EdgeWorkers main.js (${mainjsPath}) and/or manifest (${manifestPath}) provided is not found.`);
-    process.exit();
+    cliUtils.logAndExit(1, `ERROR: EdgeWorkers main.js (${mainjsPath}) and/or manifest (${manifestPath}) provided is not found.`);
   }
 
   const edgeWorkersDir = createEdgeWorkerIdDir(ewId);
@@ -85,8 +82,7 @@ export function buildTarball(ewId: string, codePath: string) {
   var manifestValidationData = validateManifest(manifest);
 
   if (!manifestValidationData.isValid) {
-    console.log(manifestValidationData.error_reason);
-    process.exit();
+    cliUtils.logAndExit(1, manifestValidationData.error_reason);
   }
   else {
     tarballVersion = manifestValidationData.version;
@@ -200,8 +196,7 @@ export function determineTarballDownloadDir(ewId: string, rawDownloadPath: strin
 
   // Regardless of what was picked, make sure it exists
   if (!fs.existsSync(downloadPath)) {
-    console.log(`ERROR: The download path does not exist: ${downloadPath}`);
-    process.exit();
+    cliUtils.logAndExit(1, `ERROR: The download path does not exist: ${downloadPath}`);
   }
   console.log(`Using ${downloadPath} as path to store downloaded bundle file`);
   return downloadPath;

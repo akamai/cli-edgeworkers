@@ -14,31 +14,26 @@ const idColumnsToKeep = ["edgeWorkerId", "name", "groupId"];
 const versionColumnsToKeep = ["edgeWorkerId", "version", "checksum", "createdBy", "createdTime", "sequenceNumber"];
 const activationColumnsToKeep = ["edgeWorkerId", "version", "activationId", "status", "network", "createdBy", "createdTime"];
 const CLI_CACHE_PATH = process.env.AKAMAI_CLI_CACHE_PATH;
-const copywrite = '\nCopyright (C) Akamai Technologies, Inc\nVisit http://github.com/akamai/cli-edgeworkers for detailed documentation';
+const copywrite = '\n(c) Copyright 2019 Akamai Technologies, Inc. Licensed under Apache 2 license.\nVisit http://github.com/akamai/cli-edgeworkers for detailed documentation';
 
 if (!CLI_CACHE_PATH) {
-  logAndExit("ERROR: AKAMAI_CLI_CACHE_PATH is not set.");
+  cliUtils.logAndExit(1,"ERROR: AKAMAI_CLI_CACHE_PATH is not set.");
 }
 
 if (!fs.existsSync(CLI_CACHE_PATH)) {
-  logAndExit(`ERROR: AKAMAI_CLI_CACHE_PATH is set to ${CLI_CACHE_PATH} but this directory does not exist.`);
+  cliUtils.logAndExit(1,`ERROR: AKAMAI_CLI_CACHE_PATH is set to ${CLI_CACHE_PATH} but this directory does not exist.`);
 }
 
 const edgeRcPath = path.resolve(os.homedir(), '.edgerc');
 if (!fs.existsSync(edgeRcPath)) {
-  logAndExit(`ERROR: Could not find .edgerc to authenticate Akamai API calls. Add your credential set to the .edgerc file at this path: ${edgeRcPath}`);
+  cliUtils.logAndExit(1,`ERROR: Could not find .edgerc to authenticate Akamai API calls. Add your credential set to the .edgerc file at this path: ${edgeRcPath}`);
 }
 
 if (envUtils.getNodeVersion() < 8) {
-  logAndExit("ERROR: The Akamai EdgeWorkers CLI requires Node 8 or later.");
+  cliUtils.logAndExit(1, "ERROR: The Akamai EdgeWorkers CLI requires Node 8 or later.");
 }
 
 /* ========== Local Helpers ========== */
-function logAndExit(msg: string) {
-  console.log(msg);
-  process.exit();
-}
-
 function filterJsonData(data, columnsToKeep: string[]) {
   //Dont filter data if in debug mode
   if (!envUtils.isDebugMode()) {
@@ -73,8 +68,7 @@ program
   .on('command:*', function (command) {
     const firstCommand = command[0];
     if (!this.commands.find(c => c._name == firstCommand)) {
-      console.error('Invalid command: %s\nSee --help for a list of available commands.', program.args.join(' '));
-      process.exit(1);
+      cliUtils.logAndExit(1, `Invalid command: ${program.args.join(' ')}\nSee --help for a list of available commands.`);
     }
   })
   ;
@@ -85,12 +79,12 @@ program
   .action(function (arg) {
     if (!arg) {
       program.outputHelp();
-      logAndExit(copywrite);
+      cliUtils.logAndExit(0, copywrite);
     }
     else {
       var command = (!!program.commands.find(c => c._name == arg)) ? program.commands.find(c => c._name == arg) : program.commands.find(c => c._alias == arg);
       if (!command) {
-        console.log(`ERROR: Could not find a command for ${arg}`);
+        cliUtils.logAndExit(1,`ERROR: Could not find a command for ${arg}`);
       }
       else {
         command.outputHelp();
@@ -98,7 +92,7 @@ program
     }
   })
   .on("--help", function () {
-    logAndExit(copywrite);
+    cliUtils.logAndExit(0, copywrite);
   });
 
 program
@@ -109,11 +103,11 @@ program
     try {
       await showGroupOverview(groupId);
     } catch (e) {
-      console.error(e);
+        cliUtils.logAndExit(1, e);
     }
   })
   .on("--help", function () {
-    logAndExit(copywrite);
+    cliUtils.logAndExit(0, copywrite);
   });
 
 program
@@ -125,11 +119,11 @@ program
     try {
       await showEdgeWorkerIdOverview(ewId, options.groupId);
     } catch (e) {
-      console.log(e);
+        cliUtils.logAndExit(1, e);
     }
   })
   .on("--help", function () {
-    logAndExit(copywrite);
+    cliUtils.logAndExit(0, copywrite);
   });
 
 program
@@ -140,11 +134,11 @@ program
     try {
       await createEdgeWorkerId(groupId, name);
     } catch (e) {
-      console.log(e);
+        cliUtils.logAndExit(1, e);
     }
   })
   .on("--help", function () {
-    logAndExit(copywrite);
+    cliUtils.logAndExit(0, copywrite);
   });
 
 program
@@ -155,11 +149,11 @@ program
     try {
       await updateEdgeWorkerInfo(ewId, groupId, name);
     } catch (e) {
-      console.log(e);
+        cliUtils.logAndExit(1, e);
     }
   })
   .on("--help", function () {
-    logAndExit(copywrite);
+    cliUtils.logAndExit(0, copywrite);
   });
 
 program
@@ -170,11 +164,11 @@ program
     try {
       await showEdgeWorkerIdVersionOverview(ewId, { versionId: versionId, showResult: true });
     } catch (e) {
-      console.log(e);
+        cliUtils.logAndExit(1, e);
     }
   })
   .on("--help", function () {
-    logAndExit(copywrite);
+    cliUtils.logAndExit(0, copywrite);
   });
 
 program
@@ -187,16 +181,16 @@ program
 
     //either bundle or code working directory must be provided or fail
     if ((!options.bundle && !options.codeDir) || (options.bundle && options.codeDir))
-      logAndExit("ERROR: You must provide the EdgeWorkers bundle tgz (--bundle) OR the working directory for mainjs and manifest file (--codeDir) to create a new version!");
+      cliUtils.logAndExit(1, "ERROR: You must provide the EdgeWorkers bundle tgz (--bundle) OR the working directory for mainjs and manifest file (--codeDir) to create a new version!");
 
     try {
       await createNewVersion(ewId, options);
     } catch (e) {
-      console.log(e);
+        cliUtils.logAndExit(1, e);
     }
   })
   .on("--help", function () {
-    logAndExit(copywrite);
+    cliUtils.logAndExit(0, copywrite);
   });
 
 program
@@ -208,11 +202,11 @@ program
     try {
       await downloadTarball(ewId, versionId, options.downloadPath);
     } catch (e) {
-      console.log(e);
+        cliUtils.logAndExit(1, e);
     }
   })
   .on("--help", function () {
-    logAndExit(copywrite);
+    cliUtils.logAndExit(0, copywrite);
   });
 
 program
@@ -225,15 +219,15 @@ program
 
     // Do not provide both versionId and activationId
     if (options.versionId && options.activationId)
-      logAndExit("ERROR: You may not provide both the Version and the Activation identifiers!");
+      cliUtils.logAndExit(1, "ERROR: You may not provide both the Version and the Activation identifiers!");
     try {
       await showEdgeWorkerActivationOverview(ewId, options);
     } catch (e) {
-      console.log(e);
+        cliUtils.logAndExit(1, e);
     }
   })
   .on("--help", function () {
-    logAndExit(copywrite);
+    cliUtils.logAndExit(0, copywrite);
   });
 
 program
@@ -244,15 +238,15 @@ program
 
     // Network must use correct keyword STAGING|PRODUCTION
     if (network.toUpperCase() !== 'STAGING' && network.toUpperCase() !== 'PRODUCTION')
-      logAndExit(`ERROR: Network parameter must be either STAGING or PRODUCTION - was: ${network}`);
+      cliUtils.logAndExit(1, `ERROR: Network parameter must be either STAGING or PRODUCTION - was: ${network}`);
     try {
       await createNewActivation(ewId, network.toUpperCase(), versionId);
     } catch (e) {
-      console.log(e);
+        cliUtils.logAndExit(1, e);
     }
   })
   .on("--help", function () {
-    logAndExit(copywrite);
+    cliUtils.logAndExit(0, copywrite);
   });
 
   if (!process.argv.slice(2).length) {
@@ -293,7 +287,7 @@ async function showGroupOverview(groupId: string) {
     console.table(group);
   }
   else {
-    logAndExit(`INFO: There is currently no Permission Group info for group: ${groupId}`);
+    cliUtils.logAndExit(0, `INFO: There is currently no Permission Group info for group: ${groupId}`);
   }
 }
 
@@ -340,7 +334,7 @@ async function showEdgeWorkerIdOverview(ewId: string, groupId: string) {
     console.table(id);
   }
   else {
-    logAndExit(`INFO: There is currently no EdgeWorker Id info for group: ${groupId}, ewId: ${ewId}`);
+    cliUtils.logAndExit(0, `INFO: There is currently no EdgeWorker Id info for group: ${groupId}, ewId: ${ewId}`);
   }
 }
 
@@ -424,7 +418,7 @@ async function showEdgeWorkerIdVersionOverview(ewId: string, options?: { version
   }
   else {
     if (showResult) {
-      logAndExit(`INFO: There are currently no Versions for this EdgeWorker Id: ${ewId}`);
+      cliUtils.logAndExit(0, `INFO: There are currently no Versions for this EdgeWorker Id: ${ewId}`);
     }
     else {
       return [];
@@ -446,7 +440,7 @@ async function createNewVersion(ewId: string, options: { bundle?: string, codeDi
 
   //compare checksum to existing tarballs already uploaded - if matches fail indicating which version matched
   if (!bundle.tarballChecksum) {
-    logAndExit("ERROR: Checksum for EdgeWorkers bundle not found!");
+    cliUtils.logAndExit(1, "ERROR: Checksum for EdgeWorkers bundle not found!");
   }
   else {
     // fetch all versions for given ewID
@@ -467,7 +461,7 @@ async function createNewVersion(ewId: string, options: { bundle?: string, codeDi
       errorInfo.push(["matched id and version", ewId + " / v" + matchedVersion['version']]);
       errorInfo.push(["matched checksum", matchedVersion['checksum']]);
       console.table(errorInfo[0], errorInfo.slice(1));
-      logAndExit(`ERROR: Checksum for EdgeWorkers bundle provided matches existing version!`);
+      cliUtils.logAndExit(1, `ERROR: Checksum for EdgeWorkers bundle provided matches existing version!`);
     }
     else {
       //if all remains good, then upload tarball and output checksum and version number
@@ -495,7 +489,7 @@ async function uploadEdgeWorkerVersion(ewId: string, tarballPath: string) {
     console.table(version);
   }
   else {
-    logAndExit(`ERROR: Code bundle was not able to be uploaded!`);
+    cliUtils.logAndExit(1, `ERROR: Code bundle was not able to be uploaded!`);
   }
 }
 
@@ -511,10 +505,10 @@ async function downloadTarball(ewId: string, versionId: string, rawDownloadPath?
 
   // if tarball found, then figure out where to store it
   if (!!wasDownloaded) {
-    logAndExit(`INFO: File saved @ ${pathToStore}`);
+    cliUtils.logAndExit(0, `INFO: File saved @ ${pathToStore}`);
   }
   else {
-    logAndExit(`ERROR: Code bundle was not able to be saved locally!`);
+    cliUtils.logAndExit(1, `ERROR: Code bundle was not able to be saved locally!`);
   }
 }
 
@@ -563,7 +557,7 @@ async function showEdgeWorkerActivationOverview(ewId: string, options?: { versio
     console.table(activation);
   }
   else {
-    logAndExit(`INFO: There are currently no Activations for ewId: ${ewId}, version: ${versionId}, activationId: ${activationId}`);
+    cliUtils.logAndExit(0, `INFO: There are currently no Activations for ewId: ${ewId}, version: ${versionId}, activationId: ${activationId}`);
   }
 }
 
@@ -580,7 +574,7 @@ async function createNewActivation(ewId: string, network: string, versionId: str
     console.table(activation);
   }
   else {
-    logAndExit(`ERROR: Activation record was not able to be created!`);
+    cliUtils.logAndExit(1, `ERROR: Activation record was not able to be created!`);
   }
 
 }
