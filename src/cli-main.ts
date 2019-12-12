@@ -70,12 +70,6 @@ program
   .on("option:debug", function () {
     envUtils.setDebugMode(true);
   })
-  .on("--help", function () {
-    console.log(copywrite);
-  })
-  .on("-h", function () {
-    console.log(copywrite);
-  })
   .on('command:*', function (command) {
     const firstCommand = command[0];
     if (!this.commands.find(c => c._name == firstCommand)) {
@@ -91,21 +85,20 @@ program
   .action(function (arg) {
     if (!arg) {
       program.outputHelp();
-    } else {
+      logAndExit(copywrite);
+    }
+    else {
       var command = (!!program.commands.find(c => c._name == arg)) ? program.commands.find(c => c._name == arg) : program.commands.find(c => c._alias == arg);
       if (!command) {
         console.log(`ERROR: Could not find a command for ${arg}`);
-      } else {
+      }
+      else {
         command.outputHelp();
-        console.log(copywrite);
       }
     }
   })
   .on("--help", function () {
-    console.log(copywrite);
-  })
-  .on("-h", function () {
-    console.log(copywrite);
+    logAndExit(copywrite);
   });
 
 program
@@ -120,10 +113,7 @@ program
     }
   })
   .on("--help", function () {
-    console.log(copywrite);
-  })
-  .on("-h", function () {
-    console.log(copywrite);
+    logAndExit(copywrite);
   });
 
 program
@@ -139,10 +129,7 @@ program
     }
   })
   .on("--help", function () {
-    console.log(copywrite);
-  })
-  .on("-h", function () {
-    console.log(copywrite);
+    logAndExit(copywrite);
   });
 
 program
@@ -157,10 +144,7 @@ program
     }
   })
   .on("--help", function () {
-    console.log(copywrite);
-  })
-  .on("-h", function () {
-    console.log(copywrite);
+    logAndExit(copywrite);
   });
 
 program
@@ -175,10 +159,7 @@ program
     }
   })
   .on("--help", function () {
-    console.log(copywrite);
-  })
-  .on("-h", function () {
-    console.log(copywrite);
+    logAndExit(copywrite);
   });
 
 program
@@ -193,10 +174,7 @@ program
     }
   })
   .on("--help", function () {
-    console.log(copywrite);
-  })
-  .on("-h", function () {
-    console.log(copywrite);
+    logAndExit(copywrite);
   });
 
 program
@@ -218,10 +196,7 @@ program
     }
   })
   .on("--help", function () {
-    console.log(copywrite);
-  })
-  .on("-h", function () {
-    console.log(copywrite);
+    logAndExit(copywrite);
   });
 
 program
@@ -237,10 +212,7 @@ program
     }
   })
   .on("--help", function () {
-    console.log(copywrite);
-  })
-  .on("-h", function () {
-    console.log(copywrite);
+    logAndExit(copywrite);
   });
 
 program
@@ -261,10 +233,7 @@ program
     }
   })
   .on("--help", function () {
-    console.log(copywrite);
-  })
-  .on("-h", function () {
-    console.log(copywrite);
+    logAndExit(copywrite);
   });
 
 program
@@ -283,10 +252,7 @@ program
     }
   })
   .on("--help", function () {
-    console.log(copywrite);
-  })
-  .on("-h", function () {
-    console.log(copywrite);
+    logAndExit(copywrite);
   });
 
   if (!process.argv.slice(2).length) {
