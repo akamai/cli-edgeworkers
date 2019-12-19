@@ -29,8 +29,8 @@ if (!fs.existsSync(edgeRcPath)) {
   cliUtils.logAndExit(1,`ERROR: Could not find .edgerc to authenticate Akamai API calls. Add your credential set to the .edgerc file at this path: ${edgeRcPath}`);
 }
 
-if (envUtils.getNodeVersion() < 8) {
-  cliUtils.logAndExit(1, "ERROR: The Akamai EdgeWorkers CLI requires Node 8 or later.");
+if (envUtils.getNodeVersion() < 7) {
+  cliUtils.logAndExit(1, "ERROR: The Akamai EdgeWorkers CLI requires Node 7.0.0 or newer.");
 }
 
 /* ========== Local Helpers ========== */

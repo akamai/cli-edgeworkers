@@ -8,6 +8,9 @@
     "build-ts": "tsc",
     "postinstall": "npm run build"
   },
+  "engines": {
+    "node": ">=7.0.0"
+  },
   "main": "./akamai-edgeworkers",
   "bin": {
     "edgeworkers": "./akamai-edgeworkers"
