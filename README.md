@@ -5,7 +5,7 @@ The EdgeWorkers command line interface (CLI) expedites the process of registerin
 To use this tool you need:
 * [Akamai CLI](https://github.com/akamai/cli) installed. If you have a Mac with brew installed, run this command: `brew install akamai`.
 * An API client that contains the EdgeWorkers APIs with read-write access. Follow the steps in [Get Started with APIs](https://developer.akamai.com/api/getting-started) to learn how to configure credentials to access the API.
-* Node version 8+
+* Node version 7+
 
 ## Installing EdgeWorkers CLI
 Use the following Akamai CLI command to install the latest EdgeWorkers CLI package:
