@@ -1,7 +1,5 @@
 #!/usr/bin/env node
-import * as fs from 'fs';
 import * as path from "path";
-import * as os from "os";
 import * as envUtils from './utils/env-utils';
 import * as cliUtils from './utils/cli-utils';
 import * as edgeWorkersSvc from './service/edgeworkers-svc';
@@ -13,13 +11,7 @@ const groupColumnsToKeep = ["groupId", "groupName", "capabilities"];
 const idColumnsToKeep = ["edgeWorkerId", "name", "groupId"];
 const versionColumnsToKeep = ["edgeWorkerId", "version", "checksum", "createdBy", "createdTime", "sequenceNumber"];
 const activationColumnsToKeep = ["edgeWorkerId", "version", "activationId", "status", "network", "createdBy", "createdTime"];
-
 const copywrite = '\n(c) Copyright 2019 Akamai Technologies, Inc. Licensed under Apache 2 license.\nVisit http://github.com/akamai/cli-edgeworkers for detailed documentation';
-
-const edgeRcPath = path.resolve(os.homedir(), '.edgerc');
-if (!fs.existsSync(edgeRcPath)) {
-  cliUtils.logAndExit(1,`ERROR: Could not find .edgerc to authenticate Akamai API calls. Add your credential set to the .edgerc file at this path: ${edgeRcPath}`);
-}
 
 if (envUtils.getNodeVersion() < 7) {
   cliUtils.logAndExit(1, "ERROR: The Akamai EdgeWorkers CLI requires Node 7.0.0 or newer.");

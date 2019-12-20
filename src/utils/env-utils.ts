@@ -1,7 +1,9 @@
 var EdgeGrid = require('edgegrid');
 const untildify = require('untildify');
 var path = require('path');
+const fs = require('fs');
 import * as os from 'os';
+import * as cliUtils from './cli-utils';
 
 const edgeRcParams = {
   section: process.env.AKAMAI_EDGERC_SECTION || 'default',
@@ -10,7 +12,12 @@ const edgeRcParams = {
 };
 
 export function getEdgeGrid() {
-    return new EdgeGrid({
+
+  if (!fs.existsSync(untildify(edgeRcParams.path))) {
+    cliUtils.logAndExit(1,`ERROR: Could not find .edgerc to authenticate Akamai API calls. Expected at: ${edgeRcParams.path}`);
+  }
+
+  return new EdgeGrid({
       path: untildify(edgeRcParams.path),
       section: edgeRcParams.section,
       debug: edgeRcParams.debug
