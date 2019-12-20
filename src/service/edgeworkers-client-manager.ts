@@ -1,11 +1,12 @@
 import * as cliUtils from '../utils/cli-utils';
+import * as os from 'os';
 const fs = require('fs');
 const path = require('path');
 const tar = require('tar');
 const untildify = require('untildify');
 const sha256File = require('sha256-file');
 
-const CLI_CACHE_PATH: string = process.env.AKAMAI_CLI_CACHE_PATH;
+const CLI_CACHE_PATH: string = process.env.AKAMAI_CLI_CACHE_DIR || process.env.AKAMAI_CLI_CACHE_PATH || path.resolve(os.homedir(), '.akamai-cli/cache');
 const EDGEWORKERS_CLI_HOME = path.join(CLI_CACHE_PATH, '/edgeworkers-cli/');
 const EDGEWORKERS_DIR = path.join(EDGEWORKERS_CLI_HOME, '/edgeworkers/');
 const MAINJS_FILENAME = 'main.js';

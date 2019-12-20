@@ -13,16 +13,8 @@ const groupColumnsToKeep = ["groupId", "groupName", "capabilities"];
 const idColumnsToKeep = ["edgeWorkerId", "name", "groupId"];
 const versionColumnsToKeep = ["edgeWorkerId", "version", "checksum", "createdBy", "createdTime", "sequenceNumber"];
 const activationColumnsToKeep = ["edgeWorkerId", "version", "activationId", "status", "network", "createdBy", "createdTime"];
-const CLI_CACHE_PATH = process.env.AKAMAI_CLI_CACHE_PATH;
+
 const copywrite = '\n(c) Copyright 2019 Akamai Technologies, Inc. Licensed under Apache 2 license.\nVisit http://github.com/akamai/cli-edgeworkers for detailed documentation';
-
-if (!CLI_CACHE_PATH) {
-  cliUtils.logAndExit(1,"ERROR: AKAMAI_CLI_CACHE_PATH is not set.");
-}
-
-if (!fs.existsSync(CLI_CACHE_PATH)) {
-  cliUtils.logAndExit(1,`ERROR: AKAMAI_CLI_CACHE_PATH is set to ${CLI_CACHE_PATH} but this directory does not exist.`);
-}
 
 const edgeRcPath = path.resolve(os.homedir(), '.edgerc');
 if (!fs.existsSync(edgeRcPath)) {
