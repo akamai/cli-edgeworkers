@@ -63,7 +63,9 @@ program
       cliUtils.logAndExit(1, `Invalid command: ${program.args.join(' ')}\nSee --help for a list of available commands.`);
     }
   })
-  ;
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
 
 program
   .command('help [command]')
