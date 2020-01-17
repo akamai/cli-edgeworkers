@@ -5,7 +5,7 @@ The EdgeWorkers command line interface (CLI) expedites the process of registerin
 To use this tool you need:
 * [Akamai CLI](https://github.com/akamai/cli) installed. If you have a Mac with brew installed, run this command: `brew install akamai`.
 * An API client that contains the EdgeWorkers APIs with read-write access. Follow the steps in [Get Started with APIs](https://developer.akamai.com/api/getting-started) to learn how to configure credentials to access the API.
-* Node version 8+
+* Node version 7+
 
 ## Installing EdgeWorkers CLI
 Use the following Akamai CLI command to install the latest EdgeWorkers CLI package:
@@ -43,7 +43,7 @@ Commands:
 | register \| create-id `<group-identifier> <edgeworker-name>` | Register a new EdgeWorker id to reference in Property Manager behavior. |
 | update-id \| ui `<edgeworker-identifier> <group-identifier> <edgeworker-name>` | Allows Customer Developer to update an existing EdgeWorker Identifier's Luna ACG or Name attributes. |
 | list-versions \| lv `<edgeworker-identifier> [version-identifier]` | List Version information of a given EdgeWorker Id. |
-| upload \| create-id `[options] <edgeworker-identifier>` | Creates a new version of a given EdgeWorker Id which includes the code bundle. |
+| upload \| create-version `[options] <edgeworker-identifier>` | Creates a new version of a given EdgeWorker Id which includes the code bundle. |
 | download \| download-version `[options] <edgeworker-identifier> <version-identifier>` | Download the code bundle of an EdgeWorker version. |
 | status \| list-activations `[options] <edgeworker-identifier>` | List Activation status of a given EdgeWorker Id. |
 | activate \| av `<edgeworker-identifier> <network> <versionId>` | Activate a Version for a given EdgeWorker Id on an Akamai Network. |

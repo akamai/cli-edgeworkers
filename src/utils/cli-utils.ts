@@ -19,6 +19,11 @@ function log(txt, type = 'log') {
   }
 }
 
+export function logAndExit(exitCode: number, msg: string) {
+  console.log(msg);
+  process.exit(exitCode);
+}
+
 export async function confirm(msg: string) {
   var answer = await inquirer.prompt([
     {
