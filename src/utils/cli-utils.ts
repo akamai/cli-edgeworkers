@@ -1,5 +1,6 @@
 const inquirer = require('inquirer');
 const Spinner = require('cli-spinner').Spinner;
+import * as edgeWorkersClientSvc from '../service/edgeworkers-client-manager';
 
 export function logWithBorder(str, type = 'log') {
   var t: string = `--- ${str} ---`;
@@ -19,8 +20,13 @@ function log(txt, type = 'log') {
   }
 }
 
-export function logAndExit(exitCode: number, msg: string) {
-  console.log(msg);
+export function logAndExit(exitCode: number, msg: string, data = {}) {
+
+  if(edgeWorkersClientSvc.isJSONOutputMode())
+    edgeWorkersClientSvc.writeJSONOutput(exitCode, msg, data);
+  else
+    console.log(msg);
+
   process.exit(exitCode);
 }
 

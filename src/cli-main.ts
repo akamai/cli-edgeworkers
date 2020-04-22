@@ -13,10 +13,6 @@ const versionColumnsToKeep = ["edgeWorkerId", "version", "checksum", "createdBy"
 const activationColumnsToKeep = ["edgeWorkerId", "version", "activationId", "status", "network", "createdBy", "createdTime"];
 const copywrite = '\n(c) Copyright 2019 Akamai Technologies, Inc. Licensed under Apache 2 license.\nVisit http://github.com/akamai/cli-edgeworkers for detailed documentation';
 
-if (envUtils.getNodeVersion() < 7) {
-  cliUtils.logAndExit(1, "ERROR: The Akamai EdgeWorkers CLI requires Node 7.0.0 or newer.");
-}
-
 /* ========== Local Helpers ========== */
 function filterJsonData(data, columnsToKeep: string[]) {
   //Dont filter data if in debug mode
@@ -28,7 +24,7 @@ function filterJsonData(data, columnsToKeep: string[]) {
   }
   return data;
 }
-
+let cmdValue;
 /* ========== EdgeWorkers CLI Program Commands ========== */
 program
   .version(pkginfo.version)
@@ -36,19 +32,25 @@ program
   .option('--debug', 'Show debug information.')
   .option('--edgerc <path>', 'Use edgerc file for authentication.')
   .option('--section <name>', 'Use this section in edgerc file that contains the credential set.')
+  .option('--json [path]', 'Write command output to JSON file at given path, otherwise written to CLI cache directory')
   .option('--accountkey <account-id>', 'internal parameter')
+  .on("option:debug", function () {
+    envUtils.setDebugMode(true);
+  })
   .on("option:edgerc", function (edgeRcFilePath) {
     envUtils.setEdgeRcFilePath(edgeRcFilePath);
   })
   .on("option:section", function (section) {
     envUtils.setEdgeRcSection(section);
   })
+  .on("option:json", function (path) {
+    edgeWorkersClientSvc.setJSONOutputMode(true);
+    edgeWorkersClientSvc.setJSONOutputPath(path);
+  })
   .on("option:accountkey", function (key) {
     edgeWorkersSvc.setAccountKey(key);
   })
-  .on("option:debug", function () {
-    envUtils.setDebugMode(true);
-  })
+  // this fires only when a command is not listed below with a custom action
   .on('command:*', function (command) {
     const firstCommand = command[0];
     if (!this.commands.find(c => c._name == firstCommand)) {
@@ -235,12 +237,15 @@ program
     cliUtils.logAndExit(0, copywrite);
   });
 
-  if (!process.argv.slice(2).length) {
-    program.outputHelp();
-    process.exit();
-  }
+program.parse(process.argv);
 
-  program.parse(process.argv);
+if (envUtils.getNodeVersion() < 7) {
+  cliUtils.logAndExit(1, "ERROR: The Akamai EdgeWorkers CLI requires Node 7.0.0 or newer.");
+}
+
+if(program.args.length === 0) {
+  cliUtils.logAndExit(1, "ERROR: No commands were provided.");
+}
 
 /* ========== Async Fetch and Formatters ========== */
 async function showGroupOverview(groupId: string) {
@@ -269,8 +274,14 @@ async function showGroupOverview(groupId: string) {
       group.push(filterJsonData(groups[key], groupColumnsToKeep));
     });
 
-    cliUtils.logWithBorder(`User has the following Permission Group acccess for group: ${groupId}`);
-    console.table(group);
+    let msg = `User has the following Permission Group acccess for group: ${groupId}`;
+    if(edgeWorkersClientSvc.isJSONOutputMode()) {
+      edgeWorkersClientSvc.writeJSONOutput(0, msg, group);
+    }
+    else {
+      cliUtils.logWithBorder(msg);
+      console.table(group);
+    }
   }
   else {
     cliUtils.logAndExit(0, `INFO: There is currently no Permission Group info for group: ${groupId}`);
@@ -316,8 +327,14 @@ async function showEdgeWorkerIdOverview(ewId: string, groupId: string) {
     id.sort(function (a, b) {
       return a.edgeWorkerId - b.edgeWorkerId;
     });
-    cliUtils.logWithBorder(`The following EdgeWorker Ids are currently registered for account: ${accountId}, group: ${groupId}, ewId: ${ewId}`);
-    console.table(id);
+    let msg = `The following EdgeWorker Ids are currently registered for account: ${accountId}, group: ${groupId}, ewId: ${ewId}`;
+    if(edgeWorkersClientSvc.isJSONOutputMode()) {
+      edgeWorkersClientSvc.writeJSONOutput(0, msg, id);
+    }
+    else {
+      cliUtils.logWithBorder(msg);
+      console.table(id);
+    }
   }
   else {
     cliUtils.logAndExit(0, `INFO: There is currently no EdgeWorker Id info for group: ${groupId}, ewId: ${ewId}`);
@@ -330,11 +347,17 @@ async function updateEdgeWorkerInfo(ewId: string, groupId: string, name: string)
   if (ids) {
     ids = [ids];
     var id = [];
-    cliUtils.logWithBorder(`Updated EdgeWorker Id info for ewId: ${ewId}`);
     Object.keys(ids).forEach(function (key) {
       id.push(filterJsonData(ids[key], idColumnsToKeep));
     });
-    console.table(id);
+    let msg = `Updated EdgeWorker Id info for ewId: ${ewId}`;
+    if(edgeWorkersClientSvc.isJSONOutputMode()) {
+      edgeWorkersClientSvc.writeJSONOutput(0, msg, id);
+    }
+    else {
+      cliUtils.logWithBorder(msg);
+      console.table(id);
+    }
   }
 }
 
@@ -344,11 +367,17 @@ async function createEdgeWorkerId(groupId: string, name: string) {
   if (ids) {
     ids = [ids];
     var id = [];
-    cliUtils.logWithBorder(`Created new EdgeWorker Identifier:`);
     Object.keys(ids).forEach(function (key) {
       id.push(filterJsonData(ids[key], idColumnsToKeep));
     });
-    console.table(id);
+    let msg = `Created new EdgeWorker Identifier:`;
+    if(edgeWorkersClientSvc.isJSONOutputMode()) {
+      edgeWorkersClientSvc.writeJSONOutput(0, msg, id);
+    }
+    else {
+      cliUtils.logWithBorder(msg);
+      console.table(id);
+    }
   }
 }
 
@@ -395,8 +424,14 @@ async function showEdgeWorkerIdVersionOverview(ewId: string, options?: { version
     }
 
     if (showResult) {
-      cliUtils.logWithBorder(`The following EdgeWorker Versions are currently registered for account: ${accountId}, ewId: ${ewId}, version: ${versionId}`);
-      console.table(version);
+      let msg = `The following EdgeWorker Versions are currently registered for account: ${accountId}, ewId: ${ewId}, version: ${versionId}`;
+      if(edgeWorkersClientSvc.isJSONOutputMode()) {
+        edgeWorkersClientSvc.writeJSONOutput(0, msg, version);
+      }
+      else {
+        cliUtils.logWithBorder(msg);
+        console.table(version);
+      }
     }
     else {
       return version;
@@ -440,14 +475,25 @@ async function createNewVersion(ewId: string, options: { bundle?: string, codeDi
       }
     });
     if (checksumMatches) {
-      var errorInfo = [];
-      errorInfo.push(["error_info", "value"]);
-      errorInfo.push(["bundle", bundle.tarballPath]);
-      errorInfo.push(["new checksum", bundle.tarballChecksum]);
-      errorInfo.push(["matched id and version", ewId + " / v" + matchedVersion['version']]);
-      errorInfo.push(["matched checksum", matchedVersion['checksum']]);
-      console.table(errorInfo[0], errorInfo.slice(1));
-      cliUtils.logAndExit(1, `ERROR: Checksum for EdgeWorkers bundle provided matches existing version!`);
+      let errorValues = {};
+      if(!edgeWorkersClientSvc.isJSONOutputMode()) {
+        var errorInfo = [];
+        errorInfo.push(["error_info", "value"]);
+        errorInfo.push(["bundle", bundle.tarballPath]);
+        errorInfo.push(["new checksum", bundle.tarballChecksum]);
+        errorInfo.push(["matched id and version", ewId + " / v" + matchedVersion['version']]);
+        errorInfo.push(["matched checksum", matchedVersion['checksum']]);
+        console.table(errorInfo[0], errorInfo.slice(1));
+      }
+      else {
+        errorValues = {
+          bundle: bundle.tarballPath,
+          new_checksum: bundle.tarballChecksum,
+          matched_id_and_version: ewId + " / v" + matchedVersion['version'],
+          matched_checksum: matchedVersion['checksum']
+        }
+      }
+      cliUtils.logAndExit(1, `ERROR: Checksum for EdgeWorkers bundle provided matches existing version!`, errorValues);
     }
     else {
       //if all remains good, then upload tarball and output checksum and version number
@@ -463,7 +509,6 @@ async function uploadEdgeWorkerVersion(ewId: string, tarballPath: string) {
   if (versions) {
     versions = [versions];
     var version = [];
-    cliUtils.logWithBorder(`New version uploaded for EdgeWorker Id: ${ewId}`);
     Object.keys(versions).forEach(function (key) {
       version.push(filterJsonData(versions[key], versionColumnsToKeep));
     });
@@ -472,10 +517,17 @@ async function uploadEdgeWorkerVersion(ewId: string, tarballPath: string) {
         delete version[key]["sequenceNumber"];
       });
     }
-    console.table(version);
+    let msg = `New version uploaded for EdgeWorker Id: ${ewId}`;
+    if(edgeWorkersClientSvc.isJSONOutputMode()) {
+       edgeWorkersClientSvc.writeJSONOutput(0, msg, version);
+    }
+    else {
+      cliUtils.logWithBorder(msg);
+      console.table(version);
+    }
   }
   else {
-    cliUtils.logAndExit(1, `ERROR: Code bundle was not able to be uploaded!`);
+    cliUtils.logAndExit(1, `ERROR: Code bundle was not able to be uploaded for EdgeWorker Id ${ewId} from ${tarballPath}`);
   }
 }
 
@@ -494,7 +546,7 @@ async function downloadTarball(ewId: string, versionId: string, rawDownloadPath?
     cliUtils.logAndExit(0, `INFO: File saved @ ${pathToStore}`);
   }
   else {
-    cliUtils.logAndExit(1, `ERROR: Code bundle was not able to be saved locally!`);
+    cliUtils.logAndExit(1, `ERROR: Code bundle for EdgeWorker Id ${ewId}, version ${versionId} was not able to be saved @ ${pathToStore}`);
   }
 }
 
@@ -513,7 +565,6 @@ async function showEdgeWorkerActivationOverview(ewId: string, options?: { versio
   else if (activationId) {
     activations = await cliUtils.spinner(edgeWorkersSvc.getActivationID(ewId, activationId), `Fetching Activation info for EdgeWorker Id ${ewId}, Activation Id ${activationId}`);
     activations = [activations];
-
   }
   else {
     activations = await cliUtils.spinner(edgeWorkersSvc.getAllActivations(ewId), `Fetching all Activations for EdgeWorker Id ${ewId}`);
@@ -539,8 +590,14 @@ async function showEdgeWorkerActivationOverview(ewId: string, options?: { versio
       activation.push(filterJsonData(activations[key], activationColumnsToKeep));
     });
 
-    cliUtils.logWithBorder(`The following EdgeWorker Activations currently exist for account: ${accountId}, ewId: ${ewId}, version: ${versionId}, activationId: ${activationId}`);
-    console.table(activation);
+    let msg = `The following EdgeWorker Activations currently exist for account: ${accountId}, ewId: ${ewId}, version: ${versionId}, activationId: ${activationId}`;
+    if(edgeWorkersClientSvc.isJSONOutputMode()) {
+       edgeWorkersClientSvc.writeJSONOutput(0, msg, activation);
+    }
+    else {
+      cliUtils.logWithBorder(msg);
+      console.table(activation);
+    }
   }
   else {
     cliUtils.logAndExit(0, `INFO: There are currently no Activations for ewId: ${ewId}, version: ${versionId}, activationId: ${activationId}`);
@@ -553,14 +610,20 @@ async function createNewActivation(ewId: string, network: string, versionId: str
   if (activations) {
     activations = [activations];
     var activation = [];
-    cliUtils.logWithBorder(`New Activation record created for EdgeWorker Id: ${ewId}, version: ${versionId}, on network: ${network}`);
     Object.keys(activations).forEach(function (key) {
       activation.push(filterJsonData(activations[key], activationColumnsToKeep));
     });
-    console.table(activation);
+    let msg = `New Activation record created for EdgeWorker Id: ${ewId}, version: ${versionId}, on network: ${network}`;
+    if(edgeWorkersClientSvc.isJSONOutputMode()) {
+       edgeWorkersClientSvc.writeJSONOutput(0, msg, activation);
+    }
+    else {
+      cliUtils.logWithBorder(msg);
+      console.table(activation);
+    }
   }
   else {
-    cliUtils.logAndExit(1, `ERROR: Activation record was not able to be created!`);
+    cliUtils.logAndExit(1, `ERROR: Activation record was not able to be created for EdgeWorker Id ${ewId}, version: ${versionId} on network: ${network}!`);
   }
 
 }
