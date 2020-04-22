@@ -24,7 +24,6 @@ function filterJsonData(data, columnsToKeep: string[]) {
   }
   return data;
 }
-let cmdValue;
 /* ========== EdgeWorkers CLI Program Commands ========== */
 program
   .version(pkginfo.version)
