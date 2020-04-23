@@ -243,7 +243,11 @@ if (envUtils.getNodeVersion() < 7) {
 }
 
 if(program.args.length === 0) {
-  cliUtils.logAndExit(1, "ERROR: No commands were provided.");
+  program.outputHelp(function(text){
+    console.log(text);
+    console.log(copywrite);
+    cliUtils.logAndExit(1, "ERROR: No commands were provided.");
+  });
 }
 
 /* ========== Async Fetch and Formatters ========== */
