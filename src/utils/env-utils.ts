@@ -17,11 +17,16 @@ export function getEdgeGrid() {
     cliUtils.logAndExit(1,`ERROR: Could not find .edgerc to authenticate Akamai API calls. Expected at: ${edgeRcParams.path}`);
   }
 
-  return new EdgeGrid({
+  try {
+    return new EdgeGrid({
       path: untildify(edgeRcParams.path),
       section: edgeRcParams.section,
       debug: edgeRcParams.debug
     });
+  }
+  catch(e) {
+    cliUtils.logAndExit(1, `ERROR: ${e.message}`);
+  }
 }
 
 export function setDebugMode(debug: boolean) {

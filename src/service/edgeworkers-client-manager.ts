@@ -16,11 +16,29 @@ const BUNDLE_FORMAT_VERSION_KEY = 'bundle-version';
 const JSAPI_VERSION_KEY = 'api-version';
 var tarballChecksum = undefined;
 
+const jsonOutputParams = {
+  jsonOutput: false,
+  jsonOutputPath: EDGEWORKERS_DIR,
+  jsonOutputFilename: 'ewcli_' + Date.now() + '.json'
+};
+
 if (!fs.existsSync(EDGEWORKERS_CLI_HOME)) {
   fs.mkdirSync(EDGEWORKERS_CLI_HOME);
 }
 if (!fs.existsSync(EDGEWORKERS_DIR)) {
   fs.mkdirSync(EDGEWORKERS_DIR);
+}
+
+export function setJSONOutputMode(output: boolean) {
+  jsonOutputParams.jsonOutput = output;
+}
+
+export function setJSONOutputPath(path: string) {
+  jsonOutputParams.jsonOutputPath = path;
+}
+
+export function isJSONOutputMode() {
+  return jsonOutputParams.jsonOutput;
 }
 
 export function validateTarball(ewId: string, rawTarballPath: string) {
@@ -201,4 +219,49 @@ export function determineTarballDownloadDir(ewId: string, rawDownloadPath: strin
   }
   console.log(`Using ${downloadPath} as path to store downloaded bundle file`);
   return downloadPath;
+}
+
+function determineJSONOutputPath(rawPath: string) {
+
+  // If JSON output path option provided, try to use it
+  // If not provided, default to CLI cache directory under <CLI_CACHE_PATH>/edgeworkers-cli/edgeworkers/
+  var jsonOutputPath = !!rawPath ? untildify(rawPath) : EDGEWORKERS_DIR;
+
+  // Regardless of what was picked, make sure it exists - if it doesn't, then just build EDGEWORKERS_DIR because we need some place to output to
+  if (!fs.existsSync(jsonOutputPath)) {
+    if (!fs.existsSync(EDGEWORKERS_DIR)) {
+      fs.mkdirSync(EDGEWORKERS_DIR);
+    }
+    jsonOutputPath = EDGEWORKERS_DIR;
+  }
+  return jsonOutputPath;
+}
+
+export function writeJSONOutput(exitCode: number, msg: string, data = {}) {
+
+  // First, build the JSON object
+  let outputMsg: string;
+  let outputData;
+
+  // Check if msg is already JSON - which would happen if OPEN API response failed for some reason
+  if(cliUtils.isJSON(msg)) {
+    outputMsg = 'An OPEN API error has occurred!';
+    outputData = JSON.parse(msg);
+  }
+  else {
+    outputMsg = msg;
+    outputData = data
+  }
+
+  let output = {
+    cliStatus: exitCode,
+    msg: outputMsg,
+    data: outputData
+  };
+
+  // Then, determine the path to write the file
+  let outputPath = determineJSONOutputPath(jsonOutputParams.jsonOutputPath);
+
+  // Last, write the output file synchronously
+  fs.writeFileSync(path.join(outputPath, jsonOutputParams.jsonOutputFilename), cliUtils.toJsonPretty(output));
 }
