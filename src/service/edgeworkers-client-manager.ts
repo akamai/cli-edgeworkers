@@ -217,7 +217,7 @@ export function determineTarballDownloadDir(ewId: string, rawDownloadPath: strin
   if (!fs.existsSync(downloadPath)) {
     cliUtils.logAndExit(1, `ERROR: The download path does not exist: ${downloadPath}`);
   }
-  console.log(`Using ${downloadPath} as path to store downloaded bundle file`);
+  console.log(`Attempting to save downloaded bundle file at: ${downloadPath}`);
   return downloadPath;
 }
 
@@ -234,6 +234,7 @@ function determineJSONOutputPath(rawPath: string) {
     }
     jsonOutputPath = EDGEWORKERS_DIR;
   }
+  console.log(`Attempting to save JSON output at: ${jsonOutputPath}`);
   return jsonOutputPath;
 }
 
