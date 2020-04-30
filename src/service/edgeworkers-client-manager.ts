@@ -7,26 +7,41 @@ const untildify = require('untildify');
 const sha256File = require('sha256-file');
 
 const CLI_CACHE_PATH: string = process.env.AKAMAI_CLI_CACHE_DIR || process.env.AKAMAI_CLI_CACHE_PATH || path.resolve(os.homedir(), '.akamai-cli/cache');
-const EDGEWORKERS_CLI_HOME = path.join(CLI_CACHE_PATH, '/edgeworkers-cli/');
-const EDGEWORKERS_DIR = path.join(EDGEWORKERS_CLI_HOME, '/edgeworkers/');
-const MAINJS_FILENAME = 'main.js';
-const MANIFEST_FILENAME = 'bundle.json';
-const TARBALL_VERSION_KEY = 'edgeworker-version';
-const BUNDLE_FORMAT_VERSION_KEY = 'bundle-version';
-const JSAPI_VERSION_KEY = 'api-version';
+const EDGEWORKERS_CLI_HOME: string = path.join(CLI_CACHE_PATH, '/edgeworkers-cli/');
+const EDGEWORKERS_DIR: string = path.join(EDGEWORKERS_CLI_HOME, '/edgeworkers/');
+const EDGEWORKERS_CLI_OUTPUT_DIR: string = path.join(EDGEWORKERS_DIR, `/cli-output/${Date.now()}/`);
+const EDGEWORKERS_CLI_OUTPUT_FILENAME: string = 'ewcli_output.json';
+const MAINJS_FILENAME: string = 'main.js';
+const MANIFEST_FILENAME: string = 'bundle.json';
+const TARBALL_VERSION_KEY: string = 'edgeworker-version';
+const BUNDLE_FORMAT_VERSION_KEY: string = 'bundle-version';
+const JSAPI_VERSION_KEY: string = 'api-version';
 var tarballChecksum = undefined;
 
+// set default JSON output options
 const jsonOutputParams = {
   jsonOutput: false,
-  jsonOutputPath: EDGEWORKERS_DIR,
-  jsonOutputFilename: 'ewcli_' + Date.now() + '.json'
+  jsonOutputPath: EDGEWORKERS_CLI_OUTPUT_DIR,
+  jsonOutputFilename: EDGEWORKERS_CLI_OUTPUT_FILENAME
 };
 
-if (!fs.existsSync(EDGEWORKERS_CLI_HOME)) {
-  fs.mkdirSync(EDGEWORKERS_CLI_HOME);
+// Add try/catch logic incase user doesnt have permissions to write directories needed
+try {
+  if (!fs.existsSync(EDGEWORKERS_CLI_HOME)) {
+    fs.mkdirSync(EDGEWORKERS_CLI_HOME);
+  }
 }
-if (!fs.existsSync(EDGEWORKERS_DIR)) {
-  fs.mkdirSync(EDGEWORKERS_DIR);
+catch(e) {
+  cliUtils.logAndExit(1, `ERROR: Cannot create ${EDGEWORKERS_CLI_HOME}\n${e.message}`);
+}
+
+try {
+  if (!fs.existsSync(EDGEWORKERS_DIR)) {
+    fs.mkdirSync(EDGEWORKERS_DIR);
+  }
+}
+catch(e) {
+  cliUtils.logAndExit(1, `ERROR: Cannot create ${EDGEWORKERS_DIR}\n${e.message}`);
 }
 
 export function setJSONOutputMode(output: boolean) {
@@ -34,7 +49,9 @@ export function setJSONOutputMode(output: boolean) {
 }
 
 export function setJSONOutputPath(path: string) {
-  jsonOutputParams.jsonOutputPath = path;
+  // only set path to new value if it is provided; since its optional, could be null, so leave set to default value
+  if(path)
+    jsonOutputParams.jsonOutputPath = path;
 }
 
 export function isJSONOutputMode() {
@@ -136,10 +153,17 @@ function calculateChecksum(filePath: string) {
 
 function createEdgeWorkerIdDir(ewId: string) {
   const edgeWorkersDir = path.join(EDGEWORKERS_DIR, ewId);
-  if (!fs.existsSync(edgeWorkersDir))
-    fs.mkdirSync(edgeWorkersDir);
 
-  return edgeWorkersDir;
+  // Add try/catch logic incase user doesnt have permissions to write directories needed
+  try {
+    if (!fs.existsSync(edgeWorkersDir))
+      fs.mkdirSync(edgeWorkersDir);
+
+    return edgeWorkersDir;
+  }
+  catch(e) {
+    cliUtils.logAndExit(1, `ERROR: Cannot create ${edgeWorkersDir}\n${e.message}`);
+  }
 }
 
 function validateManifest(manifest: string) {
@@ -213,29 +237,50 @@ export function determineTarballDownloadDir(ewId: string, rawDownloadPath: strin
   // If not provided, default to CLI cache directory under <CLI_CACHE_PATH>/edgeworkers-cli/edgeworkers/<ewid>/
   var downloadPath = !!rawDownloadPath ? untildify(rawDownloadPath) : createEdgeWorkerIdDir(ewId);
 
-  // Regardless of what was picked, make sure it exists
-  if (!fs.existsSync(downloadPath)) {
-    cliUtils.logAndExit(1, `ERROR: The download path does not exist: ${downloadPath}`);
+  // Regardless of what was picked, make sure it exists - if it doesnt, attempt to create it
+  // Add try/catch logic incase user doesnt have permissions to write directories needed
+  try {
+    if (!fs.existsSync(downloadPath)) {
+      fs.mkdirSync(downloadPath);
+    }
   }
-  console.log(`Attempting to save downloaded bundle file at: ${downloadPath}`);
+  catch(e) {
+    cliUtils.logAndExit(1, `ERROR: Cannot create ${downloadPath}\n${e.message}`);
+  }
+  console.log(`Saving downloaded bundle file at: ${downloadPath}`);
   return downloadPath;
 }
 
-function determineJSONOutputPath(rawPath: string) {
-
+function determineJSONOutputPathAndFilename(rawPath: string) {
   // If JSON output path option provided, try to use it
-  // If not provided, default to CLI cache directory under <CLI_CACHE_PATH>/edgeworkers-cli/edgeworkers/
-  var jsonOutputPath = !!rawPath ? untildify(rawPath) : EDGEWORKERS_DIR;
+  // If not provided, default to CLI cache directory under <CLI_CACHE_PATH>/edgeworkers-cli/edgeworkers/<Date.now()>/
+  let jsonOutputPath = !!rawPath ? untildify(rawPath) : jsonOutputParams.jsonOutputPath;
 
-  // Regardless of what was picked, make sure it exists - if it doesn't, then just build EDGEWORKERS_DIR because we need some place to output to
-  if (!fs.existsSync(jsonOutputPath)) {
-    if (!fs.existsSync(EDGEWORKERS_DIR)) {
-      fs.mkdirSync(EDGEWORKERS_DIR);
-    }
-    jsonOutputPath = EDGEWORKERS_DIR;
+  // Assume filename wasnt provided within rawPath, use default
+  let jsonOutputFilename = jsonOutputParams.jsonOutputFilename;
+
+  // check to see if path is an existing directory location, if it is not, collect directory name and filename via path
+  if (!(fs.existsSync(jsonOutputPath) && fs.lstatSync(jsonOutputPath).isDirectory())) {
+    jsonOutputFilename = path.basename(jsonOutputPath);
+    jsonOutputPath = path.dirname(jsonOutputPath);
   }
-  console.log(`Attempting to save JSON output at: ${jsonOutputPath}`);
-  return jsonOutputPath;
+
+  // Regardless of what was picked, make sure it exists - if it doesnt, attempt to create it
+  // Add try/catch logic incase user doesnt have permissions to write directories needed
+  try {
+    if (!fs.existsSync(jsonOutputPath)) {
+      fs.mkdirSync(jsonOutputPath);
+    }
+  }
+  catch(e) {
+    cliUtils.logAndExit(1, `ERROR: Cannot create ${jsonOutputPath}\n${e.message}`);
+  }
+
+  console.log(`Saving JSON output at: ${path.join(jsonOutputPath, jsonOutputFilename)}`);
+  return {
+    path: jsonOutputPath,
+    filename: jsonOutputFilename
+  }
 }
 
 export function writeJSONOutput(exitCode: number, msg: string, data = {}) {
@@ -260,9 +305,16 @@ export function writeJSONOutput(exitCode: number, msg: string, data = {}) {
     data: outputData
   };
 
-  // Then, determine the path to write the file
-  let outputPath = determineJSONOutputPath(jsonOutputParams.jsonOutputPath);
+  // Then, determine the path and filename to write the JSON output
+  let outputDestination = determineJSONOutputPathAndFilename(jsonOutputParams.jsonOutputPath);
 
-  // Last, write the output file synchronously
-  fs.writeFileSync(path.join(outputPath, jsonOutputParams.jsonOutputFilename), cliUtils.toJsonPretty(output));
+  // Last, try to write the output file synchronously
+  try {
+    fs.writeFileSync(path.join(outputDestination.path, outputDestination.filename), cliUtils.toJsonPretty(output));
+  }
+  catch(e) {
+    // unset JSON mode since we cant write the file before writing out error
+    setJSONOutputMode(false);
+    cliUtils.logAndExit(1, `ERROR: Cannot create JSON output \n${e.message}`);
+  }
 }
