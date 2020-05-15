@@ -496,7 +496,7 @@ async function createNewVersion(ewId: string, options: { bundle?: string, codeDi
           matched_checksum: matchedVersion['checksum']
         }
       }
-      cliUtils.logAndExit(1, `ERROR: Checksum for EdgeWorkers bundle provided matches existing version!`, errorValues);
+      cliUtils.logAndExit(1, `ERROR: Checksum for EdgeWorkers bundle provided matches existing version!`, [errorValues]);
     }
     else {
       //if all remains good, then upload tarball and output checksum and version number
