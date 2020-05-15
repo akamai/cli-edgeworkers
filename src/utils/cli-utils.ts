@@ -20,7 +20,7 @@ function log(txt, type = 'log') {
   }
 }
 
-export function logAndExit(exitCode: number, msg: string, data = {}) {
+export function logAndExit(exitCode: number, msg: string, data =[{}]) {
 
   if(edgeWorkersClientSvc.isJSONOutputMode())
     edgeWorkersClientSvc.writeJSONOutput(exitCode, msg, data);

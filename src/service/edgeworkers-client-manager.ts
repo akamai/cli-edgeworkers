@@ -311,7 +311,7 @@ export function writeJSONOutput(exitCode: number, msg: string, data = {}) {
   // Check if msg is already JSON - which would happen if OPEN API response failed for some reason
   if(cliUtils.isJSON(msg)) {
     outputMsg = 'An OPEN API error has occurred!';
-    outputData = JSON.parse(msg);
+    outputData = [JSON.parse(msg)];
   }
   else {
     outputMsg = msg;
