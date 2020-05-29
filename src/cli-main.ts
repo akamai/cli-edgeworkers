@@ -277,7 +277,7 @@ async function showGroupOverview(groupId: string) {
       group.push(filterJsonData(groups[key], groupColumnsToKeep));
     });
 
-    let msg = `User has the following Permission Group acccess for group: ${groupId}`;
+    let msg = `User has the following Permission Group access for group: ${groupId}`;
     if(edgeWorkersClientSvc.isJSONOutputMode()) {
       edgeWorkersClientSvc.writeJSONOutput(0, msg, group);
     }
