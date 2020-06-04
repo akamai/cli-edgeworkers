@@ -11,7 +11,7 @@ const groupColumnsToKeep = ["groupId", "groupName", "capabilities"];
 const idColumnsToKeep = ["edgeWorkerId", "name", "groupId"];
 const versionColumnsToKeep = ["edgeWorkerId", "version", "checksum", "createdBy", "createdTime", "sequenceNumber"];
 const activationColumnsToKeep = ["edgeWorkerId", "version", "activationId", "status", "network", "createdBy", "createdTime"];
-const copywrite = '\n(c) Copyright 2019 Akamai Technologies, Inc. Licensed under Apache 2 license.\nVisit http://github.com/akamai/cli-edgeworkers for detailed documentation';
+const copywrite = '\nCopyright (c) 2019-2020 Akamai Technologies, Inc. Licensed under Apache 2 license.\nYour use of Akamai\'s products and services is subject to the terms and provisions outlined in Akamai\'s legal policies.\nVisit http://github.com/akamai/cli-edgeworkers for detailed documentation';
 
 /* ========== Local Helpers ========== */
 function filterJsonData(data, columnsToKeep: string[]) {
