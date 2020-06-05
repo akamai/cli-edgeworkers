@@ -11,6 +11,7 @@ const groupColumnsToKeep = ["groupId", "groupName", "capabilities"];
 const idColumnsToKeep = ["edgeWorkerId", "name", "groupId"];
 const versionColumnsToKeep = ["edgeWorkerId", "version", "checksum", "createdBy", "createdTime", "sequenceNumber"];
 const activationColumnsToKeep = ["edgeWorkerId", "version", "activationId", "status", "network", "createdBy", "createdTime"];
+const errorColumnsToKeep = ["type", "message"];
 const copywrite = '\nCopyright (c) 2019-2020 Akamai Technologies, Inc. Licensed under Apache 2 license.\nYour use of Akamai\'s products and services is subject to the terms and provisions outlined in Akamai\'s legal policies.\nVisit http://github.com/akamai/cli-edgeworkers for detailed documentation';
 
 /* ========== Local Helpers ========== */
@@ -228,6 +229,22 @@ program
       cliUtils.logAndExit(1, `ERROR: Network parameter must be either STAGING or PRODUCTION - was: ${network}`);
     try {
       await createNewActivation(ewId, network.toUpperCase(), versionId);
+    } catch (e) {
+        cliUtils.logAndExit(1, e);
+    }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+program
+  .command("validate <bundlePath>")
+  .description("Validates a code bundle version without uploading the code bundle.")
+  .alias("vv")
+  .action(async function (bundlePath) {
+
+    try {
+      await validateNewVersion(bundlePath);
     } catch (e) {
         cliUtils.logAndExit(1, e);
     }
@@ -457,8 +474,10 @@ async function createNewVersion(ewId: string, options: { bundle?: string, codeDi
   var checksumMatches = false;
 
   // Depending on options used, validate or build tarball from code files
+  // New Validation API is run during code bundle upload so no need to explicitly validate the provided tarball locally, rather delegate that to the OPEN API
+  // However we still need to ensure the tarball exists locally if provided
   if (options.bundle)
-    bundle = await cliUtils.spinner(edgeWorkersClientSvc.validateTarball(ewId, options.bundle), "Validating provided tarball");
+    bundle = await cliUtils.spinner(edgeWorkersClientSvc.validateTarballLocally(options.bundle), "Validating provided tarball exists");
   else
     bundle = await cliUtils.spinner(edgeWorkersClientSvc.buildTarball(ewId, options.codeDir), "Building tarball from working directory code");
 
@@ -531,6 +550,59 @@ async function uploadEdgeWorkerVersion(ewId: string, tarballPath: string) {
   }
   else {
     cliUtils.logAndExit(1, `ERROR: Code bundle was not able to be uploaded for EdgeWorker Id ${ewId} from ${tarballPath}`);
+  }
+}
+
+// Call the Validation API
+async function validateNewVersion(bundlePath: string) {
+  var versions = null;
+
+  // first verify the tarball provided exists locally
+  var bundle = await cliUtils.spinner(edgeWorkersClientSvc.validateTarballLocally(bundlePath), "Validating provided tarball exists");
+
+  if (!bundle.tarballChecksum) {
+    cliUtils.logAndExit(1, "ERROR: Checksum for EdgeWorkers bundle not found!");
+  }
+  else {
+    //if all remains good, then send tarball to the Validation API for evaluation
+    await validateEdgeWorkerVersion(bundle.tarballPath);
+  }
+}
+
+async function validateEdgeWorkerVersion(tarballPath: string) {
+  var hasErrors = true;
+  var errors = await cliUtils.spinner(edgeWorkersSvc.validateTarball(tarballPath), `Validating new code bundle version from ${tarballPath}`);
+
+  if (errors) {
+    // take off outer layer of JSON envelope
+    if (errors.hasOwnProperty("errors"))
+        errors = errors["errors"];
+
+    // if the Validation API returns successfully, but payload illustrates code bundle has errors, flag this as CLI failure
+    if (JSON.stringify(errors) === '[]')
+      hasErrors = false;
+
+    var error = [];
+    Object.keys(errors).forEach(function (key) {
+      error.push(filterJsonData(errors[key], errorColumnsToKeep));
+    });
+
+    let msg = `Validation Errors for: ${tarballPath}`;
+    if(edgeWorkersClientSvc.isJSONOutputMode()) {
+       edgeWorkersClientSvc.writeJSONOutput(hasErrors ? 1 : 0, msg, error);
+    }
+    else {
+      if(hasErrors) {
+        cliUtils.logWithBorder(msg);
+        console.table(error);
+        cliUtils.logAndExit(1,'');
+      }
+      else
+        cliUtils.logAndExit(0, `INFO: Tarball ${tarballPath} is valid!`);
+    }
+  }
+  else {
+    cliUtils.logAndExit(1, `ERROR: Code bundle was not able to be validated from path: ${tarballPath}`);
   }
 }
 

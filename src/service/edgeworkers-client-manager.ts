@@ -58,36 +58,13 @@ export function isJSONOutputMode() {
   return jsonOutputParams.jsonOutput;
 }
 
-export function validateTarball(ewId: string, rawTarballPath: string) {
+export function validateTarballLocally(rawTarballPath: string) {
   var tarballPath = untildify(rawTarballPath);
 
   // Check to make sure tarball exists
   if (!fs.existsSync(tarballPath)) {
     cliUtils.logAndExit(1, `ERROR: EdgeWorkers bundle archive (${tarballPath}) provided is not found.`);
   }
-
-  // Check to make sure tarball contains main.js and bundle.json at root level of archive
-  let files = [];
-
-  tar.t(
-    {
-      file: tarballPath,
-      sync: true,
-      onentry: function (entry) { files.push(entry.path); }
-    },
-    [MAINJS_FILENAME, MANIFEST_FILENAME] //this acts as a filter to the archive listing command
-  );
-
-  //if both files are not found throw an error and stop
-  if (files.length != 2) {
-    cliUtils.logAndExit(1, `ERROR: EdgeWorkers ${MAINJS_FILENAME} and/or ${MANIFEST_FILENAME} is not found in provided bundle tgz!`);
-  }
-
-  /* DCT 8/19/19: Decided to punt on unpacking the tarball to check the individual files, thus letting the EdgeWorkers OPEN API validation catch those problems.
-     However, if we wanted to do it via CLI, would need to update tar.t() command above to be tar.x() providing a local directory to unpack into, then run the
-     validateManifest() function here.
-  */
-
 
   // calculate checksum of new tarball
   tarballChecksum = calculateChecksum(tarballPath);
