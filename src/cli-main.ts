@@ -553,10 +553,7 @@ async function uploadEdgeWorkerVersion(ewId: string, tarballPath: string) {
   }
 }
 
-// Call the Validation API
 async function validateNewVersion(bundlePath: string) {
-  var versions = null;
-
   // first verify the tarball provided exists locally
   var bundle = await cliUtils.spinner(edgeWorkersClientSvc.validateTarballLocally(bundlePath), "Validating provided tarball exists");
 
