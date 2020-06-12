@@ -586,7 +586,11 @@ async function validateEdgeWorkerVersion(tarballPath: string) {
 
     let msg = `Validation Errors for: ${tarballPath}`;
     if(edgeWorkersClientSvc.isJSONOutputMode()) {
-       edgeWorkersClientSvc.writeJSONOutput(hasErrors ? 1 : 0, msg, error);
+      edgeWorkersClientSvc.writeJSONOutput(hasErrors ? 1 : 0, msg, error);
+      // we want to set a failure exit code if the CLI executed successfully, but the Validation API indicated the code bundle is invalid
+      if(hasErrors){
+        process.exit(1);
+      }
     }
     else {
       if(hasErrors) {
