@@ -48,6 +48,7 @@ Commands:
 | download \| download-version `[options] <edgeworker-identifier> <version-identifier>` | Download the code bundle of an EdgeWorker version. |
 | status \| list-activations `[options] <edgeworker-identifier>` | List Activation status of a given EdgeWorker Id. |
 | activate \| av `<edgeworker-identifier> <network> <versionId>` | Activate a Version for a given EdgeWorker Id on an Akamai Network. |
+| validate \| vv `<bundlePath>` | Validates a code bundle version without uploading the code bundle. |
 
 ### List Permission Groups with EdgeWorkers Access
 Customer Developer can find their EdgeWorkers access level per Luna Access Control Group.  
@@ -235,6 +236,24 @@ Usage: `akamai edgeworkers activate [options] <edgeworker-identifier> <network> 
 2. Location response header will be provided with new EdgeWorker Activation id.
 
 3. EdgeWorker activation details response body (JSON) will be provided with 201 response code.
+
+### Validate an EdgeWorkers Code Bundle
+Validates a code bundle version without uploading the code bundle
+
+Usage: `akamai edgeworkers validate [options] <bundlePath>`
+
+| Option | Description |
+| - | - |
+| -h, --help  | output usage information |
+
+| Argument | Existence | Description |
+| - | - | - |
+| bundlePath | required | Path to bundle file in tgz format |
+
+#### Key Details
+1. Code bundle path must be found on the local filesystem.
+
+2. Code bundle expects a tgz file already built per EdgeWorkers specification.
 ___
 ## Resources
 For more information on EdgeWorkers, refer to the following resources:

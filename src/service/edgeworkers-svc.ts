@@ -204,3 +204,7 @@ export function createActivationId(ewId: string, network: string, versionId: str
   var body = { "network": network, "version": versionId };
   return postJson(`${EDGEWORKERS_API_BASE}/ids/${ewId}/activations`, body).then(r => r.body);
 }
+
+export function validateTarball(tarballPath: string) {
+  return postTarball(`${EDGEWORKERS_API_BASE}/validations`, tarballPath).then(r => r.body);
+}

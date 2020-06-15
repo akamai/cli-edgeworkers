@@ -5,7 +5,7 @@
   "commands": [
     {
       "name": "edgeworkers",
-      "version": "0.2.2",
+      "version": "0.3.0",
       "aliases": ["ew", "edgeworkers"],
       "description": "Manage Akamai EdgeWorkers code bundles."
     }
