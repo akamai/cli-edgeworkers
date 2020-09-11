@@ -4,6 +4,7 @@ import * as envUtils from './utils/env-utils';
 import * as cliUtils from './utils/cli-utils';
 import * as edgeWorkersSvc from './service/edgeworkers-svc';
 import * as edgeWorkersClientSvc from './service/edgeworkers-client-manager';
+var CryptoJS = require("crypto-js");
 const pkginfo = require('../package.json');
 const cTable = require('console.table');
 var program = require('commander');
@@ -245,6 +246,24 @@ program
 
     try {
       await validateNewVersion(bundlePath);
+    } catch (e) {
+        cliUtils.logAndExit(1, e);
+    }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+program
+  .command("generate-auth-token <secretKey> <path")
+  .description("Generates an authentication token that can be used to get detailed EdgeWorker debug response headers.")
+  .alias("auth")
+  .option("--secret <secretKey>", "The secret key that is configured for the ARL property in which the EdgeWorker executes.")
+  .option("--path <path>", "The path of the response page which requires debugging.")
+  .action(async function (secretKey, path) {
+
+    try {
+      await generateAuthToken(secretKey, path);
     } catch (e) {
         cliUtils.logAndExit(1, e);
     }
@@ -701,5 +720,34 @@ async function createNewActivation(ewId: string, network: string, versionId: str
   else {
     cliUtils.logAndExit(1, `ERROR: Activation record was not able to be created for EdgeWorker Id ${ewId}, version: ${versionId} on network: ${network}!`);
   }
+}
 
+async function generateAuthToken(secretKey: string, path: string) {
+
+  var time = 500000;
+  var startTime = "1599773934";
+  var endTime = "1599780000";
+  var acl="/*";
+  var currentTimeSeconds = Math.floor(Date.now() / 1000);
+  var field_delimiter = "~";
+  var new_token = "";
+
+  new_token += `st=${startTime}`;
+  new_token += field_delimiter;
+  new_token += `exp=${endTime}`;
+  new_token += field_delimiter;
+  new_token += `acl=${acl}`;
+
+  console.log("Token: " + new_token);
+
+  const hexedSecretKey = CryptoJS.enc.Hex.parse(secretKey);
+  const hash = CryptoJS.HmacSHA256(new_token, hexedSecretKey);
+//  const hashTest = CryptoJS.HmacSHA256(new_token, "a177345862c22a26b55f66c6978d9bd01ab3ed130bf3a4f42a31f009cea4ead8");
+  const hashStr = CryptoJS.enc.Hex.stringify(hash);
+//  const hashTestStr = CryptoJS.enc.Hex.stringify(hashTest);
+  var auth_token = new_token + field_delimiter + `hmac=${hashStr}`;
+//  var test_token = new_token + field_delimiter + `hmac=${hashTestStr}`;
+
+  console.log("Auth Token: " + auth_token);
+//  console.log("Test Token: " + test_token)
 }
