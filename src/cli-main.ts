@@ -255,15 +255,58 @@ program
   });
 
 program
-  .command("generate-auth-token <secretKey> <path")
-  .description("Generates an authentication token that can be used to get detailed EdgeWorker debug response headers.")
+  .command("generate-auth-token <secretKey>")
+  .description("Generates an authentication token that can be used to get detailed EdgeWorker debug response headers.  \
+  The secret key (hex-digit based) that is configured for the property in which the EdgeWorker executes.")
   .alias("auth")
-  .option("--secret <secretKey>", "The secret key that is configured for the ARL property in which the EdgeWorker executes.")
-  .option("--path <path>", "The path of the response page which requires debugging.")
-  .action(async function (secretKey, path) {
+  .option("--acl <aclPath>", "The path prefix of the response pages which require debugging; this value is used to restrict for which pages the token is valid. \
+  The default value if not specified is \"/*\". This option is mutually exclusive to the --url option; only use one or the other.")
+  .option("--url <urlPath>", "The exact path (including filename and extension) of the response page which requires debugging; this value is used as a salt for \
+  generating the token, and the URL does NOT appear in the final token itself. The generated token is only valid for the exact URL. This option is mutually \
+  exclusive to the --acl option; only use one or the other.")
+  .option("--duration <duration>", "The number of minutes during which the token is valid, after which it expires. Max value is 60 minutes; default value is 15 minutes.")
+  .action(async function (secretKey, options) {
+
+    if(!secretKey) {
+      cliUtils.logAndExit(1, "ERROR: The secret key specified in the property in which the EdgeWorker executes must be supplied in order to generate an authentication token.");
+    } else if(secretKey.length % 2 != 0) {
+      cliUtils.logAndExit(1, "ERROR: The secret key specified in the property in which the EdgeWorker executes must have an even number of hex characters.");
+    } else if(!secretKey.match(/^[0-9a-fA-F]+$/)) {
+      console.log("INVALID SECRET: " + secretKey);
+      cliUtils.logAndExit(1, "ERROR: The secret key specified in the property in which the EdgeWorker executes must contain only hex characters: [0-9a-f]");
+    } else {
+      secretKey = secretKey.toLowerCase();
+    }
+
+    var duration = 15; // Use 15 minutes as the default value
+    if(!options.duration) {
+      duration = 15; 
+    } else {
+      duration = parseInt(options.duration);
+      if(isNaN(duration)) {
+        cliUtils.logAndExit(1, "ERROR: The duration is invalid. It must be an integer value (in minutes) representing the duration of the validity of the token.");
+      } else if(duration < 1 || duration > 60) {
+        cliUtils.logAndExit(1, "ERROR: The duration is invalid. It must be an integer value (in minutes) between 1 and 60.");
+      }
+    }
+
+    var path = "/*";
+    var isACL = true;
+    if(options.acl) {
+      if(options.url) {
+        cliUtils.logAndExit(1, "ERROR: The --acl and --url parameters are mutually exclusive; please use only one parameter. Specifying neither will result in a \
+        default value for the --acl parameter being used." );
+      } else {
+        path = options.acl;
+        isACL = true;
+      }
+    } else if(options.url) {
+      path = options.url;
+      isACL = false;
+    }
 
     try {
-      await generateAuthToken(secretKey, path);
+      await generateAuthToken(secretKey, path, duration, isACL);
     } catch (e) {
         cliUtils.logAndExit(1, e);
     }
@@ -722,32 +765,43 @@ async function createNewActivation(ewId: string, network: string, versionId: str
   }
 }
 
-async function generateAuthToken(secretKey: string, path: string) {
+async function generateAuthToken(secretKey: string, path: string, duration: number, isACL: boolean) {
 
-  var time = 500000;
-  var startTime = "1599773934";
-  var endTime = "1599780000";
-  var acl="/*";
-  var currentTimeSeconds = Math.floor(Date.now() / 1000);
+  // Time calculations
+  //const startTime = "1599773934";
+  //const endTime = "1599780000";
+  const startTime = Math.floor(Date.now() / 1000);
+  const endTime = startTime + (duration * 60);
+  
+  var acl=path;
   var field_delimiter = "~";
   var new_token = "";
+  var hmac_token = "";
 
   new_token += `st=${startTime}`;
   new_token += field_delimiter;
   new_token += `exp=${endTime}`;
-  new_token += field_delimiter;
-  new_token += `acl=${acl}`;
 
-  console.log("Token: " + new_token);
+  if(isACL) {
+    new_token += field_delimiter;
+    new_token += `acl=${acl}`;
+    hmac_token = new_token;
+  } else {
+    hmac_token = new_token + field_delimiter + "url=" + escape(path);
+  }
+
+  //console.log("Token: " + new_token);
+  //console.log("HMAC signing string: " + hmac_token);
 
   const hexedSecretKey = CryptoJS.enc.Hex.parse(secretKey);
-  const hash = CryptoJS.HmacSHA256(new_token, hexedSecretKey);
-//  const hashTest = CryptoJS.HmacSHA256(new_token, "a177345862c22a26b55f66c6978d9bd01ab3ed130bf3a4f42a31f009cea4ead8");
+  const hash = CryptoJS.HmacSHA256(hmac_token, hexedSecretKey);
   const hashStr = CryptoJS.enc.Hex.stringify(hash);
-//  const hashTestStr = CryptoJS.enc.Hex.stringify(hashTest);
   var auth_token = new_token + field_delimiter + `hmac=${hashStr}`;
-//  var test_token = new_token + field_delimiter + `hmac=${hashTestStr}`;
 
-  console.log("Auth Token: " + auth_token);
-//  console.log("Test Token: " + test_token)
+  console.log("Add the following request header to your requests to get additional trace information.");
+  console.log("Akamai-EW-Trace: " + auth_token);
+}
+
+function escape(tokenComponent: string) {
+  return encodeURIComponent(tokenComponent);
 }
