@@ -257,7 +257,7 @@ program
 program
   .command("create-auth-token <secretKey>")
   .description("Generates an authentication token that can be used to get detailed EdgeWorker debug response headers.  \
-  The secret key (hex-digit based) that is configured for the property in which the EdgeWorker executes.")
+  The secret key (hex-digit based) that is configured for the Akamai property in which the EdgeWorker executes.")
   .alias("auth")
   .option("--acl <aclPath>", "The path prefix of the response pages which require debugging; this value is used to restrict for which pages the token is valid. \
   The default value if not specified is \"/*\". This option is mutually exclusive to the --url option; only use one or the other.")
@@ -272,16 +272,13 @@ program
     } else if(secretKey.length % 2 != 0) {
       cliUtils.logAndExit(1, "ERROR: The secret key specified in the property in which the EdgeWorker executes must have an even number of hex characters.");
     } else if(!secretKey.match(/^[0-9a-fA-F]+$/)) {
-      console.log("INVALID SECRET: " + secretKey);
       cliUtils.logAndExit(1, "ERROR: The secret key specified in the property in which the EdgeWorker executes must contain only hex characters: [0-9a-f]");
     } else {
       secretKey = secretKey.toLowerCase();
     }
 
     var expiry = 15; // Use 15 minutes as the default value
-    if(!options.expiry) {
-      expiry = 15; 
-    } else {
+    if(options.expiry) {
       expiry = parseInt(options.expiry);
       if(isNaN(expiry)) {
         cliUtils.logAndExit(1, "ERROR: The expiry is invalid. It must be an integer value (in minutes) representing the duration of the validity of the token.");
@@ -788,16 +785,13 @@ async function createAuthToken(secretKey: string, path: string, expiry: number, 
     hmac_token = new_token + field_delimiter + "url=" + escape(path);
   }
 
-  //console.log("Token: " + new_token);
-  //console.log("HMAC signing string: " + hmac_token);
-
   const hexedSecretKey = CryptoJS.enc.Hex.parse(secretKey);
   const hash = CryptoJS.HmacSHA256(hmac_token, hexedSecretKey);
   const hashStr = CryptoJS.enc.Hex.stringify(hash);
   var auth_token = new_token + field_delimiter + `hmac=${hashStr}`;
 
-  console.log("\nAdd the following request header to your requests to get additional trace information.\n");
-  console.log("Akamai-EW-Trace: " + auth_token + "\n");
+  cliUtils.logWithBorder("\nAdd the following request header to your requests to get additional trace information.\nAkamai-EW-Trace: " + auth_token + "\n");
+  cliUtils.logAndExit(0, "");
 }
 
 function escape(tokenComponent: string) {
