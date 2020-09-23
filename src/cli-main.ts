@@ -790,8 +790,12 @@ async function createAuthToken(secretKey: string, path: string, expiry: number, 
   const hashStr = CryptoJS.enc.Hex.stringify(hash);
   var auth_token = new_token + field_delimiter + `hmac=${hashStr}`;
 
-  cliUtils.logWithBorder("\nAdd the following request header to your requests to get additional trace information.\nAkamai-EW-Trace: " + auth_token + "\n");
-  cliUtils.logAndExit(0, "");
+  let msg = "Akamai-EW-Trace: " + auth_token;
+  if(edgeWorkersClientSvc.isJSONOutputMode()) {
+    edgeWorkersClientSvc.writeJSONOutput(0, msg);
+  } else {
+    cliUtils.logWithBorder("\nAdd the following request header to your requests to get additional trace information.\nAkamai-EW-Trace: " + auth_token + "\n");
+  }
 }
 
 function escape(tokenComponent: string) {
