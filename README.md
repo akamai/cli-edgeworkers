@@ -270,7 +270,7 @@ Usage: `akamai edgeworkers create-auth-token [options] <secretKey>`
 
 | Argument | Existence | Description |
 | - | - | - |
-| secretKey | required | The secret key (hex-digit based) that is configured for the Akamai property in which the EdgeWorker executes |
+| secretKey | required | The secret key (hex-digit based, minimum 64 characters) that is configured for the Akamai property in which the EdgeWorker executes |
 
 #### Key Details
 1. The `--acl` and `--url` options are mutually exclusive to each other.
