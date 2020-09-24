@@ -257,7 +257,7 @@ program
 program
   .command("create-auth-token <secretKey>")
   .description("Generates an authentication token that can be used to get detailed EdgeWorker debug response headers.  \
-  The secret key (hex-digit based) that is configured for the Akamai property in which the EdgeWorker executes.")
+  The secret key (hex-digit based, min 64 chars) that is configured for the Akamai property in which the EdgeWorker executes.")
   .alias("auth")
   .option("--acl <aclPath>", "The path prefix of the response pages which require debugging; this value is used to restrict for which pages the token is valid. \
   The default value if not specified is \"/*\". This option is mutually exclusive to the --url option; only use one or the other.")
@@ -269,6 +269,8 @@ program
 
     if(!secretKey) {
       cliUtils.logAndExit(1, "ERROR: The secret key specified in the property in which the EdgeWorker executes must be supplied in order to generate an authentication token.");
+    } else if(secretKey.length < 64) {
+      cliUtils.logAndExit(1, "ERROR: The secret key specified in the property in which the EdgeWorker executes must have at least 64 characters.");
     } else if(secretKey.length % 2 != 0) {
       cliUtils.logAndExit(1, "ERROR: The secret key specified in the property in which the EdgeWorker executes must have an even number of hex characters.");
     } else if(!secretKey.match(/^[0-9a-fA-F]+$/)) {
