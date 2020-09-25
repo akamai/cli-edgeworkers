@@ -257,13 +257,13 @@ program
 program
   .command("create-auth-token <secretKey>")
   .description("Generates an authentication token that can be used to get detailed EdgeWorker debug response headers.  \
-  The secret key (hex-digit based, min 64 chars) that is configured for the Akamai property in which the EdgeWorker executes.")
+The secret key (hex-digit based, min 64 chars) that is configured for the Akamai property in which the EdgeWorker executes.")
   .alias("auth")
   .option("--acl <aclPath>", "The path prefix of the response pages which require debugging; this value is used to restrict for which pages the token is valid. \
-  The default value if not specified is \"/*\". This option is mutually exclusive to the --url option; only use one or the other.")
+The default value if not specified is \"/*\". This option is mutually exclusive to the --url option; only use one or the other.")
   .option("--url <urlPath>", "The exact path (including filename and extension) of the response page which requires debugging; this value is used as a salt for \
-  generating the token, and the URL does NOT appear in the final token itself. The generated token is only valid for the exact URL. This option is mutually \
-  exclusive to the --acl option; only use one or the other.")
+generating the token, and the URL does NOT appear in the final token itself. The generated token is only valid for the exact URL. This option is mutually \
+exclusive to the --acl option; only use one or the other.")
   .option("--expiry <expiry>", "The number of minutes during which the token is valid, after which it expires. Max value is 60 minutes; default value is 15 minutes.")
   .action(async function (secretKey, options) {
 
@@ -294,7 +294,7 @@ program
     if(options.acl) {
       if(options.url) {
         cliUtils.logAndExit(1, "ERROR: The --acl and --url parameters are mutually exclusive; please use only one parameter. Specifying neither will result in a \
-        default value for the --acl parameter being used." );
+default value for the --acl parameter being used." );
       } else {
         path = options.acl;
         isACL = true;
