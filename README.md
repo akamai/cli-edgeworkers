@@ -1,3 +1,9 @@
+<!--esi 
+<esi:assign name="dac_stylesheets" value="['/stylesheets/screen.css']" />
+<esi:assign name="dac_footer_js" value="['/javascripts/app/toc.js']" />
+<esi:eval src="/internal/header.html?http" dca="esi" />
+-->
+
 # EdgeWorkers CLI
 The EdgeWorkers command line interface (CLI) expedites the process of registering, uploading, activating and testing EdgeWorkers functions on the Akamai Edge network.
 
@@ -290,3 +296,7 @@ For more information on EdgeWorkers, refer to the following resources:
 
 ## Reporting Issues
 You are all set, happy coding! If you experience any issues with the EdgeWorkers CLI, raise them as a [github issue](https://github.com/akamai/cli-edgeworkers/issues). Feel free to create a pull request with the fix or suggestion.
+
+<!--esi 
+<esi:eval src="/internal/footer.html?http" dca="esi" />
+-->
