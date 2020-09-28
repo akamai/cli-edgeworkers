@@ -4,6 +4,7 @@ import * as envUtils from './utils/env-utils';
 import * as cliUtils from './utils/cli-utils';
 import * as edgeWorkersSvc from './service/edgeworkers-svc';
 import * as edgeWorkersClientSvc from './service/edgeworkers-client-manager';
+var CryptoJS = require("crypto-js");
 const pkginfo = require('../package.json');
 const cTable = require('console.table');
 var program = require('commander');
@@ -245,6 +246,66 @@ program
 
     try {
       await validateNewVersion(bundlePath);
+    } catch (e) {
+        cliUtils.logAndExit(1, e);
+    }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+program
+  .command("create-auth-token <secretKey>")
+  .description("Generates an authentication token that can be used to get detailed EdgeWorker debug response headers.  \
+The secret key (hex-digit based, min 64 chars) that is configured for the Akamai property in which the EdgeWorker executes.")
+  .alias("auth")
+  .option("--acl <aclPath>", "The path prefix of the response pages which require debugging; this value is used to restrict for which pages the token is valid. \
+The default value if not specified is \"/*\". This option is mutually exclusive to the --url option; only use one or the other.")
+  .option("--url <urlPath>", "The exact path (including filename and extension) of the response page which requires debugging; this value is used as a salt for \
+generating the token, and the URL does NOT appear in the final token itself. The generated token is only valid for the exact URL. This option is mutually \
+exclusive to the --acl option; only use one or the other.")
+  .option("--expiry <expiry>", "The number of minutes during which the token is valid, after which it expires. Max value is 60 minutes; default value is 15 minutes.")
+  .action(async function (secretKey, options) {
+
+    if(!secretKey) {
+      cliUtils.logAndExit(1, "ERROR: The secret key specified in the property in which the EdgeWorker executes must be supplied in order to generate an authentication token.");
+    } else if(secretKey.length < 64) {
+      cliUtils.logAndExit(1, "ERROR: The secret key specified in the property in which the EdgeWorker executes must have at least 64 characters.");
+    } else if(secretKey.length % 2 != 0) {
+      cliUtils.logAndExit(1, "ERROR: The secret key specified in the property in which the EdgeWorker executes must have an even number of hex characters.");
+    } else if(!secretKey.match(/^[0-9a-fA-F]+$/)) {
+      cliUtils.logAndExit(1, "ERROR: The secret key specified in the property in which the EdgeWorker executes must contain only hex characters: [0-9a-f]");
+    } else {
+      secretKey = secretKey.toLowerCase();
+    }
+
+    var expiry = 15; // Use 15 minutes as the default value
+    if(options.expiry) {
+      expiry = parseInt(options.expiry);
+      if(isNaN(expiry)) {
+        cliUtils.logAndExit(1, "ERROR: The expiry is invalid. It must be an integer value (in minutes) representing the duration of the validity of the token.");
+      } else if(expiry < 1 || expiry > 60) {
+        cliUtils.logAndExit(1, "ERROR: The expiry is invalid. It must be an integer value (in minutes) between 1 and 60.");
+      }
+    }
+
+    var path = "/*";
+    var isACL = true;
+    if(options.acl) {
+      if(options.url) {
+        cliUtils.logAndExit(1, "ERROR: The --acl and --url parameters are mutually exclusive; please use only one parameter. Specifying neither will result in a \
+default value for the --acl parameter being used." );
+      } else {
+        path = options.acl;
+        isACL = true;
+      }
+    } else if(options.url) {
+      path = options.url;
+      isACL = false;
+    }
+
+    try {
+      await createAuthToken(secretKey, path, expiry, isACL);
     } catch (e) {
         cliUtils.logAndExit(1, e);
     }
@@ -701,5 +762,44 @@ async function createNewActivation(ewId: string, network: string, versionId: str
   else {
     cliUtils.logAndExit(1, `ERROR: Activation record was not able to be created for EdgeWorker Id ${ewId}, version: ${versionId} on network: ${network}!`);
   }
+}
 
+async function createAuthToken(secretKey: string, path: string, expiry: number, isACL: boolean) {
+
+  // Time calculations
+  const startTime = Math.floor(Date.now() / 1000);
+  const endTime = startTime + (expiry * 60);
+
+  var acl=path;
+  var field_delimiter = "~";
+  var new_token = "";
+  var hmac_token = "";
+
+  new_token += `st=${startTime}`;
+  new_token += field_delimiter;
+  new_token += `exp=${endTime}`;
+
+  if(isACL) {
+    new_token += field_delimiter;
+    new_token += `acl=${acl}`;
+    hmac_token = new_token;
+  } else {
+    hmac_token = new_token + field_delimiter + "url=" + escape(path);
+  }
+
+  const hexedSecretKey = CryptoJS.enc.Hex.parse(secretKey);
+  const hash = CryptoJS.HmacSHA256(hmac_token, hexedSecretKey);
+  const hashStr = CryptoJS.enc.Hex.stringify(hash);
+  var auth_token = new_token + field_delimiter + `hmac=${hashStr}`;
+
+  let msg = "Akamai-EW-Trace: " + auth_token;
+  if(edgeWorkersClientSvc.isJSONOutputMode()) {
+    edgeWorkersClientSvc.writeJSONOutput(0, msg);
+  } else {
+    cliUtils.logWithBorder("\nAdd the following request header to your requests to get additional trace information.\nAkamai-EW-Trace: " + auth_token + "\n");
+  }
+}
+
+function escape(tokenComponent: string) {
+  return encodeURIComponent(tokenComponent).toLowerCase();
 }

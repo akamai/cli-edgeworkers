@@ -49,6 +49,7 @@ Commands:
 | status \| list-activations `[options] <edgeworker-identifier>` | List Activation status of a given EdgeWorker Id. |
 | activate \| av `<edgeworker-identifier> <network> <versionId>` | Activate a Version for a given EdgeWorker Id on an Akamai Network. |
 | validate \| vv `<bundlePath>` | Validates a code bundle version without uploading the code bundle. |
+| create-auth-token \| auth `[options] <secretKey>` | Generates an authentication token that can be used to get detailed EdgeWorker debug response headers. |
 
 ### List Permission Groups with EdgeWorkers Access
 Customer Developer can find their EdgeWorkers access level per Luna Access Control Group.  
@@ -254,6 +255,32 @@ Usage: `akamai edgeworkers validate [options] <bundlePath>`
 1. Code bundle path must be found on the local filesystem.
 
 2. Code bundle expects a tgz file already built per EdgeWorkers specification.
+
+### Create an EdgeWorkers Authentication Token
+Generates an authentication token that can be used to get detailed EdgeWorker debug response headers.
+
+Usage: `akamai edgeworkers create-auth-token [options] <secretKey>`
+
+| Option | Description |
+| - | - |
+| -h, --help  | output usage information |
+| --acl `<aclPath>` | Path prefix of the response pages which require debugging |
+| --url `<urlPath>` | Exact path of response page which requires debugging |
+| --expiry `<expiry>` | Expiry duration of token, in minutes. |
+
+| Argument | Existence | Description |
+| - | - | - |
+| secretKey | required | The secret key (hex-digit based, minimum 64 characters) that is configured for the Akamai property in which the EdgeWorker executes |
+
+#### Key Details
+1. The `--acl` and `--url` options are mutually exclusive to each other.
+
+2. The `--url` value is not explicitly part of the final token, but is used as a salt in the HMAC computation.
+
+3. The `--acl` value can be a pattern that matches multiple pages, and is explicitly part of the final token. The default is `/*`.
+
+4. The `--expiry` value must be between 1 and 60 minutes. The default is `15`.
+
 ___
 ## Resources
 For more information on EdgeWorkers, refer to the following resources:
