@@ -255,6 +255,32 @@ program
   });
 
 program
+  .command("generate-secret")
+  .description("Generated a random secret key that can be used in the variable PMUSER_EW_DEBUG_KEY in their property and as an input to create auth cli command")
+  .alias("secret")
+  .option("--length <length>", "The length of the token to be generated")
+  .action(async function (options) {
+    let length = 32;
+    if(options.length) {
+      let errorMsg = "ERROR: The length specified is invalid. It must be an integer value between 32 and 64.";
+      if(isNaN(options.length)) {
+        cliUtils.logAndExit(1, errorMsg);
+      }
+      if(options.length > 32 || options.length < 64) {
+        cliUtils.logAndExit(1, errorMsg);
+      }
+    }
+    if(options.length != null) {
+      length = options.length;
+    }
+    try {
+      await generateRandomSecretKey(length);
+    } catch (e) {
+        cliUtils.logAndExit(1, e);
+    }
+  });
+
+program
   .command("create-auth-token <secretKey>")
   .description("Generates an authentication token that can be used to get detailed EdgeWorker debug response headers.  \
 The secret key (hex-digit based, min 64 chars) that is configured for the Akamai property in which the EdgeWorker executes.")
@@ -798,6 +824,12 @@ async function createAuthToken(secretKey: string, path: string, expiry: number, 
   } else {
     cliUtils.logWithBorder("\nAdd the following request header to your requests to get additional trace information.\nAkamai-EW-Trace: " + auth_token + "\n");
   }
+}
+
+async function generateRandomSecretKey(length: number) {
+  var randomToken = CryptoJS.lib.WordArray.random(length).toString(CryptoJS.enc.Hex);
+  let msg = `The following secret can be used to generate auth token or be used in the variable "PMUSER_EW_DEBUG_KEY" in the property.\n ${randomToken}`;
+  cliUtils.logWithBorder(msg);
 }
 
 function escape(tokenComponent: string) {
