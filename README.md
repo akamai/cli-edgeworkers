@@ -56,7 +56,7 @@ Commands:
 | activate \| av `<edgeworker-identifier> <network> <versionId>` | Activate a Version for a given EdgeWorker Id on an Akamai Network. |
 | validate \| vv `<bundlePath>` | Validates a code bundle version without uploading the code bundle. |
 | create-auth-token \| auth `[options] <secretKey>` | Generates an authentication token that can be used to get detailed EdgeWorker debug response headers. |
-| generate-secret \| secret | Generates a secret key that can be used to generate auth token or in property variable. |
+| generate-secret \| secret `[options]` | Generates a secret key that can be used to generate auth token or in property variable. |
 
 ### List Permission Groups with EdgeWorkers Access
 Customer Developer can find their EdgeWorkers access level per Luna Access Control Group.  
@@ -287,6 +287,18 @@ Usage: `akamai edgeworkers create-auth-token [options] <secretKey>`
 3. The `--acl` value can be a pattern that matches multiple pages, and is explicitly part of the final token. The default is `/*`.
 
 4. The `--expiry` value must be between 1 and 60 minutes. The default is `15`.
+
+### Generate a Random Secret 
+Generates a random secret key that can be used to creating edgeworkers authentication token and in property PMUSER_EW_DEBUG_KEY.
+
+Usage: `node akamai-edgeworkers generate-secret [options]`
+
+| Option | Description |
+| - | - |
+| --length `<aclPath>` | length of the token to be generated |
+
+#### Key Details
+1. The `--length` value must be between 32 and 64. 
 
 ___
 ## Resources

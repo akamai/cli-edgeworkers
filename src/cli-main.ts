@@ -256,7 +256,7 @@ program
 
 program
   .command("generate-secret")
-  .description("Generated a random secret key that can be used in the variable PMUSER_EW_DEBUG_KEY in their property and as an input to create auth cli command")
+  .description("Generated a random secret key that can be used in the variable PMUSER_EW_DEBUG_KEY in their property and as an input to create auth token using cli command")
   .alias("secret")
   .option("--length <length>", "The length of the token to be generated")
   .action(async function (options) {
