@@ -291,7 +291,7 @@ Usage: `akamai edgeworkers create-auth-token [options] <secretKey>`
 ### Generate a Random Secret Key
 Generates a random secret key that can be used to creating edgeworkers authentication token and in property PMUSER_EW_DEBUG_KEY.
 
-Usage: `node akamai-edgeworkers generate-secret [options]`
+Usage: `akamai-edgeworkers generate-secret [options]`
 
 | Option | Description |
 | - | - |
