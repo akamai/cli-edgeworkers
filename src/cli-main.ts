@@ -266,7 +266,7 @@ program
       if(isNaN(options.length)) {
         cliUtils.logAndExit(1, errorMsg);
       }
-      if(options.length > 32 || options.length < 64) {
+      if(options.length < 32 || options.length > 64) {
         cliUtils.logAndExit(1, errorMsg);
       }
     }
@@ -828,8 +828,13 @@ async function createAuthToken(secretKey: string, path: string, expiry: number, 
 
 async function generateRandomSecretKey(length: number) {
   var randomToken = CryptoJS.lib.WordArray.random(length).toString(CryptoJS.enc.Hex);
-  let msg = `The following secret can be used to generate auth token or be used in the variable "PMUSER_EW_DEBUG_KEY" in the property.\n ${randomToken}`;
+  let secretToken = `Secret: ${randomToken}`;
+  let msg = `The following secret can be used to generate auth token or be used in the variable "PMUSER_EW_DEBUG_KEY" in the property.\n `+secretToken;
+  if(edgeWorkersClientSvc.isJSONOutputMode()) {
+    edgeWorkersClientSvc.writeJSONOutput(0, secretToken);
+  } else {
   cliUtils.logWithBorder(msg);
+  }
 }
 
 function escape(tokenComponent: string) {
