@@ -262,16 +262,16 @@ program
   .action(async function (options) {
     let length = 32;
     if(options.length) {
-      let errorMsg = "ERROR: The length specified is invalid. It must be an even integer value between 32 and 64.";
+      let errorMsg = "ERROR: The length specified is invalid. It must be an even integer value between 64 and 128.";
       if(isNaN(options.length)) {
         cliUtils.logAndExit(1, errorMsg);
       }
-      if(options.length < 32 || options.length > 64 || options.length % 2 != 0) {
+      if(options.length < 64 || options.length > 128 || options.length % 2 != 0) {
         cliUtils.logAndExit(1, errorMsg);
       }
     }
     if(options.length != null) {
-      length = options.length;
+      length = options.length/2;
     }
     try {
       await generateRandomSecretKey(length);

@@ -289,7 +289,7 @@ Usage: `akamai edgeworkers create-auth-token [options] <secretKey>`
 4. The `--expiry` value must be between 1 and 60 minutes. The default is `15`.
 
 ### Generate a Random Secret Key
-Generates a random secret key that can be used to creating edgeworkers authentication token and in property PMUSER_EW_DEBUG_KEY.
+Generates a random secret key that can be used to create edgeworkers authentication token and in property PMUSER_EW_DEBUG_KEY.
 
 Usage: `akamai-edgeworkers generate-secret [options]`
 
@@ -298,7 +298,7 @@ Usage: `akamai-edgeworkers generate-secret [options]`
 | --length `<length>` | length of the token to be generated |
 
 #### Key Details
-1. The `--length` value must be between 32 and 64. 
+1. The `--length` value must be between 64 and 128. 
 
 ___
 ## Resources
