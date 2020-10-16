@@ -258,21 +258,8 @@ program
   .command("generate-secret")
   .description("Generates a random secret key that can be used in the variable PMUSER_EW_DEBUG_KEY in their property and as an input to create auth token using cli command")
   .alias("secret")
-  .option("--length <length>", "The length of the token to be generated")
-  .action(async function (options) {
+  .action(async function () {
     let length = 32;
-    if(options.length) {
-      let errorMsg = "ERROR: The length specified is invalid. It must be an even integer value between 64 and 128.";
-      if(isNaN(options.length)) {
-        cliUtils.logAndExit(1, errorMsg);
-      }
-      if(options.length < 64 || options.length > 128 || options.length % 2 != 0) {
-        cliUtils.logAndExit(1, errorMsg);
-      }
-    }
-    if(options.length != null) {
-      length = options.length/2;
-    }
     try {
       await generateRandomSecretKey(length);
     } catch (e) {
