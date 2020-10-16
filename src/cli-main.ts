@@ -255,6 +255,19 @@ program
   });
 
 program
+  .command("generate-secret")
+  .description("Generates a random secret key that can be used in the variable PMUSER_EW_DEBUG_KEY in their property and as an input to create auth token using cli command")
+  .alias("secret")
+  .action(async function () {
+    let length = 32;
+    try {
+      await generateRandomSecretKey(length);
+    } catch (e) {
+        cliUtils.logAndExit(1, e);
+    }
+  });
+
+program
   .command("create-auth-token <secretKey>")
   .description("Generates an authentication token that can be used to get detailed EdgeWorker debug response headers.  \
 The secret key (hex-digit based, min 64 chars) that is configured for the Akamai property in which the EdgeWorker executes.")
@@ -797,6 +810,17 @@ async function createAuthToken(secretKey: string, path: string, expiry: number, 
     edgeWorkersClientSvc.writeJSONOutput(0, msg);
   } else {
     cliUtils.logWithBorder("\nAdd the following request header to your requests to get additional trace information.\nAkamai-EW-Trace: " + auth_token + "\n");
+  }
+}
+
+async function generateRandomSecretKey(length: number) {
+  var randomToken = CryptoJS.lib.WordArray.random(length).toString(CryptoJS.enc.Hex);
+  let secretToken = `Secret: ${randomToken}`;
+  let msg = `The following secret can be used to generate auth token or be used in the variable "PMUSER_EW_DEBUG_KEY" in the property.\n `+secretToken;
+  if(edgeWorkersClientSvc.isJSONOutputMode()) {
+    edgeWorkersClientSvc.writeJSONOutput(0, secretToken);
+  } else {
+  cliUtils.logWithBorder(msg);
   }
 }
 
