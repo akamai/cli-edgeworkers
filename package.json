@@ -5,6 +5,7 @@
   "repository": "https://github.com/akamai/cli-edgeworkers",
   "scripts": {
     "build": "npm run build-ts",
+    "clean": "rm -rf node_modules",
     "build-ts": "tsc",
     "postinstall": "npm run build"
   },
