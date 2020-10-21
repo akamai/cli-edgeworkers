@@ -1,6 +1,6 @@
+import * as edgeWorkersClientSvc from '../service/edgeworkers/client-manager';
 const inquirer = require('inquirer');
 const Spinner = require('cli-spinner').Spinner;
-import * as edgeWorkersClientSvc from '../service/edgeworkers-client-manager';
 
 export function logWithBorder(str, type = 'log') {
   var t: string = `--- ${str} ---`;

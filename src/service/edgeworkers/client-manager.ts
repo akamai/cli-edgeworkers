@@ -1,4 +1,4 @@
-import * as cliUtils from '../utils/cli-utils';
+import * as cliUtils from '../../utils/cli-utils';
 import * as os from 'os';
 const fs = require('fs');
 const path = require('path');

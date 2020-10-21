@@ -1,8 +1,8 @@
 import * as path from "path";
-import * as envUtils from './env-utils';
-import * as cliUtils from './cli-utils';
-import * as edgeWorkersSvc from '../service/edgeworkers-svc';
-import * as edgeWorkersClientSvc from '../service/edgeworkers-client-manager';
+import * as envUtils from '../../utils/env-utils';
+import * as cliUtils from '../../utils/cli-utils';
+import * as edgeWorkersSvc from '../edgeworkers/edgeworkers-svc';
+import * as edgeWorkersClientSvc from '../edgeworkers/client-manager';
 
 var CryptoJS = require("crypto-js");
 const groupColumnsToKeep = ["groupId", "groupName", "capabilities"];

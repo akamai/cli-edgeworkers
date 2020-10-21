@@ -1,18 +1,12 @@
 #!/usr/bin/env node
-import * as path from "path";
 import * as envUtils from './utils/env-utils';
 import * as cliUtils from './utils/cli-utils';
-import * as cliHelpers from './utils/cli-helper';
-import * as edgeWorkersSvc from './service/edgeworkers-svc';
-import * as edgeWorkersClientSvc from './service/edgeworkers-client-manager';
-var CryptoJS = require("crypto-js");
+import * as cliHandler from './service/handlers/cli-handler';
+import * as kvCliHandler from './service/handlers/edgekv-cli-handler';
+import * as httpEdge from './service/edgeworkers-http'
+import * as edgeWorkersClientSvc from './service/edgeworkers/client-manager';
 const pkginfo = require('../package.json');
 var program = require('commander');
-const groupColumnsToKeep = ["groupId", "groupName", "capabilities"];
-const idColumnsToKeep = ["edgeWorkerId", "name", "groupId"];
-const versionColumnsToKeep = ["edgeWorkerId", "version", "checksum", "createdBy", "createdTime", "sequenceNumber"];
-const activationColumnsToKeep = ["edgeWorkerId", "version", "activationId", "status", "network", "createdBy", "createdTime"];
-const errorColumnsToKeep = ["type", "message"];
 const copywrite = '\nCopyright (c) 2019-2020 Akamai Technologies, Inc. Licensed under Apache 2 license.\nYour use of Akamai\'s products and services is subject to the terms and provisions outlined in Akamai\'s legal policies.\nVisit http://github.com/akamai/cli-edgeworkers for detailed documentation';
 
 /* ========== EdgeWorkers CLI Program Commands ========== */
@@ -38,7 +32,7 @@ program
     edgeWorkersClientSvc.setJSONOutputPath(path);
   })
   .on("option:accountkey", function (key) {
-    edgeWorkersSvc.setAccountKey(key);
+    httpEdge.setAccountKey(key);
   })
   // this fires only when a command is not listed below with a custom action
   .on('command:*', function (command) {
@@ -62,7 +56,7 @@ program
     else {
       var command = (!!program.commands.find(c => c._name == arg)) ? program.commands.find(c => c._name == arg) : program.commands.find(c => c._alias == arg);
       if (!command) {
-        cliUtils.logAndExit(1,`ERROR: Could not find a command for ${arg}`);
+        cliUtils.logAndExit(1, `ERROR: Could not find a command for ${arg}`);
       }
       else {
         command.outputHelp();
@@ -79,9 +73,9 @@ program
   .alias("lg")
   .action(async function (groupId) {
     try {
-      await cliHelpers.showGroupOverview(groupId);
+      await cliHandler.showGroupOverview(groupId);
     } catch (e) {
-        cliUtils.logAndExit(1, e);
+      cliUtils.logAndExit(1, e);
     }
   })
   .on("--help", function () {
@@ -95,9 +89,9 @@ program
   .option("--groupId <groupId>", "Filter EdgeWorker Id list by Permission Group")
   .action(async function (ewId, options) {
     try {
-      await cliHelpers.showEdgeWorkerIdOverview(ewId, options.groupId);
+      await cliHandler.showEdgeWorkerIdOverview(ewId, options.groupId);
     } catch (e) {
-        cliUtils.logAndExit(1, e);
+      cliUtils.logAndExit(1, e);
     }
   })
   .on("--help", function () {
@@ -110,9 +104,9 @@ program
   .alias("create-id")
   .action(async function (groupId, name) {
     try {
-      await cliHelpers.createEdgeWorkerId(groupId, name);
+      await cliHandler.createEdgeWorkerId(groupId, name);
     } catch (e) {
-        cliUtils.logAndExit(1, e);
+      cliUtils.logAndExit(1, e);
     }
   })
   .on("--help", function () {
@@ -125,9 +119,9 @@ program
   .alias("ui")
   .action(async function (ewId, groupId, name) {
     try {
-      await cliHelpers.updateEdgeWorkerInfo(ewId, groupId, name);
+      await cliHandler.updateEdgeWorkerInfo(ewId, groupId, name);
     } catch (e) {
-        cliUtils.logAndExit(1, e);
+      cliUtils.logAndExit(1, e);
     }
   })
   .on("--help", function () {
@@ -140,9 +134,9 @@ program
   .alias("lv")
   .action(async function (ewId, versionId) {
     try {
-      await cliHelpers.showEdgeWorkerIdVersionOverview(ewId, { versionId: versionId, showResult: true });
+      await cliHandler.showEdgeWorkerIdVersionOverview(ewId, { versionId: versionId, showResult: true });
     } catch (e) {
-        cliUtils.logAndExit(1, e);
+      cliUtils.logAndExit(1, e);
     }
   })
   .on("--help", function () {
@@ -162,9 +156,9 @@ program
       cliUtils.logAndExit(1, "ERROR: You must provide the EdgeWorkers bundle tgz (--bundle) OR the working directory for mainjs and manifest file (--codeDir) to create a new version!");
 
     try {
-      await cliHelpers.createNewVersion(ewId, options);
+      await cliHandler.createNewVersion(ewId, options);
     } catch (e) {
-        cliUtils.logAndExit(1, e);
+      cliUtils.logAndExit(1, e);
     }
   })
   .on("--help", function () {
@@ -178,9 +172,9 @@ program
   .option("--downloadPath <downloadPath>", "Path to store downloaded bundle file; defaults to CLI home directory if not provided")
   .action(async function (ewId, versionId, options) {
     try {
-      await cliHelpers.downloadTarball(ewId, versionId, options.downloadPath);
+      await cliHandler.downloadTarball(ewId, versionId, options.downloadPath);
     } catch (e) {
-        cliUtils.logAndExit(1, e);
+      cliUtils.logAndExit(1, e);
     }
   })
   .on("--help", function () {
@@ -199,9 +193,9 @@ program
     if (options.versionId && options.activationId)
       cliUtils.logAndExit(1, "ERROR: You may not provide both the Version and the Activation identifiers!");
     try {
-      await cliHelpers.showEdgeWorkerActivationOverview(ewId, options);
+      await cliHandler.showEdgeWorkerActivationOverview(ewId, options);
     } catch (e) {
-        cliUtils.logAndExit(1, e);
+      cliUtils.logAndExit(1, e);
     }
   })
   .on("--help", function () {
@@ -218,9 +212,9 @@ program
     if (network.toUpperCase() !== 'STAGING' && network.toUpperCase() !== 'PRODUCTION')
       cliUtils.logAndExit(1, `ERROR: Network parameter must be either STAGING or PRODUCTION - was: ${network}`);
     try {
-      await cliHelpers.createNewActivation(ewId, network.toUpperCase(), versionId);
+      await cliHandler.createNewActivation(ewId, network.toUpperCase(), versionId);
     } catch (e) {
-        cliUtils.logAndExit(1, e);
+      cliUtils.logAndExit(1, e);
     }
   })
   .on("--help", function () {
@@ -234,9 +228,9 @@ program
   .action(async function (bundlePath) {
 
     try {
-      await cliHelpers.validateNewVersion(bundlePath);
+      await cliHandler.validateNewVersion(bundlePath);
     } catch (e) {
-        cliUtils.logAndExit(1, e);
+      cliUtils.logAndExit(1, e);
     }
   })
   .on("--help", function () {
@@ -250,10 +244,13 @@ program
   .action(async function () {
     let length = 32;
     try {
-      await cliHelpers.generateRandomSecretKey(length);
+      await cliHandler.generateRandomSecretKey(length);
     } catch (e) {
-        cliUtils.logAndExit(1, e);
+      cliUtils.logAndExit(1, e);
     }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
   });
 
 program
@@ -269,47 +266,94 @@ exclusive to the --acl option; only use one or the other.")
   .option("--expiry <expiry>", "The number of minutes during which the token is valid, after which it expires. Max value is 60 minutes; default value is 15 minutes.")
   .action(async function (secretKey, options) {
 
-    if(!secretKey) {
+    if (!secretKey) {
       cliUtils.logAndExit(1, "ERROR: The secret key specified in the property in which the EdgeWorker executes must be supplied in order to generate an authentication token.");
-    } else if(secretKey.length < 64) {
+    } else if (secretKey.length < 64) {
       cliUtils.logAndExit(1, "ERROR: The secret key specified in the property in which the EdgeWorker executes must have at least 64 characters.");
-    } else if(secretKey.length % 2 != 0) {
+    } else if (secretKey.length % 2 != 0) {
       cliUtils.logAndExit(1, "ERROR: The secret key specified in the property in which the EdgeWorker executes must have an even number of hex characters.");
-    } else if(!secretKey.match(/^[0-9a-fA-F]+$/)) {
+    } else if (!secretKey.match(/^[0-9a-fA-F]+$/)) {
       cliUtils.logAndExit(1, "ERROR: The secret key specified in the property in which the EdgeWorker executes must contain only hex characters: [0-9a-f]");
     } else {
       secretKey = secretKey.toLowerCase();
     }
 
     var expiry = 15; // Use 15 minutes as the default value
-    if(options.expiry) {
+    if (options.expiry) {
       expiry = parseInt(options.expiry);
-      if(isNaN(expiry)) {
+      if (isNaN(expiry)) {
         cliUtils.logAndExit(1, "ERROR: The expiry is invalid. It must be an integer value (in minutes) representing the duration of the validity of the token.");
-      } else if(expiry < 1 || expiry > 60) {
+      } else if (expiry < 1 || expiry > 60) {
         cliUtils.logAndExit(1, "ERROR: The expiry is invalid. It must be an integer value (in minutes) between 1 and 60.");
       }
     }
 
     var path = "/*";
     var isACL = true;
-    if(options.acl) {
-      if(options.url) {
+    if (options.acl) {
+      if (options.url) {
         cliUtils.logAndExit(1, "ERROR: The --acl and --url parameters are mutually exclusive; please use only one parameter. Specifying neither will result in a \
 default value for the --acl parameter being used." );
       } else {
         path = options.acl;
         isACL = true;
       }
-    } else if(options.url) {
+    } else if (options.url) {
       path = options.url;
       isACL = false;
     }
 
     try {
-      await cliHelpers.createAuthToken(secretKey, path, expiry, isACL);
+      await cliHandler.createAuthToken(secretKey, path, expiry, isACL);
     } catch (e) {
-        cliUtils.logAndExit(1, e);
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+/* ========== Edge KV CLI Program Commands ========== */
+
+program
+  .command("list-namespaces <network>")
+  .description("List all the namespaces")
+  .alias("listns")
+  .action(async function (network) {
+    try {
+      await kvCliHandler.listNameSpaces(network);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+program
+  .command("create-namespace <network> <namespace>")
+  .description("Creates an EdgeKV namespace")
+  .alias("createns")
+  .action(async function (network, namespace) {
+    try {
+      await kvCliHandler.createNamespace(network, namespace);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+program
+  .command("get-namespace <network> <namespace>")
+  .description("Retrieves an EdgeKV namespace")
+  .alias("getns")
+  .action(async function (network, namespace) {
+    try {
+      await kvCliHandler.getNameSpace(network, namespace);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
     }
   })
   .on("--help", function () {
@@ -322,8 +366,8 @@ if (envUtils.getNodeVersion() < 7) {
   cliUtils.logAndExit(1, "ERROR: The Akamai EdgeWorkers CLI requires Node 7.0.0 or newer.");
 }
 
-if(program.args.length === 0) {
-  program.outputHelp(function(text){
+if (program.args.length === 0) {
+  program.outputHelp(function (text) {
     console.log(text);
     console.log(copywrite);
     cliUtils.logAndExit(1, "ERROR: No commands were provided.");
