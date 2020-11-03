@@ -17,7 +17,6 @@ To use this tool you need:
 Use the following Akamai CLI command to install the latest EdgeWorkers CLI package:
 
 `akamai install edgeworkers`
-___
 
 ## Overview of Commands
 EdgeWorkers CLI enables you to manage EdgeWorkers functions by calling the [EdgeWorkers API](https://developer.akamai.com/api/web_performance/edgeworkers/v1.html).
@@ -293,7 +292,6 @@ Generates a random secret key that can be used to create edgeworkers authenticat
 
 Usage: `akamai edgeworkers generate-secret`
 
-___
 ## Resources
 For more information on EdgeWorkers, refer to the following resources:
 * [EdgeWorkers Developer Page](https://developer.akamai.com/edgeworkers)
