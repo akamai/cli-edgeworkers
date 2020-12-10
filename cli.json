@@ -8,6 +8,12 @@
       "version": "0.4.1",
       "aliases": ["ew", "edgeworkers"],
       "description": "Manage Akamai EdgeWorkers code bundles."
+    },
+    {
+      "name": "edgekv",
+      "version": "0.4.1",
+      "aliases": ["ekv", "edgekv"],
+      "description": "Manage Akamai EdgeKV code bundles."
     }
   ]
 }

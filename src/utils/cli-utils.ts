@@ -1,10 +1,10 @@
-import * as edgeWorkersClientSvc from '../service/edgeworkers/client-manager';
+import * as edgeWorkersClientSvc from '../edgeworkers/client-manager';
 const inquirer = require('inquirer');
 const Spinner = require('cli-spinner').Spinner;
 
 export function logWithBorder(str, type = 'log') {
   var t: string = `--- ${str} ---`;
-  var border = Array(t.length).fill('-').join('');
+  var border = getBorder(t);
   log(border, type);
   log(t, type);
   log(border, type);
@@ -95,3 +95,9 @@ export async function progress(func, userMsg: string = '') {
     }
   }
 }
+
+export function getBorder(text: string) {
+  return Array(text.length).fill('-').join('');
+}
+
+
