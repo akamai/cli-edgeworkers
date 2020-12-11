@@ -1,7 +1,6 @@
 // temporary solution to parse error until edgeKV team comes up with proper design
 export function handleError(err) {
     err = JSON.parse(err);
-    
     // this is sent by edgeKV
     if (err.hasOwnProperty("errors")) {
         let errors = err["errors"];

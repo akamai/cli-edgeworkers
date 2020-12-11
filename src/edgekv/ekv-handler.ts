@@ -110,9 +110,7 @@ export async function writeItemToEdgeKV(environment: string, nameSpace: string, 
   }
   else if (itemType == "file") {
     ekvhelper.validateInputFile(items);
-
     let createdItem = await edgekvSvc.writeItemsFromFile(environment, nameSpace, groupId, itemId, items);
-    console.log(createdItem.statusCode);
     if (createdItem) {
       cliUtils.logWithBorder(msg);
     }
@@ -198,7 +196,7 @@ export async function createToken(tokenName: string, options: { save_path?: stri
 
       // if tar bundle does not exist in the specified location
       if(!ekvhelper.checkIfFileExists(options.save_path)) {
-        cliUtils.logWithBorder(`Tar bundle not found in the specified location. Add the token in file edgekv_tokens.js and place it in your tar bundle`);
+        cliUtils.logWithBorder(`ERROR: Tar bundle not found in the specified location. Add the token in file edgekv_tokens.js and place it in your tar bundle`);
         response.logToken(createdToken["name"], createdToken["value"], decodedToken, nameSpaceList, false);
         process.exit(1);
       }
@@ -218,8 +216,16 @@ export async function createToken(tokenName: string, options: { save_path?: stri
             data += chunk;
             let tokenList = data.split("=");
 
-            tokenList[1] = tokenList[1].replace("export { edgekv_access_tokens };","");
-            // .replace("\n","");    
+            if(tokenList.length == 0){
+              cliUtils.logWithBorder(1, "ERROR : Not a valid EdgeKV Access Token file (missing 'edgekv_access_tokens' var assignment)!");
+              response.logToken(createdToken["name"], createdToken["value"], decodedToken, nameSpaceList, false);
+              process.exit(1);
+            }  
+
+            tokenList[1] = tokenList[1].replace('}export', '} export').replace('export{', 'export {')
+            .replace('{edgekv_access_tokens', '{ edgekv_access_tokens').replace('edgekv_access_tokens}', 'edgekv_access_tokens }')
+            .replace("export { edgekv_access_tokens };","");
+
             tokenContent = JSON.parse(tokenList[1]);
             
             for (let ns of nameSpaceList) {
@@ -246,7 +252,7 @@ export async function createToken(tokenName: string, options: { save_path?: stri
                     process.exit(1);
                   }
                 } else {
-                  cliUtils.logWithBorder(`Token ${createdToken["name"]} for namespace ${ns} not found in the file`);
+                  cliUtils.logWithBorder(`ERROR: Token ${createdToken["name"]} for namespace ${ns} not found in the file`);
                   process.exit(1);
                 }
               }

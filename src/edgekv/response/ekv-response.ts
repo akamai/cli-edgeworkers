@@ -22,9 +22,9 @@ export function logInitialize(initializedEdgekv) {
 export function logToken(tokenName: string, tokenValue, decodedToken, nameSpaceList, savePath:boolean) {
     const shortMnthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     let weekday = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    let env = decodedToken["env"];
     let expiryDate = ekvhelper.convertTokenDate(decodedToken['exp']);
     let issueDate = ekvhelper.convertTokenDate(decodedToken['iat'])
+    let env = decodedToken["env"];
     let staging = false;
     let production = false;
     env.forEach(function(value) {
@@ -55,14 +55,11 @@ export function logToken(tokenName: string, tokenValue, decodedToken, nameSpaceL
         let permission = decodedToken[ns];
             let permissionList = [];
             let namespace = ns.split("-");
-
             permission.forEach(function(value) {
                 permissionList.push(permissions[value]);
-                
-            })
+            });
             console.log('  '+ namespace[1]+':  [' + permissionList+']');
-    }
-    
+    }    
 }
 
 export function getNameSpaceFromToken(decodedToken) {
