@@ -1,5 +1,5 @@
 import * as httpEdge from '../cli-httpRequest';
-import * as error from '../edgekv/ekv-error';
+import * as error from './ekv-error';
 import * as fs from 'fs';
 
 const EDGEKV_API_BASE = '/edgekv/v1';

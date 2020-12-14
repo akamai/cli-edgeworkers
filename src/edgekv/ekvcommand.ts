@@ -72,7 +72,7 @@ program
     cliUtils.logAndExit(0, copywrite);
   });
 
-// the following are created as sub commands since commander does not support space
+/* ========== The following are created as sub commands since commander does not support space  ========== */
 
 const read = program.command('read');
 
@@ -113,7 +113,7 @@ const list = program.command('list')
   .description("List all the namespaces or list all items with in a group");
 
 list
-  .command("ns <environment>") // adding ns as param since we want space and commander is not supporting commands with space
+  .command("ns <environment>")
   .description("List all the namespaces")
   .action(async function (environment) {
     try {
@@ -148,7 +148,7 @@ const create = program.command('create')
   });
 
 create
-  .command("ns <environment> <namespace>") // adding ns as param since we want space and commander is not supporting commands with space
+  .command("ns <environment> <namespace>")
   .description("Creates an EdgeKV namespace")
   .alias("createns")
   .action(async function (environment, namespace) {
