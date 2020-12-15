@@ -40,41 +40,7 @@ export function convertRetentionPeriod(seconds) {
     return result;
 }
 
-function validateNameSpace(namespace: string) {
-    let regex: RegExp = /^[a-zA-Z0-9_-]{1,32}$/;
-    let validateNs = validateString(regex, namespace, "NameSpace");
-    if (validateNs != undefined && !validateNs.isValid) {
-        cliUtils.logAndExit(1, validateNs.error_reason);
-    }
-}
-
-function validateGroup(group: string) {
-    let regex: RegExp = /^[a-zA-Z0-9_-]{1,128}$/;
-    let validateGroup = validateString(regex, group, "Group");
-    if (validateGroup != undefined && !validateGroup.isValid) {
-        cliUtils.logAndExit(1, validateGroup.error_reason);
-    }
-}
-
-function validateItemKey(itemKey: string) {
-    let regex: RegExp = /^[a-zA-Z0-9_-]{1,512}$/;
-    let validateItemKey = validateString(regex, itemKey, "ItemKey");
-    if (validateItemKey != undefined && !validateItemKey.isValid) {
-        cliUtils.logAndExit(1, validateItemKey.error_reason);
-    }
-}
-
-function validateString(regex: RegExp, input: string, errorFieldName: string) {
-    if (!regex.test(input)) {
-        return {
-            isValid: false,
-            version: undefined,
-            error_reason: `ERROR: ${errorFieldName} contains invalid characters. ${errorFieldName} must contain only characters: [0-9a-zA-Z_-]`
-        }
-    }
-}
-
-function validateNetwork(network: string) {
+export function validateNetwork(network: string) {
     if (network.toUpperCase() !== 'STAGING' && network.toUpperCase() !== 'PRODUCTION') {
         cliUtils.logAndExit(1, `ERROR: Environment parameter must be either STAGING or PRODUCTION - was: ${network}`);
     }
@@ -90,15 +56,6 @@ function validateNetwork(network: string) {
 export function validateInputParams(network: string, namespace?: string, group?: string, item?: string) {
     if (typeof network != 'undefined') {
         validateNetwork(network);
-    }
-    if (typeof namespace != 'undefined') {
-        validateNameSpace(namespace)
-    }
-    if (typeof group != 'undefined') {
-        validateGroup(group);
-    }
-    if (typeof item != 'undefined') {
-        validateItemKey(item);
     }
 }
 

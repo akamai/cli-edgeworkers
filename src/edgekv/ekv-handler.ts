@@ -4,8 +4,8 @@ import * as response from './ekv-response';
 import * as ekvhelper from './ekv-helper';
 
 export async function listNameSpaces(environment: string) {
-  ekvhelper.validateInputParams(environment);
-  let nameSpaceList = await edgekvSvc.getNameSpaceList(environment);
+  ekvhelper.validateNetwork(environment);
+  let nameSpaceList = await cliUtils.spinner(edgekvSvc.getNameSpaceList(environment), "Fetching namespace list...");
   if (nameSpaceList != 'undefined' && !nameSpaceList.isError) {
     let nsListResp = [];
     if (nameSpaceList.hasOwnProperty("namespaces")) {
@@ -22,9 +22,10 @@ export async function listNameSpaces(environment: string) {
 }
 
 export async function createNamespace(environment: string, nameSpace: string) {
-  ekvhelper.validateInputParams(environment, nameSpace);
+  ekvhelper.validateNetwork(environment);
   let msg = `Namespace ${nameSpace} has been created successfully on the ${environment} environment`
-  let createdNamespace = await edgekvSvc.createNameSpace(environment, nameSpace);
+  // let createdNamespace = await edgekvSvc.createNameSpace(environment, nameSpace);
+  let createdNamespace = await cliUtils.spinner(edgekvSvc.createNameSpace(environment, nameSpace), `Creating namespace for environment ${environment}`);
   if (createdNamespace != 'undefined' && !createdNamespace.isError) {
     cliUtils.logWithBorder(msg);
     response.logNamespace(nameSpace, createdNamespace);
@@ -35,9 +36,9 @@ export async function createNamespace(environment: string, nameSpace: string) {
 }
 
 export async function getNameSpace(environment: string, nameSpace: string) {
-  ekvhelper.validateInputParams(environment, nameSpace);
+  ekvhelper.validateNetwork(environment);
   let msg = `Namespace ${nameSpace} was successfully retrieved for the ${environment} environment`
-  let createdNamespace = await edgekvSvc.getNameSpace(environment, nameSpace);
+  let createdNamespace = await cliUtils.spinner(edgekvSvc.getNameSpace(environment, nameSpace), `Fetching namespace for id ${nameSpace}`);
   if (createdNamespace != 'undefined' && !createdNamespace.isError) {
     cliUtils.logWithBorder(msg);
     response.logNamespace(nameSpace, createdNamespace);
@@ -47,7 +48,7 @@ export async function getNameSpace(environment: string, nameSpace: string) {
 }
 
 export async function initializeEdgeKv() {
-  let initializedEdgeKv = await edgekvSvc.initializeEdgeKV();
+  let initializedEdgeKv = await cliUtils.spinner(edgekvSvc.initializeEdgeKV(), "Initializing EdgeKV ...");
 
   if (initializedEdgeKv != 'undefined' && !initializedEdgeKv.isError) {
     if (initializedEdgeKv.hasOwnProperty("account_status")) {
@@ -89,7 +90,7 @@ export async function getInitializationStatus() {
 }
 
 export async function writeItemToEdgeKV(environment: string, nameSpace: string, groupId: string, itemId: string, items, itemType: string) {
-  ekvhelper.validateInputParams(environment, nameSpace, groupId, itemId);
+  ekvhelper.validateNetwork(environment);
   let msg = `Item ${itemId} was successfully created into the environment: ${environment}, namespace: ${nameSpace} and groupid: ${groupId}`
   if (itemType == "text") {
     if (cliUtils.isJSON(items)) {
@@ -107,13 +108,13 @@ export async function writeItemToEdgeKV(environment: string, nameSpace: string, 
       cliUtils.logWithBorder(msg);
     }
   } else {
-    cliUtils.logAndExit(1, `ERROR: Unable to write item to EdgeKV. Use 'text' or 'jsonfile' as `)
+    cliUtils.logAndExit(1, "ERROR: Unable to write item to EdgeKV. Use 'text' or 'jsonfile' as item type.")
   }
 }
 
 export async function readItemFromEdgeKV(environment: string, nameSpace: string, groupId: string, itemId: string) {
 
-  ekvhelper.validateInputParams(environment, nameSpace, groupId, itemId);
+  ekvhelper.validateNetwork(environment);
 
   let item = await edgekvSvc.readItem(environment, nameSpace, groupId, itemId);
   if (item != 'undefined' && !item.isError) {
@@ -132,7 +133,7 @@ export async function readItemFromEdgeKV(environment: string, nameSpace: string,
 }
 
 export async function deleteItemFromEdgeKV(environment: string, nameSpace: string, groupId: string, itemId: string) {
-  ekvhelper.validateInputParams(environment, nameSpace, groupId, itemId);
+  ekvhelper.validateNetwork(environment);
   let deletedItem = await edgekvSvc.deleteItem(environment, nameSpace, groupId, itemId);
   if (deletedItem != 'undefined' && !deletedItem.isError) {
     let msg = `Item ${itemId} was successfully marked for deletion from group ${groupId}, namespace ${nameSpace} and environment ${environment}`
@@ -143,7 +144,7 @@ export async function deleteItemFromEdgeKV(environment: string, nameSpace: strin
 }
 
 export async function listItemsFromGroup(environment: string, nameSpace: string, groupId: string) {
-  ekvhelper.validateInputParams(environment, nameSpace, groupId);
+  ekvhelper.validateNetwork(environment);
   let itemsList = await edgekvSvc.getItemsFromGroup(environment, nameSpace, groupId);
   if (itemsList != 'undefined' && !itemsList.isError) {
 

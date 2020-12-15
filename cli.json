@@ -5,13 +5,13 @@
   "commands": [
     {
       "name": "edgeworkers",
-      "version": "0.4.1",
+      "version": "0.5.0",
       "aliases": ["ew", "edgeworkers"],
       "description": "Manage Akamai EdgeWorkers code bundles."
     },
     {
       "name": "edgekv",
-      "version": "0.4.1",
+      "version": "0.5.0",
       "aliases": ["ekv", "edgekv"],
       "description": "Manage Akamai EdgeKV code bundles."
     }
