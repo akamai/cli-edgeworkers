@@ -100,12 +100,14 @@ export async function writeItemToEdgeKV(environment: string, nameSpace: string, 
       cliUtils.logWithBorder(msg);
     }
   }
-  else if (itemType == "file") {
+  else if (itemType == "jsonfile") {
     ekvhelper.validateInputFile(items);
     let createdItem = await edgekvSvc.writeItemsFromFile(environment, nameSpace, groupId, itemId, items);
     if (createdItem) {
       cliUtils.logWithBorder(msg);
     }
+  } else {
+    cliUtils.logAndExit(1, `ERROR: Unable to write item to EdgeKV. Use 'text' or 'jsonfile' as `)
   }
 }
 

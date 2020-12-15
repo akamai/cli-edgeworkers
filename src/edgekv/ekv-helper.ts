@@ -15,6 +15,10 @@ const tkn_export = "\n}\nexport { edgekv_access_tokens };"
  * @param seconds 
  */
 export function convertRetentionPeriod(seconds) {
+    if(seconds == 0) {
+        return "Indefinite";
+    }
+
     let days = Math.floor(seconds / 86400); // converting seconds to days
     let y = 365;
     let m = 30;
@@ -195,7 +199,7 @@ export function saveTokenToBundle(savePath, overWrite, createdToken, decodedToke
                 let tokenList = data.split("=");
 
                 if (tokenList.length == 0) {
-                    cliUtils.logWithBorder(1, "ERROR : Not a valid EdgeKV Access Token file (missing 'edgekv_access_tokens' var assignment)!");
+                    cliUtils.logWithBorder("ERROR : Not a valid EdgeKV Access Token file (missing 'edgekv_access_tokens' var assignment)!");
                     response.logToken(createdToken["name"], createdToken["value"], decodedToken, nameSpaceList, false);
                     process.exit(1);
                 }
@@ -205,7 +209,13 @@ export function saveTokenToBundle(savePath, overWrite, createdToken, decodedToke
                     .replace("export { edgekv_access_tokens };", "");
 
                 // token content from the existing file
-                tokenContent = JSON.parse(tokenList[1]);
+                try {
+                    tokenContent = JSON.parse(tokenList[1]);
+                } catch(ex) {
+                    cliUtils.logWithBorder(`ERROR: Not a valid EdgeKV access token file. Delete or re-create the edgekv token file. ${ex}`);
+                    response.logToken(createdToken["name"], createdToken["value"], decodedToken, nameSpaceList, false);
+                    process.exit(1);
+                }
 
                 for (let ns of nameSpaceList) {
                     // if the namespace/token value does not exist in file add it
