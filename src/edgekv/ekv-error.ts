@@ -14,7 +14,7 @@ export function handleError(err) {
     // additional details is sent by pulsar
     else if (err.hasOwnProperty("additionalDetail")) {
         let additionalDetail = err["additionalDetail"];
-        if(additionalDetail["detail"]!="NO_MESSAGE" && additionalDetail["detail"] != ""){// to work on
+        if(additionalDetail["detail"]!="NO_MESSAGE" && additionalDetail["detail"] != ""){
             return  {
                 isError: true,
                 error_reason: additionalDetail["detail"]

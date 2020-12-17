@@ -14,8 +14,8 @@
   },
   "main": "cli-main.js",
   "bin": {
-    "edgeworkers": "./bin/src/edgeworkers/ewcommand.js",
-    "edgekv": "./bin/src/edgekv/ekvcommand.js"
+    "edgeworkers": "./akamai-edgeworkers",
+    "edgekv": "./akamai-edgekv"
   },
   "dependencies": {
     "cli-spinner": "0.2.8",

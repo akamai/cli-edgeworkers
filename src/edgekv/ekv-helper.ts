@@ -47,19 +47,6 @@ export function validateNetwork(network: string) {
 }
 
 /**
- * Validates network, namespace, group and item key
- * @param network 
- * @param namespace 
- * @param group 
- * @param item 
- */
-export function validateInputParams(network: string, namespace?: string, group?: string, item?: string) {
-    if (typeof network != 'undefined') {
-        validateNetwork(network);
-    }
-}
-
-/**
  * Validates if json file exists in the specified location
  * and validates json content of the file
  * @param items 

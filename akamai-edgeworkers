@@ -1,0 +1,5 @@
+#!/usr/bin/env node
+
+// stub file to kick off compiled app
+// top level CLI needs the file to be started with akamai
+require('./bin/src/edgeworkers/ewcommand.js');
