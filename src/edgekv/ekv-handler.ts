@@ -24,7 +24,6 @@ export async function listNameSpaces(environment: string) {
 export async function createNamespace(environment: string, nameSpace: string) {
   ekvhelper.validateNetwork(environment);
   let msg = `Namespace ${nameSpace} has been created successfully on the ${environment} environment`
-  // let createdNamespace = await edgekvSvc.createNameSpace(environment, nameSpace);
   let createdNamespace = await cliUtils.spinner(edgekvSvc.createNameSpace(environment, nameSpace), `Creating namespace for environment ${environment}`);
   if (createdNamespace != 'undefined' && !createdNamespace.isError) {
     cliUtils.logWithBorder(msg);
@@ -48,7 +47,7 @@ export async function getNameSpace(environment: string, nameSpace: string) {
 }
 
 export async function initializeEdgeKv() {
-  let initializedEdgeKv = await cliUtils.spinner(edgekvSvc.initializeEdgeKV(), "Initializing EdgeKV ...");
+  let initializedEdgeKv = await edgekvSvc.initializeEdgeKV();
 
   if (initializedEdgeKv != 'undefined' && !initializedEdgeKv.isError) {
     if (initializedEdgeKv.hasOwnProperty("account_status")) {
@@ -167,7 +166,7 @@ export async function createToken(tokenName: string, options: { save_path?: stri
   // parse input permissions
   let permissionList = parseNameSpacePermissions(options.namespace);
   let envAccess = { "allow": true, "deny": false };
-  let createdToken = await edgekvSvc.createEdgeKVToken(tokenName, permissionList, envAccess[options.staging], envAccess[options.production], options.ewids, expiry);
+  let createdToken = await cliUtils.spinner(edgekvSvc.createEdgeKVToken(tokenName, permissionList, envAccess[options.staging], envAccess[options.production], options.ewids, expiry),"Creating edgekv token ...");
 
   if (createdToken != 'undefined' && !createdToken.isError) {
     // decodes the jwt token
