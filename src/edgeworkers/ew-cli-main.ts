@@ -41,7 +41,6 @@ program
     }
   })
   .on("--help", function () {
-    console.log("this is coming from me");
     cliUtils.logAndExit(0, copywrite);
   });
 

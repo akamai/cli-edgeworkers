@@ -13,7 +13,7 @@
       "name": "edgekv",
       "version": "0.5.0",
       "aliases": ["ekv", "edgekv"],
-      "description": "Manage Akamai EdgeKV code bundles."
+      "description": "Manage Akamai EdgeKV database."
     }
   ]
 }

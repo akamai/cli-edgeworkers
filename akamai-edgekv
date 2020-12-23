@@ -2,4 +2,4 @@
 
 // stub file to kick off compiled app
 // top level CLI needs the file to be started with akamai
-require('./bin/src/edgekv/ekvcommand.js');
+require('./bin/src/edgekv/ekv-cli-main.js');
