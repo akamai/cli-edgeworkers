@@ -17,7 +17,7 @@
     }
   },
   "include": [
-    "src/**/*", "cli-main.ts"
+    "src/**/*", "index.ts"
   ]
   ,
   "exclude": ["node_modules"]
