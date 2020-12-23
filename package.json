@@ -20,6 +20,7 @@
   "dependencies": {
     "cli-spinner": "0.2.8",
     "commander": "6.2.0",
+    "console.table": "0.10.0",
     "crypto-js": "^4.0.0",
     "edgegrid": "^3.0.8",
     "inquirer": "6.2.0",
