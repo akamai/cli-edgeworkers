@@ -74,7 +74,8 @@ program
 
 /* ========== The following are created as sub commands since commander does not support space  ========== */
 
-const read = program.command('read');
+const read = program.command('read')
+  .description("Read an item from an EdgeKV Namespace");
 
 read
   .command("item <environment> <namespace> <groupId> <itemId>")
@@ -91,7 +92,9 @@ read
     cliUtils.logAndExit(0, copywrite);
   });
 
-const del = program.command('delete');
+const del = program.command('delete')
+  .alias("del")
+  .description("Delete an item from an EdgeKV Namespace");
 
 del
   .command("item <environment> <namespace> <groupId> <itemId>")
@@ -110,7 +113,7 @@ del
 
 const list = program.command('list')
   .alias("l")
-  .description("List all the namespaces or list all items with in a group");
+  .description("List all the namespaces or list all items with in a group. Use list -h to see available options");
 
 list
   .command("ns <environment>")
@@ -150,7 +153,6 @@ const create = program.command('create')
 create
   .command("ns <environment> <namespace>")
   .description("Creates an EdgeKV namespace")
-  .alias("createns")
   .action(async function (environment, namespace) {
     try {
       await kvCliHandler.createNamespace(environment, namespace);
@@ -186,6 +188,7 @@ create
 
 
 const show = program.command('show')
+.description("Check the initialization status of the EdgeKV or Retrieve an EdgeKV namespace. Use show -h to see available options")
 show
   .command("status")
   .description("Check the initialization status of the edgeKV")

@@ -91,23 +91,24 @@ export async function getInitializationStatus() {
 export async function writeItemToEdgeKV(environment: string, nameSpace: string, groupId: string, itemId: string, items, itemType: string) {
   ekvhelper.validateNetwork(environment);
   let msg = `Item ${itemId} was successfully created into the environment: ${environment}, namespace: ${nameSpace} and groupid: ${groupId}`
+  let createdItem: any;
   if (itemType == "text") {
     if (cliUtils.isJSON(items)) {
       items = JSON.parse(items);
     }
-    let createdItem = await edgekvSvc.writeItems(environment, nameSpace, groupId, itemId, items);
-    if (createdItem) {
-      cliUtils.logWithBorder(msg);
-    }
+    createdItem = await edgekvSvc.writeItems(environment, nameSpace, groupId, itemId, items);
   }
   else if (itemType == "jsonfile") {
     ekvhelper.validateInputFile(items);
-    let createdItem = await edgekvSvc.writeItemsFromFile(environment, nameSpace, groupId, itemId, items);
-    if (createdItem) {
-      cliUtils.logWithBorder(msg);
-    }
+    createdItem = await edgekvSvc.writeItemsFromFile(environment, nameSpace, groupId, itemId, items);
   } else {
     cliUtils.logAndExit(1, "ERROR: Unable to write item to EdgeKV. Use 'text' or 'jsonfile' as item type.")
+  }
+  
+  if (createdItem!= 'undefined' && !createdItem.isError){
+    cliUtils.logWithBorder(msg);
+  } else {
+    cliUtils.logAndExit(1, `ERROR: Unable to write item to EdgeKV. ${createdItem.error_reason}`)
   }
 }
 
