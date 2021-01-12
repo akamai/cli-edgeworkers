@@ -1,11 +1,10 @@
 #!/usr/bin/env node
-import * as envUtils from './utils/env-utils';
-import * as cliUtils from './utils/cli-utils';
-import * as cliHandler from './service/handlers/cli-handler';
-import * as kvCliHandler from './service/handlers/edgekv-cli-handler';
-import * as httpEdge from './service/edgeworkers-http'
-import * as edgeWorkersClientSvc from './service/edgeworkers/client-manager';
-const pkginfo = require('../package.json');
+import * as envUtils from '../utils/env-utils';
+import * as cliUtils from '../utils/cli-utils';
+import * as cliHandler from './ew-handler';
+import * as httpEdge from '../cli-httpRequest'
+import * as edgeWorkersClientSvc from './client-manager';
+import * as pkginfo from '../../package.json';
 var program = require('commander');
 const copywrite = '\nCopyright (c) 2019-2020 Akamai Technologies, Inc. Licensed under Apache 2 license.\nYour use of Akamai\'s products and services is subject to the terms and provisions outlined in Akamai\'s legal policies.\nVisit http://github.com/akamai/cli-edgeworkers for detailed documentation';
 
@@ -313,52 +312,6 @@ default value for the --acl parameter being used." );
     cliUtils.logAndExit(0, copywrite);
   });
 
-/* ========== Edge KV CLI Program Commands ========== */
-
-program
-  .command("list-namespaces <network>")
-  .description("List all the namespaces")
-  .alias("listns")
-  .action(async function (network) {
-    try {
-      await kvCliHandler.listNameSpaces(network);
-    } catch (e) {
-      cliUtils.logAndExit(1, e);
-    }
-  })
-  .on("--help", function () {
-    cliUtils.logAndExit(0, copywrite);
-  });
-
-program
-  .command("create-namespace <network> <namespace>")
-  .description("Creates an EdgeKV namespace")
-  .alias("createns")
-  .action(async function (network, namespace) {
-    try {
-      await kvCliHandler.createNamespace(network, namespace);
-    } catch (e) {
-      cliUtils.logAndExit(1, e);
-    }
-  })
-  .on("--help", function () {
-    cliUtils.logAndExit(0, copywrite);
-  });
-
-program
-  .command("get-namespace <network> <namespace>")
-  .description("Retrieves an EdgeKV namespace")
-  .alias("getns")
-  .action(async function (network, namespace) {
-    try {
-      await kvCliHandler.getNameSpace(network, namespace);
-    } catch (e) {
-      cliUtils.logAndExit(1, e);
-    }
-  })
-  .on("--help", function () {
-    cliUtils.logAndExit(0, copywrite);
-  });
 
 program.parse(process.argv);
 

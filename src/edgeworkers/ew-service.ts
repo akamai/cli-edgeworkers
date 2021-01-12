@@ -1,6 +1,6 @@
-import * as envUtils from '../../utils/env-utils';
-import * as cliUtils from '../../utils/cli-utils';
-import * as httpEdge from '../edgeworkers-http'
+import * as envUtils from '../utils/env-utils';
+import * as cliUtils from '../utils/cli-utils';
+import * as httpEdge from '../cli-httpRequest'
 import * as fs from 'fs';
 
 var accountKey: string = null;
@@ -38,7 +38,7 @@ function fetchTarball(pth: string, method: string, body, headers, downloadPath: 
           if (contentType.indexOf('gzip') > -1) {
             const buffer = Buffer.from(body, 'utf8');
             fs.writeFileSync(downloadPath, buffer);
-            resolve({ state: true });
+            resolve({state: true});
           }
           else {
             // this shouldn't happen unless Version API changes content-types to non-tarball format

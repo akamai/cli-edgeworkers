@@ -1,6 +1,6 @@
 {
   "name": "akamai-edgeworkers-cli",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "A tool that makes it easier to manage Akamai EdgeWorkers function bundles. Call the EdgeWorkers API from the command line.",
   "repository": "https://github.com/akamai/cli-edgeworkers",
   "scripts": {
@@ -12,26 +12,29 @@
   "engines": {
     "node": ">=7.0.0"
   },
-  "main": "./akamai-edgeworkers",
+  "main": "index.js",
   "bin": {
-    "edgeworkers": "./akamai-edgeworkers"
+    "edgeworkers": "./akamai-edgeworkers",
+    "edgekv": "./akamai-edgekv"
   },
   "dependencies": {
     "cli-spinner": "0.2.8",
-    "commander": "2.18.0",
+    "commander": "6.2.0",
     "console.table": "0.10.0",
     "crypto-js": "^4.0.0",
     "edgegrid": "^3.0.8",
     "inquirer": "6.2.0",
+    "jwt-decode": "^3.1.2",
     "sha256-file": "^1.0.0",
     "tar": "^4.4.11",
+    "tar-stream": "^2.1.4",
     "untildify": "3.0.3"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.138",
     "@types/node": "^9.6.52",
     "@types/request": "^2.48.3",
-    "typescript": "^2.8.3"
+    "typescript": "^3.5.1"
   },
   "license": "Apache-2.0"
 }

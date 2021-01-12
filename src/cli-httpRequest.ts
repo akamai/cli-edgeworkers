@@ -1,5 +1,5 @@
-import * as envUtils from '../utils/env-utils';
-import * as cliUtils from '../utils/cli-utils';
+import * as envUtils from './utils/env-utils';
+import * as cliUtils from './utils/cli-utils';
 
 var accountKey: string = null;
 
@@ -67,6 +67,10 @@ export function putJson(path: string, body) {
 
 export function getJson(path: string) {
     return sendEdgeRequest(path, 'GET', '', {});
+}
+
+export function deleteReq(path: string) {
+    return sendEdgeRequest(path, 'DELETE', '', {});
 }
 
 export function isOkStatus(code) {
