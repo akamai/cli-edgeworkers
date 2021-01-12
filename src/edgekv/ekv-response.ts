@@ -54,11 +54,10 @@ export function logToken(tokenName: string, tokenValue, decodedToken, nameSpaceL
     for (let ns of nameSpaceList) {
         let permission = decodedToken[ns];
             let permissionList = [];
-            let namespace = ns.split("-");
             permission.forEach(function(value) {
                 permissionList.push(permissions[value]);
             });
-            console.log('  '+ namespace[1]+':  [' + permissionList+']');
+            console.log('  '+ ns.substring(ns.indexOf('_')+1)+':  [' + permissionList+']');
     }    
 }
 
