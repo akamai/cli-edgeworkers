@@ -3,6 +3,7 @@ import jwt_decode from "jwt-decode";
 import * as response from './ekv-response';
 
 const fs = require('fs');
+var path = require('path')
 const untildify = require('untildify');
 var tar = require('tar-stream')
 var zlib = require('zlib');
@@ -111,6 +112,10 @@ export function checkIfFileExists(filePath) {
     return fs.existsSync(jsFilePath);
 }
 
+export function getFileExtension(filePath) {
+    return path.extname(filePath);
+}
+
 export function saveTokenToBundle(savePath, overWrite, createdToken, decodedToken, nameSpaceList) {
     let tokenContent = [];
     var data = "";
@@ -121,13 +126,19 @@ export function saveTokenToBundle(savePath, overWrite, createdToken, decodedToke
     var pack = tar.pack();
 
     // if tar bundle does not exist in the specified location
-    if (!checkIfFileExists(savePath)) {
+    if (getFileExtension(savePath) != ".tgz" || !checkIfFileExists(savePath)) {
         cliUtils.logWithBorder(`ERROR: Tar bundle not found in the specified location. Add the token in file edgekv_tokens.js and place it in your tar bundle`);
         response.logToken(createdToken["name"], createdToken["value"], decodedToken, nameSpaceList, false);
         process.exit(1);
     }
 
     var oldTarBallStream = fs.createReadStream(savePath);
+    oldTarBallStream.on('error', function(err) {
+        cliUtils.logWithBorder(`ERROR: Unable to read the tar bundle. Add the token in file edgekv_tokens.js and place it in your tar bundle`);
+        response.logToken(createdToken["name"], createdToken["value"], decodedToken, nameSpaceList, false);
+        process.exit(1);
+      });
+
     // because the archive is .tgz we need to gunzip, .pipe extract invokes the extraction
     oldTarBallStream.pipe(zlib.createGunzip()).pipe(extract);
 
