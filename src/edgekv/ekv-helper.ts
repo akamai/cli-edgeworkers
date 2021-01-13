@@ -133,6 +133,7 @@ export function saveTokenToBundle(savePath, overWrite, createdToken, decodedToke
     }
 
     var oldTarBallStream = fs.createReadStream(savePath);
+
     oldTarBallStream.on('error', function(err) {
         cliUtils.logWithBorder(`ERROR: Unable to read the tar bundle. Add the token in file edgekv_tokens.js and place it in your tar bundle`);
         response.logToken(createdToken["name"], createdToken["value"], decodedToken, nameSpaceList, false);
