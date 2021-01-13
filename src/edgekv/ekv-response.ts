@@ -57,7 +57,7 @@ export function logToken(tokenName: string, tokenValue, decodedToken, nameSpaceL
             permission.forEach(function(value) {
                 permissionList.push(permissions[value]);
             });
-            console.log('  '+ ns.substring(ns.indexOf('_')+1)+':  [' + permissionList+']');
+            console.log('  '+ ns.substring(ns.indexOf('-')+1)+':  [' + permissionList+']');
     }    
 }
 
