@@ -1,10 +1,25 @@
 # EdgeKV CLI
+
+* [ Overview ](##overview)
+* [ Available Commands ](##available-commands)
+    * [ Initialize EdgeKV ](###initialize-edgekv)
+    * [ Get Initialization Status](###get-initialization-status)
+    * [ Create Namespace](###create-namespace)
+    * [ Get Namespace](###get-namespace)
+    * [ List Namespace](###list-namespace)
+    * [ Upsert Item](###upsert-item)
+    * [ Read Item](###read-item)
+    * [ Delete Item](###delete-item)
+    * [ List Items](###list-items)
+    * [ Access Token](###access-token)
+* [ Resources](##resources)
+* [ Reporting Issues](##reporting-issues)
+
+## Overview
 The EdgeKV command line interface (CLI) expedites the process of initializing, creating namespace, creating tokens, reading items, writing items and deleting  EdgeKV items on the Akamai Edge network.
 
-___
-
-## Overview of Commands
-EdgeKV CLI enables you to manage EdgeKV functions by calling the [EdgeKV API](https://developer.akamai.com/api/web_performance/edgeworkers/v1.html).
+## Available Commands
+EdgeKV CLI enables you to manage EdgeKV functions by calling the [EdgeKV API](https://github.com/akamai/edgeworkers-examples/tree/master/edgekv/apis).
 
 Conventions:
 * optional args `[]`
