@@ -234,9 +234,9 @@ Example: ` edgekv create token token1 --save_path=/Documents/hellomgmt.tgz --ove
 
 ___
 ## Resources
-For more information on EdgeWorkers, refer to the following resources:
+For more information on EdgeKV, refer to the following resources:
 * [EdgeKV User Guide](https://learn.akamai.com/en-us/webhelp/edgeworkers/edgekv-getting-started-guide/GUID-FA85D8AF-F277-4FD0-B789-17312DBD3DDE.html)
 * [EdgeKV API](https://github.com/akamai/edgeworkers-examples/tree/master/edgekv/apis)
 
 ## Reporting Issues
-You are all set, happy coding! If you experience any issues with the EdgeWorkers CLI, raise them as a [github issue](https://github.com/akamai/cli-edgeworkers/issues). Feel free to create a pull request with the fix or suggestion.
+You are all set, happy coding! If you experience any issues with the EdgeKV CLI, raise them as a [github issue](https://github.com/akamai/cli-edgeworkers/issues). Feel free to create a pull request with the fix or suggestion.
