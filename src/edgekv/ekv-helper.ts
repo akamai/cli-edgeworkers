@@ -154,15 +154,22 @@ export function saveTokenToBundle(savePath, overWrite, createdToken, decodedToke
                 data += chunk;
                 let tokenList = data.split("=");
 
-                if (tokenList.length == 0) {
+                if (tokenList.length == 0 || tokenList[0].indexOf("var edgekv_access_tokens") == -1) {
                     cliUtils.logWithBorder("ERROR : Not a valid EdgeKV Access Token file (missing 'edgekv_access_tokens' var assignment)!");
                     response.logToken(createdToken["name"], createdToken["value"], decodedToken, nameSpaceList, false);
                     process.exit(1);
                 }
 
                 tokenList[1] = tokenList[1].replace('}export', '} export').replace('export{', 'export {')
-                    .replace('{edgekv_access_tokens', '{ edgekv_access_tokens').replace('edgekv_access_tokens}', 'edgekv_access_tokens }')
-                    .replace("export { edgekv_access_tokens };", "");
+                    .replace('{edgekv_access_tokens', '{ edgekv_access_tokens').replace('edgekv_access_tokens}', 'edgekv_access_tokens }');
+               
+                if (tokenList[1].indexOf("export { edgekv_access_tokens };") == -1) {
+                    cliUtils.logWithBorder("ERROR : Not a valid EdgeKV Access Token file (missing 'edgekv_access_tokens' export assignment)!");
+                    response.logToken(createdToken["name"], createdToken["value"], decodedToken, nameSpaceList, false);
+                    process.exit(1);
+                }
+                
+                tokenList[1] = tokenList[1].replace("export { edgekv_access_tokens };", "");
 
                 // token content from the existing file
                 try {
