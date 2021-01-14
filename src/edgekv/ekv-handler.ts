@@ -122,7 +122,12 @@ export async function readItemFromEdgeKV(environment: string, nameSpace: string,
     cliUtils.logWithBorder(msg);
     if (typeof item == 'object') {
       Object.keys(item).forEach(function (key) {
-        console.log(key + ":" + item[key]);
+        // if nested json 
+        if (typeof item[key] == 'object') {
+          console.log(JSON. stringify(item[key]));
+        } else {
+          console.log(key + ":" + item[key]);
+        } 
       });
     } else {
       console.log(item);
