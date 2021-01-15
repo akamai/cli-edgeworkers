@@ -44,6 +44,29 @@ program
   });
 
 program
+  .command('help [command]')
+  .description('Displays help information for the given command.')
+  .action(function (arg) {
+    if (!arg) {
+      program.outputHelp();
+      cliUtils.logAndExit(0, copywrite);
+    }
+    else {
+      var command = (!!program.commands.find(c => c._name == arg)) ? program.commands.find(c => c._name == arg) : program.commands.find(c => c._aliases[0] == arg);
+      if (!command) {
+        cliUtils.logAndExit(1, `ERROR: Could not find a command for ${arg}`);
+      }
+      else {
+        command.outputHelp();
+      }
+    }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+
+program
   .command("initialize")
   .description("Initialize edgeKV for the first time")
   .alias("init")
@@ -172,9 +195,9 @@ create
   .option("--staging <staging>", "Token can be used in staging environment if allowed")
   .option("--production <production>", "Token can be used in production environment if allowed")
   .option("--ewids <ewIds>", "All or specific ewids for which the token can be applied")
-  .option("--expiry <expiry>","Expiry date of the token in the format yyyy-mm-dd")
-  .option("--namespace <namespace>","Permissions for the namespaces" )
-  .option("-o, --overwrite","EdgeKV token placed inside the bundle will be overwritten")
+  .option("--expiry <expiry>", "Expiry date of the token in the format yyyy-mm-dd")
+  .option("--namespace <namespace>", "Permissions for the namespaces")
+  .option("-o, --overwrite", "EdgeKV token placed inside the bundle will be overwritten")
   .action(async function (tokenName, options) {
     try {
       await kvCliHandler.createToken(tokenName, options);
@@ -188,7 +211,7 @@ create
 
 
 const show = program.command('show')
-.description("Check the initialization status of the EdgeKV or Retrieve an EdgeKV namespace. Use show -h to see available options")
+  .description("Check the initialization status of the EdgeKV or Retrieve an EdgeKV namespace. Use show -h to see available options")
 show
   .command("status")
   .description("Check the initialization status of the edgeKV")
