@@ -176,9 +176,14 @@ export async function createToken(tokenName: string, options: { save_path?: stri
 
   if (savePath) {
     if (ekvhelper.getFileExtension(savePath) != ".tgz" || !(ekvhelper.checkIfFileExists(savePath))) {
-      cliUtils.logWithBorder(`ERROR:  Unable to create token. save_path provided is invalid or you do not have access permissions. Please provide a valid path.`);
+      cliUtils.logWithBorder(`ERROR: Unable to create token. save_path provided is invalid or you do not have access permissions. Please provide a valid path.`);
       process.exit(1);
     }
+  }
+
+  if (options.staging == "deny" && options.production == "deny") {
+    cliUtils.logWithBorder(`ERROR: Unable to create token. Either one of staging or production access should be set to "allow". Please provide a valid access permissions.`);
+    process.exit(1); 
   }
 
   let createdToken = await cliUtils.spinner(edgekvSvc.createEdgeKVToken(tokenName, permissionList, envAccess[options.staging], envAccess[options.production], options.ewids, expiry), "Creating edgekv token ...");
@@ -214,13 +219,23 @@ function parseNameSpacePermissions(namespace: string) {
   namespace.split(",").forEach(val => {
     let per = val.split("+");
     let permissions = [];
+
+    // if no permissions are provided
+    if (per.length != 2) {
+      cliUtils.logAndExit(1, `ERROR: Permissions provided is invalid. Please provide from the following : r,w,d`);
+    }
+
     per[1].split('').forEach(function (c) {
       if (allowedPermission.includes(c)) {
         permissions.push(c);
       } else {
-        cliUtils.logAndExit(1, `Permissions provided is invalid. Please provide from the following : r,w,d`)
+        cliUtils.logAndExit(1, `ERROR: Permissions provided is invalid. Please provide from the following : r,w,d`)
       }
     });
+    // if namespace is repeated
+    if (permissionList[per[0]] != null) {
+      cliUtils.logAndExit(1, `ERROR: Namespace cannot be repeated. Please provide valid namespace and permissions.`);
+    }
     permissionList[per[0]] = permissions;
   });
   return permissionList;
