@@ -16,7 +16,7 @@ const tkn_export = "\n}\nexport { edgekv_access_tokens };"
  * @param seconds 
  */
 export function convertRetentionPeriod(seconds) {
-    if(seconds == 0) {
+    if (seconds == 0) {
         return "Indefinite";
     }
 
@@ -107,9 +107,15 @@ export function getNameSpaceListFromJWT(decodedToken) {
     return nameSpaceList;
 }
 
+// check if file exisits and file has read / write permissions
 export function checkIfFileExists(filePath) {
-    var jsFilePath = untildify(filePath);
-    return fs.existsSync(jsFilePath);
+    try {
+        var jsFilePath = untildify(filePath);
+        fs.accessSync(jsFilePath, fs.constants.W_OK);
+        return true;
+    } catch (e) {
+        return false;
+    }
 }
 
 export function getFileExtension(filePath) {
@@ -125,20 +131,13 @@ export function saveTokenToBundle(savePath, overWrite, createdToken, decodedToke
     var extract = tar.extract();
     var pack = tar.pack();
 
-    // if tar bundle does not exist in the specified location
-    if (getFileExtension(savePath) != ".tgz" || !checkIfFileExists(savePath)) {
-        cliUtils.logWithBorder(`ERROR: Tar bundle not found in the specified location. Add the token in file edgekv_tokens.js and place it in your tar bundle`);
-        response.logToken(createdToken["name"], createdToken["value"], decodedToken, nameSpaceList, false);
-        process.exit(1);
-    }
-
     var oldTarBallStream = fs.createReadStream(savePath);
 
-    oldTarBallStream.on('error', function(err) {
+    oldTarBallStream.on('error', function (err) {
         cliUtils.logWithBorder(`ERROR: Unable to read the tar bundle. Add the token in file edgekv_tokens.js and place it in your tar bundle`);
         response.logToken(createdToken["name"], createdToken["value"], decodedToken, nameSpaceList, false);
         process.exit(1);
-      });
+    });
 
     // because the archive is .tgz we need to gunzip, .pipe extract invokes the extraction
     oldTarBallStream.pipe(zlib.createGunzip()).pipe(extract);
@@ -162,19 +161,19 @@ export function saveTokenToBundle(savePath, overWrite, createdToken, decodedToke
 
                 tokenList[1] = tokenList[1].replace('}export', '} export').replace('export{', 'export {')
                     .replace('{edgekv_access_tokens', '{ edgekv_access_tokens').replace('edgekv_access_tokens}', 'edgekv_access_tokens }');
-               
+
                 if (tokenList[1].indexOf("export { edgekv_access_tokens };") == -1) {
                     cliUtils.logWithBorder("ERROR : Not a valid EdgeKV Access Token file (missing 'edgekv_access_tokens' export assignment)!");
                     response.logToken(createdToken["name"], createdToken["value"], decodedToken, nameSpaceList, false);
                     process.exit(1);
                 }
-                
+
                 tokenList[1] = tokenList[1].replace("export { edgekv_access_tokens };", "");
 
                 // token content from the existing file
                 try {
                     tokenContent = JSON.parse(tokenList[1]);
-                } catch(ex) {
+                } catch (ex) {
                     cliUtils.logWithBorder(`ERROR: Not a valid EdgeKV access token file. Delete or re-create the edgekv token file. ${ex}`);
                     response.logToken(createdToken["name"], createdToken["value"], decodedToken, nameSpaceList, false);
                     process.exit(1);

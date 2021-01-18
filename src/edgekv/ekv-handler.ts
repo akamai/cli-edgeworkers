@@ -104,8 +104,8 @@ export async function writeItemToEdgeKV(environment: string, nameSpace: string, 
   } else {
     cliUtils.logAndExit(1, "ERROR: Unable to write item to EdgeKV. Use 'text' or 'jsonfile' as item type.")
   }
-  
-  if (createdItem!= 'undefined' && !createdItem.isError){
+
+  if (createdItem != 'undefined' && !createdItem.isError) {
     cliUtils.logWithBorder(msg);
   } else {
     cliUtils.logAndExit(1, `ERROR: Unable to write item to EdgeKV. ${createdItem.error_reason}`)
@@ -124,10 +124,10 @@ export async function readItemFromEdgeKV(environment: string, nameSpace: string,
       Object.keys(item).forEach(function (key) {
         // if nested json 
         if (typeof item[key] == 'object') {
-          console.log(JSON. stringify(item[key]));
+          console.log(JSON.stringify(item[key]));
         } else {
           console.log(key + ":" + item[key]);
-        } 
+        }
       });
     } else {
       console.log(item);
@@ -153,8 +153,8 @@ export async function listItemsFromGroup(environment: string, nameSpace: string,
   let itemsList = await edgekvSvc.getItemsFromGroup(environment, nameSpace, groupId);
   if (itemsList != 'undefined' && !itemsList.isError) {
 
-    let msg:string = `There are no items for group ${groupId}, namespace ${nameSpace} and environment ${environment}`;
-    if(itemsList.length != 0){
+    let msg: string = `There are no items for group ${groupId}, namespace ${nameSpace} and environment ${environment}`;
+    if (itemsList.length != 0) {
       msg = `${itemsList.length} items from group ${groupId} were retrieved successfully.`;
     }
     cliUtils.logWithBorder(msg);
@@ -166,20 +166,29 @@ export async function listItemsFromGroup(environment: string, nameSpace: string,
   }
 }
 
-export async function createToken(tokenName: string, options: { save_path?: string, staging?: string, production?: string, ewids?: string, namespace?: string, expiry?: string, overwrite? }) {
+export async function createToken(tokenName: string, options: { save_path?: string, staging?: string, production?: string, ewids?: string, namespace?: string, expiry?: string, overwrite?}) {
   // convert string to ISO date
   let expiry = getExpiryDate(options.expiry);
+  let savePath = options.save_path;
   // parse input permissions
   let permissionList = parseNameSpacePermissions(options.namespace);
   let envAccess = { "allow": true, "deny": false };
-  let createdToken = await cliUtils.spinner(edgekvSvc.createEdgeKVToken(tokenName, permissionList, envAccess[options.staging], envAccess[options.production], options.ewids, expiry),"Creating edgekv token ...");
+
+  if (savePath) {
+    if (ekvhelper.getFileExtension(savePath) != ".tgz" || !(ekvhelper.checkIfFileExists(savePath))) {
+      cliUtils.logWithBorder(`ERROR:  Unable to create token. save_path provided is invalid or you do not have access permissions. Please provide a valid path.`);
+      process.exit(1);
+    }
+  }
+
+  let createdToken = await cliUtils.spinner(edgekvSvc.createEdgeKVToken(tokenName, permissionList, envAccess[options.staging], envAccess[options.production], options.ewids, expiry), "Creating edgekv token ...");
 
   if (createdToken != 'undefined' && !createdToken.isError) {
     // decodes the jwt token
     let decodedToken = ekvhelper.decodeJWTToken(createdToken["value"]);
     let nameSpaceList = ekvhelper.getNameSpaceListFromJWT(decodedToken);
     let msg = `Add the token value in edgekv_tokens.js file and place it in your bundle. Use --save_path option to save the token file to your bundle`
-    if(options.save_path) {
+    if (options.save_path) {
       ekvhelper.saveTokenToBundle(options.save_path, options.overwrite, createdToken, decodedToken, nameSpaceList);
     } else {
       cliUtils.logWithBorder(msg);
