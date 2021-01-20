@@ -39,10 +39,6 @@ export function sendEdgeRequest(pth: string, method: string, body, headers) {
                         response,
                         body: !!body ? cliUtils.parseIfJSON(body) : undefined
                     };
-
-                    if (obj["body"] != undefined) {
-                        obj["body"]["status"] = response.statusCode;
-                    }
                     resolve(obj);
                 } else {
                     try {

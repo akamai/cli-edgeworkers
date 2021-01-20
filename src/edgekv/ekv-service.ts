@@ -18,11 +18,11 @@ export function getNameSpace(network: string, namespace: string) {
 }
 
 export function initializeEdgeKV() {
-  return httpEdge.putJson(`${EDGEKV_API_BASE}/initialize`, "").then(r => r.body).catch(err => error.handleError(err));
+  return httpEdge.putJson(`${EDGEKV_API_BASE}/initialize`, "").then(r => r.response).catch(err => error.handleError(err));
 }
 
 export function getInitializedEdgeKV() {
-  return httpEdge.getJson(`${EDGEKV_API_BASE}/initialize`).then(r => r.body).catch(err => error.handleError(err));
+  return httpEdge.getJson(`${EDGEKV_API_BASE}/initialize`).then(r => r.response).catch(err => error.handleError(err));
 }
 
 export function writeItems(network: string, namespace: string, groupId: string, itemId: string, itemList) {

@@ -49,10 +49,12 @@ export async function getNameSpace(environment: string, nameSpace: string) {
 export async function initializeEdgeKv() {
   let initializedEdgeKv = await edgekvSvc.initializeEdgeKV();
 
-  if (initializedEdgeKv != 'undefined' && !initializedEdgeKv.isError) {
-    let status = initializedEdgeKv.status;
-    if (initializedEdgeKv.hasOwnProperty("account_status")) {
-      let accountStatus = initializedEdgeKv["account_status"];
+  if (initializedEdgeKv.body != 'undefined' && !initializedEdgeKv.isError) {
+    let initRespBody = JSON.parse(initializedEdgeKv.body); 
+
+    let status = initializedEdgeKv.statusCode;
+    if (initRespBody.hasOwnProperty("account_status")) {
+      let accountStatus = initRespBody["account_status"];
       if (accountStatus == "INITIALIZED") {
         if (status == 201) {
           cliUtils.logWithBorder(`EdgeKV INITIALIZED successfully`);
@@ -64,13 +66,13 @@ export async function initializeEdgeKv() {
       } else if (status == 404) {
         cliUtils.logWithBorder(`EdgeKV was not INITIALIZED`);
       } else if (accountStatus == "UNINITIALIZED") {
-        cliUtils.logWithBorder(`EdgeKV Initialization failed. (${initializedEdgeKv.error_reason}).`);
+        cliUtils.logWithBorder(`EdgeKV Initialization failed. Please try again.`);
       }
       else {
-        cliUtils.logWithBorder(`EdgeKV initialization is ${initializedEdgeKv.account_status}`);
+        cliUtils.logWithBorder(`EdgeKV initialization is ${initRespBody.account_status}`);
       }
     }
-    response.logInitialize(initializedEdgeKv);
+    response.logInitialize(initRespBody);
   } else {
     cliUtils.logAndExit(1, `ERROR: EdgeKV Initialization failed  (${initializedEdgeKv.error_reason}).`)
   }
@@ -79,10 +81,12 @@ export async function initializeEdgeKv() {
 export async function getInitializationStatus() {
   let initializedEdgeKv = await edgekvSvc.getInitializedEdgeKV();
 
-  if (initializedEdgeKv != 'undefined' && !initializedEdgeKv.isError) {
-    let status = initializedEdgeKv.status;
-    if (initializedEdgeKv.hasOwnProperty("account_status")) {
-      let accountStatus = initializedEdgeKv["account_status"];
+  if (initializedEdgeKv.body != 'undefined' && !initializedEdgeKv.isError) {
+    let initRespBody = JSON.parse(initializedEdgeKv.body); 
+    let status = initializedEdgeKv.statusCode;
+
+    if (initRespBody.hasOwnProperty("account_status")) {
+      let accountStatus = initRespBody["account_status"];
       if (accountStatus == "INITIALIZED") {
         if (status == 200) {
           cliUtils.logWithBorder(`EdgeKV already INITIALIZED`);
@@ -94,10 +98,10 @@ export async function getInitializationStatus() {
       } else if (accountStatus == "UNINITIALIZED") {
         cliUtils.logWithBorder(`EdgeKV Initialization failed. Please try again`);
       } else {
-        cliUtils.logWithBorder(`EdgeKV initialization is ${initializedEdgeKv.account_status}`);
+        cliUtils.logWithBorder(`EdgeKV initialization is ${initRespBody.account_status}`);
       }
     }
-    response.logInitialize(initializedEdgeKv);
+    response.logInitialize(initRespBody);
   } else {
     cliUtils.logAndExit(1, `ERROR: EdgeKV Initialization failed. Please try again. ${initializedEdgeKv.error_reason}`)
   }
