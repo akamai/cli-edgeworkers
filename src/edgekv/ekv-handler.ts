@@ -50,12 +50,21 @@ export async function initializeEdgeKv() {
   let initializedEdgeKv = await edgekvSvc.initializeEdgeKV();
 
   if (initializedEdgeKv != 'undefined' && !initializedEdgeKv.isError) {
+    let status = initializedEdgeKv.status;
     if (initializedEdgeKv.hasOwnProperty("account_status")) {
       let accountStatus = initializedEdgeKv["account_status"];
       if (accountStatus == "INITIALIZED") {
-        cliUtils.logWithBorder(`EdgeKV ${initializedEdgeKv.account_status} successfully`);
+        if (status == 201) {
+          cliUtils.logWithBorder(`EdgeKV INITIALIZED successfully`);
+        } else if (status = 200) {
+          cliUtils.logWithBorder(`EdgeKV already INITIALIZED`);
+        }
+      } else if (status == 200 && accountStatus != "INITIALIZED") {
+        cliUtils.logWithBorder(`EdgeKV initialization is IN PROGRESS`);
+      } else if (status == 404) {
+        cliUtils.logWithBorder(`EdgeKV was not INITIALIZED`);
       } else if (accountStatus == "UNINITIALIZED") {
-        cliUtils.logWithBorder(`EdgeKV Initialization failed (${initializedEdgeKv.error_reason}).`);
+        cliUtils.logWithBorder(`EdgeKV Initialization failed. (${initializedEdgeKv.error_reason}).`);
       }
       else {
         cliUtils.logWithBorder(`EdgeKV initialization is ${initializedEdgeKv.account_status}`);
@@ -69,16 +78,22 @@ export async function initializeEdgeKv() {
 
 export async function getInitializationStatus() {
   let initializedEdgeKv = await edgekvSvc.getInitializedEdgeKV();
-  let msg = `The following EdgeKV instances are provisioned`;
+
   if (initializedEdgeKv != 'undefined' && !initializedEdgeKv.isError) {
+    let status = initializedEdgeKv.status;
     if (initializedEdgeKv.hasOwnProperty("account_status")) {
       let accountStatus = initializedEdgeKv["account_status"];
       if (accountStatus == "INITIALIZED") {
-        cliUtils.logWithBorder(`EdgeKV ${initializedEdgeKv.account_status} successfully`);
+        if (status == 200) {
+          cliUtils.logWithBorder(`EdgeKV already INITIALIZED`);
+        } else if (status == 201) {
+          cliUtils.logWithBorder(`EdgeKV INITIALIZED successfully`);
+        }
+      } else if (status == 102) {
+        cliUtils.logWithBorder(`EdgeKV initialization is IN PROGRESS`);
       } else if (accountStatus == "UNINITIALIZED") {
         cliUtils.logWithBorder(`EdgeKV Initialization failed. Please try again`);
-      }
-      else {
+      } else {
         cliUtils.logWithBorder(`EdgeKV initialization is ${initializedEdgeKv.account_status}`);
       }
     }
@@ -121,14 +136,7 @@ export async function readItemFromEdgeKV(environment: string, nameSpace: string,
     let msg = `Item ${itemId} from group ${groupId}, namespace ${nameSpace} and environment ${environment} retrieved successfully.`
     cliUtils.logWithBorder(msg);
     if (typeof item == 'object') {
-      Object.keys(item).forEach(function (key) {
-        // if nested json 
-        if (typeof item[key] == 'object') {
-          console.log(JSON.stringify(item[key]));
-        } else {
-          console.log(key + ":" + item[key]);
-        }
-      });
+      console.log(JSON.stringify(item));
     } else {
       console.log(item);
     }
@@ -183,7 +191,7 @@ export async function createToken(tokenName: string, options: { save_path?: stri
 
   if (options.staging == "deny" && options.production == "deny") {
     cliUtils.logWithBorder(`ERROR: Unable to create token. Either one of staging or production access should be set to "allow". Please provide a valid access permissions.`);
-    process.exit(1); 
+    process.exit(1);
   }
 
   let createdToken = await cliUtils.spinner(edgekvSvc.createEdgeKVToken(tokenName, permissionList, envAccess[options.staging], envAccess[options.production], options.ewids, expiry), "Creating edgekv token ...");

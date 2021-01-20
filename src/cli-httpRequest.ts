@@ -39,10 +39,15 @@ export function sendEdgeRequest(pth: string, method: string, body, headers) {
                         response,
                         body: !!body ? cliUtils.parseIfJSON(body) : undefined
                     };
+
+                    if (obj["body"] != undefined) {
+                        obj["body"]["status"] = response.statusCode;
+                    }
                     resolve(obj);
                 } else {
                     try {
                         var errorObj = JSON.parse(body);
+                        errorObj["status"] = response.statusCode;
                         reject(cliUtils.toJsonPretty(errorObj));
                     } catch (ex) {
                         console.error(`got error code: ${response.statusCode} calling ${method} ${path}\n${body}`);

@@ -81,8 +81,7 @@ program
     cliUtils.logAndExit(0, copywrite);
   });
 
-program
-  .command("write <itemType> <environment> <namespace> <groupId> <itemId> <items>")
+  program.command("write <itemType> <environment> <namespace> <groupId> <itemId> <items>")
   .description("Write an item to an EdgeKV Namespace")
   .action(async function (itemType, environment, namespace, groupId, itemId, items) {
     try {
@@ -103,7 +102,6 @@ const read = program.command('read')
 read
   .command("item <environment> <namespace> <groupId> <itemId>")
   .description("Read an item from an EdgeKV Namespace")
-  .alias("rd")
   .action(async function (environment, namespace, groupId, itemId) {
     try {
       await kvCliHandler.readItemFromEdgeKV(environment, namespace, groupId, itemId);
@@ -155,7 +153,6 @@ list
 list
   .command("items <environment> <namespace> <groupId>")
   .description("List items with in a group")
-  .alias("itms")
   .action(async function (environment, namespace, groupId) {
     try {
       await kvCliHandler.listItemsFromGroup(environment, namespace, groupId);
@@ -192,11 +189,11 @@ create
   .description("Creates an edgekv token")
   .alias("tkn")
   .option('--save_path <save_path>', 'The path of the bundle where the token will be saved')
-  .option("--staging <staging>", "Token can be used in staging environment if allowed")
-  .option("--production <production>", "Token can be used in production environment if allowed")
-  .option("--ewids <ewIds>", "All or specific ewids for which the token can be applied")
-  .option("--expiry <expiry>", "Expiry date of the token in the format yyyy-mm-dd")
-  .option("--namespace <namespace>", "Permissions for the namespaces")
+  .requiredOption("--staging <staging>", "Token can be used in staging environment if allowed")
+  .requiredOption("--production <production>", "Token can be used in production environment if allowed")
+  .requiredOption("--ewids <ewIds>", "All or specific ewids for which the token can be applied")
+  .requiredOption("--expiry <expiry>", "Expiry date of the token in the format yyyy-mm-dd")
+  .requiredOption("--namespace <namespace>", "Permissions for the namespaces")
   .option("-o, --overwrite", "EdgeKV token placed inside the bundle will be overwritten")
   .action(async function (tokenName, options) {
     try {

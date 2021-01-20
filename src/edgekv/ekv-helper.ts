@@ -43,7 +43,7 @@ export function convertRetentionPeriod(seconds) {
 
 export function validateNetwork(network: string) {
     if (network.toUpperCase() !== 'STAGING' && network.toUpperCase() !== 'PRODUCTION') {
-        cliUtils.logAndExit(1, `ERROR: Environment parameter must be either STAGING or PRODUCTION - was: ${network}`);
+        cliUtils.logAndExit(1, `ERROR: Environment parameter must be either staging or production - was: ${network}`);
     }
 }
 
@@ -56,7 +56,7 @@ export function validateInputFile(itemFilePath) {
 
     // validate if json file exists in the specified location
     if (!checkIfFileExists(itemFilePath)) {
-        cliUtils.logAndExit(1, `ERROR: Json file provided in the path (${itemFilePath}) is not found.`);
+        cliUtils.logAndExit(1, `ERROR: Json file provided in the path (${itemFilePath}) is not found or file does not have permissions.`);
     }
     //validate json content of the file
     let validJsonFile = validateJson(itemFilePath);
@@ -111,7 +111,7 @@ export function getNameSpaceListFromJWT(decodedToken) {
 export function checkIfFileExists(filePath) {
     try {
         var jsFilePath = untildify(filePath);
-        fs.accessSync(jsFilePath, fs.constants.W_OK);
+        fs.accessSync(jsFilePath, fs.constants.R_OK && fs.constants.W_OK);
         return true;
     } catch (e) {
         return false;
