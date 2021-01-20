@@ -122,6 +122,12 @@ export function getFileExtension(filePath) {
     return path.extname(filePath);
 }
 
+// This checks if the date string is in format yyyy-mm-dd
+export function isValidDate(dateString) {
+    var regEx = /^\d{4}-\d{2}-\d{2}$/;
+    return dateString.match(regEx) != null;
+}
+
 export function saveTokenToBundle(savePath, overWrite, createdToken, decodedToken, nameSpaceList) {
     let tokenContent = [];
     var data = "";

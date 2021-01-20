@@ -217,11 +217,15 @@ export async function createToken(tokenName: string, options: { save_path?: stri
 }
 
 function getExpiryDate(expiry: string) {
+  let errorMsg = "Expiration time specified is invalid. Please specify in format yyyy-mm-dd.";
   try {
+    if (!ekvhelper.isValidDate(expiry)) {
+      cliUtils.logAndExit(1, errorMsg);
+    }
     expiry = new Date(expiry).toISOString().split('.').shift() + 'Z';
     return expiry;
   } catch (ex) {
-    cliUtils.logAndExit(1, `Expiration time specified is invalid. ${ex}`);
+    cliUtils.logAndExit(1, errorMsg);
   }
 }
 
