@@ -50,7 +50,7 @@ export async function initializeEdgeKv() {
   let initializedEdgeKv = await edgekvSvc.initializeEdgeKV();
 
   if (initializedEdgeKv.body != 'undefined' && !initializedEdgeKv.isError) {
-    let initRespBody = JSON.parse(initializedEdgeKv.body); 
+    let initRespBody = JSON.parse(initializedEdgeKv.body);
 
     let status = initializedEdgeKv.statusCode;
     if (initRespBody.hasOwnProperty("account_status")) {
@@ -82,7 +82,7 @@ export async function getInitializationStatus() {
   let initializedEdgeKv = await edgekvSvc.getInitializedEdgeKV();
 
   if (initializedEdgeKv.body != 'undefined' && !initializedEdgeKv.isError) {
-    let initRespBody = JSON.parse(initializedEdgeKv.body); 
+    let initRespBody = JSON.parse(initializedEdgeKv.body);
     let status = initializedEdgeKv.statusCode;
 
     if (initRespBody.hasOwnProperty("account_status")) {
@@ -187,7 +187,7 @@ export async function createToken(tokenName: string, options: { save_path?: stri
   let envAccess = { "allow": true, "deny": false };
 
   if (savePath) {
-    if (ekvhelper.getFileExtension(savePath) != ".tgz" || !(ekvhelper.checkIfFileExists(savePath))) {
+    if (!ekvhelper.checkIfFileExists(savePath)) {
       cliUtils.logWithBorder(`ERROR: Unable to create token. save_path provided is invalid or you do not have access permissions. Please provide a valid path.`);
       process.exit(1);
     }
@@ -206,7 +206,11 @@ export async function createToken(tokenName: string, options: { save_path?: stri
     let nameSpaceList = ekvhelper.getNameSpaceListFromJWT(decodedToken);
     let msg = `Add the token value in edgekv_tokens.js file and place it in your bundle. Use --save_path option to save the token file to your bundle`
     if (options.save_path) {
-      ekvhelper.saveTokenToBundle(options.save_path, options.overwrite, createdToken, decodedToken, nameSpaceList);
+      if (ekvhelper.getFileExtension(savePath) != ".tgz") {
+        ekvhelper.createTokenFileWithoutBundle(options.save_path, options.overwrite, createdToken, decodedToken, nameSpaceList);
+      } else {
+        ekvhelper.saveTokenToBundle(options.save_path, options.overwrite, createdToken, decodedToken, nameSpaceList);
+      }
     } else {
       cliUtils.logWithBorder(msg);
       response.logToken(createdToken["name"], createdToken["value"], decodedToken, nameSpaceList, false);
@@ -216,6 +220,11 @@ export async function createToken(tokenName: string, options: { save_path?: stri
   }
 }
 
+/**
+ * Checks if date is in format yyyy-mm-dd
+ * Converts date to iso format to be consumed by API
+ * @param expiry 
+ */
 function getExpiryDate(expiry: string) {
   let errorMsg = "Expiration time specified is invalid. Please specify in format yyyy-mm-dd.";
   try {
@@ -230,25 +239,27 @@ function getExpiryDate(expiry: string) {
 }
 
 function parseNameSpacePermissions(namespace: string) {
-  let permissionList = {}; // list to which all the permissions mapped to namespace will be added
+  // list to which all the permissions mapped to namespace will be added
+  let permissionList = {}; 
   let allowedPermission = ["r", "w", "d"];
+  let allowedPermissionErrorMsg = "ERROR: Permissions provided is invalid. Please provide from the following : r,w,d";
   namespace.split(",").forEach(val => {
     let per = val.split("+");
     let permissions = [];
 
     // if no permissions are provided
     if (per.length != 2) {
-      cliUtils.logAndExit(1, `ERROR: Permissions provided is invalid. Please provide from the following : r,w,d`);
+      cliUtils.logAndExit(1, allowedPermissionErrorMsg);
     }
 
     per[1].split('').forEach(function (c) {
       if (allowedPermission.includes(c)) {
         permissions.push(c);
       } else {
-        cliUtils.logAndExit(1, `ERROR: Permissions provided is invalid. Please provide from the following : r,w,d`)
+        cliUtils.logAndExit(1, allowedPermissionErrorMsg)
       }
     });
-    // if namespace is repeated
+    // if namespace is repeated, error out
     if (permissionList[per[0]] != null) {
       cliUtils.logAndExit(1, `ERROR: Namespace cannot be repeated. Please provide valid namespace and permissions.`);
     }
