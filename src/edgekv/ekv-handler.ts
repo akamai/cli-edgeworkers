@@ -247,6 +247,9 @@ function parseNameSpacePermissions(namespace: string) {
     let per = val.split("+");
     let permissions = [];
 
+    if (per[0] == "" || per[1] == "") {
+      cliUtils.logAndExit(1, "ERROR: Permissions provided is invalid. Please donot provide space between namespaces or permissions.");
+    }
     // if no permissions are provided
     if (per.length != 2) {
       cliUtils.logAndExit(1, allowedPermissionErrorMsg);
