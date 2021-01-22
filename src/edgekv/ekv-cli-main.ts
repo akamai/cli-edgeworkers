@@ -14,7 +14,7 @@ program
   .option('--debug', 'Show debug information.')
   .option('--edgerc <path>', 'Use edgerc file for authentication.')
   .option('--section <name>', 'Use this section in edgerc file that contains the credential set.')
-  .option('--json [path]', 'Write command output to JSON file at given path, otherwise written to CLI cache directory')
+  // .option('--json [path]', 'Write command output to JSON file at given path, otherwise written to CLI cache directory')
   .option('--accountkey <account-id>', 'internal parameter')
   .on("option:debug", function () {
     envUtils.setDebugMode(true);
@@ -26,7 +26,7 @@ program
     envUtils.setEdgeRcSection(section);
   })
   .on("option:json", function (path) {
-    edgeWorkersClientSvc.setJSONOutputMode(true);
+    edgeWorkersClientSvc.setJSONOutputMode(false); // set this to true when we enable json output mode
     edgeWorkersClientSvc.setJSONOutputPath(path);
   })
   .on("option:accountkey", function (key) {
@@ -44,6 +44,29 @@ program
   });
 
 program
+  .command('help [command]')
+  .description('Displays help information for the given command.')
+  .action(function (arg) {
+    if (!arg) {
+      program.outputHelp();
+      cliUtils.logAndExit(0, copywrite);
+    }
+    else {
+      var command = (!!program.commands.find(c => c._name == arg)) ? program.commands.find(c => c._name == arg) : program.commands.find(c => c._aliases[0] == arg);
+      if (!command) {
+        cliUtils.logAndExit(1, `ERROR: Could not find a command for ${arg}`);
+      }
+      else {
+        command.outputHelp();
+      }
+    }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+
+program
   .command("initialize")
   .description("Initialize edgeKV for the first time")
   .alias("init")
@@ -58,8 +81,7 @@ program
     cliUtils.logAndExit(0, copywrite);
   });
 
-program
-  .command("write <itemType> <environment> <namespace> <groupId> <itemId> <items>")
+  program.command("write <itemType> <environment> <namespace> <groupId> <itemId> <items>")
   .description("Write an item to an EdgeKV Namespace")
   .action(async function (itemType, environment, namespace, groupId, itemId, items) {
     try {
@@ -80,7 +102,6 @@ const read = program.command('read')
 read
   .command("item <environment> <namespace> <groupId> <itemId>")
   .description("Read an item from an EdgeKV Namespace")
-  .alias("rd")
   .action(async function (environment, namespace, groupId, itemId) {
     try {
       await kvCliHandler.readItemFromEdgeKV(environment, namespace, groupId, itemId);
@@ -132,7 +153,6 @@ list
 list
   .command("items <environment> <namespace> <groupId>")
   .description("List items with in a group")
-  .alias("itms")
   .action(async function (environment, namespace, groupId) {
     try {
       await kvCliHandler.listItemsFromGroup(environment, namespace, groupId);
@@ -169,12 +189,12 @@ create
   .description("Creates an edgekv token")
   .alias("tkn")
   .option('--save_path <save_path>', 'The path of the bundle where the token will be saved')
-  .option("--staging <staging>", "Token can be used in staging environment if allowed")
-  .option("--production <production>", "Token can be used in production environment if allowed")
-  .option("--ewids <ewIds>", "All or specific ewids for which the token can be applied")
-  .option("--expiry <expiry>","Expiry date of the token in the format yyyy-mm-dd")
-  .option("--namespace <namespace>","Permissions for the namespaces" )
-  .option("-o, --overwrite","EdgeKV token placed inside the bundle will be overwritten")
+  .requiredOption("--staging <staging>", "Token can be used in staging environment if allowed")
+  .requiredOption("--production <production>", "Token can be used in production environment if allowed")
+  .requiredOption("--ewids <ewIds>", "All or specific ewids for which the token can be applied")
+  .requiredOption("--expiry <expiry>", "Expiry date of the token in the format yyyy-mm-dd")
+  .requiredOption("--namespace <namespace>", "Permissions for the namespaces")
+  .option("-o, --overwrite", "EdgeKV token placed inside the bundle will be overwritten")
   .action(async function (tokenName, options) {
     try {
       await kvCliHandler.createToken(tokenName, options);
@@ -188,7 +208,7 @@ create
 
 
 const show = program.command('show')
-.description("Check the initialization status of the EdgeKV or Retrieve an EdgeKV namespace. Use show -h to see available options")
+  .description("Check the initialization status of the EdgeKV or Retrieve an EdgeKV namespace. Use show -h to see available options")
 show
   .command("status")
   .description("Check the initialization status of the edgeKV")

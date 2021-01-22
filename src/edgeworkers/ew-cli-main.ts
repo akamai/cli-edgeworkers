@@ -53,7 +53,7 @@ program
       cliUtils.logAndExit(0, copywrite);
     }
     else {
-      var command = (!!program.commands.find(c => c._name == arg)) ? program.commands.find(c => c._name == arg) : program.commands.find(c => c._alias == arg);
+      var command = (!!program.commands.find(c => c._name == arg)) ? program.commands.find(c => c._name == arg) : program.commands.find(c => c._aliases[0] == arg);
       if (!command) {
         cliUtils.logAndExit(1, `ERROR: Could not find a command for ${arg}`);
       }

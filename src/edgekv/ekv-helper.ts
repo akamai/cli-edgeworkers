@@ -16,7 +16,7 @@ const tkn_export = "\n}\nexport { edgekv_access_tokens };"
  * @param seconds 
  */
 export function convertRetentionPeriod(seconds) {
-    if(seconds == 0) {
+    if (seconds == 0) {
         return "Indefinite";
     }
 
@@ -43,7 +43,7 @@ export function convertRetentionPeriod(seconds) {
 
 export function validateNetwork(network: string) {
     if (network.toUpperCase() !== 'STAGING' && network.toUpperCase() !== 'PRODUCTION') {
-        cliUtils.logAndExit(1, `ERROR: Environment parameter must be either STAGING or PRODUCTION - was: ${network}`);
+        cliUtils.logAndExit(1, `ERROR: Environment parameter must be either staging or production - was: ${network}`);
     }
 }
 
@@ -56,7 +56,7 @@ export function validateInputFile(itemFilePath) {
 
     // validate if json file exists in the specified location
     if (!checkIfFileExists(itemFilePath)) {
-        cliUtils.logAndExit(1, `ERROR: Json file provided in the path (${itemFilePath}) is not found.`);
+        cliUtils.logAndExit(1, `ERROR: Json file provided in the path (${itemFilePath}) is not found or file does not have permissions.`);
     }
     //validate json content of the file
     let validJsonFile = validateJson(itemFilePath);
@@ -88,6 +88,7 @@ export function convertTokenDate(seconds) {
     return convertedDate;
 }
 
+// decode JWT token returned by API
 export function decodeJWTToken(token) {
     try {
         let decodedToken = jwt_decode(token)
@@ -107,15 +108,39 @@ export function getNameSpaceListFromJWT(decodedToken) {
     return nameSpaceList;
 }
 
+// check if file exisits and file has read / write permissions
 export function checkIfFileExists(filePath) {
-    var jsFilePath = untildify(filePath);
-    return fs.existsSync(jsFilePath);
+    try {
+        var jsFilePath = untildify(filePath);
+        fs.accessSync(jsFilePath, fs.constants.R_OK && fs.constants.W_OK);
+        return true;
+    } catch (e) {
+        return false;
+    }
 }
 
+// get extension of a file
 export function getFileExtension(filePath) {
     return path.extname(filePath);
 }
 
+// This checks if the date string is in format yyyy-mm-dd
+export function isValidDate(dateString) {
+    var regEx = /^\d{4}-\d{2}-\d{2}$/;
+    return dateString.match(regEx) != null;
+}
+
+/**
+ * If provided save_path is tgz bundle
+ * if no token file exists, new file is created.Else the existing file is updated
+ * If overwrite option is specified token content will be overwritte else token will be displayed
+ * for users to copy to their file
+ * @param savePath 
+ * @param overWrite 
+ * @param createdToken 
+ * @param decodedToken 
+ * @param nameSpaceList 
+ */
 export function saveTokenToBundle(savePath, overWrite, createdToken, decodedToken, nameSpaceList) {
     let tokenContent = [];
     var data = "";
@@ -125,20 +150,13 @@ export function saveTokenToBundle(savePath, overWrite, createdToken, decodedToke
     var extract = tar.extract();
     var pack = tar.pack();
 
-    // if tar bundle does not exist in the specified location
-    if (getFileExtension(savePath) != ".tgz" || !checkIfFileExists(savePath)) {
-        cliUtils.logWithBorder(`ERROR: Tar bundle not found in the specified location. Add the token in file edgekv_tokens.js and place it in your tar bundle`);
-        response.logToken(createdToken["name"], createdToken["value"], decodedToken, nameSpaceList, false);
-        process.exit(1);
-    }
-
     var oldTarBallStream = fs.createReadStream(savePath);
 
-    oldTarBallStream.on('error', function(err) {
+    oldTarBallStream.on('error', function (err) {
         cliUtils.logWithBorder(`ERROR: Unable to read the tar bundle. Add the token in file edgekv_tokens.js and place it in your tar bundle`);
         response.logToken(createdToken["name"], createdToken["value"], decodedToken, nameSpaceList, false);
         process.exit(1);
-      });
+    });
 
     // because the archive is .tgz we need to gunzip, .pipe extract invokes the extraction
     oldTarBallStream.pipe(zlib.createGunzip()).pipe(extract);
@@ -152,56 +170,10 @@ export function saveTokenToBundle(savePath, overWrite, createdToken, decodedToke
             updateFile = true;
             stream.on('data', function (chunk) {
                 data += chunk;
-                let tokenList = data.split("=");
+                let existingTokenContent = validateAndGetExistingTokenContent(data, createdToken, decodedToken, nameSpaceList);
+                // updated content
+                tokenContent = updateTokenContent(existingTokenContent, nameSpaceList, createdToken, decodedToken, overWrite);
 
-                if (tokenList.length == 0) {
-                    cliUtils.logWithBorder("ERROR : Not a valid EdgeKV Access Token file (missing 'edgekv_access_tokens' var assignment)!");
-                    response.logToken(createdToken["name"], createdToken["value"], decodedToken, nameSpaceList, false);
-                    process.exit(1);
-                }
-
-                tokenList[1] = tokenList[1].replace('}export', '} export').replace('export{', 'export {')
-                    .replace('{edgekv_access_tokens', '{ edgekv_access_tokens').replace('edgekv_access_tokens}', 'edgekv_access_tokens }')
-                    .replace("export { edgekv_access_tokens };", "");
-
-                // token content from the existing file
-                try {
-                    tokenContent = JSON.parse(tokenList[1]);
-                } catch(ex) {
-                    cliUtils.logWithBorder(`ERROR: Not a valid EdgeKV access token file. Delete or re-create the edgekv token file. ${ex}`);
-                    response.logToken(createdToken["name"], createdToken["value"], decodedToken, nameSpaceList, false);
-                    process.exit(1);
-                }
-
-                for (let ns of nameSpaceList) {
-                    // if the namespace/token value does not exist in file add it
-                    if (!tokenContent.hasOwnProperty(ns)) {
-                        let nameSpaceContent = { "name": createdToken["name"], "value": createdToken["value"] };
-                        tokenContent[ns] = nameSpaceContent;
-                    }
-                    // if namespace already exists, if overwrite option is specified overwrite token value in file else display token 
-                    else if (tokenContent.hasOwnProperty(ns)) {
-                        let tokenName = tokenContent[ns]["name"];
-                        if (tokenName === createdToken["name"]) {
-                            if (overWrite) {
-                                let nameSpaceContent = { "name": createdToken["name"], "value": createdToken["value"] };
-                                tokenContent[ns] = nameSpaceContent;
-                            } else {
-                                let tokenValue = tokenContent[ns]["value"];
-                                if (tokenValue != createdToken["value"]) {
-                                    cliUtils.logWithBorder(`Token value mismatch for token ${tokenName}! Not updating token value. Use '-o' to overwrite token value. Place the below token in edgekv_tokens.js manually`);
-                                } else {
-                                    cliUtils.logWithBorder(`Token value matches for token ${tokenName}. Not updating token value. Use '-o' to overwrite token value.`);
-                                }
-                                response.logToken(createdToken["name"], createdToken["value"], decodedToken, nameSpaceList, false);
-                                process.exit(1);
-                            }
-                        } else {
-                            cliUtils.logWithBorder(`ERROR: Token ${createdToken["name"]} for namespace ${ns} not found in the file`);
-                            process.exit(1);
-                        }
-                    }
-                }
             });
             callback();
         }
@@ -227,6 +199,10 @@ export function saveTokenToBundle(savePath, overWrite, createdToken, decodedToke
     });
 }
 
+/**
+ * Constructs the token file with static constants
+ * @param tokenContent 
+ */
 function constructTokenFile(tokenContent) {
     let token = [];
     Object.keys(tokenContent).forEach(function (key) {
@@ -235,4 +211,129 @@ function constructTokenFile(tokenContent) {
         token.push(nameSpaceContent);
     });
     return tkn_var + token.toString() + tkn_export;
+}
+
+/**
+ * If only directory is specified without tgz, we create new token file and place it in the save path.
+ * If token file already exists, token will be updated. Users can place this token file when they place it in th bundle
+ * @param savePath 
+ * @param overWrite 
+ * @param createdToken 
+ * @param decodedToken 
+ * @param nameSpaceList 
+ */
+export function createTokenFileWithoutBundle(savePath, overWrite, createdToken, decodedToken, nameSpaceList) {
+
+    let msg = `Token in ${savePath}/edgekv_tokens.js was successfully updated.`;
+
+    // if token file does not exist, create new file
+    let tokenFilePath = savePath + "/edgekv_tokens.js";
+    let tokenFileContent = "";
+    let tokenContent = [];
+    if (!checkIfFileExists(tokenFilePath)) {
+        for (let ns of nameSpaceList) {
+            tokenContent[ns] = { "name": createdToken["name"], "value": createdToken["value"] };
+        }
+    }
+    // update existing token file
+    else {
+        var text = fs.readFileSync(tokenFilePath, 'utf8');
+        // get existing token content from file
+        let existingTokenContent = validateAndGetExistingTokenContent(text, createdToken, decodedToken, nameSpaceList);
+        // updated content
+        tokenContent = updateTokenContent(existingTokenContent, nameSpaceList, createdToken, decodedToken, overWrite);
+    }
+    tokenFileContent = constructTokenFile(tokenContent);
+    fs.writeFile(tokenFilePath, tokenFileContent, function (err, file) {
+        if (err) {
+            cliUtils.logWithBorder(`ERROR: Unable to create a token file. Add the token in file edgekv_tokens.js and place it in your tar bundle`);
+            response.logToken(createdToken["name"], createdToken["value"], decodedToken, nameSpaceList, false);
+            process.exit(1);
+        }
+    });
+    cliUtils.logWithBorder(msg);
+    response.logToken(createdToken["name"], createdToken["value"], decodedToken, nameSpaceList, true);
+}
+
+/**
+ * Validates the static content of the token 
+ * If valid parses the content and returns it
+ * @param data 
+ * @param createdToken 
+ * @param decodedToken 
+ * @param nameSpaceList 
+ */
+function validateAndGetExistingTokenContent(data, createdToken, decodedToken, nameSpaceList) {
+    let tokenList = data.split("=");
+    let tokenContent = [];
+
+    if (tokenList.length == 0 || tokenList[0].indexOf("var edgekv_access_tokens") == -1) {
+        cliUtils.logWithBorder("ERROR : Not a valid EdgeKV Access Token file (missing 'edgekv_access_tokens' var assignment)!");
+        response.logToken(createdToken["name"], createdToken["value"], decodedToken, nameSpaceList, false);
+        process.exit(1);
+    }
+
+    tokenList[1] = tokenList[1].replace('}export', '} export').replace('export{', 'export {')
+        .replace('{edgekv_access_tokens', '{ edgekv_access_tokens').replace('edgekv_access_tokens}', 'edgekv_access_tokens }');
+
+    if (tokenList[1].indexOf("export { edgekv_access_tokens };") == -1) {
+        cliUtils.logWithBorder("ERROR : Not a valid EdgeKV Access Token file (missing 'edgekv_access_tokens' export assignment)!");
+        response.logToken(createdToken["name"], createdToken["value"], decodedToken, nameSpaceList, false);
+        process.exit(1);
+    }
+
+    tokenList[1] = tokenList[1].replace("export { edgekv_access_tokens };", "");
+    
+    // Parse token content from the existing file
+    try {
+        tokenContent = JSON.parse(tokenList[1]);
+    } catch (ex) {
+        cliUtils.logWithBorder(`ERROR: Not a valid EdgeKV access token file. Delete or re-create the edgekv token file. ${ex}`);
+        response.logToken(createdToken["name"], createdToken["value"], decodedToken, nameSpaceList, false);
+        process.exit(1);
+    }
+    return tokenContent;
+}
+
+/**
+ * Add or update token to the existing token content
+ * @param tokenContent 
+ * @param nameSpaceList 
+ * @param createdToken 
+ * @param decodedToken 
+ * @param overWrite 
+ * @returns updated token content value
+ */
+function updateTokenContent(tokenContent, nameSpaceList, createdToken, decodedToken, overWrite) {
+    for (let ns of nameSpaceList) {
+        // if the namespace/token value does not exist in file add it
+        if (!tokenContent.hasOwnProperty(ns)) {
+            let nameSpaceContent = { "name": createdToken["name"], "value": createdToken["value"] };
+            tokenContent[ns] = nameSpaceContent;
+        }
+        // if namespace already exists, if overwrite option is specified overwrite token value in file else display token 
+        else if (tokenContent.hasOwnProperty(ns)) {
+            let tokenName = tokenContent[ns]["name"];
+            if (tokenName === createdToken["name"]) {
+                if (overWrite) {
+                    let nameSpaceContent = { "name": createdToken["name"], "value": createdToken["value"] };
+                    tokenContent[ns] = nameSpaceContent;
+                } else {
+                    let tokenValue = tokenContent[ns]["value"];
+                    if (tokenValue != createdToken["value"]) {
+                        cliUtils.logWithBorder(`Token value mismatch for token ${tokenName}! Not updating token value. Use '-o' to overwrite token value. Place the below token in edgekv_tokens.js manually`);
+                    } else {
+                        cliUtils.logWithBorder(`Token value matches for token ${tokenName}. Not updating token value. Use '-o' to overwrite token value.`);
+                    }
+                    response.logToken(createdToken["name"], createdToken["value"], decodedToken, nameSpaceList, false);
+                    process.exit(1);
+                }
+            } else {
+                cliUtils.logWithBorder(`ERROR: Token ${createdToken["name"]} for namespace ${ns} not found in the file`);
+                response.logToken(createdToken["name"], createdToken["value"], decodedToken, nameSpaceList, false);
+                process.exit(1);
+            }
+        }
+    }
+    return tokenContent;
 }

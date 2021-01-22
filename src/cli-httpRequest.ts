@@ -43,6 +43,7 @@ export function sendEdgeRequest(pth: string, method: string, body, headers) {
                 } else {
                     try {
                         var errorObj = JSON.parse(body);
+                        errorObj["status"] = response.statusCode;
                         reject(cliUtils.toJsonPretty(errorObj));
                     } catch (ex) {
                         console.error(`got error code: ${response.statusCode} calling ${method} ${path}\n${body}`);
