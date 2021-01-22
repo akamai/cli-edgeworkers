@@ -88,7 +88,7 @@ Return Codes:
 
 ### Initialize EdgeKV
 
-Initialize the EdgeKV database. This action is only required once to initialize your EdgeKV database and provision the default EdgeKV namespace on Akamai's staging and production environments. It also creates a new, dedicated CP code used to track your EdgeKV usage. Before you can perform any other EdgeKV operations you must successfully complete this step.
+Initialize the EdgeKV database. This action is only required once to initialize your EdgeKV database and provision the *default* EdgeKV namespace on Akamai's staging and production environments. It also creates a new, dedicated CP code used to track your EdgeKV usage. Before you can perform any other EdgeKV operations you must successfully complete this step.
 
 Usage: `akamai edgekv initialize`
 
@@ -104,8 +104,7 @@ Usage: `akamai edgekv show status`
 
 | Option | Description |
 | - | - |
-| -h, --help  |  
-Display information on how to use this EdgeKV command |
+| -h, --help  |  Display information on how to use this EdgeKV command |
 
 ### Create Namespace
 
@@ -174,13 +173,13 @@ Usage: `akamai edgekv write <itemType> <environment> <namespace> <groupId> <item
 | - | - | - |
 | itemType | required | Item type can be 'text' or 'jsonfile' |
 | environment | required | The Akamai environment on which to create or update this item, either “staging” or “production” |
-| namespace | required | Namespace Identifier |
-| groupid | required | group Identifier |
-| itemid | required | Item Identifier |
+| namespace | required | Namespace identifier |
+| groupid | required | Group identifier |
+| itemid | required | Item identifier |
 | value | required | If the itemType is 'text' the value can be a text string. If the itemType is 'jsonfile' the value can be the path/name of a file containing the item value in valid JSON format. |
 
 #### Important Notes
-1. The namespace must have been already created, while the group will be automatically created for you if it does not exist.
+1. The *namespace* must have been already created, while the *group* will be automatically created for you if it does not exist.
 2. The namespace, group, and item identifiers can only include alphanumeric (0-9, a-z, A-Z), underscore (_), and (-) dash characters.
 3. The namespace identifier can be between 1 and 32 characters in length.
 4. The group identifier can be between 1 and 128 characters in length.
@@ -200,9 +199,9 @@ Usage: `akamai edgekv read item <environment> <nameSpace> <groupId> <itemId>`
 | Argument | Existence | Description |
 | - | - | - |
 | environment | required | The Akamai environment on which to read this item, either “staging” or “production”. |
-| namespace | required | Namespace Identifier |
-| groupid | required | group Identifier |
-| itemid | required | Item Identifier |
+| namespace | required | Namespace identifier |
+| groupid | required | Group identifier |
+| itemid | required | Item identifier |
 
 #### Important Notes
 1. The namespace, group, and item identifiers can only include alphanumeric (0-9, a-z, A-Z), underscore (_), and (-) dash characters.
@@ -225,9 +224,9 @@ Usage: `akamai edgekv delete item <environment> <nameSpace> <groupId> <itemId>`
 | Argument | Existence | Description |
 | - | - | - |
 | environment | required | The Akamai environment on which to delete this item, either “staging” or “production”. |
-| namespace | required | Namespace Identifier |
-| groupid | required | group Identifier |
-| itemid | required | Item Identifier |
+| namespace | required | Namespace identifier |
+| groupid | required | Group identifier |
+| itemid | required | Item identifier |
 
 #### Important Notes
 1. The namespace, group, and item identifiers can only include alphanumeric (0-9, a-z, A-Z), underscore (_), and (-) dash characters.
@@ -249,8 +248,8 @@ Usage: `akamai edgekv list items <environment> <nameSpace> <groupId>`
 | Argument | Existence | Description |
 | - | - | - |
 | environment | required | The Akamai environment on which to list the items, either “staging” or “production” |
-| namespace | required | Namespace Identifier |
-| groupid | required | group Identifier |
+| namespace | required | Namespace identifier |
+| groupid | required | Group identifier |
 
 #### Important Notes
 1. The namespace and group identifiers can only include alphanumeric (0-9, a-z, A-Z), underscore (_), and (-) dash characters.
