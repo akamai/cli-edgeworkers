@@ -7,7 +7,7 @@ import * as httpEdge from '../cli-httpRequest';
 import * as pkginfo from '../../package.json';
 const commander = require('commander');
 const program = new commander.Command();
-const copywrite = '\nCopyright (c) 2019-2020 Akamai Technologies, Inc. Licensed under Apache 2 license.\nYour use of Akamai\'s products and services is subject to the terms and provisions outlined in Akamai\'s legal policies.\nVisit http://github.com/akamai/cli-edgeworkers for detailed documentation';
+const copywrite = '\nCopyright (c) 2019-2021 Akamai Technologies, Inc. Licensed under Apache 2 license.\nYour use of Akamai\'s products and services is subject to the terms and provisions outlined in Akamai\'s legal policies.\nVisit http://github.com/akamai/cli-edgeworkers for detailed documentation';
 program
   .version(pkginfo.version)
   .description(pkginfo.description)

@@ -6,7 +6,7 @@ import * as httpEdge from '../cli-httpRequest'
 import * as edgeWorkersClientSvc from './client-manager';
 import * as pkginfo from '../../package.json';
 var program = require('commander');
-const copywrite = '\nCopyright (c) 2019-2020 Akamai Technologies, Inc. Licensed under Apache 2 license.\nYour use of Akamai\'s products and services is subject to the terms and provisions outlined in Akamai\'s legal policies.\nVisit http://github.com/akamai/cli-edgeworkers for detailed documentation';
+const copywrite = '\nCopyright (c) 2019-2021 Akamai Technologies, Inc. Licensed under Apache 2 license.\nYour use of Akamai\'s products and services is subject to the terms and provisions outlined in Akamai\'s legal policies.\nVisit http://github.com/akamai/cli-edgeworkers for detailed documentation';
 
 /* ========== EdgeWorkers CLI Program Commands ========== */
 program
@@ -208,7 +208,7 @@ program
   .action(async function (ewId, network, versionId) {
 
     // Network must use correct keyword STAGING|PRODUCTION
-    if (network.toUpperCase() !== 'STAGING' && network.toUpperCase() !== 'PRODUCTION')
+    if (network.toUpperCase() !== cliUtils.staging && network.toUpperCase() !== cliUtils.production)
       cliUtils.logAndExit(1, `ERROR: Network parameter must be either STAGING or PRODUCTION - was: ${network}`);
     try {
       await cliHandler.createNewActivation(ewId, network.toUpperCase(), versionId);

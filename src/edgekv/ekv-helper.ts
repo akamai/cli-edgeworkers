@@ -42,7 +42,7 @@ export function convertRetentionPeriod(seconds) {
 }
 
 export function validateNetwork(network: string) {
-    if (network.toUpperCase() !== 'STAGING' && network.toUpperCase() !== 'PRODUCTION') {
+    if (network.toUpperCase() !== cliUtils.staging && network.toUpperCase() !== cliUtils.production) {
         cliUtils.logAndExit(1, `ERROR: Environment parameter must be either staging or production - was: ${network}`);
     }
 }

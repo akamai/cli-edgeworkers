@@ -1,6 +1,8 @@
 import * as edgeWorkersClientSvc from '../edgeworkers/client-manager';
 const inquirer = require('inquirer');
 const Spinner = require('cli-spinner').Spinner;
+export const staging = 'STAGING';
+export const production = 'PRODUCTION';
 
 export function logWithBorder(str, type = 'log') {
   var t: string = `--- ${str} ---`;
