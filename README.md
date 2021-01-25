@@ -5,7 +5,10 @@
 -->
 
 # EdgeWorkers CLI
+EdgeWorkers CLI
 The EdgeWorkers command line interface (CLI) expedites the process of registering, uploading, activating and testing EdgeWorkers functions on the Akamai Edge network.
+
+Go to [Akamai CLI for EdgeKV](docs/edgekv_cli.md) for information on how to manage EdgeKV databases and call the EdgeKV API from the command line.
 
 ## Technical Setup Requirements
 To use this tool you need:
