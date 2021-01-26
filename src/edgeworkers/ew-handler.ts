@@ -3,6 +3,7 @@ import * as envUtils from '../utils/env-utils';
 import * as cliUtils from '../utils/cli-utils';
 import * as edgeWorkersSvc from './ew-service';
 import * as edgeWorkersClientSvc from './client-manager';
+require('console.table');
 
 var CryptoJS = require("crypto-js");
 const groupColumnsToKeep = ["groupId", "groupName", "capabilities"];

@@ -47,7 +47,7 @@ export async function getNameSpace(environment: string, nameSpace: string) {
 }
 
 export async function initializeEdgeKv() {
-  let initializedEdgeKv = await edgekvSvc.initializeEdgeKV();
+  let initializedEdgeKv = await cliUtils.spinner(edgekvSvc.initializeEdgeKV(),`Initializing EdgeKV...`);
 
   if (initializedEdgeKv.body != undefined && !initializedEdgeKv.isError) {
     let initRespBody = JSON.parse(initializedEdgeKv.body);
@@ -79,7 +79,7 @@ export async function initializeEdgeKv() {
 }
 
 export async function getInitializationStatus() {
-  let initializedEdgeKv = await edgekvSvc.getInitializedEdgeKV();
+  let initializedEdgeKv = await cliUtils.spinner(edgekvSvc.getInitializedEdgeKV(),"Getting Initialization status...");
 
   if (initializedEdgeKv.body != undefined && !initializedEdgeKv.isError) {
     let initRespBody = JSON.parse(initializedEdgeKv.body);
@@ -135,7 +135,7 @@ export async function readItemFromEdgeKV(environment: string, nameSpace: string,
 
   ekvhelper.validateNetwork(environment);
 
-  let item = await edgekvSvc.readItem(environment, nameSpace, groupId, itemId);
+  let item = await cliUtils.spinner(edgekvSvc.readItem(environment, nameSpace, groupId, itemId),"Reading items from EdgeKV..");
   if (item != undefined && !item.isError) {
     let msg = `Item ${itemId} from group ${groupId}, namespace ${nameSpace} and environment ${environment} retrieved successfully.`
     cliUtils.logWithBorder(msg);
@@ -162,7 +162,7 @@ export async function deleteItemFromEdgeKV(environment: string, nameSpace: strin
 
 export async function listItemsFromGroup(environment: string, nameSpace: string, groupId: string) {
   ekvhelper.validateNetwork(environment);
-  let itemsList = await edgekvSvc.getItemsFromGroup(environment, nameSpace, groupId);
+  let itemsList = await cliUtils.spinner(edgekvSvc.getItemsFromGroup(environment, nameSpace, groupId),`Listing items from namespace ${nameSpace} and group ${groupId}`);
   if (itemsList != undefined && !itemsList.isError) {
 
     let msg: string = `There are no items for group ${groupId}, namespace ${nameSpace} and environment ${environment}`;
