@@ -35,9 +35,10 @@ export function handleError(err) {
         }
     } 
     else {
+        let errDetail = err["detail"] == undefined ? "" : err["detail"];
         return {
             isError: true,
-            error_reason: err["detail"]
+            error_reason: errDetail
         }
     }
 }

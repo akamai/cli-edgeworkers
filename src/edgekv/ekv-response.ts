@@ -1,4 +1,6 @@
 import * as ekvhelper from './ekv-helper';
+require('console.table');
+
 
 export function logNamespace(nameSpaceId: string, createdNameSpace) {
     let retentionPeriod = ekvhelper.convertRetentionPeriod(createdNameSpace["retention_period"]);
