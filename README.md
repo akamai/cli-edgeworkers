@@ -12,14 +12,20 @@ Go to [Akamai CLI for EdgeKV](docs/edgekv_cli.md) for information on how to mana
 
 ## Technical Setup Requirements
 To use this tool you need:
-* [Akamai CLI](https://github.com/akamai/cli) installed. If you have a Mac with brew installed, run this command: `brew install akamai`.
-* An API client that contains the EdgeWorkers APIs with read-write access. Follow the steps in [Get Started with APIs](https://developer.akamai.com/api/getting-started) to learn how to configure credentials to access the API.
-* Node version 7+
+* [Akamai CLI](https://github.com/akamai/cli) installed. 
+	* If you do not have the CLI and are using [Homebrew](https://brew.sh/) on a Mac, run this command: `brew install akamai`
+	* You may also download OS-specific CLI binaries or a Docker image
+* Valid EdgeGrid credentials configured via Akamai Control Center (see [Get Started with APIs](https://developer.akamai.com/api/getting-started))
+* Node version 7 or higher
 
-## Installing EdgeWorkers CLI
-Use the following Akamai CLI command to install the latest EdgeWorkers CLI package:
+## Install or Update EdgeWorkers CLI
+If you do not have the EdgeWorkers CLI package installed, use the following Akamai CLI command to install the latest EdgeWorkers CLI package:
 
 `akamai install edgeworkers`
+
+If you already have the CLI installed, use the following Akamai CLI command to install the latest EdgeWorkers CLI package that includes EdgeKV functionality:
+
+`akamai update edgeworkers`
 
 ## Overview of Commands
 EdgeWorkers CLI enables you to manage EdgeWorkers functions by calling the [EdgeWorkers API](https://developer.akamai.com/api/web_performance/edgeworkers/v1.html).
