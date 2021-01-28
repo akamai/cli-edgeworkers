@@ -24,22 +24,20 @@ The command-line interface (CLI) is a downloadable utility you can use to contro
 You can issue commands to trigger activities including database initialization, namespace management, token creation, and CRUD operations.
 
 ## Technical Setup Requirements
-
 To use this tool you need:
-* [Akamai CLI](https://github.com/akamai/cli) installed. If you have a Mac with brew installed, run this command: brew install akamai.
-* An API client that contains the EdgeWorkers APIs with read-write access. Follow the steps in [Get Started with APIs](https://developer.akamai.com/api/getting-started) to learn how to configure credentials to access the API.
-* Node version 7+
+* [Akamai CLI](https://github.com/akamai/cli) installed. 
+	* If you do not have the CLI and are using [Homebrew](https://brew.sh/) on a Mac, run this command: `brew install akamai`
+	* You may also download OS-specific CLI binaries or a Docker image
+* Valid EdgeGrid credentials configured via Akamai Control Center (see [Get Started with APIs](https://developer.akamai.com/api/getting-started))
+* Node version 7 or higher
 
-## Install or Update the EdgeWorkers and EdgeKV CLI
+## Install or Update EdgeWorkers CLI
+If you do not have the EdgeWorkers CLI package installed, use the following Akamai CLI command to install the latest EdgeWorkers CLI package:
 
-* Use the following Akamai CLI command to install the latest EdgeWorkers CLI package that includes EdgeKV functionality:
-
-Usage:  
 `akamai install edgeworkers`
 
-* Use the following Akamai CLI command to update the latest EdgeWorkers CLI package that includes EdgeKV functionality:
+If you already have the CLI installed, use the following Akamai CLI command to install the latest EdgeWorkers CLI package that includes EdgeKV functionality:
 
-Usage:  
 `akamai update edgeworkers`
 
 ## Overview of Commands
