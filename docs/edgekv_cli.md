@@ -26,9 +26,11 @@ You can issue commands to trigger activities including database initialization, 
 ## Technical Setup Requirements
 
 To use this tool you need:
-* [Akamai CLI](https://github.com/akamai/cli) installed. If you have a Mac with brew installed, run this command: brew install akamai.
-* An API client that contains the EdgeWorkers APIs with read-write access. Follow the steps in [Get Started with APIs](https://developer.akamai.com/api/getting-started) to learn how to configure credentials to access the API.
-* Node version 7+
+* [Akamai CLI](https://github.com/akamai/cli) installed. 
+    * If you do not have the CLI and are using [Homebrew](https://brew.sh/) on a Mac, run this command: `brew install akamai`
+    * You may also [download](https://github.com/akamai/cli) OS-specific CLI binaries or a Docker image
+* Valid EdgeGrid credentials configured via Akamai Control Center (see [Get Started with APIs](https://developer.akamai.com/api/getting-started))
+* Node version 7 or higher
 
 ## Install or Update the EdgeWorkers and EdgeKV CLI
 
@@ -41,6 +43,13 @@ Usage:
 
 Usage:  
 `akamai update edgeworkers`
+
+## Known Issues
+
+When installing the Akamai CLI using the "akamai install edgeworkers" command you may run into a *"Package directory already exists"* error. This is likely because you already have the EdgeWorkers CLI package installed. In this case, please try updating the EdgeWorkers CLI package using “akamai update edgeworkers”.
+
+If you continue to encounter this error when trying to update the Akamai CLI using the “akamai update edgeworkers” command,  uninstall the Akamai CLI using the “akamai uninstall edgeworkers” command. This will remove the existing installation, allowing you to reinstall using the “akamai install edgeworkers” command.
+
 
 ## Overview of Commands
 
