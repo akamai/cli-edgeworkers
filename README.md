@@ -12,14 +12,23 @@ Go to [Akamai CLI for EdgeKV](docs/edgekv_cli.md) for information on how to mana
 
 ## Technical Setup Requirements
 To use this tool you need:
-* [Akamai CLI](https://github.com/akamai/cli) installed. If you have a Mac with brew installed, run this command: `brew install akamai`.
-* An API client that contains the EdgeWorkers APIs with read-write access. Follow the steps in [Get Started with APIs](https://developer.akamai.com/api/getting-started) to learn how to configure credentials to access the API.
-* Node version 7+
+* [Akamai CLI](https://github.com/akamai/cli) installed. 
+    * If you do not have the CLI and are using [Homebrew](https://brew.sh/) on a Mac, run this command: `brew install akamai`
+    * You may also [download](https://github.com/akamai/cli) OS-specific CLI binaries or a Docker image
+* Valid EdgeGrid credentials configured via Akamai Control Center (see [Get Started with APIs](https://developer.akamai.com/api/getting-started))
+* Node version 7 or higher
 
-## Installing EdgeWorkers CLI
-Use the following Akamai CLI command to install the latest EdgeWorkers CLI package:
 
+## Install or Update the EdgeWorkers
+* Use the following Akamai CLI command to install the latest EdgeWorkers CLI package:
+
+Usage:  
 `akamai install edgeworkers`
+
+* Use the following Akamai CLI command to update the latest EdgeWorkers CLI package:
+
+Usage:  
+`akamai update edgeworkers`
 
 ## Overview of Commands
 EdgeWorkers CLI enables you to manage EdgeWorkers functions by calling the [EdgeWorkers API](https://developer.akamai.com/api/web_performance/edgeworkers/v1.html).
@@ -304,8 +313,3 @@ For more information on EdgeWorkers, refer to the following resources:
 ## Reporting Issues
 You are all set, happy coding! If you experience any issues with the EdgeWorkers CLI, raise them as a [github issue](https://github.com/akamai/cli-edgeworkers/issues). Feel free to create a pull request with the fix or suggestion.
 
-<!--esi 
-<esi:eval src="/internal/footer.html?http" dca="esi" />
--->
-
-## EdgeKV
