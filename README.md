@@ -307,3 +307,5 @@ You are all set, happy coding! If you experience any issues with the EdgeWorkers
 <!--esi 
 <esi:eval src="/internal/footer.html?http" dca="esi" />
 -->
+
+## EdgeKV
