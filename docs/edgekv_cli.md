@@ -307,5 +307,5 @@ For more information on EdgeKV, refer to the following resources:
 
 ## Reporting Issues
 
-If you experience any issues with the CLI or feel like there's anything missing, let us know or simply create an issue or a PR on the repo. 
+If you experience any issues with the CLI or feel like there's anything missing, let us know or simply create an [issue](https://github.com/akamai/cli-edgeworkers/issues) or a PR on the repo. 
 
