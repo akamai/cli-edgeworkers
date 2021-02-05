@@ -313,3 +313,6 @@ For more information on EdgeWorkers, refer to the following resources:
 ## Reporting Issues
 You are all set, happy coding! If you experience any issues with the EdgeWorkers CLI, raise them as a [github issue](https://github.com/akamai/cli-edgeworkers/issues). Feel free to create a pull request with the fix or suggestion.
 
+<!--esi
+<esi:eval src="/internal/footer.html?http" dca="esi" />
+-->

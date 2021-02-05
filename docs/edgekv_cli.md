@@ -1,3 +1,9 @@
+<!--esi
+<esi:assign name="dac_stylesheets" value="['/stylesheets/screen.css']" />
+<esi:assign name="dac_footer_js" value="['/javascripts/app/toc.js']" />
+<esi:eval src="/internal/header.html?http" dca="esi" />
+-->
+
 # EdgeKV CLI
 
 * [ Overview ](##overview)
@@ -309,3 +315,6 @@ For more information on EdgeKV, refer to the following resources:
 
 If you experience any issues with the CLI or feel like there's anything missing, let us know or simply create an [issue](https://github.com/akamai/cli-edgeworkers/issues) or a PR on the repo. 
 
+<!--esi
+<esi:eval src="/internal/footer.html?http" dca="esi" />
+-->

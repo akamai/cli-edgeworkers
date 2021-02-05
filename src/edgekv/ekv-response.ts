@@ -1,6 +1,7 @@
 import * as ekvhelper from './ekv-helper';
+import * as cliUtils from '../utils/cli-utils'
+import {ErrorMessage} from './http-error-message';
 require('console.table');
-
 
 export function logNamespace(nameSpaceId: string, createdNameSpace) {
     let retentionPeriod = ekvhelper.convertRetentionPeriod(createdNameSpace["retention_period"]);
@@ -19,6 +20,18 @@ export function logInitialize(initializedEdgekv) {
         Cpcode: initializedEdgekv["cpcode"]
     }
     console.table([initializeStatus]);
+}
+
+/**
+ * todo this needs to be updated when open api releases the beta
+ * @param status 
+ */
+export function logError(errorObj, message) {
+    if (errorObj.status == 401) {
+        cliUtils.logAndExit(1, ErrorMessage.permissionError);
+    } else {
+        cliUtils.logAndExit(1, message);
+    }
 }
 
 export function logToken(tokenName: string, tokenValue, decodedToken, nameSpaceList, savePath:boolean) {

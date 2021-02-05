@@ -1,7 +1,7 @@
 import * as envUtils from './utils/env-utils';
 import * as cliUtils from './utils/cli-utils';
 
-var accountKey: string = null;
+export var accountKey: string = null;
 
 export function setAccountKey(account: string) {
     accountKey = account;

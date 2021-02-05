@@ -3,14 +3,16 @@ import * as cliUtils from '../utils/cli-utils';
 import * as httpEdge from '../cli-httpRequest'
 import * as fs from 'fs';
 
-var accountKey: string = null;
 const EDGEWORKERS_API_BASE = '/edgeworkers/v1';
+
+// var accountKey: string = null;
 
 // This is only for fetching tarball bodies
 function fetchTarball(pth: string, method: string, body, headers, downloadPath: string) {
   const edge = envUtils.getEdgeGrid();
   var path = pth;
   var qs: string = "&";
+  let accountKey = httpEdge.accountKey;
   if (accountKey) {
     // Check if query string already included in path, if not use ? otherwise use &
     if (path.indexOf("?") == -1)
