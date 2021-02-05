@@ -5,8 +5,6 @@ import * as fs from 'fs';
 
 const EDGEWORKERS_API_BASE = '/edgeworkers/v1';
 
-// var accountKey: string = null;
-
 // This is only for fetching tarball bodies
 function fetchTarball(pth: string, method: string, body, headers, downloadPath: string) {
   const edge = envUtils.getEdgeGrid();
