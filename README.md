@@ -20,12 +20,12 @@ To use this tool you need:
 
 
 ## Install or Update the EdgeWorkers
-* Use the following Akamai CLI command to install the latest EdgeWorkers CLI package:
+* If you do not have the EdgeWorkers CLI package installed, use the following Akamai CLI command to install the latest EdgeWorkers CLI package:
 
 Usage:  
 `akamai install edgeworkers`
 
-* Use the following Akamai CLI command to update the latest EdgeWorkers CLI package:
+* If you already have the CLI installed, use the following Akamai CLI command to install the latest EdgeWorkers CLI package that includes EdgeKV functionality:
 
 Usage:  
 `akamai update edgeworkers`
@@ -313,3 +313,6 @@ For more information on EdgeWorkers, refer to the following resources:
 ## Reporting Issues
 You are all set, happy coding! If you experience any issues with the EdgeWorkers CLI, raise them as a [github issue](https://github.com/akamai/cli-edgeworkers/issues). Feel free to create a pull request with the fix or suggestion.
 
+<!--esi
+<esi:eval src="/internal/footer.html?http" dca="esi" />
+-->
