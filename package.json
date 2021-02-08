@@ -1,10 +1,6 @@
 {
   "name": "akamai-edgeworkers-cli",
-<<<<<<< HEAD
   "version": "0.6.0",
-=======
-  "version": "0.5.2",
->>>>>>> a496bdcfb9bb355c4949037593b5c7f65a68c5ff
   "description": "A tool that makes it easier to manage Akamai EdgeWorkers code bundles and EdgeKV databases. Call the EdgeWorkers and EdgeKV API from the command line.",
   "repository": "https://github.com/akamai/cli-edgeworkers",
   "scripts": {
