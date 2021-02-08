@@ -40,21 +40,31 @@ To use this tool you need:
 
 ## Install or Update the EdgeWorkers and EdgeKV CLI
 
-* Use the following Akamai CLI command to install the latest EdgeWorkers CLI package that includes EdgeKV functionality:
+* If you do not have the EdgeWorkers CLI package installed, use the following Akamai CLI command to install the latest EdgeWorkers CLI package:
 
 Usage:  
 `akamai install edgeworkers`
 
-* Use the following Akamai CLI command to update the latest EdgeWorkers CLI package that includes EdgeKV functionality:
+* If you already have the CLI installed, use the following Akamai CLI command to install the latest EdgeWorkers CLI package that includes EdgeKV functionality:
 
 Usage:  
 `akamai update edgeworkers`
 
 ## Known Issues
 
-When installing the Akamai CLI using the "akamai install edgeworkers" command you may run into a *"Package directory already exists"* error. This is likely because you already have the EdgeWorkers CLI package installed. In this case, please try updating the EdgeWorkers CLI package using “akamai update edgeworkers”.
+1. When installing the Akamai CLI using the "akamai install edgeworkers" command you may run into a *"Package directory already exists"* error. This is likely because you already have the EdgeWorkers CLI package installed. In this case, please try updating the EdgeWorkers CLI package using “akamai update edgeworkers”.
 
 If you continue to encounter this error when trying to update the Akamai CLI using the “akamai update edgeworkers” command,  uninstall the Akamai CLI using the “akamai uninstall edgeworkers” command. This will remove the existing installation, allowing you to reinstall using the “akamai install edgeworkers” command.
+
+2. Docker installation error  
+When installing Akamai CLI using docker, you may run into "Error: Cannot find module. '.bin/src/edgekv/ekv-cli-main.js".
+
+Build-time workaround - use this when building the Docker image  
+RUN `akamai install edgeworkers && cd $AKAMAI_CLI_HOME/.akamai-cli/src/cli-edgeworkers/ && npm run build`
+
+Runtime workaround - use this if Docker is already running  
+`cd ~/.akamai-cli/src/cli-edgeworkers/ && npm install --unsafe-perm`
+
 
 
 ## Overview of Commands
