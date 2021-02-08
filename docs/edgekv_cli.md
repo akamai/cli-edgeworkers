@@ -40,12 +40,12 @@ To use this tool you need:
 
 ## Install or Update the EdgeWorkers and EdgeKV CLI
 
-* Use the following Akamai CLI command to install the latest EdgeWorkers CLI package that includes EdgeKV functionality:
+* If you do not have the EdgeWorkers CLI package installed, use the following Akamai CLI command to install the latest EdgeWorkers CLI package:
 
 Usage:  
 `akamai install edgeworkers`
 
-* Use the following Akamai CLI command to update the latest EdgeWorkers CLI package that includes EdgeKV functionality:
+* If you already have the CLI installed, use the following Akamai CLI command to install the latest EdgeWorkers CLI package that includes EdgeKV functionality:
 
 Usage:  
 `akamai update edgeworkers`
