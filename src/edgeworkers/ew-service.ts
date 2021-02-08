@@ -141,3 +141,36 @@ export function createActivationId(ewId: string, network: string, versionId: str
 export function validateTarball(tarballPath: string) {
   return postTarball(`${EDGEWORKERS_API_BASE}/validations`, tarballPath).then(r => r.body);
 }
+
+export function getAuthToken(propertyId: string, acl: string, url: string, expiry: number, network: string) {
+  let urlPath = `${EDGEWORKERS_API_BASE}/secure-token/${propertyId}`;
+  let queryParams = getTokenQueryParams(acl, url, expiry, network);
+
+  if (queryParams.length > 0) {
+    urlPath += `?${queryParams}`;
+  }
+  return httpEdge.getJson(urlPath).then(r => r.body);
+}
+
+function getTokenQueryParams(acl: string, url: string, expiry: number, network: string) {
+  let params = {};
+  if (acl != undefined && acl != null) {
+    params["acl"] = acl;
+  }
+  if (expiry != undefined && expiry != null) {
+    params["expiry"] = expiry;
+  }
+  if (url != undefined && url != null) {
+    params["url"] = url;
+  }
+
+  if (network != undefined && network != null) {
+    params["network"] = network;
+  }
+
+  let query = Object.keys(params)
+    .map(key => cliUtils.escape(key) + '=' + cliUtils.escape(params[key]))
+    .join('&');
+
+  return query;
+}

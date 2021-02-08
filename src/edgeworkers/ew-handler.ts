@@ -447,39 +447,44 @@ export async function createNewActivation(ewId: string, network: string, version
   }
 }
 
-export async function createAuthToken(secretKey: string, path: string, expiry: number, isACL: boolean) {
+export async function createAuthToken(propertyId: string, options?: { acl?: string, url?: string, expiry?: number, network?: string }) {
+  try {
+    if (options.expiry) {
+      validateExpiry(options.expiry);
+    }
+  
+    if (options.acl && options.url) {
+        cliUtils.logAndExit(1, "ERROR: The --acl and --url parameters are mutually exclusive; please use only one parameter. Specifying neither will result in a default value for the --acl parameter being used." );
+    } 
 
-  // Time calculations
-  const startTime = Math.floor(Date.now() / 1000);
-  const endTime = startTime + (expiry * 60);
+    if (options.network) {
+      let network = options.network;
+      if (network.toUpperCase() !== cliUtils.staging && network.toUpperCase() !== cliUtils.production) {
+        cliUtils.logAndExit(1, `ERROR: Network parameter must be either staging or production - was: ${network}`);  
+      }
+    }
 
-  var acl = path;
-  var field_delimiter = "~";
-  var new_token = "";
-  var hmac_token = "";
-
-  new_token += `st=${startTime}`;
-  new_token += field_delimiter;
-  new_token += `exp=${endTime}`;
-
-  if (isACL) {
-    new_token += field_delimiter;
-    new_token += `acl=${acl}`;
-    hmac_token = new_token;
-  } else {
-    hmac_token = new_token + field_delimiter + "url=" + escape(path);
+    let authToken = await cliUtils.spinner(edgeWorkersSvc.getAuthToken(propertyId, options.acl, options.url, options.expiry, options.network),"Creating auth token ...");
+    Object.keys(authToken).forEach(function (key) {
+      authToken = authToken[key];
+    });
+    if (authToken) {
+      let token = "Akamai-EW-Trace: " + authToken;
+      if (edgeWorkersClientSvc.isJSONOutputMode()) {
+        edgeWorkersClientSvc.writeJSONOutput(0, token);
+      } else {
+        cliUtils.logWithBorder("\nAdd the following request header to your requests to get additional trace information.\n" + token + "\n");
+      }
+    }
   }
-
-  const hexedSecretKey = CryptoJS.enc.Hex.parse(secretKey);
-  const hash = CryptoJS.HmacSHA256(hmac_token, hexedSecretKey);
-  const hashStr = CryptoJS.enc.Hex.stringify(hash);
-  var auth_token = new_token + field_delimiter + `hmac=${hashStr}`;
-
-  let msg = "Akamai-EW-Trace: " + auth_token;
-  if (edgeWorkersClientSvc.isJSONOutputMode()) {
-    edgeWorkersClientSvc.writeJSONOutput(0, msg);
-  } else {
-    cliUtils.logWithBorder("\nAdd the following request header to your requests to get additional trace information.\nAkamai-EW-Trace: " + auth_token + "\n");
+  catch (e) {
+    // this will have to be updated once open api is updated.
+    let status = JSON.parse(e)["status"];
+    let errReason = "";
+    if (status == 503) {
+      errReason = `Unable to find Property id ${propertyId}.`
+    }
+    cliUtils.logAndExit(1, `ERROR: Unable to create auth token. ${errReason}`);
   }
 }
 
@@ -494,10 +499,6 @@ export async function generateRandomSecretKey(length: number) {
   }
 }
 
-function escape(tokenComponent: string) {
-  return encodeURIComponent(tokenComponent).toLowerCase();
-}
-
 /* ========== Local Helpers ========== */
 function filterJsonData(data, columnsToKeep: string[]) {
   //Dont filter data if in debug mode
@@ -508,4 +509,13 @@ function filterJsonData(data, columnsToKeep: string[]) {
     });
   }
   return data;
+}
+
+function validateExpiry(expiry) {
+    expiry = parseInt(expiry);
+    if (isNaN(expiry)) {
+      cliUtils.logAndExit(1, "ERROR: The expiry is invalid. It must be an integer value (in minutes) representing the duration of the validity of the token.");
+    } else if (expiry < 1 || expiry > 60) {
+      cliUtils.logAndExit(1, "ERROR: The expiry is invalid. It must be an integer value (in minutes) between 1 and 60.");
+    }
 }

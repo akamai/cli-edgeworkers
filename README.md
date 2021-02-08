@@ -277,7 +277,7 @@ Usage: `akamai edgeworkers validate [options] <bundlePath>`
 ### Create an EdgeWorkers Authentication Token
 Generates an authentication token that can be used to get detailed EdgeWorker debug response headers.
 
-Usage: `akamai edgeworkers create-auth-token [options] <secretKey>`
+Usage: `akamai edgeworkers create-auth-token [options] <propertyId>`
 
 | Option | Description |
 | - | - |
@@ -285,10 +285,11 @@ Usage: `akamai edgeworkers create-auth-token [options] <secretKey>`
 | --acl `<aclPath>` | Path prefix of the response pages which require debugging |
 | --url `<urlPath>` | Exact path of response page which requires debugging |
 | --expiry `<expiry>` | Expiry duration of token, in minutes. |
+| --network `<network>` |  The Akamai environment on which to create this token, either “staging” or “production”
 
 | Argument | Existence | Description |
 | - | - | - |
-| secretKey | required | The secret key (hex-digit based, minimum 64 characters) that is configured for the Akamai property in which the EdgeWorker executes |
+| propertyId | required | The property id that is configured for the Akamai property in which the EdgeWorker executes |
 
 #### Key Details
 1. The `--acl` and `--url` options are mutually exclusive to each other.
