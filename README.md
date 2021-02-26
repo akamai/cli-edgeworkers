@@ -65,6 +65,7 @@ Commands:
 | download \| download-version `[options] <edgeworker-identifier> <version-identifier>` | Download the code bundle of an EdgeWorker version. |
 | status \| list-activations `[options] <edgeworker-identifier>` | List Activation status of a given EdgeWorker Id. |
 | activate \| av `<edgeworker-identifier> <network> <versionId>` | Activate a Version for a given EdgeWorker Id on an Akamai Network. |
+| deactivate \| deact `<edgeworker-identifier> <network> <versionId>` | Deactivate a Version for a given EdgeWorker Id on an Akamai Network. |
 | validate \| vv `<bundlePath>` | Validates a code bundle version without uploading the code bundle. |
 | create-auth-token \| auth `[options] <secretKey>` | Generates an authentication token that can be used to get detailed EdgeWorker debug response headers. |
 | generate-secret \| secret `[options]` | Generates a secret key that can be used to generate auth token or in property variable. |
@@ -273,6 +274,28 @@ Usage: `akamai edgeworkers validate [options] <bundlePath>`
 1. Code bundle path must be found on the local filesystem.
 
 2. Code bundle expects a tgz file already built per EdgeWorkers specification.
+
+### Deactivate an EdgeWorker
+Deactivate a Version for a given EdgeWorker Id on an Akamai Network.
+
+Usage: `akamai edgeworkers deactivate [options] <edgeworker-identifier> <network> <version-identifier>`
+
+| Option | Description |
+| - | - |
+| -h, --help  | output usage information |
+
+| Argument | Existence | Description |
+| - | - | - |
+| edgeworker-identifier | required | A unique integer handle to an EdgeWorkers instance |
+| network | required | Label for which Akamai Network (STAGING or PRODUCTION) activation should be sent to
+| version-identifier | required | A unique integer handle to version of an EdgeWorkers instance |
+
+#### Key Details
+1. Network must be either STAGING or PRODUCTION. Capitalization will be normalized to uppercase.
+
+2. Location response header will be provided with new EdgeWorker Activation id.
+
+3. EdgeWorker activation details response body (JSON) will be provided with 201 response code.
 
 ### Create an EdgeWorkers Authentication Token
 Generates an authentication token that can be used to get detailed EdgeWorker debug response headers.

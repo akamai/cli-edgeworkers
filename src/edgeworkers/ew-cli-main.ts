@@ -221,6 +221,25 @@ program
   });
 
 program
+  .command("deactivate <edgeworker-identifier> <network> <version-identifier>")
+  .description("De-activate a version for a given EdgeWorker Id on an Akamai Network")
+  .alias("deact")
+  .action(async function (ewId, network, versionId) {
+    
+    // Network must use correct keyword STAGING|PRODUCTION
+    if (network.toUpperCase() !== cliUtils.staging && network.toUpperCase() !== cliUtils.production)
+      cliUtils.logAndExit(1, `ERROR: Network parameter must be either staging or production - was: ${network}`);
+    try {
+      await cliHandler.deactivateEdgeworker(ewId, network.toUpperCase(), versionId);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+program
   .command("validate <bundlePath>")
   .description("Validates a code bundle version without uploading the code bundle.")
   .alias("vv")
