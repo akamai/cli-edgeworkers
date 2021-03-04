@@ -308,6 +308,7 @@ Usage: `akamai edgeworkers create-auth-token [options] <secretKey>`
 | --acl `<aclPath>` | Path prefix of the response pages which require debugging |
 | --url `<urlPath>` | Exact path of response page which requires debugging |
 | --expiry `<expiry>` | Expiry duration of token, in minutes. |
+| --format `<format>` | Format in which the output will be printed |
 
 | Argument | Existence | Description |
 | - | - | - |

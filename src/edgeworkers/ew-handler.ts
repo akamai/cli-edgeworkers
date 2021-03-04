@@ -3,6 +3,7 @@ import * as envUtils from '../utils/env-utils';
 import * as cliUtils from '../utils/cli-utils';
 import * as edgeWorkersSvc from './ew-service';
 import * as edgeWorkersClientSvc from './client-manager';
+import { parseOptions } from "commander";
 require('console.table');
 
 var CryptoJS = require("crypto-js");
@@ -470,7 +471,7 @@ export async function deactivateEdgeworker(ewId: string, network: string, versio
   }
 }
 
-export async function createAuthToken(secretKey: string, path: string, expiry: number, isACL: boolean) {
+export async function createAuthToken(secretKey: string, path: string, expiry: number, isACL: boolean, format) {
 
   // Time calculations
   const startTime = Math.floor(Date.now() / 1000);
@@ -501,6 +502,8 @@ export async function createAuthToken(secretKey: string, path: string, expiry: n
   let msg = "Akamai-EW-Trace: " + auth_token;
   if (edgeWorkersClientSvc.isJSONOutputMode()) {
     edgeWorkersClientSvc.writeJSONOutput(0, msg);
+  } else if (format == "curl") {
+    cliUtils.log(`-H ${auth_token}`)
   } else {
     cliUtils.logWithBorder("\nAdd the following request header to your requests to get additional trace information.\nAkamai-EW-Trace: " + auth_token + "\n");
   }

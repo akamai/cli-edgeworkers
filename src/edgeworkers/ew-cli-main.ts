@@ -282,6 +282,7 @@ The default value if not specified is \"/*\". This option is mutually exclusive 
 generating the token, and the URL does NOT appear in the final token itself. The generated token is only valid for the exact URL. This option is mutually \
 exclusive to the --acl option; only use one or the other.")
   .option("--expiry <expiry>", "The number of minutes during which the token is valid, after which it expires. Max value is 60 minutes; default value is 15 minutes.")
+  .option("--format <format>", "Format in which the output will be printed to console")
   .action(async function (secretKey, options) {
 
     if (!secretKey) {
@@ -322,7 +323,7 @@ default value for the --acl parameter being used." );
     }
 
     try {
-      await cliHandler.createAuthToken(secretKey, path, expiry, isACL);
+      await cliHandler.createAuthToken(secretKey, path, expiry, isACL, options.format);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
