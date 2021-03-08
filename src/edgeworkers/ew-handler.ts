@@ -3,7 +3,6 @@ import * as envUtils from '../utils/env-utils';
 import * as cliUtils from '../utils/cli-utils';
 import * as edgeWorkersSvc from './ew-service';
 import * as edgeWorkersClientSvc from './client-manager';
-import { parseOptions } from "commander";
 require('console.table');
 
 var CryptoJS = require("crypto-js");
