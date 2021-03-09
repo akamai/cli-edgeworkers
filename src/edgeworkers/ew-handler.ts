@@ -10,6 +10,7 @@ const groupColumnsToKeep = ["groupId", "groupName", "capabilities"];
 const idColumnsToKeep = ["edgeWorkerId", "name", "groupId"];
 const versionColumnsToKeep = ["edgeWorkerId", "version", "checksum", "createdBy", "createdTime", "sequenceNumber"];
 const activationColumnsToKeep = ["edgeWorkerId", "version", "activationId", "status", "network", "createdBy", "createdTime"];
+const deactivationColumnsToKeep = ["edgeWorkerId", "version", "deactivationId", "status", "network", "createdBy", "createdTime"];
 const errorColumnsToKeep = ["type", "message"];
 
 export async function showGroupOverview(groupId: string) {
@@ -447,7 +448,29 @@ export async function createNewActivation(ewId: string, network: string, version
   }
 }
 
-export async function createAuthToken(secretKey: string, path: string, expiry: number, isACL: boolean) {
+export async function deactivateEdgeworker(ewId: string, network: string, versionId: string) {
+  var deactivate = await cliUtils.spinner(edgeWorkersSvc.deactivateEdgeworker(ewId, network, versionId), `Deactivating Edgeworker for Id ${ewId}, version: ${versionId} on network: ${network}`);
+  if (deactivate) {
+    deactivate = [deactivate];
+    var deactivation = [];
+    Object.keys(deactivate).forEach(function (key) {
+      deactivation.push(filterJsonData(deactivate[key], deactivationColumnsToKeep));
+    });
+    let msg = `EdgeWorker deactivated for Id: ${ewId}, version: ${versionId}, on network: ${network}`;
+    if (edgeWorkersClientSvc.isJSONOutputMode()) {
+      edgeWorkersClientSvc.writeJSONOutput(0, msg, deactivate);
+    }
+    else {
+      cliUtils.logWithBorder(msg);
+      console.table(deactivate);
+    }
+  }
+  else {
+    cliUtils.logAndExit(1, `ERROR: Unable to deactivate EdgeWorker for Id ${ewId}, version: ${versionId} on network: ${network}!`);
+  }
+}
+
+export async function createAuthToken(secretKey: string, path: string, expiry: number, isACL: boolean, format) {
 
   // Time calculations
   const startTime = Math.floor(Date.now() / 1000);
@@ -478,6 +501,8 @@ export async function createAuthToken(secretKey: string, path: string, expiry: n
   let msg = "Akamai-EW-Trace: " + auth_token;
   if (edgeWorkersClientSvc.isJSONOutputMode()) {
     edgeWorkersClientSvc.writeJSONOutput(0, msg);
+  } else if (format == "curl") {
+    cliUtils.log(`-H ${auth_token}`)
   } else {
     cliUtils.logWithBorder("\nAdd the following request header to your requests to get additional trace information.\nAkamai-EW-Trace: " + auth_token + "\n");
   }

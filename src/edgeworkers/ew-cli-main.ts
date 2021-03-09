@@ -221,6 +221,25 @@ program
   });
 
 program
+  .command("deactivate <edgeworker-identifier> <network> <version-identifier>")
+  .description("De-activate a version for a given EdgeWorker Id on an Akamai Network")
+  .alias("deact")
+  .action(async function (ewId, network, versionId) {
+    
+    // Network must use correct keyword STAGING|PRODUCTION
+    if (network.toUpperCase() !== cliUtils.staging && network.toUpperCase() !== cliUtils.production)
+      cliUtils.logAndExit(1, `ERROR: Network parameter must be either staging or production - was: ${network}`);
+    try {
+      await cliHandler.deactivateEdgeworker(ewId, network.toUpperCase(), versionId);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+program
   .command("validate <bundlePath>")
   .description("Validates a code bundle version without uploading the code bundle.")
   .alias("vv")
@@ -263,6 +282,7 @@ The default value if not specified is \"/*\". This option is mutually exclusive 
 generating the token, and the URL does NOT appear in the final token itself. The generated token is only valid for the exact URL. This option is mutually \
 exclusive to the --acl option; only use one or the other.")
   .option("--expiry <expiry>", "The number of minutes during which the token is valid, after which it expires. Max value is 60 minutes; default value is 15 minutes.")
+  .option("--format <format>", "Format in which the output will be printed to console")
   .action(async function (secretKey, options) {
 
     if (!secretKey) {
@@ -303,7 +323,7 @@ default value for the --acl parameter being used." );
     }
 
     try {
-      await cliHandler.createAuthToken(secretKey, path, expiry, isACL);
+      await cliHandler.createAuthToken(secretKey, path, expiry, isACL, options.format);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
