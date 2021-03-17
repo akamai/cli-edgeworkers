@@ -3,6 +3,9 @@ import * as cliUtils from '../utils/cli-utils'
 import {ErrorMessage} from './http-error-message';
 require('console.table');
 
+const shortMnthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const weekday = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
 export function logNamespace(nameSpaceId: string, createdNameSpace) {
     let retentionPeriod = ekvhelper.convertRetentionPeriod(createdNameSpace["retention_period"]);
     var createNameSpace = {
@@ -22,6 +25,22 @@ export function logInitialize(initializedEdgekv) {
     console.table([initializeStatus]);
 }
 
+export function logTokenList(tokenList) {
+    let expiry = new Date(tokenList["expiry"]);
+    let difference = (ekvhelper.getDateDifference(expiry));
+    let warning = "-";
+
+    if (difference >= 30) {
+        warning = `Will EXPIRE in less than ${difference} days`;
+    }
+    let tokens = {
+        TokenName: tokenList["name"],
+        ExpiryDate: `${weekday[expiry.getDay()]},${expiry.getDate()} ${shortMnthNames[expiry.getMonth()]} ${expiry.getFullYear()}`,
+        Warning: warning
+    }
+    console.table([tokens]);
+}
+
 /**
  * todo this needs to be updated when open api releases the beta
  * @param status 
@@ -35,8 +54,6 @@ export function logError(errorObj, message) {
 }
 
 export function logToken(tokenName: string, tokenValue, decodedToken, nameSpaceList, savePath:boolean) {
-    const shortMnthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    let weekday = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     let expiryDate = ekvhelper.convertTokenDate(decodedToken['exp']);
     let issueDate = ekvhelper.convertTokenDate(decodedToken['iat'])
     let env = decodedToken["env"];

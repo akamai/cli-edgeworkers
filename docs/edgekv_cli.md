@@ -20,6 +20,7 @@
     * [ Delete Item](###delete-item)
     * [ List Items](###list-items)
     * [ Create an Access Token](###create-an-access-token)
+    * [ List Access Tokens](###list-access-tokens)
 * [ Resources](##resources)
 * [ Reporting Issues](##reporting-issues)
 
@@ -312,6 +313,16 @@ Example:
 1. The token name can only include alphanumeric (0-9, a-z, A-Z), underscore (_), and (-) dash characters.
 2. The token name can be between 1 and 32 characters in length.
 3. The expiry date must be at least 1 day in the future and no more than 6 months from the current date.
+
+### List Access Tokens
+
+List of all tokens for which the user has permission to download.
+
+Usage: `akamai edgekv list tokens`
+
+| Option | Description |
+| - | - |
+| -h, --help  | Display information on how to use this EdgeKV command |
 
 ___
 ## Resources

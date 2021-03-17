@@ -337,3 +337,15 @@ function updateTokenContent(tokenContent, nameSpaceList, createdToken, decodedTo
     }
     return tokenContent;
 }
+
+export function getDateDifference(date2) {
+    let Difference_In_Time = new Date().getTime() - date2.getTime(); 
+  
+    // To calculate the no. of days between two dates 
+    let Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24); 
+    return Difference_In_Days;
+}
+
+export function getWarningMessage() {
+    
+}

@@ -103,7 +103,7 @@ export async function getInitializationStatus() {
     }
     response.logInitialize(initRespBody);
   } else {
-    response.logError(initializedEdgeKv, `ERROR: EdgeKV Initialization failed.  (${initializedEdgeKv.error_reason}).`);  
+    response.logError(initializedEdgeKv, `ERROR: Unable to retrieve EdgeKV status.  (${initializedEdgeKv.error_reason}).`);  
   }
 }
 
@@ -174,7 +174,21 @@ export async function listItemsFromGroup(environment: string, nameSpace: string,
       console.log(element);
     });
   } else {
-    response.logError(itemsList, `ERROR: Unable to retrieve items from group. ${itemsList.error_reason}`);  
+    response.logError(itemsList, `ERROR: Unable to retrieve items from group. ${itemsList.error_reason}`);
+  }
+}
+
+export async function listTokens() {
+  let tokenList = await cliUtils.spinner(edgekvSvc.getTokenList(), `Fetching token list...`);
+  let msg = `The following tokens are available for you to download`;
+  if (tokenList != undefined && !tokenList.isError) {
+    cliUtils.logWithBorder(msg);
+    tokenList["tokens"].forEach(token => {
+      response.logTokenList(token);
+    });
+    cliUtils.log(`You have ${tokenList["tokens"].length} tokens available to download.`)
+  } else {
+    response.logError(tokenList, `ERROR: Unable to retrieve edgekv access tokens. ${tokenList.error_reason}`);
   }
 }
 

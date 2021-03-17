@@ -56,3 +56,8 @@ export function createEdgeKVToken(tokenName: string, permissionList, allowOnStg:
   };
   return httpEdge.postJson(`${EDGEKV_API_BASE}/tokens`, body).then(r => r.body).catch(err => error.handleError(err));
 }
+
+export function getTokenList() {
+  return httpEdge.getJson(`${EDGEKV_API_BASE}/tokens`).then(r => r.body).catch(err => error.handleError(err));
+}
+// }

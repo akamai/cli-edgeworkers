@@ -164,6 +164,20 @@ list
     cliUtils.logAndExit(0, copywrite);
   });
 
+list
+  .command("tokens")
+  .description("List all tokens for which the user has permission to download.")
+  .action(async function () {
+    try {
+      await kvCliHandler.listTokens();
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
 const create = program.command('create')
   .description("Creates a namespace or creates a token")
   .on("--help", function () {
