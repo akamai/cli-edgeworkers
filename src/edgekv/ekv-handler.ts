@@ -17,7 +17,7 @@ export async function listNameSpaces(environment: string) {
     cliUtils.logWithBorder(`The following namespaces are provisioned on the ${environment} environment`);
     console.table(nsListResp);
   } else {
-    response.logError(nameSpaceList, `ERROR: Error while retrieving namespaces. ${nameSpaceList.error_reason}`);  
+    response.logError(nameSpaceList, `ERROR: Error while retrieving namespaces. ${nameSpaceList.error_reason} [TraceId: ${nameSpaceList.traceId}]`);  
   }
 }
 
@@ -29,7 +29,7 @@ export async function createNamespace(environment: string, nameSpace: string) {
     cliUtils.logWithBorder(msg);
     response.logNamespace(nameSpace, createdNamespace);
   } else {
-    response.logError(createdNamespace, `ERROR: Error while creating namespace. ${createdNamespace.error_reason}`);  
+    response.logError(createdNamespace, `ERROR: Error while creating namespace. ${createdNamespace.error_reason} [TraceId: ${createdNamespace.traceId}]`);  
   }
 
 }
@@ -42,7 +42,7 @@ export async function getNameSpace(environment: string, nameSpace: string) {
     cliUtils.logWithBorder(msg);
     response.logNamespace(nameSpace, createdNamespace);
   } else {
-    response.logError(createdNamespace, `ERROR: Error while retrieving namespace from ${environment} environment. ${createdNamespace.error_reason}`);  
+    response.logError(createdNamespace, `ERROR: Error while retrieving namespace from ${environment} environment. ${createdNamespace.error_reason} [TraceId: ${createdNamespace.traceId}]`);  
   }
 }
 
@@ -74,7 +74,7 @@ export async function initializeEdgeKv() {
     }
     response.logInitialize(initRespBody);
   } else {
-    response.logError(initializedEdgeKv, `ERROR: EdgeKV Initialization failed.  (${initializedEdgeKv.error_reason}).`);  
+    response.logError(initializedEdgeKv, `ERROR: EdgeKV Initialization failed.  (${initializedEdgeKv.error_reason}) [${initializedEdgeKv.traceId}]`);  
   }
 }
 
@@ -103,7 +103,7 @@ export async function getInitializationStatus() {
     }
     response.logInitialize(initRespBody);
   } else {
-    response.logError(initializedEdgeKv, `ERROR: Unable to retrieve EdgeKV status.  (${initializedEdgeKv.error_reason}).`);  
+    response.logError(initializedEdgeKv, `ERROR: Unable to retrieve EdgeKV status.  (${initializedEdgeKv.error_reason}) [TraceId: ${initializedEdgeKv.traceId}]`);  
   }
 }
 
@@ -127,7 +127,7 @@ export async function writeItemToEdgeKV(environment: string, nameSpace: string, 
   if (createdItem != undefined && !createdItem.isError) {
     cliUtils.logWithBorder(msg);
   } else {
-    response.logError(createdItem, `ERROR: Unable to write item to EdgeKV. ${createdItem.error_reason}`);  
+    response.logError(createdItem, `ERROR: Unable to write item to EdgeKV. ${createdItem.error_reason} [TraceId: ${createdItem.traceId}]`);  
   }
 }
 
@@ -145,7 +145,7 @@ export async function readItemFromEdgeKV(environment: string, nameSpace: string,
       console.log(item);
     }
   } else {
-    response.logError(item, `ERROR: Unable to read item. ${item.error_reason}`);  
+    response.logError(item, `ERROR: Unable to read item. ${item.error_reason} [TraceId: ${item.traceId}]`);  
   }
 }
 
@@ -156,7 +156,7 @@ export async function deleteItemFromEdgeKV(environment: string, nameSpace: strin
     let msg = `Item ${itemId} was successfully marked for deletion from group ${groupId}, namespace ${nameSpace} and environment ${environment}`
     cliUtils.logWithBorder(msg);
   } else {
-    response.logError(deletedItem, `ERROR: Unable to delete item ${itemId} from group ${groupId}, namespace ${nameSpace} and environment ${environment}. ${deletedItem.error_reason}`);  
+    response.logError(deletedItem, `ERROR: Unable to delete item ${itemId} from group ${groupId}, namespace ${nameSpace} and environment ${environment}. ${deletedItem.error_reason} [TraceId: ${deletedItem.traceId}]`);  
   }
 }
 
@@ -174,7 +174,7 @@ export async function listItemsFromGroup(environment: string, nameSpace: string,
       console.log(element);
     });
   } else {
-    response.logError(itemsList, `ERROR: Unable to retrieve items from group. ${itemsList.error_reason}`);
+    response.logError(itemsList, `ERROR: Unable to retrieve items from group. ${itemsList.error_reason} [TraceId: ${itemsList.traceId}]`);
   }
 }
 
@@ -188,7 +188,7 @@ export async function listTokens() {
     });
     cliUtils.log(`You have ${tokenList["tokens"].length} tokens available to download.`)
   } else {
-    response.logError(tokenList, `ERROR: Unable to retrieve edgekv access tokens. ${tokenList.error_reason}`);
+    response.logError(tokenList, `ERROR: Unable to retrieve edgekv access tokens. ${tokenList.error_reason} [TraceId: ${tokenList.traceId}]`);
   }
 }
 
@@ -230,7 +230,7 @@ export async function createToken(tokenName: string, options: { save_path?: stri
       response.logToken(createdToken["name"], createdToken["value"], decodedToken, nameSpaceList, false);
     }
   } else {
-    response.logError(createdToken, `ERROR: Unable to create edgekv token. ${createdToken.error_reason}`); 
+    response.logError(createdToken, `ERROR: Unable to create edgekv token. ${createdToken.error_reason} [TraceId: ${createdToken.traceId}]`); 
   }
 }
 
