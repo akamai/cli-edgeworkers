@@ -1,6 +1,7 @@
 import * as cliUtils from '../utils/cli-utils';
 import jwt_decode from "jwt-decode";
 import * as response from './ekv-response';
+import { fromSeconds } from 'from-seconds';
 
 const fs = require('fs');
 var path = require('path')
@@ -12,21 +13,18 @@ const tkn_export = "\n}\nexport { edgekv_access_tokens };"
 
 /**
  * converts seconds to years, months and days
- * @example docs - https://stackoverflow.com/questions/8942895/convert-a-number-of-days-to-days-months-and-years-with-jquery/8943500
  * @param seconds 
  */
 export function convertRetentionPeriod(seconds) {
     if (seconds == 0) {
         return "Indefinite";
     }
-
-    let days = Math.floor(seconds / 86400); // converting seconds to days
-    let y = 365;
-    let m = 30;
-    var remainder = days % y;
-    let remDays = remainder % m;
-    let year = (days - remainder) / y;
-    let month = (remainder - remDays) / m;
+    let convResult = fromSeconds(seconds);
+    let yearConv = convResult.toYears();
+    let year = yearConv["years"];
+    let month = yearConv["months"];
+    let days = yearConv["days"];
+    let totalDays = convResult.toDays()["days"];
     let result: string = "";
 
     if (year >= 1) {
@@ -35,9 +33,10 @@ export function convertRetentionPeriod(seconds) {
     if (month >= 1) {
         result += month + ((month == 1) ? " month " : " months ");
     }
-    if (remDays >= 1) {
-        result += remDays + ((remDays == 1) ? " day" : " days");
+    if (days >= 1) {
+        result += days + ((days == 1) ? " day" : " days");
     }
+    result += " (" + totalDays + "days)";
     return result;
 }
 
@@ -338,14 +337,10 @@ function updateTokenContent(tokenContent, nameSpaceList, createdToken, decodedTo
     return tokenContent;
 }
 
-export function getDateDifference(date2) {
-    let Difference_In_Time = new Date().getTime() - date2.getTime(); 
+export function getDateDifference(date) {
+    let Difference_In_Time = date.getTime() - new Date().getTime();
   
     // To calculate the no. of days between two dates 
     let Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24); 
     return Difference_In_Days;
-}
-
-export function getWarningMessage() {
-    
 }

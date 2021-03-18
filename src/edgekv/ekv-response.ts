@@ -27,10 +27,10 @@ export function logInitialize(initializedEdgekv) {
 
 export function logTokenList(tokenList) {
     let expiry = new Date(tokenList["expiry"]);
-    let difference = (ekvhelper.getDateDifference(expiry));
+    let difference = Math.floor(ekvhelper.getDateDifference(expiry));
     let warning = "-";
 
-    if (difference >= 30) {
+    if (difference <= 30) {
         warning = `Will EXPIRE in less than ${difference} days`;
     }
     let tokens = {
