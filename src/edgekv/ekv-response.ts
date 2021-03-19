@@ -1,6 +1,6 @@
 import * as ekvhelper from './ekv-helper';
 import * as cliUtils from '../utils/cli-utils'
-import {ErrorMessage} from './http-error-message';
+import { ErrorMessage } from './http-error-message';
 require('console.table');
 
 const shortMnthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -13,7 +13,7 @@ export function logNamespace(nameSpaceId: string, createdNameSpace) {
         RetentionPeriod: retentionPeriod
     }
     console.table([createNameSpace]);
-}  
+}
 
 export function logInitialize(initializedEdgekv) {
     let initializeStatus = {
@@ -26,19 +26,23 @@ export function logInitialize(initializedEdgekv) {
 }
 
 export function logTokenList(tokenList) {
-    let expiry = new Date(tokenList["expiry"]);
-    let difference = Math.floor(ekvhelper.getDateDifference(expiry));
-    let warning = "-";
+    let tokens = [];
+    tokenList["tokens"].forEach(token => {
+        let expiry = new Date(token["expiry"]);
+        let difference = Math.floor(ekvhelper.getDateDifference(expiry));
+        let warning = "-";
 
-    if (difference <= 30) {
-        warning = `Will EXPIRE in less than ${difference} days`;
-    }
-    let tokens = {
-        TokenName: tokenList["name"],
-        ExpiryDate: `${weekday[expiry.getDay()]},${expiry.getDate()} ${shortMnthNames[expiry.getMonth()]} ${expiry.getFullYear()}`,
-        Warning: warning
-    }
-    console.table([tokens]);
+        if (difference <= 30) {
+            warning = `Will EXPIRE in less than ${difference} days`;
+        }
+        let tokenContent = {
+            TokenName: token["name"],
+            ExpiryDate: `${weekday[expiry.getDay()]},${expiry.getDate()} ${shortMnthNames[expiry.getMonth()]} ${expiry.getFullYear()}`,
+            Warning: warning
+        }
+        tokens.push(tokenContent);
+    });
+    console.table(tokens);
 }
 
 /**
@@ -53,57 +57,61 @@ export function logError(errorObj, message) {
     }
 }
 
-export function logToken(tokenName: string, tokenValue, decodedToken, nameSpaceList, savePath:boolean) {
+export function logToken(tokenName: string, tokenValue, decodedToken, nameSpaceList, savePath: boolean) {
     let expiryDate = ekvhelper.convertTokenDate(decodedToken['exp']);
     let issueDate = ekvhelper.convertTokenDate(decodedToken['iat'])
     let env = decodedToken["env"];
     let staging = false;
     let production = false;
-    env.forEach(function(value) {
-        if(value === 's') {
+    env.forEach(function (value) {
+        if (value === 's') {
             staging = true;
-        } else if(value === 'p') {
+        } else if (value === 'p') {
             production = true;
         }
     })
 
     console.log(
-      'Token Name:          ', tokenName+'\n'  
-    + 'CpCode used:         ', decodedToken["cpc"]+'\n' 
-    + 'Valid for EWIDs:     ', decodedToken["ewids"]+'\n'
-    + 'Valid on Production: ', production+'\n'
-    + 'Valid on Staging:    ', staging+'\n'
-    + `Expiry date:          ${weekday[expiryDate.getDay()]},${expiryDate.getDate()} ${shortMnthNames[expiryDate.getMonth()]} ${expiryDate.getFullYear()}\n`
+        'Token Name:          ', tokenName + '\n'
+    + 'CpCode used:         ', decodedToken["cpc"] + '\n'
+    + 'Valid for EWIDs:     ', decodedToken["ewids"] + '\n'
+    + 'Valid on Production: ', production + '\n'
+    + 'Valid on Staging:    ', staging + '\n'
     + `Issue date:           ${weekday[issueDate.getDay()]},${issueDate.getDate()} ${shortMnthNames[issueDate.getMonth()]} ${issueDate.getFullYear()}`);
+    + `Expiry date:          ${weekday[expiryDate.getDay()]},${expiryDate.getDate()} ${shortMnthNames[expiryDate.getMonth()]} ${expiryDate.getFullYear()}\n`
     
-    // if save path is not provided print the token value
-    if(!savePath) {
-        console.log("value:                "+tokenValue);
+    let difference = Math.floor(ekvhelper.getDateDifference(expiryDate));
+    if(difference <= 30) {
+        console.log(`       ***WARNING: Access Token will EXPIRE in less than ${difference} days!***`);
     }
-    
+    // if save path is not provided print the token value
+    if (!savePath) {
+        console.log("value:                " + tokenValue);
+    }
+
     console.log('Namespace Permissions:')
 
     for (let ns of nameSpaceList) {
         let permission = decodedToken[ns];
-            let permissionList = [];
-            permission.forEach(function(value) {
-                permissionList.push(permissions[value]);
-            });
-            console.log('  '+ ns.substring(ns.indexOf('-')+1)+':  [' + permissionList+']');
-    }    
+        let permissionList = [];
+        permission.forEach(function (value) {
+            permissionList.push(permissions[value]);
+        });
+        console.log('  ' + ns.substring(ns.indexOf('-') + 1) + ':  [' + permissionList + ']');
+    }
 }
 
 export function getNameSpaceFromToken(decodedToken) {
     let nameSpaceList = [];
-    Object.keys(decodedToken).forEach(function(key){
-        if(key.includes("namespace-")){
+    Object.keys(decodedToken).forEach(function (key) {
+        if (key.includes("namespace-")) {
             nameSpaceList.push(key);
         }
     })
 }
 
 enum permissions {
-r = "READ",
-w = "WRITE",
-d = "DELETE"
+    r = "READ",
+    w = "WRITE",
+    d = "DELETE"
 }
