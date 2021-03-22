@@ -28,7 +28,8 @@ export function logInitialize(initializedEdgekv) {
 export function logTokenList(tokenList) {
     let tokens = [];
     tokenList["tokens"].forEach(token => {
-        let expiry = new Date(token["expiry"]);
+        let parts = token["expiry"].split('-');
+        let expiry = new Date(parts[0], parts[1] - 1, parts[2]); 
         let difference = Math.floor(ekvhelper.getDateDifference(expiry));
         let warning = "-";
 
@@ -37,7 +38,7 @@ export function logTokenList(tokenList) {
         }
         let tokenContent = {
             TokenName: token["name"],
-            ExpiryDate: `${weekday[expiry.getDay()]},${expiry.getDate()} ${shortMnthNames[expiry.getMonth()]} ${expiry.getFullYear()}`,
+            ExpiryDate: `${weekday[expiry.getUTCDay()]},${expiry.getDate()} ${shortMnthNames[expiry.getMonth()]} ${expiry.getFullYear()}`,
             Warning: warning
         }
         tokens.push(tokenContent);
@@ -77,12 +78,12 @@ export function logToken(tokenName: string, tokenValue, decodedToken, nameSpaceL
     + 'Valid for EWIDs:     ', decodedToken["ewids"] + '\n'
     + 'Valid on Production: ', production + '\n'
     + 'Valid on Staging:    ', staging + '\n'
-    + `Issue date:           ${weekday[issueDate.getDay()]},${issueDate.getDate()} ${shortMnthNames[issueDate.getMonth()]} ${issueDate.getFullYear()}`);
-    + `Expiry date:          ${weekday[expiryDate.getDay()]},${expiryDate.getDate()} ${shortMnthNames[expiryDate.getMonth()]} ${expiryDate.getFullYear()}\n`
+    + `Issue date:           ${weekday[issueDate.getDay()]},${issueDate.getDate()} ${shortMnthNames[issueDate.getMonth()]} ${issueDate.getFullYear()} \n`
+    + `Expiry date:          ${weekday[expiryDate.getDay()]},${expiryDate.getDate()} ${shortMnthNames[expiryDate.getMonth()]} ${expiryDate.getFullYear()}`);
     
     let difference = Math.floor(ekvhelper.getDateDifference(expiryDate));
     if(difference <= 30) {
-        console.log(`       ***WARNING: Access Token will EXPIRE in less than ${difference} days!***`);
+        console.log(`       *** WARNING: Access Token will EXPIRE in less than ${difference} days! ***`);
     }
     // if save path is not provided print the token value
     if (!savePath) {

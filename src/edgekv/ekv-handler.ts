@@ -193,17 +193,12 @@ export async function listTokens() {
 export async function createToken(tokenName: string, options: { save_path?: string, staging?: string, production?: string, ewids?: string, namespace?: string, expiry?: string, overwrite?}) {
   // convert string to ISO date
   let expiry = getExpiryDate(options.expiry);
-  let savePath = options.save_path;
+
   // parse input permissions
   let permissionList = parseNameSpacePermissions(options.namespace);
   let envAccess = { "allow": true, "deny": false };
-
-  if (savePath) {
-    if (!ekvhelper.checkIfFileExists(savePath)) {
-      cliUtils.logWithBorder(`ERROR: Unable to create token. save_path provided is invalid or you do not have access permissions. Please provide a valid path.`);
-      process.exit(1);
-    }
-  }
+  let savePath = options.save_path;
+  validateSavePath(savePath);
 
   if (options.staging == "deny" && options.production == "deny") {
     cliUtils.logWithBorder(`ERROR: Unable to create token. Either one of staging or production access should be set to "allow". Please provide a valid access permissions.`);
@@ -213,22 +208,22 @@ export async function createToken(tokenName: string, options: { save_path?: stri
   let createdToken = await cliUtils.spinner(edgekvSvc.createEdgeKVToken(tokenName, permissionList, envAccess[options.staging], envAccess[options.production], options.ewids, expiry), "Creating edgekv token ...");
 
   if (createdToken != undefined && !createdToken.isError) {
-    // decodes the jwt token
-    let decodedToken = ekvhelper.decodeJWTToken(createdToken["value"]);
-    let nameSpaceList = ekvhelper.getNameSpaceListFromJWT(decodedToken);
-    let msg = `Add the token value in edgekv_tokens.js file and place it in your bundle. Use --save_path option to save the token file to your bundle`
-    if (options.save_path) {
-      if (ekvhelper.getFileExtension(savePath) != ".tgz") {
-        ekvhelper.createTokenFileWithoutBundle(options.save_path, options.overwrite, createdToken, decodedToken, nameSpaceList);
-      } else {
-        ekvhelper.saveTokenToBundle(options.save_path, options.overwrite, createdToken, decodedToken, nameSpaceList);
-      }
-    } else {
-      cliUtils.logWithBorder(msg);
-      response.logToken(createdToken["name"], createdToken["value"], decodedToken, nameSpaceList, false);
-    }
+    processToken(createdToken, savePath, options.overwrite); 
   } else {
     response.logError(createdToken, `ERROR: Unable to create edgekv token. ${createdToken.error_reason} [TraceId: ${createdToken.traceId}]`);
+  }
+}
+
+export async function retrieveToken(tokenName: string, options: { save_path?: string, overwrite?}) {
+  let savePath = options.save_path;
+  validateSavePath(savePath);
+
+  let retrievedToken = await cliUtils.spinner(edgekvSvc.getSingleToken(tokenName));
+
+  if (retrievedToken != undefined && !retrievedToken.isError) {
+    processToken(retrievedToken, savePath, options.overwrite);
+  } else {
+    response.logError(retrievedToken, `ERROR: Unable to retrieve edgekv token. ${retrievedToken.error_reason} [TraceId: ${retrievedToken.traceId}]`);
   }
 }
 
@@ -281,4 +276,30 @@ function parseNameSpacePermissions(namespace: string) {
     permissionList[per[0]] = permissions;
   });
   return permissionList;
+}
+
+function validateSavePath(savePath) {
+  if (savePath) {
+    if (!ekvhelper.checkIfFileExists(savePath)) {
+      cliUtils.logWithBorder(`ERROR: Unable to save token. save_path provided is invalid or you do not have access permissions. Please provide a valid path.`);
+      process.exit(1);
+    }
+  }
+}
+
+function processToken(token, savePath, overwrite) {
+  // decodes the jwt token
+  let decodedToken = ekvhelper.decodeJWTToken(token["value"]);
+  let nameSpaceList = ekvhelper.getNameSpaceListFromJWT(decodedToken);
+  let msg = `Add the token value in edgekv_tokens.js file and place it in your bundle. Use --save_path option to save the token file to your bundle`
+  if (savePath) {
+    if (ekvhelper.getFileExtension(savePath) != ".tgz") {
+      ekvhelper.createTokenFileWithoutBundle(savePath, overwrite, token, decodedToken, nameSpaceList);
+    } else {
+      ekvhelper.saveTokenToBundle(savePath, overwrite, token, decodedToken, nameSpaceList);
+    }
+  } else {
+    cliUtils.logWithBorder(msg);
+    response.logToken(token["name"], token["value"], decodedToken, nameSpaceList, false);
+  }
 }
