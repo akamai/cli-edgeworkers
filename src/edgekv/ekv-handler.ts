@@ -218,7 +218,7 @@ export async function retrieveToken(tokenName: string, options: { save_path?: st
   let savePath = options.save_path;
   validateSavePath(savePath);
 
-  let retrievedToken = await cliUtils.spinner(edgekvSvc.getSingleToken(tokenName));
+  let retrievedToken = await cliUtils.spinner(edgekvSvc.getSingleToken(tokenName), "Downloading egdekv token...");
 
   if (retrievedToken != undefined && !retrievedToken.isError) {
     processToken(retrievedToken, savePath, options.overwrite);

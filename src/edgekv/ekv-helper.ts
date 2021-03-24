@@ -224,9 +224,11 @@ function constructTokenFile(tokenContent) {
 export function createTokenFileWithoutBundle(savePath, overWrite, createdToken, decodedToken, nameSpaceList) {
 
     let msg = `Token in ${savePath}/edgekv_tokens.js was successfully updated.`;
-
+    let tokenFilePath = savePath;
     // if token file does not exist, create new file
-    let tokenFilePath = savePath + "/edgekv_tokens.js";
+    if (savePath.indexOf("edgekv_tokens.js") == -1) {
+        tokenFilePath = savePath + "/edgekv_tokens.js";
+    }
     let tokenFileContent = "";
     let tokenContent = [];
     if (!checkIfFileExists(tokenFilePath)) {
