@@ -3,11 +3,13 @@ import * as envUtils from '../utils/env-utils';
 import * as cliUtils from '../utils/cli-utils';
 import * as edgeWorkersSvc from './ew-service';
 import * as edgeWorkersClientSvc from './client-manager';
+const readline = require('readline-sync');
 require('console.table');
 
 var CryptoJS = require("crypto-js");
 const groupColumnsToKeep = ["groupId", "groupName", "capabilities"];
-const idColumnsToKeep = ["edgeWorkerId", "name", "groupId"];
+const idColumnsToKeep = ["edgeWorkerId", "name", "groupId", "resourceTierId"];
+const clonedColumnsToKeep = ["edgeWorkerId", "name", "groupId", "resourceTierId", "sourceEdgeWorkerId", "createdBy", "createdTime"];
 const versionColumnsToKeep = ["edgeWorkerId", "version", "checksum", "createdBy", "createdTime", "sequenceNumber"];
 const activationColumnsToKeep = ["edgeWorkerId", "version", "activationId", "status", "network", "createdBy", "createdTime"];
 const deactivationColumnsToKeep = ["edgeWorkerId", "version", "deactivationId", "status", "network", "createdBy", "createdTime"];
@@ -53,13 +55,13 @@ export async function showGroupOverview(groupId: string) {
   }
 }
 
-export async function showEdgeWorkerIdOverview(ewId: string, groupId: string) {
+export async function showEdgeWorkerIdOverview(ewId: string, groupId: string, resourceTierId: string) {
   var ids = null;
   var id = [];
   var accountId: string = '';
 
   if (!ewId) {
-    ids = await cliUtils.spinner(edgeWorkersSvc.getAllEdgeWorkerIds(groupId), "Fetching EdgeWorker Ids...");
+    ids = await cliUtils.spinner(edgeWorkersSvc.getAllEdgeWorkerIds(groupId, resourceTierId), "Fetching EdgeWorker Ids...");
     // remove outer envelope of JSON data
     if (ids.hasOwnProperty("edgeWorkerIds"))
       ids = ids["edgeWorkerIds"];
@@ -80,7 +82,7 @@ export async function showEdgeWorkerIdOverview(ewId: string, groupId: string) {
     ewId = "any";
 
   // If data was provided format it, otherwise submit an INFO statement that no data was provided
-  if (ids.length > 0) {
+  if (ids.length > 0 && !ids.isError) {
     // accountid should be consistent across returned data set so grab value for messaging from first array element
     accountId = ids[0]["accountId"];
 
@@ -100,16 +102,18 @@ export async function showEdgeWorkerIdOverview(ewId: string, groupId: string) {
       cliUtils.logWithBorder(msg);
       console.table(id);
     }
+  } else if (ids.isError) {
+    cliUtils.logAndExit(1, ids.error_reason);
   }
   else {
     cliUtils.logAndExit(0, `INFO: There is currently no EdgeWorker Id info for group: ${groupId}, ewId: ${ewId}`);
   }
 }
 
-export async function updateEdgeWorkerInfo(ewId: string, groupId: string, name: string) {
-  var ids = await cliUtils.spinner(edgeWorkersSvc.updateEdgeWorkerId(ewId, groupId, name), `Updating info for EdgeWorker Id ${ewId}`);
+export async function updateEdgeWorkerInfo(ewId: string, groupId: string, name: string, resourceTierId?: string) {
+  var ids = await cliUtils.spinner(edgeWorkersSvc.updateEdgeWorkerId(ewId, groupId, name, resourceTierId), `Updating info for EdgeWorker Id ${ewId}`);
 
-  if (ids) {
+  if (ids && !ids.isError) {
     ids = [ids];
     var id = [];
     Object.keys(ids).forEach(function (key) {
@@ -123,13 +127,133 @@ export async function updateEdgeWorkerInfo(ewId: string, groupId: string, name: 
       cliUtils.logWithBorder(msg);
       console.table(id);
     }
+  } else {
+    cliUtils.logAndExit(1, ids.error_reason);
   }
 }
 
-export async function createEdgeWorkerId(groupId: string, name: string) {
-  var ids = await cliUtils.spinner(edgeWorkersSvc.createEdgeWorkerId(groupId, name), `Creating new EdgeWorker Id in group: ${groupId}, with name: ${name}`);
+export async function getResourceTierInfo() {
+  // get contract list
+  let contractList = await cliUtils.spinner(getContractIds(),"Retrieving contract id's...");
+  if (contractList == undefined) {
+    cliUtils.logAndExit(1, "ERROR: Unable to retrieve contract ids for your account.");
+  }
 
-  if (ids) {
+  let contractId = readline.keyInSelect(contractList, "Please select from the above contract ids :");
+  let selectedOption = (contractId == -1) ? "cancel" : contractList[contractId]
+  console.log('You have selected '+selectedOption);
+  if (contractList[contractId] == undefined) {
+    cliUtils.logAndExit(1, "ERROR: Please select a valid contract id");
+  }
+  let resourceTierList = await getResourceTierList(contractList[contractId]);
+
+  cliUtils.log("\n Please find the resource tier information below:");
+  let resourceIds = [];
+  resourceTierList.forEach(function (resTier, index) {
+    console.log(index + 1 + ". Resource Tier " + resTier["resourceTierId"] + " " + resTier["resourceTierName"] + "\n");
+    resourceIds.push(resTier["resourceTierId"]);
+    let ewLimit = resTier["edgeWorkerLimits"];
+    ewLimit.forEach(function (limit) {
+      console.log(limit["limitName"] + ": " + limit["limitValue"] + " " + limit["limitUnit"]);
+    });
+    console.log(); // adding line break
+  });
+
+  let resourceTrIdx = readline.keyInSelect(resourceIds, 'Please select from the above resource tier ids');
+  return resourceIds[resourceTrIdx];
+}
+
+/**
+ * This helper method is reused by both get contracts and in create edgeworker
+ * @returns contract id list
+ */
+async function getContractIds() {
+  let contractIdList = await cliUtils.spinner(edgeWorkersSvc.getContracts(), "Retrieving contract id's...");
+  if (contractIdList && !contractIdList.isError) {
+    let contractIds = contractIdList["contractIds"]
+    if (contractIds.length == 0) {
+      cliUtils.logAndExit(1, "Unable to retrieve contracts for your account.")
+    }
+    return contractIdList["contractIds"];
+  } else {
+    cliUtils.logAndExit(1, contractIdList.error_reason);
+  }
+}
+
+export async function getContracts() {
+  let contractIdList = await getContractIds();
+  if (contractIdList != undefined) {
+    let msg = "List of contract id's associated with this account"
+    let contractList = [];
+    contractIdList.forEach(function (value) {
+      contractList.push({ "ContractIds": value });
+    });
+    if (edgeWorkersClientSvc.isJSONOutputMode()) {
+      edgeWorkersClientSvc.writeJSONOutput(0, msg, contractList);
+    } else {
+      cliUtils.logWithBorder(msg);
+      console.table(contractList);
+    }
+  } else {
+    cliUtils.logAndExit(1, "ERROR: Unable to retrieve contracts for your account.")
+  }
+}
+
+export async function getResourceTiers() {
+  let contractIdList = await getContractIds();
+  if (contractIdList == undefined) {
+    cliUtils.logAndExit(1, "ERROR: Unable to retrieve contracts for your account.");
+  } else {
+    cliUtils.log("Please select from the following contract ids :");
+    let contractId = readline.keyInSelect(contractIdList, "");
+    if (contractIdList[contractId] == undefined) {
+      cliUtils.logAndExit(1, "ERROR: Please select a valid contract id");
+    }
+    let resourceTierList = await getResourceTierList(contractIdList[contractId]);
+    let msg = `The following Resource Tiers available for the contract id ${contractIdList[contractId]}`;
+    cliUtils.logWithBorder(msg);
+    resourceTierList.forEach(function (resTier, index) {
+      console.log(index + 1 + ". ResourceTier " + resTier["resourceTierId"] + " - " + resTier["resourceTierName"]);
+      let ewLimit = resTier["edgeWorkerLimits"];
+      ewLimit.forEach(function (limit) {
+        console.log(limit["limitName"] + ": " + limit["limitValue"] + " " + limit["limitUnit"]);
+      });
+      console.log();
+    })
+  }
+}
+
+export async function getResourceTierForEwid(ewId: string) {
+  let resourceTier = await cliUtils.spinner(edgeWorkersSvc.getResourceTierForEwid(ewId), `Retrieving resource tier for Edgeworker id ${ewId}...`);
+  if (resourceTier && !resourceTier.isError) {
+    let keyVal = "ResourceTier " + resourceTier["resourceTierId"] + " - " + resourceTier["resourceTierName"];
+    cliUtils.logWithBorder(keyVal);
+    let ewLimit = resourceTier["edgeWorkerLimits"];
+    ewLimit.forEach(function (limit) {
+      console.log(limit["limitName"] + ": " + limit["limitValue"] + " " + limit["limitUnit"]);
+    });
+  } else {
+    cliUtils.logAndExit(1, resourceTier.error_reason);
+  }
+}
+
+async function getResourceTierList(contractId) {
+  let resourceTierList = await cliUtils.spinner(edgeWorkersSvc.getResourceTiers(contractId), `Retrieving resource tiers for contract id ${contractId}...`);
+  if (!resourceTierList.isError) {
+    if (resourceTierList["resourceTiers"].length == 0) {
+      cliUtils.logAndExit(1, `Unable to retrieve resource tiers for your contract id ${contractId}.`);
+    } else {
+      return resourceTierList["resourceTiers"];
+    }
+  } else {
+    cliUtils.logAndExit(1, resourceTierList.error_reason);
+  }
+}
+
+export async function createEdgeWorkerId(groupId: string, name: string, resourceTierId: string) {
+  var ids = await cliUtils.spinner(edgeWorkersSvc.createEdgeWorkerId(groupId, name, resourceTierId), `Creating new EdgeWorker Id in group: ${groupId}, with name: ${name}`);
+
+  if (ids && !ids.isError) {
     ids = [ids];
     var id = [];
     Object.keys(ids).forEach(function (key) {
@@ -143,6 +267,8 @@ export async function createEdgeWorkerId(groupId: string, name: string) {
       cliUtils.logWithBorder(msg);
       console.table(id);
     }
+  } else {
+    cliUtils.logAndExit(1, ids.error_reason);
   }
 }
 
@@ -445,6 +571,28 @@ export async function createNewActivation(ewId: string, network: string, version
   }
   else {
     cliUtils.logAndExit(1, `ERROR: Activation record was not able to be created for EdgeWorker Id ${ewId}, version: ${versionId} on network: ${network}!`);
+  }
+}
+
+export async function cloneEdgeworker(ewId: string, groupId: string, ewName: string, resourceTierId: string) {
+  let clonedEw = await cliUtils.spinner(edgeWorkersSvc.cloneEdgeworker(ewId, ewName, groupId, resourceTierId), "Cloning Edgeworker ...")
+  
+  if (clonedEw && !clonedEw.isError) {
+    let msg = `Cloned Edgeworker from Edgeworker id ${ewId} to resourceTier id ${resourceTierId}`;
+    clonedEw = [clonedEw];
+    var id = [];
+    Object.keys(clonedEw).forEach(function (key) {
+      id.push(filterJsonData(clonedEw[key], clonedColumnsToKeep));
+    });
+    if (edgeWorkersClientSvc.isJSONOutputMode()) {
+      edgeWorkersClientSvc.writeJSONOutput(0, msg, id);
+    }
+    else {
+      cliUtils.logWithBorder(msg);
+      console.table(id);
+    }
+  } else {
+    cliUtils.logAndExit(1, clonedEw.error_reason);
   }
 }
 

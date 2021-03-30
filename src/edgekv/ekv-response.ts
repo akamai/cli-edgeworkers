@@ -1,6 +1,6 @@
 import * as ekvhelper from './ekv-helper';
 import * as cliUtils from '../utils/cli-utils'
-import {ErrorMessage} from './http-error-message';
+import {ErrorMessage} from '../utils/http-error-message';
 require('console.table');
 
 export function logNamespace(nameSpaceId: string, createdNameSpace) {

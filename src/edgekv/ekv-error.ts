@@ -1,5 +1,3 @@
-import * as cliUtils from '../utils/cli-utils';
-
 // temporary solution to parse error until edgeKV team comes up with proper design
 export function handleError(err) {
 
