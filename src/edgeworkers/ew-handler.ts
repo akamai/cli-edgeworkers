@@ -13,6 +13,7 @@ const clonedColumnsToKeep = ["edgeWorkerId", "name", "groupId", "resourceTierId"
 const versionColumnsToKeep = ["edgeWorkerId", "version", "checksum", "createdBy", "createdTime", "sequenceNumber"];
 const activationColumnsToKeep = ["edgeWorkerId", "version", "activationId", "status", "network", "createdBy", "createdTime"];
 const deactivationColumnsToKeep = ["edgeWorkerId", "version", "deactivationId", "status", "network", "createdBy", "createdTime"];
+const resourceTierColumnsToKeep = ["resourceTierId", "resourceTierName", "edgeWorkerLimits"];
 const errorColumnsToKeep = ["type", "message"];
 
 export async function showGroupOverview(groupId: string) {
@@ -210,28 +211,39 @@ export async function getResourceTiers() {
       cliUtils.logAndExit(1, "ERROR: Please select a valid contract id");
     }
     let resourceTierList = await getResourceTierList(contractIdList[contractId]);
-    let msg = `The following Resource Tiers available for the contract id ${contractIdList[contractId]}`;
-    cliUtils.logWithBorder(msg);
-    resourceTierList.forEach(function (resTier, index) {
-      console.log(index + 1 + ". ResourceTier " + resTier["resourceTierId"] + " - " + resTier["resourceTierName"]);
-      let ewLimit = resTier["edgeWorkerLimits"];
-      ewLimit.forEach(function (limit) {
-        console.log(limit["limitName"] + ": " + limit["limitValue"] + " " + limit["limitUnit"]);
-      });
-      console.log();
-    })
+    if (resourceTierList) {
+      let msg = `The following Resource Tiers available for the contract id ${contractIdList[contractId]}`;
+      if (edgeWorkersClientSvc.isJSONOutputMode()) {
+        edgeWorkersClientSvc.writeJSONOutput(0, msg, resourceTierList);
+      } else {
+        cliUtils.logWithBorder(msg);
+        resourceTierList.forEach(function (resTier, index) {
+          console.log(index + 1 + ". ResourceTier " + resTier["resourceTierId"] + " - " + resTier["resourceTierName"]);
+          let ewLimit = resTier["edgeWorkerLimits"];
+          ewLimit.forEach(function (limit) {
+            console.log(limit["limitName"] + ": " + limit["limitValue"] + " " + limit["limitUnit"]);
+          });
+          console.log();
+        }) 
+      }
+    }
   }
 }
 
 export async function getResourceTierForEwid(ewId: string) {
   let resourceTier = await cliUtils.spinner(edgeWorkersSvc.getResourceTierForEwid(ewId), `Retrieving resource tier for Edgeworker id ${ewId}...`);
   if (resourceTier && !resourceTier.isError) {
-    let keyVal = "ResourceTier " + resourceTier["resourceTierId"] + " - " + resourceTier["resourceTierName"];
-    cliUtils.logWithBorder(keyVal);
-    let ewLimit = resourceTier["edgeWorkerLimits"];
-    ewLimit.forEach(function (limit) {
-      console.log(limit["limitName"] + ": " + limit["limitValue"] + " " + limit["limitUnit"]);
-    });
+    if (edgeWorkersClientSvc.isJSONOutputMode()) {
+      let msg = `The following resource tier is associated with the edgeworker id ${ewId}`;
+      edgeWorkersClientSvc.writeJSONOutput(0, msg, resourceTier);
+    } else {
+      let keyVal = "ResourceTier " + resourceTier["resourceTierId"] + " - " + resourceTier["resourceTierName"];
+      cliUtils.logWithBorder(keyVal);
+      let ewLimit = resourceTier["edgeWorkerLimits"];
+      ewLimit.forEach(function (limit) {
+        console.log(limit["limitName"] + ": " + limit["limitValue"] + " " + limit["limitUnit"]);
+      });
+    }
   } else {
     cliUtils.logAndExit(1, resourceTier.error_reason);
   }
