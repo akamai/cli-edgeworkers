@@ -33,8 +33,10 @@ export function logTokenList(tokenList) {
         let difference = Math.floor(ekvhelper.getDateDifference(expiry));
         let warning = "-";
 
-        if (difference <= 30) {
+        if (difference >=0 && difference <= 30) {
             warning = `Will EXPIRE in less than ${difference} days`;
+        } else if (difference <= -1) {
+            warning = `Token already expired`;
         }
         let tokenContent = {
             TokenName: token["name"],
@@ -82,9 +84,12 @@ export function logToken(tokenName: string, tokenValue, decodedToken, nameSpaceL
     + `Expiry date:          ${weekday[expiryDate.getDay()]},${expiryDate.getDate()} ${shortMnthNames[expiryDate.getMonth()]} ${expiryDate.getFullYear()}`);
     
     let difference = Math.floor(ekvhelper.getDateDifference(expiryDate));
-    if(difference <= 30) {
+    if(difference >=0 && difference <= 30) {
         console.log(`       *** WARNING: Access Token will EXPIRE in less than ${difference} days! ***`);
+    } else if (difference <= -1) {
+        console.log(`       *** Token already expired ***`);
     }
+
     // if save path is not provided print the token value
     if (!savePath) {
         console.log("value:                " + tokenValue);
