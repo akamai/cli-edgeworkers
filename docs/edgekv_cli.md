@@ -330,7 +330,7 @@ Usage: `akamai edgekv list tokens`
 Retrieve an edgeKV access token
 
 Usage: 
-`akamai edgekv create token <tokenName> --save_path=<path> --overwrite 
+`akamai edgekv create token <tokenName> --save_path=<path> --overwrite`
 
 | Option | Existence | Description |
 | - | - | - |
