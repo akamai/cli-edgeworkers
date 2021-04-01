@@ -122,7 +122,7 @@ program
 program
   .command("list-contracts")
   .description("Allows customer to view the list of contracts associated with their account")
-  .alias("li-cntrct")
+  .alias("li-contract")
   .action(async function () {
     try {
       await cliHandler.getContracts();
@@ -275,11 +275,11 @@ program
 program
   .command("clone <edgeworker-identifier> <resourceTierId>")
   .description("Clone the given Edgeworker Id on an akamai network")
-  .option("--ewname <name>", "Name of the Edgeworker")
+  .option("--ewName <name>", "Name of the Edgeworker")
   .option("--groupId <groupId>", "GroupId in which Edgeworker will be cloned")
   .action(async function (ewId, resourceTierId, options) {
     try {
-      await cliHandler.cloneEdgeworker(ewId, options.groupId, options.ewname, resourceTierId);
+      await cliHandler.cloneEdgeworker(ewId, options.groupId, options.ewName, resourceTierId);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }

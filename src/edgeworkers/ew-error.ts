@@ -25,6 +25,13 @@ export function handleError(err, commandId) {
                     error_reason: ErrorMessage[commandId + "_ERROR"] + " " + ErrorMessage.GENERIC_403
                 }
             }
+            case 401: {
+                let detail = err["title"] == undefined ? "" : err["title"];
+                return {
+                    isError: true,
+                    error_reason: ErrorMessage[commandId + "_ERROR"] + " " + detail
+                }
+            }    
             case 400: {
                 return {
                     isError: true,
@@ -32,9 +39,10 @@ export function handleError(err, commandId) {
                 }
             }    
             default: {
+                let detail = err["detail"] == undefined ? "" : err["detail"];
                 return {
                     isError: true,
-                    error_reason: ErrorMessage[commandId + "_ERROR"] + " " + err["detail"]
+                    error_reason: ErrorMessage[commandId + "_ERROR"] + " " + detail
                 }
             }    
 
