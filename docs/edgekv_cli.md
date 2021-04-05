@@ -105,6 +105,9 @@ Commands:
 | delete item \| del item `<environment> <namespace> <groupId> <itemId>` | Delete an item for the given namespace, group id, and item id in an Akamai environment. |
 | list items `<environment> <namespace> <groupId>` | List the items for the given namespace and group id in an Akamai environment. |
 | create token \| create tkn `<tokenName> [options]` |  Create an EdgeKV access token. |
+| list tokens | List of all tokens the user has permission to download. |
+| download token `<tokenName> [options]` | Download an edgekv token. |
+
 
 Return Codes:
 
@@ -330,7 +333,7 @@ Usage: `akamai edgekv list tokens`
 Retrieve an edgeKV access token.
  
 Usage:
-`akamai edgekv create token <tokenName> --save_path=<path> --overwrite`
+`akamai edgekv download token <tokenName> --save_path=<path> --overwrite`
  
 | Option | Existence | Description |
 | - | - | - |

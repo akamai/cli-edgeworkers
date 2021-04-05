@@ -135,9 +135,9 @@ program
   });
 
 program
-  .command("list-restier")
+  .command("list-restiers")
   .description("Allows customer to view the list of resource tiers available for the specified contract")
-  .alias("li-restier")
+  .alias("li-restiers")
   .action(async function () {
     try {
       await cliHandler.getResourceTiers();
