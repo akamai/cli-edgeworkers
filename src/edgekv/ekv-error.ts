@@ -6,11 +6,13 @@ export function handleError(err) {
     } catch (e) {
         return {
             isError: true,
-            error_reason: ""
+            error_reason: "",
+            traceId: "-"
         }
     }
 
     let statusCode = err["status"] == undefined ? "" : err["status"];
+    let traceIdVal = err["traceId"] == undefined ? "" : err["traceId"];
     // this is sent by edgeKV
     if (err.hasOwnProperty("errors")) {
         let errors = err["errors"];
@@ -18,7 +20,8 @@ export function handleError(err) {
             return  {
                 isError: true,
                 error_reason: errors[0]["detail"],
-                status: statusCode
+                status: statusCode,
+                traceId: traceIdVal
             }
         }
     }
@@ -29,13 +32,15 @@ export function handleError(err) {
             return  {
                 isError: true,
                 error_reason: additionalDetail["detail"],
-                status: statusCode
+                status: statusCode,
+                traceId: traceIdVal
             }
         } else {
             return {
                 isError: true,
                 error_reason: "",
-                status: statusCode
+                status: statusCode,
+                traceId: traceIdVal
             }
         }
     } 
@@ -44,7 +49,8 @@ export function handleError(err) {
         return {
             isError: true,
             error_reason: errDetail,
-            status: statusCode
+            status: statusCode,
+            traceId: traceIdVal
         }
     }
 }
