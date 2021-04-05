@@ -59,7 +59,7 @@ Commands:
 | list-groups \| lg `[group-identifier]` | Customer Developer can find their EdgeWorkers access level per Luna Access Control Group. |
 | list-ids \| li `[options] [edgeworker-identifier]` | List EdgeWorker ids currently registered. |
 | register \| create-id `<group-identifier> <edgeworker-name>` | Register a new EdgeWorker id to reference in Property Manager behavior. |
-| update-id \| ui `<edgeworker-identifier> <group-identifier> <edgeworker-name>` | Allows Customer Developer to update an existing EdgeWorker Identifier's Luna ACG or Name attributes. |
+| update-id \| ui `<edgeworker-identifier> <group-identifier> <edgeworker-name> [options]` | Allows Customer Developer to update an existing EdgeWorker Identifier's Luna ACG or Name attributes. |
 | list-versions \| lv `<edgeworker-identifier> [version-identifier]` | List Version information of a given EdgeWorker Id. |
 | upload \| create-version `[options] <edgeworker-identifier>` | Creates a new version of a given EdgeWorker Id which includes the code bundle. |
 | download \| download-version `[options] <edgeworker-identifier> <version-identifier>` | Download the code bundle of an EdgeWorker version. |
@@ -69,6 +69,10 @@ Commands:
 | validate \| vv `<bundlePath>` | Validates a code bundle version without uploading the code bundle. |
 | create-auth-token \| auth `[options] <secretKey>` | Generates an authentication token that can be used to get detailed EdgeWorker debug response headers. |
 | generate-secret \| secret `[options]` | Generates a secret key that can be used to generate auth token or in property variable. |
+| clone \| clone `<edgeworker-identifier> <resourceTierId> [options]` | Clones an Edgeworker from the existing Edgeworker Id. |
+| list-contracts \| li-contracts `[options]` | List of contract ids that user has access to. |
+| list-restiers \| li-restiers `[options]` | List Resource Tiers that can be used to create or clone EdgeWorker Id. |
+| show-restier \| show-restier `<edgeworker-identifier>` | Customers can get Resource Tier details for a specific EdgeWorker Id. |
 
 ### List Permission Groups with EdgeWorkers Access
 Customer Developer can find their EdgeWorkers access level per Luna Access Control Group.  
@@ -97,6 +101,7 @@ Usage: `akamai edgeworkers list-ids [options] [edgeworker-identifier]`
 | - | - |
 | -h, --help  | output usage information |
 | --groupId `<groupId>` | Filter EdgeWorker Id list by Permission Group |
+| --resourceTierId `<resourceTierId>` | Filter Edgeworker Id by Resource Tier |
 
 | Argument | Existence | Description |
 | - | - | - |
@@ -128,6 +133,7 @@ Usage: `akamai edgeworkers update-id [options] <edgeworker-identifier> <group-id
 
 | Option | Description |
 | - | - |
+| --resourceTierId | New Resource tier id to which the Edgeworker will be associated |
 | -h, --help  | output usage information |
 
 | Argument | Existence | Description |
@@ -140,6 +146,8 @@ Usage: `akamai edgeworkers update-id [options] <edgeworker-identifier> <group-id
 1. API requires that both groupId and name be provided even if only changing one of these attributes.
 
 2. EdgeWorker id details response body (JSON) will be provided with 200 response code.
+
+3. Resource Tier ID provided should be same as the one the EdgeWorker ID already has. In order to provide a different resource tier id, please use the clone operation.
 
 ### List EdgeWorker Versions
 List Version information of a given EdgeWorker Id.
@@ -225,8 +233,8 @@ Usage: `akamai edgeworkers status [options] <edgeworker-identifier>`
 | Option | Description |
 | - | - |
 | -h, --help  | output usage information |
-| --versionId `<versionId>` | Version Identifier |
-| --activationId `<activationId>` | Activation Identifier |
+| --versionId `<versionId>` | Version identifier |
+| --activationId `<activationId>` | Activation identifier |
 
 | Argument | Existence | Description |
 | - | - | - |
@@ -327,6 +335,58 @@ Usage: `akamai edgeworkers create-auth-token [options] <secretKey>`
 Generates a random secret key that can be used to create edgeworkers authentication token and in property PMUSER_EW_DEBUG_KEY.
 
 Usage: `akamai edgeworkers generate-secret`
+
+### Clone an Edgeworker Id
+Allows customer to clone an Edgeworker from an existing Edgeworker Id.
+
+Usage: `akamai edgeworkers clone <edgeworker-identifier> <resourceTierId> [options]`
+
+| Option | Description |
+| - | - |
+| -h, --help  | output usage information |
+| --ewName | Name of the Edgeworker |
+| --groupId | Group identifier |
+
+| Argument | Existence | Description |
+| - | - | - |
+| resourceTierId | required | Resource tier id to which the Edgeworker will be cloned.
+
+#### Key Details
+1. This endpoint allows user to select a different Resource Tier ID for a specific EdgeWorker id by cloning it. Cloning to the same resource tier will fail.
+
+### List Contracts
+List of contract ids that user has access to.
+
+Usage: `akamai list-contracts`
+
+| Option | Description |
+| - | - |
+| -h, --help  | output usage information |
+
+### List Resource Tiers for a specific Contract ID
+Allows customers to list Resource Tiers that can be used to create or clone EdgeWorker IDs. 
+
+Usage: `akamai list-restiers`
+
+| Option | Description |
+| - | - |
+| -h, --help  | output usage information |
+
+#### Key Details
+1. User will be prompted with list of contract ids that user has access to. The selected contract id will be used to fetch resource tier.
+
+### Fetch the Resource Tier for a specific EdgeWorker Id
+Customers can get Resource Tier details for a specific EdgeWorker Id.
+
+Usage: `akamai show-restier <edgeworkerId>`
+
+| Option | Description |
+| - | - |
+| -h, --help  | output usage information |
+
+| Argument | Existence | Description |
+| - | - | - |
+| edgeworkerId | required | Edgeworker identifier.
 
 ## Resources
 For more information on EdgeWorkers, refer to the following resources:

@@ -86,9 +86,10 @@ program
   .description("List EdgeWorker ids currently registered.")
   .alias("li")
   .option("--groupId <groupId>", "Filter EdgeWorker Id list by Permission Group")
+  .option("--resourceTierId <resourceTierId>", "Filter Edgeworkers by resource tiers")
   .action(async function (ewId, options) {
     try {
-      await cliHandler.showEdgeWorkerIdOverview(ewId, options.groupId);
+      await cliHandler.showEdgeWorkerIdOverview(ewId, options.groupId, options.resourceTierId);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
@@ -103,7 +104,57 @@ program
   .alias("create-id")
   .action(async function (groupId, name) {
     try {
-      await cliHandler.createEdgeWorkerId(groupId, name);
+      // get contract list and get resource tier info
+      let resourceTierId = await cliHandler.getResourceTierInfo();
+      // create edgeworker for the grpid, res tier and ew name
+      if (resourceTierId == undefined) {
+        cliUtils.logAndExit(1, "ERROR: Please select a valid resource tier id.")
+      }
+      await cliHandler.createEdgeWorkerId(groupId, name, resourceTierId);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+program
+  .command("list-contracts")
+  .description("Allows customer to view the list of contracts associated with their account")
+  .alias("li-contracts")
+  .action(async function () {
+    try {
+      await cliHandler.getContracts();
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+program
+  .command("list-restiers")
+  .description("Allows customer to view the list of resource tiers available for the specified contract")
+  .alias("li-restiers")
+  .action(async function () {
+    try {
+      await cliHandler.getResourceTiers();
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+program
+  .command("show-restier <edgeworkerId>")
+  .description("allows customer to view the esource tier associated with the EdgeWorker Id")
+  .action(async function (edgeworkerId) {
+    try {
+      await cliHandler.getResourceTierForEwid(edgeworkerId);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
@@ -115,10 +166,11 @@ program
 program
   .command("update-id <edgeworker-identifier> <group-identifier> <edgeworker-name>")
   .description("Allows Customer Developer to update an existing EdgeWorker Identifier's Luna ACG or Name attributes.")
+  .option("--resourceTierId <resourceTierId>", "New resource Tier id to associate with Edgeworker")
   .alias("ui")
-  .action(async function (ewId, groupId, name) {
+  .action(async function (ewId, groupId, name, options) {
     try {
-      await cliHandler.updateEdgeWorkerInfo(ewId, groupId, name);
+      await cliHandler.updateEdgeWorkerInfo(ewId, groupId, name, options.resourceTierId);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
@@ -219,6 +271,22 @@ program
   .on("--help", function () {
     cliUtils.logAndExit(0, copywrite);
   });
+
+program
+  .command("clone <edgeworker-identifier> <resourceTierId>")
+  .description("Clone the given Edgeworker Id on an akamai network")
+  .option("--ewName <name>", "Name of the Edgeworker")
+  .option("--groupId <groupId>", "GroupId in which Edgeworker will be cloned")
+  .action(async function (ewId, resourceTierId, options) {
+    try {
+      await cliHandler.cloneEdgeworker(ewId, options.groupId, options.ewName, resourceTierId);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+})
+.on("--help", function () {
+  cliUtils.logAndExit(0, copywrite);
+});
 
 program
   .command("deactivate <edgeworker-identifier> <network> <version-identifier>")

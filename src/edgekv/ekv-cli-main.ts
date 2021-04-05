@@ -164,6 +164,20 @@ list
     cliUtils.logAndExit(0, copywrite);
   });
 
+list
+  .command("tokens")
+  .description("List all tokens for which the user has permission to download.")
+  .action(async function () {
+    try {
+      await kvCliHandler.listTokens();
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
 const create = program.command('create')
   .description("Creates a namespace or creates a token")
   .on("--help", function () {
@@ -206,6 +220,25 @@ create
     cliUtils.logAndExit(0, copywrite);
   });
 
+const download = program.command('download')
+  .alias("dnld")
+  .description("Download an edgekv token");
+
+download
+  .command("token <tokenName>")
+  .description("Download an edgekv token")
+  .option('--save_path <save_path>', 'The path of the bundle where the token will be saved')
+  .option("-o, --overwrite", "EdgeKV token placed inside the bundle will be overwritten")
+  .action(async function (tokenName, options) {
+    try {
+      await kvCliHandler.retrieveToken(tokenName, options);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  }); 
 
 const show = program.command('show')
   .description("Check the initialization status of the EdgeKV or Retrieve an EdgeKV namespace. Use show -h to see available options")
