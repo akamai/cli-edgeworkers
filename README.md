@@ -70,7 +70,7 @@ Commands:
 | create-auth-token \| auth `[options] <secretKey>` | Generates an authentication token that can be used to get detailed EdgeWorker debug response headers. |
 | generate-secret \| secret `[options]` | Generates a secret key that can be used to generate auth token or in property variable. |
 | clone \| clone `<edgeworker-identifier> <resourceTierId> [options]` | Clones an Edgeworker from the existing Edgeworker Id. |
-| list-contracts \| li-contract `[options]` | List of contract ids that user has access to. |
+| list-contracts \| li-contracts `[options]` | List of contract ids that user has access to. |
 | list-restiers \| li-restiers `[options]` | List Resource Tiers that can be used to create or clone EdgeWorker Id. |
 | show-restier \| show-restier `<edgeworker-identifier>` | Customers can get Resource Tier details for a specific EdgeWorker Id. |
 

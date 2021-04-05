@@ -122,7 +122,7 @@ program
 program
   .command("list-contracts")
   .description("Allows customer to view the list of contracts associated with their account")
-  .alias("li-contract")
+  .alias("li-contracts")
   .action(async function () {
     try {
       await cliHandler.getContracts();
