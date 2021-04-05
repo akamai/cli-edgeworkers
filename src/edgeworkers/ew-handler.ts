@@ -148,7 +148,7 @@ export async function getResourceTierInfo() {
   }
   let resourceTierList = await getResourceTierList(contractList[contractId]);
 
-  cliUtils.log("\n Please find the resource tier information below:");
+  cliUtils.log("\n Resource Tiers");
   let resourceIds = [];
   resourceTierList.forEach(function (resTier, index) {
     console.log(index + 1 + ". Resource Tier " + resTier["resourceTierId"] + " " + resTier["resourceTierName"] + "\n");
@@ -205,8 +205,9 @@ export async function getResourceTiers() {
   if (contractIdList == undefined) {
     cliUtils.logAndExit(1, "ERROR: Unable to retrieve contracts for your account.");
   } else {
-    cliUtils.log("Please select from the following contract ids :");
-    let contractId = readline.keyInSelect(contractIdList, "");
+    let contractId = readline.keyInSelect(contractIdList, "Please select from the above contract ids :");
+    let selectedOption = (contractId == -1) ? "cancel" : contractIdList[contractId]
+    console.log('You have selected '+selectedOption);
     if (contractIdList[contractId] == undefined) {
       cliUtils.logAndExit(1, "ERROR: Please select a valid contract id");
     }
