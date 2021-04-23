@@ -3,7 +3,6 @@ import * as cliUtils from '../utils/cli-utils';
 import * as httpEdge from '../cli-httpRequest';
 import * as error from './ew-error';
 import * as fs from 'fs';
-import { hostname } from 'os';
 
 const EDGEWORKERS_API_BASE = '/edgeworkers/v1';
 
