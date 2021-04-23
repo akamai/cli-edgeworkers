@@ -17,7 +17,7 @@ export async function listNameSpaces(environment: string) {
     cliUtils.logWithBorder(`The following namespaces are provisioned on the ${environment} environment`);
     console.table(nsListResp);
   } else {
-    response.logError(nameSpaceList, `ERROR: Error while retrieving namespaces. ${nameSpaceList.error_reason}`);  
+    response.logError(nameSpaceList, `ERROR: Error while retrieving namespaces. ${nameSpaceList.error_reason} [TraceId: ${nameSpaceList.traceId}]`);
   }
 }
 
@@ -29,7 +29,7 @@ export async function createNamespace(environment: string, nameSpace: string) {
     cliUtils.logWithBorder(msg);
     response.logNamespace(nameSpace, createdNamespace);
   } else {
-    response.logError(createdNamespace, `ERROR: Error while creating namespace. ${createdNamespace.error_reason}`);  
+    response.logError(createdNamespace, `ERROR: Error while creating namespace. ${createdNamespace.error_reason} [TraceId: ${createdNamespace.traceId}]`);
   }
 
 }
@@ -42,12 +42,12 @@ export async function getNameSpace(environment: string, nameSpace: string) {
     cliUtils.logWithBorder(msg);
     response.logNamespace(nameSpace, createdNamespace);
   } else {
-    response.logError(createdNamespace, `ERROR: Error while retrieving namespace from ${environment} environment. ${createdNamespace.error_reason}`);  
+    response.logError(createdNamespace, `ERROR: Error while retrieving namespace from ${environment} environment. ${createdNamespace.error_reason} [TraceId: ${createdNamespace.traceId}]`);
   }
 }
 
 export async function initializeEdgeKv() {
-  let initializedEdgeKv = await cliUtils.spinner(edgekvSvc.initializeEdgeKV(),`Initializing EdgeKV...`);
+  let initializedEdgeKv = await cliUtils.spinner(edgekvSvc.initializeEdgeKV(), `Initializing EdgeKV...`);
 
   if (initializedEdgeKv.body != undefined && !initializedEdgeKv.isError) {
     let initRespBody = JSON.parse(initializedEdgeKv.body);
@@ -74,12 +74,12 @@ export async function initializeEdgeKv() {
     }
     response.logInitialize(initRespBody);
   } else {
-    response.logError(initializedEdgeKv, `ERROR: EdgeKV Initialization failed.  (${initializedEdgeKv.error_reason}).`);  
+    response.logError(initializedEdgeKv, `ERROR: EdgeKV Initialization failed.  (${initializedEdgeKv.error_reason}) [${initializedEdgeKv.traceId}]`);
   }
 }
 
 export async function getInitializationStatus() {
-  let initializedEdgeKv = await cliUtils.spinner(edgekvSvc.getInitializedEdgeKV(),"Getting Initialization status...");
+  let initializedEdgeKv = await cliUtils.spinner(edgekvSvc.getInitializedEdgeKV(), "Getting Initialization status...");
 
   if (initializedEdgeKv.body != undefined && !initializedEdgeKv.isError) {
     let initRespBody = JSON.parse(initializedEdgeKv.body);
@@ -103,7 +103,7 @@ export async function getInitializationStatus() {
     }
     response.logInitialize(initRespBody);
   } else {
-    response.logError(initializedEdgeKv, `ERROR: EdgeKV Initialization failed.  (${initializedEdgeKv.error_reason}).`);  
+    response.logError(initializedEdgeKv, `ERROR: Unable to retrieve EdgeKV status.  (${initializedEdgeKv.error_reason}) [TraceId: ${initializedEdgeKv.traceId}]`);
   }
 }
 
@@ -127,7 +127,7 @@ export async function writeItemToEdgeKV(environment: string, nameSpace: string, 
   if (createdItem != undefined && !createdItem.isError) {
     cliUtils.logWithBorder(msg);
   } else {
-    response.logError(createdItem, `ERROR: Unable to write item to EdgeKV. ${createdItem.error_reason}`);  
+    response.logError(createdItem, `ERROR: Unable to write item to EdgeKV. ${createdItem.error_reason} [TraceId: ${createdItem.traceId}]`);
   }
 }
 
@@ -135,7 +135,7 @@ export async function readItemFromEdgeKV(environment: string, nameSpace: string,
 
   ekvhelper.validateNetwork(environment);
 
-  let item = await cliUtils.spinner(edgekvSvc.readItem(environment, nameSpace, groupId, itemId),"Reading items from EdgeKV..");
+  let item = await cliUtils.spinner(edgekvSvc.readItem(environment, nameSpace, groupId, itemId), "Reading items from EdgeKV..");
   if (item != undefined && !item.isError) {
     let msg = `Item ${itemId} from group ${groupId}, namespace ${nameSpace} and environment ${environment} retrieved successfully.`
     cliUtils.logWithBorder(msg);
@@ -145,7 +145,7 @@ export async function readItemFromEdgeKV(environment: string, nameSpace: string,
       console.log(item);
     }
   } else {
-    response.logError(item, `ERROR: Unable to read item. ${item.error_reason}`);  
+    response.logError(item, `ERROR: Unable to read item. ${item.error_reason} [TraceId: ${item.traceId}]`);
   }
 }
 
@@ -156,13 +156,13 @@ export async function deleteItemFromEdgeKV(environment: string, nameSpace: strin
     let msg = `Item ${itemId} was successfully marked for deletion from group ${groupId}, namespace ${nameSpace} and environment ${environment}`
     cliUtils.logWithBorder(msg);
   } else {
-    response.logError(deletedItem, `ERROR: Unable to delete item ${itemId} from group ${groupId}, namespace ${nameSpace} and environment ${environment}. ${deletedItem.error_reason}`);  
+    response.logError(deletedItem, `ERROR: Unable to delete item ${itemId} from group ${groupId}, namespace ${nameSpace} and environment ${environment}. ${deletedItem.error_reason} [TraceId: ${deletedItem.traceId}]`);
   }
 }
 
 export async function listItemsFromGroup(environment: string, nameSpace: string, groupId: string) {
   ekvhelper.validateNetwork(environment);
-  let itemsList = await cliUtils.spinner(edgekvSvc.getItemsFromGroup(environment, nameSpace, groupId),`Listing items from namespace ${nameSpace} and group ${groupId}`);
+  let itemsList = await cliUtils.spinner(edgekvSvc.getItemsFromGroup(environment, nameSpace, groupId), `Listing items from namespace ${nameSpace} and group ${groupId}`);
   if (itemsList != undefined && !itemsList.isError) {
 
     let msg: string = `There are no items for group ${groupId}, namespace ${nameSpace} and environment ${environment}`;
@@ -174,24 +174,31 @@ export async function listItemsFromGroup(environment: string, nameSpace: string,
       console.log(element);
     });
   } else {
-    response.logError(itemsList, `ERROR: Unable to retrieve items from group. ${itemsList.error_reason}`);  
+    response.logError(itemsList, `ERROR: Unable to retrieve items from group. ${itemsList.error_reason} [TraceId: ${itemsList.traceId}]`);
+  }
+}
+
+export async function listTokens() {
+  let tokenList = await cliUtils.spinner(edgekvSvc.getTokenList(), `Fetching token list...`);
+  let msg = `The following tokens are available for you to download`;
+  if (tokenList != undefined && !tokenList.isError) {
+    cliUtils.logWithBorder(msg);
+    response.logTokenList(tokenList);
+    cliUtils.log(`You have ${tokenList["tokens"].length} tokens available to download.`)
+  } else {
+    response.logError(tokenList, `ERROR: Unable to retrieve edgekv access tokens. ${tokenList.error_reason} [TraceId: ${tokenList.traceId}]`);
   }
 }
 
 export async function createToken(tokenName: string, options: { save_path?: string, staging?: string, production?: string, ewids?: string, namespace?: string, expiry?: string, overwrite?}) {
   // convert string to ISO date
   let expiry = getExpiryDate(options.expiry);
-  let savePath = options.save_path;
+
   // parse input permissions
   let permissionList = parseNameSpacePermissions(options.namespace);
   let envAccess = { "allow": true, "deny": false };
-
-  if (savePath) {
-    if (!ekvhelper.checkIfFileExists(savePath)) {
-      cliUtils.logWithBorder(`ERROR: Unable to create token. save_path provided is invalid or you do not have access permissions. Please provide a valid path.`);
-      process.exit(1);
-    }
-  }
+  let savePath = options.save_path;
+  validateSavePath(savePath);
 
   if (options.staging == "deny" && options.production == "deny") {
     cliUtils.logWithBorder(`ERROR: Unable to create token. Either one of staging or production access should be set to "allow". Please provide a valid access permissions.`);
@@ -201,22 +208,22 @@ export async function createToken(tokenName: string, options: { save_path?: stri
   let createdToken = await cliUtils.spinner(edgekvSvc.createEdgeKVToken(tokenName, permissionList, envAccess[options.staging], envAccess[options.production], options.ewids, expiry), "Creating edgekv token ...");
 
   if (createdToken != undefined && !createdToken.isError) {
-    // decodes the jwt token
-    let decodedToken = ekvhelper.decodeJWTToken(createdToken["value"]);
-    let nameSpaceList = ekvhelper.getNameSpaceListFromJWT(decodedToken);
-    let msg = `Add the token value in edgekv_tokens.js file and place it in your bundle. Use --save_path option to save the token file to your bundle`
-    if (options.save_path) {
-      if (ekvhelper.getFileExtension(savePath) != ".tgz") {
-        ekvhelper.createTokenFileWithoutBundle(options.save_path, options.overwrite, createdToken, decodedToken, nameSpaceList);
-      } else {
-        ekvhelper.saveTokenToBundle(options.save_path, options.overwrite, createdToken, decodedToken, nameSpaceList);
-      }
-    } else {
-      cliUtils.logWithBorder(msg);
-      response.logToken(createdToken["name"], createdToken["value"], decodedToken, nameSpaceList, false);
-    }
+    processToken(createdToken, savePath, options.overwrite); 
   } else {
-    response.logError(createdToken, `ERROR: Unable to create edgekv token. ${createdToken.error_reason}`); 
+    response.logError(createdToken, `ERROR: Unable to create edgekv token. ${createdToken.error_reason} [TraceId: ${createdToken.traceId}]`);
+  }
+}
+
+export async function retrieveToken(tokenName: string, options: { save_path?: string, overwrite?}) {
+  let savePath = options.save_path;
+  validateSavePath(savePath);
+
+  let retrievedToken = await cliUtils.spinner(edgekvSvc.getSingleToken(tokenName), "Downloading egdekv token...");
+
+  if (retrievedToken != undefined && !retrievedToken.isError) {
+    processToken(retrievedToken, savePath, options.overwrite);
+  } else {
+    response.logError(retrievedToken, `ERROR: Unable to retrieve edgekv token. ${retrievedToken.error_reason} [TraceId: ${retrievedToken.traceId}]`);
   }
 }
 
@@ -240,7 +247,7 @@ function getExpiryDate(expiry: string) {
 
 function parseNameSpacePermissions(namespace: string) {
   // list to which all the permissions mapped to namespace will be added
-  let permissionList = {}; 
+  let permissionList = {};
   let allowedPermission = ["r", "w", "d"];
   let allowedPermissionErrorMsg = "ERROR: Permissions provided is invalid. Please provide from the following : r,w,d";
   namespace.split(",").forEach(val => {
@@ -269,4 +276,30 @@ function parseNameSpacePermissions(namespace: string) {
     permissionList[per[0]] = permissions;
   });
   return permissionList;
+}
+
+function validateSavePath(savePath) {
+  if (savePath) {
+    if (!ekvhelper.checkIfFileExists(savePath)) {
+      cliUtils.logWithBorder(`ERROR: Unable to save token. save_path provided is invalid or you do not have access permissions. Please provide a valid path.`);
+      process.exit(1);
+    }
+  }
+}
+
+function processToken(token, savePath, overwrite) {
+  // decodes the jwt token
+  let decodedToken = ekvhelper.decodeJWTToken(token["value"]);
+  let nameSpaceList = ekvhelper.getNameSpaceListFromJWT(decodedToken);
+  let msg = `Add the token value in edgekv_tokens.js file and place it in your bundle. Use --save_path option to save the token file to your bundle`
+  if (savePath) {
+    if (ekvhelper.getFileExtension(savePath) != ".tgz") {
+      ekvhelper.createTokenFileWithoutBundle(savePath, overwrite, token, decodedToken, nameSpaceList);
+    } else {
+      ekvhelper.saveTokenToBundle(savePath, overwrite, token, decodedToken, nameSpaceList);
+    }
+  } else {
+    cliUtils.logWithBorder(msg);
+    response.logToken(token["name"], token["value"], decodedToken, nameSpaceList, false);
+  }
 }

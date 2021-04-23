@@ -20,6 +20,8 @@
     * [ Delete Item](###delete-item)
     * [ List Items](###list-items)
     * [ Create an Access Token](###create-an-access-token)
+    * [ List Access Tokens](###list-access-tokens)
+    * [ Retrieve Access Token](###retrieve-access-token)
 * [ Resources](##resources)
 * [ Reporting Issues](##reporting-issues)
 
@@ -86,6 +88,7 @@ Options:
 | --debug | Show debug information. |
 | --edgerc `<path>` | Use credentials in edgerc file for command. (Default file location is ~/.edgerc). Refer to [Get Started with APIs](https://developer.akamai.com/api/getting-started#addcred) for more information. |
 | --section `<name>` | Use this section in `edgerc` file. (Default section is _[default]_)|
+| --timeout `<timeout>` | You can specify a timeout value for a command in milliseconds to override the 2 minute default. For example, if you add "--timeout 1000" to a command, it will timeout if the server takes more than 1 second to respond. |
 | -h, --help | Display information on how to use this EdgeKV command. | 
 
 Commands:
@@ -103,6 +106,9 @@ Commands:
 | delete item \| del item `<environment> <namespace> <groupId> <itemId>` | Delete an item for the given namespace, group id, and item id in an Akamai environment. |
 | list items `<environment> <namespace> <groupId>` | List the items for the given namespace and group id in an Akamai environment. |
 | create token \| create tkn `<tokenName> [options]` |  Create an EdgeKV access token. |
+| list tokens | List of all tokens the user has permission to download. |
+| download token `<tokenName> [options]` | Download an edgekv token. |
+
 
 Return Codes:
 
@@ -295,7 +301,7 @@ Example:
 
 | Option | Existence | Description |
 | - | - | - |
-| --save_path | Optional | Path specifying where to save the edgekv_tokens.js token file. We recommend that you save the token file in the same location as the EdgeWorkers code bundle file (.tgz). The EdgeWorkers code bundle is then automatically updated every time this command updates the edgekv_tokens.js token file.If a path is not provided the token value is displayed. This token must be securely stored and manually added to the edgekv_tokens.js token file and EdgeWorkers code bundle. |
+| --save_path | Optional | Path specifying where to save the edgekv_tokens.js token file. We recommend that you save the token file in the same location as the EdgeWorkers code bundle file (.tgz). The EdgeWorkers code bundle is then automatically updated every time this command updates the edgekv_tokens.js token file. If a path is not provided the token value is displayed. This token must be securely stored and manually added to the edgekv_tokens.js token file and EdgeWorkers code bundle. |
 | -o, --overwrite | Optional | This option is used in conjunction with the --save_path option to overwrite the value of an existing token with the same name in the edgekv_tokens.js file. |
 | --staging | Required | Acceptable value: 'allow', 'deny'. <br />Specifies whether the token will be allowed or denied in the staging environment. |
 | -- production | Required | Acceptable value: 'allow', 'deny'. <br />Specifies whether the token will be allowed or denied in the production environment. |
@@ -312,6 +318,29 @@ Example:
 1. The token name can only include alphanumeric (0-9, a-z, A-Z), underscore (_), and (-) dash characters.
 2. The token name can be between 1 and 32 characters in length.
 3. The expiry date must be at least 1 day in the future and no more than 6 months from the current date.
+
+### List Access Tokens
+ 
+List of all tokens the user has permission to download.
+ 
+Usage: `akamai edgekv list tokens`
+ 
+| Option | Description |
+| - | - |
+| -h, --help  | Display information on how to use this EdgeKV command. |
+ 
+### Retrieve Access Token
+ 
+Retrieve an edgeKV access token.
+ 
+Usage:
+`akamai edgekv download token <tokenName> --save_path=<path> --overwrite`
+ 
+| Option | Existence | Description |
+| - | - | - |
+| --save_path | Optional | Path specifying where to save the edgekv_tokens.js token file. We recommend that you save the token file in the same location as the EdgeWorkers code bundle file (.tgz). The EdgeWorkers code bundle is then automatically updated every time this command updates the edgekv_tokens.js token file. If a path is not provided the token value is displayed. This token must be securely stored and manually added to the edgekv_tokens.js token file and EdgeWorkers code bundle. |
+| -o, --overwrite | Optional | This option is used in conjunction with the --save_path option to overwrite the value of an existing token with the same name in the edgekv_tokens.js file. |
+| -h, --help  | Display information on how to use this EdgeKV command. |
 
 ___
 ## Resources

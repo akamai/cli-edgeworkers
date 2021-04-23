@@ -1,7 +1,9 @@
 import * as envUtils from '../utils/env-utils';
 import * as cliUtils from '../utils/cli-utils';
-import * as httpEdge from '../cli-httpRequest'
+import * as httpEdge from '../cli-httpRequest';
+import * as error from './ew-error';
 import * as fs from 'fs';
+import { hostname } from 'os';
 
 const EDGEWORKERS_API_BASE = '/edgeworkers/v1';
 
@@ -81,23 +83,41 @@ export function getEdgeWorkerId(ewId: string) {
   return httpEdge.getJson(`${EDGEWORKERS_API_BASE}/ids/${ewId}`).then(r => r.body);
 }
 
-export function getAllEdgeWorkerIds(groupId?: string) {
-  var qs: string = "?groupId=";
-  if (groupId === undefined || groupId === null) {
-    qs = '';
-    groupId = '';
+export function getAllEdgeWorkerIds(groupId?: string, resourceTierId?: string) {
+  var qs: string = "";
+  if (groupId != undefined || groupId != null) {
+    qs += `?groupId=${groupId}`
   }
-  return httpEdge.getJson(`${EDGEWORKERS_API_BASE}/ids${qs}${groupId}`).then(r => r.body);
+  if (resourceTierId != undefined) {
+    qs += (groupId == undefined) ? "?" : "&";
+    qs += `resourceTierId=${resourceTierId}`;
+  }
+  return httpEdge.getJson(`${EDGEWORKERS_API_BASE}/ids${qs}`).then(r => r.body).catch(err => error.handleError(err,"LISTALL_EW"));
 }
 
-export function createEdgeWorkerId(groupId: string, name: string) {
-  var body = { "groupId": groupId, "name": name };
-  return httpEdge.postJson(`${EDGEWORKERS_API_BASE}/ids`, body).then(r => r.body);
+export function createEdgeWorkerId(groupId: string, name: string, resourceTierId: string) {
+  var body = { "groupId": groupId, "name": name, "resourceTierId": resourceTierId};
+  return httpEdge.postJson(`${EDGEWORKERS_API_BASE}/ids`, body).then(r => r.body).catch(err => error.handleError(err,"REGISTER_EW"));
 }
 
-export function updateEdgeWorkerId(ewId: string, groupId: string, name: string) {
+export function getContracts() {
+  return httpEdge.getJson(`${EDGEWORKERS_API_BASE}/contracts`).then(r => r.body).catch(err => error.handleError(err,"GET_CONTRACT"));
+}
+
+export function getResourceTiers(contractId: string) {
+  return httpEdge.getJson(`${EDGEWORKERS_API_BASE}/resource-tiers?contractId=${contractId}`).then(r => r.body).catch(err => error.handleError(err,"GET_RESTIER"));
+}
+
+export function getResourceTierForEwid(ewId: string) {
+  return httpEdge.getJson(`${EDGEWORKERS_API_BASE}/ids/${ewId}/resource-tier`).then(r => r.body).catch(err => error.handleError(err,"GET_RESTR_FOR_EW"));
+}
+
+export function updateEdgeWorkerId(ewId: string, groupId: string, name: string, resourceTierId: string) {
   var body = { "groupId": groupId, "name": name };
-  return httpEdge.putJson(`${EDGEWORKERS_API_BASE}/ids/${ewId}`, body).then(r => r.body);
+  if (resourceTierId != undefined && resourceTierId != null) {
+    body["resourceTierId"] = resourceTierId;
+  }
+  return httpEdge.putJson(`${EDGEWORKERS_API_BASE}/ids/${ewId}`, body).then(r => r.body).catch(err => error.handleError(err,"UPDATE_EW"));
 }
 
 export function getAllVersions(ewId: string) {
@@ -138,22 +158,36 @@ export function createActivationId(ewId: string, network: string, versionId: str
   return httpEdge.postJson(`${EDGEWORKERS_API_BASE}/ids/${ewId}/activations`, body).then(r => r.body);
 }
 
+export function cloneEdgeworker(ewId: string, name: string, groupId: string, resourceTierId: string) {
+  let body = { "resourceTierId": resourceTierId };
+  if (groupId != undefined) {
+    body["groupId"] = groupId;
+  }
+  if (name != undefined) {
+    body["name"] = name;
+  }
+  return httpEdge.postJson(`${EDGEWORKERS_API_BASE}/ids/${ewId}/clone`, body).then(r => r.body).catch(err => error.handleError(err,"CLONE_EW"));
+}
+
 export function validateTarball(tarballPath: string) {
   return postTarball(`${EDGEWORKERS_API_BASE}/validations`, tarballPath).then(r => r.body);
 }
 
-export function getAuthToken(propertyId: string, acl: string, url: string, expiry: number, network: string) {
-  let urlPath = `${EDGEWORKERS_API_BASE}/secure-token/${propertyId}`;
-  let queryParams = getTokenQueryParams(acl, url, expiry, network);
+export function getAuthToken(hostName: string, acl: string, url: string, expiry: number, network: string) {
+  let urlPath = `${EDGEWORKERS_API_BASE}/secure-token`;
 
-  if (queryParams.length > 0) {
-    urlPath += `?${queryParams}`;
-  }
-  return httpEdge.getJson(urlPath).then(r => r.body);
+  let body = buildTokenBody(hostName, acl, url, expiry, network);
+
+  return httpEdge.postJson(urlPath, body).then(r => r.body).catch(err => error.handleError(err,"AUTH_TOKEN"));
 }
 
-function getTokenQueryParams(acl: string, url: string, expiry: number, network: string) {
+function buildTokenBody(hostName: string, acl: string, url: string, expiry: number, network: string) {
   let params = {};
+
+  if (hostName != undefined && hostName != null) {
+    params["hostname"] = hostName;
+  }  
+
   if (acl != undefined && acl != null) {
     params["acl"] = acl;
   }
@@ -168,9 +202,9 @@ function getTokenQueryParams(acl: string, url: string, expiry: number, network: 
     params["network"] = network;
   }
 
-  let query = Object.keys(params)
-    .map(key => cliUtils.escape(key) + '=' + cliUtils.escape(params[key]))
-    .join('&');
-
-  return query;
+  return params;
+}
+export function deactivateEdgeworker(ewId: string, network: string, versionId: string) {
+  var body = { "network": network, "version": versionId };
+  return httpEdge.postJson(`${EDGEWORKERS_API_BASE}/edgeworkers/${ewId}/deactivations`, body).then(r => r.body);
 }

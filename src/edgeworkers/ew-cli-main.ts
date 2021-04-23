@@ -17,6 +17,7 @@ program
   .option('--section <name>', 'Use this section in edgerc file that contains the credential set.')
   .option('--json [path]', 'Write command output to JSON file at given path, otherwise written to CLI cache directory')
   .option('--accountkey <account-id>', 'internal parameter')
+  .option('--timeout <timeout>', 'Use this for custom timeout')
   .on("option:debug", function () {
     envUtils.setDebugMode(true);
   })
@@ -32,6 +33,9 @@ program
   })
   .on("option:accountkey", function (key) {
     httpEdge.setAccountKey(key);
+  })
+  .on("option:timeout", function (timeout){
+    httpEdge.setTimeout(timeout);
   })
   // this fires only when a command is not listed below with a custom action
   .on('command:*', function (command) {
@@ -86,9 +90,10 @@ program
   .description("List EdgeWorker ids currently registered.")
   .alias("li")
   .option("--groupId <groupId>", "Filter EdgeWorker Id list by Permission Group")
+  .option("--resourceTierId <resourceTierId>", "Filter Edgeworkers by resource tiers")
   .action(async function (ewId, options) {
     try {
-      await cliHandler.showEdgeWorkerIdOverview(ewId, options.groupId);
+      await cliHandler.showEdgeWorkerIdOverview(ewId, options.groupId, options.resourceTierId);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
@@ -103,7 +108,57 @@ program
   .alias("create-id")
   .action(async function (groupId, name) {
     try {
-      await cliHandler.createEdgeWorkerId(groupId, name);
+      // get contract list and get resource tier info
+      let resourceTierId = await cliHandler.getResourceTierInfo();
+      // create edgeworker for the grpid, res tier and ew name
+      if (resourceTierId == undefined) {
+        cliUtils.logAndExit(1, "ERROR: Please select a valid resource tier id.")
+      }
+      await cliHandler.createEdgeWorkerId(groupId, name, resourceTierId);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+program
+  .command("list-contracts")
+  .description("Allows customer to view the list of contracts associated with their account")
+  .alias("li-contracts")
+  .action(async function () {
+    try {
+      await cliHandler.getContracts();
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+program
+  .command("list-restiers")
+  .description("Allows customer to view the list of resource tiers available for the specified contract")
+  .alias("li-restiers")
+  .action(async function () {
+    try {
+      await cliHandler.getResourceTiers();
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+program
+  .command("show-restier <edgeworkerId>")
+  .description("allows customer to view the esource tier associated with the EdgeWorker Id")
+  .action(async function (edgeworkerId) {
+    try {
+      await cliHandler.getResourceTierForEwid(edgeworkerId);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
@@ -115,10 +170,11 @@ program
 program
   .command("update-id <edgeworker-identifier> <group-identifier> <edgeworker-name>")
   .description("Allows Customer Developer to update an existing EdgeWorker Identifier's Luna ACG or Name attributes.")
+  .option("--resourceTierId <resourceTierId>", "New resource Tier id to associate with Edgeworker")
   .alias("ui")
-  .action(async function (ewId, groupId, name) {
+  .action(async function (ewId, groupId, name, options) {
     try {
-      await cliHandler.updateEdgeWorkerInfo(ewId, groupId, name);
+      await cliHandler.updateEdgeWorkerInfo(ewId, groupId, name, options.resourceTierId);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
@@ -221,6 +277,41 @@ program
   });
 
 program
+  .command("clone <edgeworker-identifier> <resourceTierId>")
+  .description("Clone the given Edgeworker Id on an akamai network")
+  .option("--ewName <name>", "Name of the Edgeworker")
+  .option("--groupId <groupId>", "GroupId in which Edgeworker will be cloned")
+  .action(async function (ewId, resourceTierId, options) {
+    try {
+      await cliHandler.cloneEdgeworker(ewId, options.groupId, options.ewName, resourceTierId);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+})
+.on("--help", function () {
+  cliUtils.logAndExit(0, copywrite);
+});
+
+program
+  .command("deactivate <edgeworker-identifier> <network> <version-identifier>")
+  .description("De-activate a version for a given EdgeWorker Id on an Akamai Network")
+  .alias("deact")
+  .action(async function (ewId, network, versionId) {
+    
+    // Network must use correct keyword STAGING|PRODUCTION
+    if (network.toUpperCase() !== cliUtils.staging && network.toUpperCase() !== cliUtils.production)
+      cliUtils.logAndExit(1, `ERROR: Network parameter must be either staging or production - was: ${network}`);
+    try {
+      await cliHandler.deactivateEdgeworker(ewId, network.toUpperCase(), versionId);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+program
   .command("validate <bundlePath>")
   .description("Validates a code bundle version without uploading the code bundle.")
   .alias("vv")
@@ -253,7 +344,7 @@ program
   });
 
 program
-  .command("create-auth-token <propertyId>")
+  .command("create-auth-token <hostName>")
   .description("Generates an authentication token that can be used to get detailed EdgeWorker debug response headers.")
   .alias("auth")
   .option("--network <network>","The Akamai environment on which to create this token, either “staging” or “production”")
@@ -263,9 +354,10 @@ The default value if not specified is \"/*\". This option is mutually exclusive 
 generating the token, and the URL does NOT appear in the final token itself. The generated token is only valid for the exact URL. This option is mutually \
 exclusive to the --acl option; only use one or the other.")
   .option("--expiry <expiry>", "The number of minutes during which the token is valid, after which it expires. Max value is 60 minutes; default value is 15 minutes.")
-  .action(async function (propertyId, options) {
+  .option("--format <format>", "Format in which the output will be printed to console")
+  .action(async function (hostName, options) {
     try {
-      await cliHandler.createAuthToken(propertyId, options);
+      await cliHandler.createAuthToken(hostName, options);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }

@@ -12,7 +12,7 @@ export function logWithBorder(str, type = 'log') {
   log(border, type);
 }
 
-function log(txt, type = 'log') {
+export function log(txt, type = 'log') {
   if (type === 'log') {
     console.log(txt);
   } else if (type === 'err') {
