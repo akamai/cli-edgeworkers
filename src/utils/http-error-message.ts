@@ -11,5 +11,9 @@ export enum ErrorMessage {
     GET_RESTR_FOR_EW_ERROR = "ERROR: Unable to retrieve resource tiers for the specified Edgeworker id.",
     GET_RESTR_FOR_EW_404 = "Unable to find the requested EdgeWorker id.",
     LISTALL_EW_404 = "The requested resource Tier is not found.",
-    UPDATE_EW_400 = "Cloning an EdgeWorkers id is required in order to edit the Resource Tier id."
+    UPDATE_EW_400 = "Cloning an EdgeWorkers id is required in order to edit the Resource Tier id.",
+    AUTH_TOKEN_ERROR = "ERROR: Unable to create authentication token.",
+    AUTH_TOKEN_404 = "Secret key could not be found.",
+    EKV_TIMEOUT_ERROR = "The EdgeKV service was unable to respond in time. Please retry the request later.",
+    EW_TIMEOUT_ERROR = "The EdgeWorkers service was unable to respond in time. Please retry the request later."
 }

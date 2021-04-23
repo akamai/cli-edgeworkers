@@ -16,6 +16,7 @@ program
   .option('--section <name>', 'Use this section in edgerc file that contains the credential set.')
   // .option('--json [path]', 'Write command output to JSON file at given path, otherwise written to CLI cache directory')
   .option('--accountkey <account-id>', 'internal parameter')
+  .option('--timeout <timeout>', 'Use this for custom timeout')
   .on("option:debug", function () {
     envUtils.setDebugMode(true);
   })
@@ -31,6 +32,9 @@ program
   })
   .on("option:accountkey", function (key) {
     httpEdge.setAccountKey(key);
+  })
+  .on("option:timeout", function (timeout){
+    httpEdge.setTimeout(timeout);
   })
   // this fires only when a command is not listed below with a custom action
   .on('command:*', function (command) {

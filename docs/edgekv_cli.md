@@ -88,6 +88,7 @@ Options:
 | --debug | Show debug information. |
 | --edgerc `<path>` | Use credentials in edgerc file for command. (Default file location is ~/.edgerc). Refer to [Get Started with APIs](https://developer.akamai.com/api/getting-started#addcred) for more information. |
 | --section `<name>` | Use this section in `edgerc` file. (Default section is _[default]_)|
+| --timeout `<timeout>` | You can specify a timeout value for a command in milliseconds to override the 2 minute default. For example, if you add "--timeout 1000" to a command, it will timeout if the server takes more than 1 second to respond. |
 | -h, --help | Display information on how to use this EdgeKV command. | 
 
 Commands:

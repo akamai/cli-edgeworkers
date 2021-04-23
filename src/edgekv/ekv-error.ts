@@ -1,3 +1,5 @@
+import {ErrorMessage} from '../utils/http-error-message';
+
 // temporary solution to parse error until edgeKV team comes up with proper design
 export function handleError(err) {
 
@@ -13,6 +15,14 @@ export function handleError(err) {
 
     let statusCode = err["status"] == undefined ? "" : err["status"];
     let traceIdVal = err["traceId"] == undefined ? "" : err["traceId"];
+
+    if (statusCode == 504) {
+        return {
+            isError: true,
+            error_reason: ErrorMessage.EKV_TIMEOUT_ERROR
+        }
+    }
+
     // this is sent by edgeKV
     if (err.hasOwnProperty("errors")) {
         let errors = err["errors"];

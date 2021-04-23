@@ -102,4 +102,6 @@ export function getBorder(text: string) {
   return Array(text.length).fill('-').join('');
 }
 
-
+export function escape(text: string) {
+  return encodeURIComponent(text);
+}

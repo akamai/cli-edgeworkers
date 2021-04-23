@@ -48,6 +48,7 @@ Options:
 | --debug | Show debug information. |
 | --edgerc `<path>` | Use credentials in `edgerc` file for command. (Default file location is _~/.edgerc_) |
 | --section `<name>` | Use this section in `edgerc` file. (Default section is _[default]_)|
+| --timeout `<timeout>` | You can specify a timeout value for a command in milliseconds to override the 2 minute default. For example, if you add "--timeout 1000" to a command, it will timeout if the server takes more than 1 second to respond. |
 | --json `[path]` | Write CLI output as JSON to optionally provided path.  If not path provided, write JSON output to CLI home directory |
 | -h, --help | Display usage information for EdgeWorkers CLI. |
  
@@ -308,7 +309,7 @@ Usage: `akamai edgeworkers deactivate [options] <edgeworker-identifier> <network
 ### Create an EdgeWorkers Authentication Token
 Generates an authentication token that can be used to get detailed EdgeWorker debug response headers.
 
-Usage: `akamai edgeworkers create-auth-token [options] <secretKey>`
+Usage: `akamai edgeworkers create-auth-token [options] <hostName>`
 
 | Option | Description |
 | - | - |
@@ -316,11 +317,12 @@ Usage: `akamai edgeworkers create-auth-token [options] <secretKey>`
 | --acl `<aclPath>` | Path prefix of the response pages which require debugging |
 | --url `<urlPath>` | Exact path of response page which requires debugging |
 | --expiry `<expiry>` | Expiry duration of token, in minutes. |
+| --network `<network>` |  The Akamai environment on which to create this token, either “staging” or “production”
 | --format `<format>` | Format in which the output will be printed |
 
 | Argument | Existence | Description |
 | - | - | - |
-| secretKey | required | The secret key (hex-digit based, minimum 64 characters) that is configured for the Akamai property in which the EdgeWorker executes |
+| hostName | required | HostName of the property. Eg: www.test.com |
 
 #### Key Details
 1. The `--acl` and `--url` options are mutually exclusive to each other.

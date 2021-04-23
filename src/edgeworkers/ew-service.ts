@@ -172,6 +172,37 @@ export function validateTarball(tarballPath: string) {
   return postTarball(`${EDGEWORKERS_API_BASE}/validations`, tarballPath).then(r => r.body);
 }
 
+export function getAuthToken(hostName: string, acl: string, url: string, expiry: number, network: string) {
+  let urlPath = `${EDGEWORKERS_API_BASE}/secure-token`;
+
+  let body = buildTokenBody(hostName, acl, url, expiry, network);
+
+  return httpEdge.postJson(urlPath, body).then(r => r.body).catch(err => error.handleError(err,"AUTH_TOKEN"));
+}
+
+function buildTokenBody(hostName: string, acl: string, url: string, expiry: number, network: string) {
+  let params = {};
+
+  if (hostName != undefined && hostName != null) {
+    params["hostname"] = hostName;
+  }  
+
+  if (acl != undefined && acl != null) {
+    params["acl"] = acl;
+  }
+  if (expiry != undefined && expiry != null) {
+    params["expiry"] = expiry;
+  }
+  if (url != undefined && url != null) {
+    params["url"] = url;
+  }
+
+  if (network != undefined && network != null) {
+    params["network"] = network;
+  }
+
+  return params;
+}
 export function deactivateEdgeworker(ewId: string, network: string, versionId: string) {
   var body = { "network": network, "version": versionId };
   return httpEdge.postJson(`${EDGEWORKERS_API_BASE}/edgeworkers/${ewId}/deactivations`, body).then(r => r.body);

@@ -37,6 +37,12 @@ export function handleError(err, commandId) {
                     isError: true,
                     error_reason: ErrorMessage[commandId + "_ERROR"] + " " + ErrorMessage[commandId + "_400"]
                 }
+            }
+            case 504: {
+                return {
+                    isError: true,
+                    error_reason: ErrorMessage[commandId + "_ERROR"] + " " + ErrorMessage.EW_TIMEOUT_ERROR
+                }
             }    
             default: {
                 let detail = err["detail"] == undefined ? "" : err["detail"];

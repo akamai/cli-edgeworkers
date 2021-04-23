@@ -17,6 +17,7 @@ program
   .option('--section <name>', 'Use this section in edgerc file that contains the credential set.')
   .option('--json [path]', 'Write command output to JSON file at given path, otherwise written to CLI cache directory')
   .option('--accountkey <account-id>', 'internal parameter')
+  .option('--timeout <timeout>', 'Use this for custom timeout')
   .on("option:debug", function () {
     envUtils.setDebugMode(true);
   })
@@ -32,6 +33,9 @@ program
   })
   .on("option:accountkey", function (key) {
     httpEdge.setAccountKey(key);
+  })
+  .on("option:timeout", function (timeout){
+    httpEdge.setTimeout(timeout);
   })
   // this fires only when a command is not listed below with a custom action
   .on('command:*', function (command) {
@@ -261,7 +265,7 @@ program
 
     // Network must use correct keyword STAGING|PRODUCTION
     if (network.toUpperCase() !== cliUtils.staging && network.toUpperCase() !== cliUtils.production)
-      cliUtils.logAndExit(1, `ERROR: Network parameter must be either STAGING or PRODUCTION - was: ${network}`);
+      cliUtils.logAndExit(1, `ERROR: Network parameter must be either staging or production - was: ${network}`);
     try {
       await cliHandler.createNewActivation(ewId, network.toUpperCase(), versionId);
     } catch (e) {
@@ -325,7 +329,7 @@ program
 
 program
   .command("generate-secret")
-  .description("Generates a random secret key that can be used in the variable PMUSER_EW_DEBUG_KEY in their property and as an input to create auth token using cli command")
+  .description("Generates a random secret key that can be used in the variable PMUSER_EW_DEBUG_KEY in their property.")
   .alias("secret")
   .action(async function () {
     let length = 32;
@@ -340,10 +344,10 @@ program
   });
 
 program
-  .command("create-auth-token <secretKey>")
-  .description("Generates an authentication token that can be used to get detailed EdgeWorker debug response headers.  \
-The secret key (hex-digit based, min 64 chars) that is configured for the Akamai property in which the EdgeWorker executes.")
+  .command("create-auth-token <hostName>")
+  .description("Generates an authentication token that can be used to get detailed EdgeWorker debug response headers.")
   .alias("auth")
+  .option("--network <network>","The Akamai environment on which to create this token, either “staging” or “production”")
   .option("--acl <aclPath>", "The path prefix of the response pages which require debugging; this value is used to restrict for which pages the token is valid. \
 The default value if not specified is \"/*\". This option is mutually exclusive to the --url option; only use one or the other.")
   .option("--url <urlPath>", "The exact path (including filename and extension) of the response page which requires debugging; this value is used as a salt for \
@@ -351,47 +355,9 @@ generating the token, and the URL does NOT appear in the final token itself. The
 exclusive to the --acl option; only use one or the other.")
   .option("--expiry <expiry>", "The number of minutes during which the token is valid, after which it expires. Max value is 60 minutes; default value is 15 minutes.")
   .option("--format <format>", "Format in which the output will be printed to console")
-  .action(async function (secretKey, options) {
-
-    if (!secretKey) {
-      cliUtils.logAndExit(1, "ERROR: The secret key specified in the property in which the EdgeWorker executes must be supplied in order to generate an authentication token.");
-    } else if (secretKey.length < 64) {
-      cliUtils.logAndExit(1, "ERROR: The secret key specified in the property in which the EdgeWorker executes must have at least 64 characters.");
-    } else if (secretKey.length % 2 != 0) {
-      cliUtils.logAndExit(1, "ERROR: The secret key specified in the property in which the EdgeWorker executes must have an even number of hex characters.");
-    } else if (!secretKey.match(/^[0-9a-fA-F]+$/)) {
-      cliUtils.logAndExit(1, "ERROR: The secret key specified in the property in which the EdgeWorker executes must contain only hex characters: [0-9a-f]");
-    } else {
-      secretKey = secretKey.toLowerCase();
-    }
-
-    var expiry = 15; // Use 15 minutes as the default value
-    if (options.expiry) {
-      expiry = parseInt(options.expiry);
-      if (isNaN(expiry)) {
-        cliUtils.logAndExit(1, "ERROR: The expiry is invalid. It must be an integer value (in minutes) representing the duration of the validity of the token.");
-      } else if (expiry < 1 || expiry > 60) {
-        cliUtils.logAndExit(1, "ERROR: The expiry is invalid. It must be an integer value (in minutes) between 1 and 60.");
-      }
-    }
-
-    var path = "/*";
-    var isACL = true;
-    if (options.acl) {
-      if (options.url) {
-        cliUtils.logAndExit(1, "ERROR: The --acl and --url parameters are mutually exclusive; please use only one parameter. Specifying neither will result in a \
-default value for the --acl parameter being used." );
-      } else {
-        path = options.acl;
-        isACL = true;
-      }
-    } else if (options.url) {
-      path = options.url;
-      isACL = false;
-    }
-
+  .action(async function (hostName, options) {
     try {
-      await cliHandler.createAuthToken(secretKey, path, expiry, isACL, options.format);
+      await cliHandler.createAuthToken(hostName, options);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
