@@ -309,7 +309,7 @@ Usage: `akamai edgeworkers deactivate [options] <edgeworker-identifier> <network
 ### Create an EdgeWorkers Authentication Token
 Generates an authentication token that can be used to get detailed EdgeWorker debug response headers.
 
-Usage: `akamai edgeworkers create-auth-token [options] <propertyId>`
+Usage: `akamai edgeworkers create-auth-token [options] <hostName>`
 
 | Option | Description |
 | - | - |
@@ -322,7 +322,7 @@ Usage: `akamai edgeworkers create-auth-token [options] <propertyId>`
 
 | Argument | Existence | Description |
 | - | - | - |
-| propertyId | required | The property id that is configured for the Akamai property in which the EdgeWorker executes |
+| hostName | required | HostName of the property. Eg: www.test.com |
 
 #### Key Details
 1. The `--acl` and `--url` options are mutually exclusive to each other.
