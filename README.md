@@ -68,7 +68,7 @@ Commands:
 | activate \| av `<edgeworker-identifier> <network> <versionId>` | Activate a Version for a given EdgeWorker Id on an Akamai Network. |
 | deactivate \| deact `<edgeworker-identifier> <network> <versionId>` | Deactivate a Version for a given EdgeWorker Id on an Akamai Network. |
 | validate \| vv `<bundlePath>` | Validates a code bundle version without uploading the code bundle. |
-| create-auth-token \| auth `[options] <secretKey>` | Generates an authentication token that can be used to get detailed EdgeWorker debug response headers. |
+| create-auth-token \| auth `[options] <hostName>` | Generates an authentication token that can be used to get detailed EdgeWorker debug response headers. |
 | generate-secret \| secret `[options]` | Generates a secret key that can be used to generate auth token or in property variable. |
 | clone \| clone `<edgeworker-identifier> <resourceTierId> [options]` | Clones an Edgeworker from the existing Edgeworker Id. |
 | list-contracts \| li-contracts `[options]` | List of contract ids that user has access to. |
