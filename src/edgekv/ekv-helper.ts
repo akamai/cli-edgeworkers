@@ -346,3 +346,11 @@ export function getDateDifference(date) {
     let Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24); 
     return Difference_In_Days;
 }
+
+export function convertDaysToSeconds(days: number) {
+    if (!isNaN(days) && days > 0) {
+        return days * 86400;
+    } else {
+        cliUtils.logAndExit(1, "ERROR: Retention period specified is invalid. Please specify the retention in number of days.");
+    }
+}

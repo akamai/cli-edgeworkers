@@ -142,10 +142,11 @@ const list = program.command('list')
 
 list
   .command("ns <environment>")
+  .option("-d, --details", "Setting this option will provide the namespace details")
   .description("List all the namespaces")
-  .action(async function (environment) {
+  .action(async function (environment, options) {
     try {
-      await kvCliHandler.listNameSpaces(environment);
+      await kvCliHandler.listNameSpaces(environment, options.details);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
@@ -190,10 +191,11 @@ const create = program.command('create')
 
 create
   .command("ns <environment> <namespace>")
+  .requiredOption("--retention <retention>", "Retention period of the namespace in days")
   .description("Creates an EdgeKV namespace")
-  .action(async function (environment, namespace) {
+  .action(async function (environment, namespace, options) {
     try {
-      await kvCliHandler.createNamespace(environment, namespace);
+      await kvCliHandler.createNamespace(environment, namespace, options.retention);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
