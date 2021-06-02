@@ -185,8 +185,8 @@ export async function listItemsFromGroup(environment: string, nameSpace: string,
   }
 }
 
-export async function listTokens() {
-  let tokenList = await cliUtils.spinner(edgekvSvc.getTokenList(), `Fetching token list...`);
+export async function listTokens(incExpired) {
+  let tokenList = await cliUtils.spinner(edgekvSvc.getTokenList(incExpired), `Fetching token list...`);
   let msg = `The following tokens are available for you to download`;
   if (tokenList != undefined && !tokenList.isError) {
     cliUtils.logWithBorder(msg);

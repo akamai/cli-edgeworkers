@@ -171,10 +171,11 @@ list
 
 list
   .command("tokens")
+  .option("--include-expired", "Returns expired tokens in the response")
   .description("List all tokens for which the user has permission to download.")
-  .action(async function () {
+  .action(async function (options) {
     try {
-      await kvCliHandler.listTokens();
+      await kvCliHandler.listTokens(options.includeExpired);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }

@@ -6,6 +6,7 @@ import * as httpEdge from '../cli-httpRequest'
 import * as edgeWorkersClientSvc from './client-manager';
 import * as pkginfo from '../../package.json';
 var program = require('commander');
+const isValidDomain = require('is-valid-domain')
 const copywrite = '\nCopyright (c) 2019-2021 Akamai Technologies, Inc. Licensed under Apache 2 license.\nYour use of Akamai\'s products and services is subject to the terms and provisions outlined in Akamai\'s legal policies.\nVisit http://github.com/akamai/cli-edgeworkers for detailed documentation';
 
 /* ========== EdgeWorkers CLI Program Commands ========== */
@@ -357,6 +358,11 @@ exclusive to the --acl option; only use one or the other.")
   .option("--format <format>", "Format in which the output will be printed to console")
   .action(async function (hostName, options) {
     try {
+      // deprecation msg for people using older CLI. This will be removed eventually.
+      if (!isValidDomain(hostName)) {
+        cliUtils.logAndExit(1, 'ERROR: Creating auth token with secret is deprecated with version CLI 1.1.0. Please use your host name to create an authentication token.');
+      } 
+
       await cliHandler.createAuthToken(hostName, options);
     } catch (e) {
       cliUtils.logAndExit(1, e);

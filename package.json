@@ -25,6 +25,7 @@
     "edgegrid": "^3.0.8",
     "from-seconds": "^1.0.2",
     "inquirer": "6.2.0",
+    "is-valid-domain": "^0.0.19",
     "jwt-decode": "^3.1.2",
     "readline-sync": "^1.4.10",
     "sha256-file": "^1.0.0",
