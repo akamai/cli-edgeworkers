@@ -98,7 +98,7 @@ Commands:
 | help `[command]` | Display information on how to use the given command. |
 | initialize \| init | Initialize an EdgeKV database. |
 | show status | Show the status of an EdgeKV database. |
-| create ns `<environment> <namespace>` | Create an EdgeKV namespace in an Akamai environment. |
+| create ns `<environment> <namespace> --retention <retention>` | Create an EdgeKV namespace in an Akamai environment. Specify the retention period of the namespace in days. |
 | show ns `<environment> <namespace>`| Retrieve an EdgeKV namespace in an Akamai environment. |
 | list ns `<environment>` | List the namespaces provisioned in an Akamai environment. |
 | write `<itemType> <environment> <namespace> <groupId> <itemId> <items>` | Write the text item or JSON item supplied in a file for the given namespace, group id, and item id in an Akamai environment. |
@@ -106,7 +106,7 @@ Commands:
 | delete item \| del item `<environment> <namespace> <groupId> <itemId>` | Delete an item for the given namespace, group id, and item id in an Akamai environment. |
 | list items `<environment> <namespace> <groupId>` | List the items for the given namespace and group id in an Akamai environment. |
 | create token \| create tkn `<tokenName> [options]` |  Create an EdgeKV access token. |
-| list tokens | List of all tokens the user has permission to download. |
+| list tokens `[options]`| List of all tokens the user has permission to download. |
 | download token `<tokenName> [options]` | Download an edgekv token. |
 
 
@@ -146,6 +146,7 @@ Usage: `akamai edgekv create ns <environment> <nameSpace>`
 | Option | Description |
 | - | - |
 | -h, --help  | Display information on how to use this EdgeKV command |
+| --retention | Retention period of the namespace in days |
 
 | Argument | Existence | Description |
 | - | - | - |
@@ -166,6 +167,7 @@ Usage: `akamai edgekv list ns <environment>`
 | Option | Description |
 | - | - |
 | -h, --help  | Display information on how to use this EdgeKV command. |
+| -d, --details | Displays details of the namespace. |
 
 | Argument | Existence | Description |
 | - | - | - |
@@ -328,6 +330,7 @@ Usage: `akamai edgekv list tokens`
 | Option | Description |
 | - | - |
 | -h, --help  | Display information on how to use this EdgeKV command. |
+| --include-expired | Retrieves both expired and valid tokens. |
  
 ### Retrieve Access Token
  
