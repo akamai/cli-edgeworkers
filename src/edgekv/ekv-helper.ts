@@ -348,7 +348,7 @@ export function getDateDifference(date) {
 }
 
 export function convertDaysToSeconds(days: number) {
-    if (!isNaN(days) && days > 0) {
+    if (!isNaN(days) && days >= 0) {
         return days * 86400;
     } else {
         cliUtils.logAndExit(1, "ERROR: Retention period specified is invalid. Please specify the retention in number of days.");

@@ -143,10 +143,10 @@ Create a namespace
 
 Usage: `akamai edgekv create ns <environment> <nameSpace>`
 
-| Option | Description |
+| Option | Existence | Description |
 | - | - |
-| -h, --help  | Display information on how to use this EdgeKV command |
-| --retention | Retention period of the namespace in days |
+| -h, --help  | optional | Display information on how to use this EdgeKV command |
+| --retention | Required | Retention period of the namespace in days. |
 
 | Argument | Existence | Description |
 | - | - | - |
@@ -157,6 +157,7 @@ Usage: `akamai edgekv create ns <environment> <nameSpace>`
 1. The namespace identifier can only include alphanumeric (0-9, a-z, A-Z), underscore (_), and (-) dash characters.
 2. The namespace identifier can be between 1 and 32 characters in length.
 3. You cannot use the word "default" as the namespace identifier. The “default” namespace is already created during initialization.
+4. Specifying "0" retention means indefinite retention.
 
 ### List NameSpace
 
@@ -331,6 +332,9 @@ Usage: `akamai edgekv list tokens`
 | - | - |
 | -h, --help  | Display information on how to use this EdgeKV command. |
 | --include-expired | Retrieves both expired and valid tokens. |
+
+#### Important Notes
+1. Note that --include-expired shows all the tokens that count towards your account's token limit. For more details, See [Akamai EdgeKV getting started guide](https://learn.akamai.com/en-us/webhelp/edgeworkers/edgekv-getting-started-guide/GUID-F14C3474-D4B8-47F4-84CF-A999647000E0.html)
  
 ### Retrieve Access Token
  

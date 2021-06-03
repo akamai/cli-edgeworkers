@@ -13,7 +13,7 @@ export function getNameSpaceList(network: string, detail: boolean) {
 }
 
 export function createNameSpace(network: string, namespace: string, retention) {
-  var body = { "name": namespace, "retentionInSeconds": retention };
+  var body = { "namespace": namespace, "retentionInSeconds": retention };
   return httpEdge.postJson(`${EDGEKV_API_BASE}/networks/${network}/namespaces`, body).then(r => r.body).catch(err => error.handleError(err));
 }
 
