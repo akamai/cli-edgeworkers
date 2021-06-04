@@ -6,7 +6,7 @@ const EDGEKV_API_BASE = '/edgekv/v1';
 
 export function getNameSpaceList(network: string, details: boolean) {
   var qs: string = "";
-  if (detail) {
+  if (details) {
     qs += `?details=${details}`
   }
   return httpEdge.getJson(`${EDGEKV_API_BASE}/networks/${network}/namespaces${qs}`).then(r => r.body).catch(err => error.handleError(err));
