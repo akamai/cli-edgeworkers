@@ -16,7 +16,7 @@ export function handleError(err, commandId) {
             case 404: {
                 return {
                     isError: true,
-                    error_reason: ErrorMessage[commandId + "_ERROR"] + " " + ErrorMessage[commandId + "_404"]
+                    error_reason: ErrorMessage[commandId + "_ERROR"] + " " + err["detail"]
                 }
             }
             case 403: {

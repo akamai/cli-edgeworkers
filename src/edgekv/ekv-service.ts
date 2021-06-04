@@ -4,12 +4,16 @@ import * as fs from 'fs';
 
 const EDGEKV_API_BASE = '/edgekv/v1';
 
-export function getNameSpaceList(network: string) {
-  return httpEdge.getJson(`${EDGEKV_API_BASE}/networks/${network}/namespaces`).then(r => r.body).catch(err => error.handleError(err));
+export function getNameSpaceList(network: string, details: boolean) {
+  var qs: string = "";
+  if (detail) {
+    qs += `?details=${details}`
+  }
+  return httpEdge.getJson(`${EDGEKV_API_BASE}/networks/${network}/namespaces${qs}`).then(r => r.body).catch(err => error.handleError(err));
 }
 
-export function createNameSpace(network: string, namespace: string) {
-  var body = { "name": namespace };
+export function createNameSpace(network: string, namespace: string, retention) {
+  var body = { "namespace": namespace, "retentionInSeconds": retention };
   return httpEdge.postJson(`${EDGEKV_API_BASE}/networks/${network}/namespaces`, body).then(r => r.body).catch(err => error.handleError(err));
 }
 
@@ -52,7 +56,7 @@ export function getItemsFromGroup(network: string, namespace: string, groupId: s
 export function createEdgeKVToken(tokenName: string, permissionList, allowOnStg: boolean, allowOnProd: boolean, ewids:string, expiry) {
   
   let body = {
-    "name": tokenName, "allow_on_production": allowOnProd, "allow_on_staging": allowOnStg, "ewids":ewids ,"expiry": expiry, "namespace_permissions": permissionList
+    "name": tokenName, "allowOnProduction": allowOnProd, "allowOnStaging": allowOnStg, "ewids":ewids ,"expiry": expiry, "namespacePermissions": permissionList
   };
   return httpEdge.postJson(`${EDGEKV_API_BASE}/tokens`, body).then(r => r.body).catch(err => error.handleError(err));
 }
@@ -61,7 +65,11 @@ export function getSingleToken(tokenName: string) {
   return httpEdge.getJson(`${EDGEKV_API_BASE}/tokens/${tokenName}`).then(r => r.body).catch(err => error.handleError(err));
 }
 
-export function getTokenList() {
-  return httpEdge.getJson(`${EDGEKV_API_BASE}/tokens`).then(r => r.body).catch(err => error.handleError(err));
+export function getTokenList(incExpired: boolean) {
+  var qs: string = "";
+  if (incExpired) {
+    qs += `?includeExpired=${incExpired}`
+  }
+  return httpEdge.getJson(`${EDGEKV_API_BASE}/tokens${qs}`).then(r => r.body).catch(err => error.handleError(err));
 }
 // }

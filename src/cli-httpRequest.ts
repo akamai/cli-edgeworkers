@@ -45,7 +45,7 @@ export function sendEdgeRequest(pth: string, method: string, body, headers) {
                     } else if (isOkStatus(response.statusCode)) {
                         var obj: any = {
                             response,
-                            body: !!body ? cliUtils.parseIfJSON(body) : undefined
+                            body: (body == "" || body == "null" || !!body) ? cliUtils.parseIfJSON(body) : undefined // adding null and empty string use case for edgekv
                         };
                         resolve(obj);
                     } else {

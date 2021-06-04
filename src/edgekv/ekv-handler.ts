@@ -3,15 +3,21 @@ import * as cliUtils from '../utils/cli-utils';
 import * as response from './ekv-response';
 import * as ekvhelper from './ekv-helper';
 
-export async function listNameSpaces(environment: string) {
+export async function listNameSpaces(environment: string, details) {
   ekvhelper.validateNetwork(environment);
-  let nameSpaceList = await cliUtils.spinner(edgekvSvc.getNameSpaceList(environment), "Fetching namespace list...");
+  let nameSpaceList = await cliUtils.spinner(edgekvSvc.getNameSpaceList(environment, details), "Fetching namespace list...");
   if (nameSpaceList != undefined && !nameSpaceList.isError) {
     let nsListResp = [];
     if (nameSpaceList.hasOwnProperty("namespaces")) {
       let namespace = nameSpaceList["namespaces"];
       namespace.forEach(function (value) {
-        nsListResp.push({ "Namespace": value });
+        if (detail) {
+          let retentionPeriod = ekvhelper.convertRetentionPeriod(value["retentionInSeconds"]);
+          nsListResp.push({ "Namespace": value["namespace"], "RetentionPeriod": retentionPeriod,"GeoLocation": value["geoLocation"] });
+        }
+        else {
+          nsListResp.push({ "Namespace": value["namespace"] });
+        }
       });
     }
     cliUtils.logWithBorder(`The following namespaces are provisioned on the ${environment} environment`);
@@ -21,10 +27,11 @@ export async function listNameSpaces(environment: string) {
   }
 }
 
-export async function createNamespace(environment: string, nameSpace: string) {
+export async function createNamespace(environment: string, nameSpace: string, retention: number) {
   ekvhelper.validateNetwork(environment);
   let msg = `Namespace ${nameSpace} has been created successfully on the ${environment} environment`
-  let createdNamespace = await cliUtils.spinner(edgekvSvc.createNameSpace(environment, nameSpace), `Creating namespace for environment ${environment}`);
+  let retentionPeriod = ekvhelper.convertDaysToSeconds(retention);
+  let createdNamespace = await cliUtils.spinner(edgekvSvc.createNameSpace(environment, nameSpace, retentionPeriod), `Creating namespace for environment ${environment}`);
   if (createdNamespace != undefined && !createdNamespace.isError) {
     cliUtils.logWithBorder(msg);
     response.logNamespace(nameSpace, createdNamespace);
@@ -53,8 +60,8 @@ export async function initializeEdgeKv() {
     let initRespBody = JSON.parse(initializedEdgeKv.body);
 
     let status = initializedEdgeKv.statusCode;
-    if (initRespBody.hasOwnProperty("account_status")) {
-      let accountStatus = initRespBody["account_status"];
+    if (initRespBody.hasOwnProperty("accountStatus")) {
+      let accountStatus = initRespBody["accountStatus"];
       if (accountStatus == "INITIALIZED") {
         if (status == 201) {
           cliUtils.logWithBorder(`EdgeKV INITIALIZED successfully`);
@@ -85,8 +92,8 @@ export async function getInitializationStatus() {
     let initRespBody = JSON.parse(initializedEdgeKv.body);
     let status = initializedEdgeKv.statusCode;
 
-    if (initRespBody.hasOwnProperty("account_status")) {
-      let accountStatus = initRespBody["account_status"];
+    if (initRespBody.hasOwnProperty("accountStatus")) {
+      let accountStatus = initRespBody["accountStatus"];
       if (accountStatus == "INITIALIZED") {
         if (status == 200) {
           cliUtils.logWithBorder(`EdgeKV already INITIALIZED`);
@@ -136,7 +143,7 @@ export async function readItemFromEdgeKV(environment: string, nameSpace: string,
   ekvhelper.validateNetwork(environment);
 
   let item = await cliUtils.spinner(edgekvSvc.readItem(environment, nameSpace, groupId, itemId), "Reading items from EdgeKV..");
-  if (item != undefined && !item.isError) {
+  if ((item != undefined && !item.isError) || item == null) {
     let msg = `Item ${itemId} from group ${groupId}, namespace ${nameSpace} and environment ${environment} retrieved successfully.`
     cliUtils.logWithBorder(msg);
     if (typeof item == 'object') {
@@ -178,8 +185,8 @@ export async function listItemsFromGroup(environment: string, nameSpace: string,
   }
 }
 
-export async function listTokens() {
-  let tokenList = await cliUtils.spinner(edgekvSvc.getTokenList(), `Fetching token list...`);
+export async function listTokens(incExpired) {
+  let tokenList = await cliUtils.spinner(edgekvSvc.getTokenList(incExpired), `Fetching token list...`);
   let msg = `The following tokens are available for you to download`;
   if (tokenList != undefined && !tokenList.isError) {
     cliUtils.logWithBorder(msg);

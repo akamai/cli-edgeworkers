@@ -655,7 +655,7 @@ export async function createAuthToken(hostName: string, options?: { acl?: string
       if (edgeWorkersClientSvc.isJSONOutputMode()) {
         edgeWorkersClientSvc.writeJSONOutput(0, token);
       } else if (options.format && options.format == "curl") {
-        cliUtils.log(`-H ${authToken}`)
+        cliUtils.log(`-H '${token}'`)
       } else {
         cliUtils.logWithBorder("\nAdd the following request header to your requests to get additional trace information.\n" + token + "\n");
       }

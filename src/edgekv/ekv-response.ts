@@ -7,19 +7,20 @@ const shortMnthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 
 const weekday = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export function logNamespace(nameSpaceId: string, createdNameSpace) {
-    let retentionPeriod = ekvhelper.convertRetentionPeriod(createdNameSpace["retention_period"]);
+    let retentionPeriod = ekvhelper.convertRetentionPeriod(createdNameSpace["retentionInSeconds"]);
     var createNameSpace = {
         Namespace: nameSpaceId,
-        RetentionPeriod: retentionPeriod
+        RetentionPeriod: retentionPeriod,
+        GeoLocation: createdNameSpace["geoLocation"]
     }
     console.table([createNameSpace]);
 }
 
 export function logInitialize(initializedEdgekv) {
     let initializeStatus = {
-        AccountStatus: initializedEdgekv["account_status"],
-        ProductionStatus: initializedEdgekv["production_status"],
-        StagingStatus: initializedEdgekv["staging_status"],
+        AccountStatus: initializedEdgekv["accountStatus"],
+        ProductionStatus: initializedEdgekv["productionStatus"],
+        StagingStatus: initializedEdgekv["stagingStatus"],
         Cpcode: initializedEdgekv["cpcode"]
     }
     console.table([initializeStatus]);
