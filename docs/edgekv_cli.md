@@ -334,7 +334,7 @@ Usage: `akamai edgekv list tokens`
 | --include-expired | Retrieves both expired and valid tokens. |
 
 #### Important Notes
-1. Note that --include-expired shows all the tokens that count towards your account's token limit. For more details, See [Akamai EdgeKV getting started guide](https://learn.akamai.com/en-us/webhelp/edgeworkers/edgekv-getting-started-guide/GUID-F14C3474-D4B8-47F4-84CF-A999647000E0.html)
+1. Note that --include-expired returns all the tokens that count towards your account's token limit. For more details, See [Akamai EdgeKV getting started guide](https://learn.akamai.com/en-us/webhelp/edgeworkers/edgekv-getting-started-guide/GUID-F14C3474-D4B8-47F4-84CF-A999647000E0.html)
  
 ### Retrieve Access Token
  
