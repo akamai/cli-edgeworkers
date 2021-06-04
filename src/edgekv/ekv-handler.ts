@@ -3,9 +3,9 @@ import * as cliUtils from '../utils/cli-utils';
 import * as response from './ekv-response';
 import * as ekvhelper from './ekv-helper';
 
-export async function listNameSpaces(environment: string, detail) {
+export async function listNameSpaces(environment: string, details) {
   ekvhelper.validateNetwork(environment);
-  let nameSpaceList = await cliUtils.spinner(edgekvSvc.getNameSpaceList(environment, detail), "Fetching namespace list...");
+  let nameSpaceList = await cliUtils.spinner(edgekvSvc.getNameSpaceList(environment, details), "Fetching namespace list...");
   if (nameSpaceList != undefined && !nameSpaceList.isError) {
     let nsListResp = [];
     if (nameSpaceList.hasOwnProperty("namespaces")) {

@@ -4,10 +4,10 @@ import * as fs from 'fs';
 
 const EDGEKV_API_BASE = '/edgekv/v1';
 
-export function getNameSpaceList(network: string, detail: boolean) {
+export function getNameSpaceList(network: string, details: boolean) {
   var qs: string = "";
   if (detail) {
-    qs += `?details=${detail}`
+    qs += `?details=${details}`
   }
   return httpEdge.getJson(`${EDGEKV_API_BASE}/networks/${network}/namespaces${qs}`).then(r => r.body).catch(err => error.handleError(err));
 }
