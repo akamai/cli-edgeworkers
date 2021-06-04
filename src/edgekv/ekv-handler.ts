@@ -11,7 +11,7 @@ export async function listNameSpaces(environment: string, details) {
     if (nameSpaceList.hasOwnProperty("namespaces")) {
       let namespace = nameSpaceList["namespaces"];
       namespace.forEach(function (value) {
-        if (detail) {
+        if (details) {
           let retentionPeriod = ekvhelper.convertRetentionPeriod(value["retentionInSeconds"]);
           nsListResp.push({ "Namespace": value["namespace"], "RetentionPeriod": retentionPeriod,"GeoLocation": value["geoLocation"] });
         }
