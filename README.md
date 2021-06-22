@@ -50,6 +50,7 @@ Options:
 | --section `<name>` | Use this section in `edgerc` file. (Default section is _[default]_)|
 | --timeout `<timeout>` | You can specify a timeout value for a command in milliseconds to override the 2 minute default. For example, if you add "--timeout 1000" to a command, it will timeout if the server takes more than 1 second to respond. |
 | --json `[path]` | Write CLI output as JSON to optionally provided path.  If not path provided, write JSON output to CLI home directory |
+| --jsonout | Write CLI output as JSON to stdout. |
 | -h, --help | Display usage information for EdgeWorkers CLI. |
  
 Commands:
