@@ -33,9 +33,14 @@ export function handleError(err, commandId) {
                 }
             }    
             case 400: {
+                let errorMessage = ErrorMessage[commandId + "_400"];
+                if (errorMessage === undefined) {
+                  errorMessage = err.detail
+                }
+
                 return {
                     isError: true,
-                    error_reason: ErrorMessage[commandId + "_ERROR"] + " " + ErrorMessage[commandId + "_400"]
+                    error_reason: ErrorMessage[commandId + "_ERROR"] + " " + errorMessage
                 }
             }
             case 504: {

@@ -61,8 +61,10 @@ Commands:
 | list-ids \| li `[options] [edgeworker-identifier]` | List EdgeWorker ids currently registered. |
 | register \| create-id `<group-identifier> <edgeworker-name>` | Register a new EdgeWorker id to reference in Property Manager behavior. |
 | update-id \| ui `<edgeworker-identifier> <group-identifier> <edgeworker-name> [options]` | Allows Customer Developer to update an existing EdgeWorker Identifier's Luna ACG or Name attributes. |
+| delete-id \| delete-id `<edgeworker-identifier>` | Permanently delete an existing EdgeWorker Id. |
 | list-versions \| lv `<edgeworker-identifier> [version-identifier]` | List Version information of a given EdgeWorker Id. |
 | upload \| create-version `[options] <edgeworker-identifier>` | Creates a new version of a given EdgeWorker Id which includes the code bundle. |
+| delete-version \| delete-version `<edgeworker-identifier> <version-identifier>` | Permanently delete an existing version of a given EdgeWorker Id. |
 | download \| download-version `[options] <edgeworker-identifier> <version-identifier>` | Download the code bundle of an EdgeWorker version. |
 | status \| list-activations `[options] <edgeworker-identifier>` | List Activation status of a given EdgeWorker Id. |
 | activate \| av `<edgeworker-identifier> <network> <versionId>` | Activate a Version for a given EdgeWorker Id on an Akamai Network. |
@@ -150,6 +152,24 @@ Usage: `akamai edgeworkers update-id [options] <edgeworker-identifier> <group-id
 
 3. Resource Tier ID provided should be same as the one the EdgeWorker ID already has. In order to provide a different resource tier id, please use the clone operation.
 
+### Delete Existing EdgeWorker Identifier
+Permanently delete an existing EdgeWorker Identifier.
+
+Usage: `akamai edgeworkers delete-id <edgeworker-identifier>`
+
+| Option | Description |
+| - | - |
+| -h, --help  | output usage information |
+
+| Argument | Existence | Description |
+| - | - | - |
+| edgeworker-identifier | required | A unique integer handle to an EdgeWorkers instance |
+
+#### Key Details
+1. Deleting an EdgeWorker ID is only possible if it doesn't have any version currently active or being activated on the Akamai network.
+
+2. Ensure that there are no active properties associated with an EdgeWorker before deletion.
+
 ### List EdgeWorker Versions
 List Version information of a given EdgeWorker Id.
 
@@ -206,6 +226,25 @@ Usage: `akamai edgeworkers upload [options] <edgeworker-identifier>`
 10. Location response header will be provided with new EdgeWorker Version id.
 
 11. EdgeWorker version details response body (JSON) will be provided with 201 response code.
+
+### Delete Existing EdgeWorker Version
+Permanently delete an existing version of a given EdgeWorker Id.
+
+Usage: `akamai edgeworkers delete-version <edgeworker-identifier> <version-identifier>`
+
+| Option | Description |
+| - | - |
+| -h, --help  | output usage information |
+
+| Argument | Existence | Description |
+| - | - | - |
+| edgeworker-identifier | required | A unique integer handle to an EdgeWorkers instance |
+| version-identifier | required | A unique integer handle to version of an EdgeWorkers instance |
+
+#### Key Details
+1. Deleting a version is only possible if it is not currently active or being activated on the Akamai network.
+
+2.  If the version is currently active, it will have to be deactivated before it can be deleted.
 
 ### Download an EdgeWorkers Code Bundle
 Download the code bundle of an EdgeWorker version.
