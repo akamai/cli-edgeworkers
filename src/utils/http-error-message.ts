@@ -7,6 +7,7 @@ export enum ErrorMessage {
     CLONE_EW_ERROR = "ERROR: Unable to clone the specified edgeworker.",
     LISTALL_EW_ERROR = "ERROR: Unable to retrieve Edgeworkers list.",
     GET_CONTRACT_ERROR = "ERROR: Unable to retrieve contracts for your account.",
+    GET_PROPERTIES_ERROR = "ERROR: Unable to retrieve properties for the specified Edgeworker id.",
     GET_RESTIER_ERROR = "ERROR: Unable to retrieve resource tiers for the contract.",
     GET_RESTR_FOR_EW_ERROR = "ERROR: Unable to retrieve resource tiers for the specified Edgeworker id.",
     GET_RESTR_FOR_EW_404 = "Unable to find the requested EdgeWorker id.",

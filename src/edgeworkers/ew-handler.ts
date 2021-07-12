@@ -200,6 +200,27 @@ export async function getContracts() {
   }
 }
 
+export async function getProperties(ewId: string, activeOnly: boolean) {
+  let properties = await cliUtils.spinner(edgeWorkersSvc.getProperties(ewId, activeOnly), `Retrieving properties for EdgeWorker Id ${ewId}...`);
+  if (properties && !properties.isError) {
+    if (properties.properties.length > 0) {
+      let msg = `The following properties are associated with the EdgeWorker Id ${ewId}`;
+
+      if (edgeWorkersClientSvc.isJSONOutputMode()) {
+        edgeWorkersClientSvc.writeJSONOutput(0, msg, properties);
+      } else {
+        cliUtils.logWithBorder(msg);
+        console.table(properties.properties);
+      }
+    } else {
+      const optionalParam = activeOnly ? " active " : " ";
+      cliUtils.logAndExit(0, `INFO: There are currently no${optionalParam}properties associated with the EdgeWorker Id: ${ewId}`);
+    }
+  } else {
+    cliUtils.logAndExit(1, properties.error_reason);
+  }
+}
+
 export async function getResourceTiers() {
   let contractIdList = await getContractIds();
   if (contractIdList == undefined) {

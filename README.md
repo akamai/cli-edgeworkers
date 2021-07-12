@@ -72,6 +72,7 @@ Commands:
 | generate-secret \| secret `[options]` | Generates a secret key that can be used to generate auth token or in property variable. |
 | clone \| clone `<edgeworker-identifier> <resourceTierId> [options]` | Clones an Edgeworker from the existing Edgeworker Id. |
 | list-contracts \| li-contracts `[options]` | List of contract ids that user has access to. |
+| list-properties \| lp `<edgeworker-identifier> [options]` | List of properties associated with a given EdgeWorker Id. |
 | list-restiers \| li-restiers `[options]` | List Resource Tiers that can be used to create or clone EdgeWorker Id. |
 | show-restier \| show-restier `<edgeworker-identifier>` | Customers can get Resource Tier details for a specific EdgeWorker Id. |
 
@@ -364,6 +365,20 @@ Usage: `akamai list-contracts`
 | Option | Description |
 | - | - |
 | -h, --help  | output usage information |
+
+### List Properties
+List of properties associated to a specific EdgeWorker Id.
+
+Usage: `akamai edgeworkers list-properties <edgeworkerId>`
+
+| Option | Description |
+| - | - |
+| -h, --help  | output usage information |
+| --activeOnly | Returns only active properties |
+
+| Argument | Existence | Description |
+| - | - | - |
+| edgeworkerId | required | Edgeworker identifier.
 
 ### List Resource Tiers for a specific Contract ID
 Allows customers to list Resource Tiers that can be used to create or clone EdgeWorker IDs. 
