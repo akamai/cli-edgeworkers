@@ -369,7 +369,7 @@ Usage: `akamai list-contracts`
 ### List Properties
 List of properties associated to a specific EdgeWorker Id.
 
-Usage: `akamai edgeworkers list-properties <edgeworkerId>`
+Usage: `akamai edgeworkers list-properties <edgeworkerId> [options]`
 
 | Option | Description |
 | - | - |
