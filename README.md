@@ -369,7 +369,7 @@ Usage: `akamai list-contracts`
 ### List Properties
 List of properties associated to a specific EdgeWorker Id.
 
-Usage: `akamai edgeworkers list-properties <edgeworkerId> [options]`
+Usage: `akamai edgeworkers list-properties <edgeworker-identifier> [options]`
 
 | Option | Description |
 | - | - |
@@ -378,7 +378,10 @@ Usage: `akamai edgeworkers list-properties <edgeworkerId> [options]`
 
 | Argument | Existence | Description |
 | - | - | - |
-| edgeworkerId | required | Edgeworker identifier.
+| edgeworker-identifier | required | Edgeworker identifier.
+
+#### Key Details
+1. Note that the returned boolean limitedAccessToProperties is true if the user doesn't have access to the top level group under the account, or if they don't have the admin role for this group.
 
 ### List Resource Tiers for a specific Contract ID
 Allows customers to list Resource Tiers that can be used to create or clone EdgeWorker IDs. 

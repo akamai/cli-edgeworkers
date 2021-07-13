@@ -104,9 +104,9 @@ export function getContracts() {
 }
 
 export function getProperties(ewId: string, activeOnly: boolean) {
-  let qs: string = "?activeOnly=true";
-  if (activeOnly === undefined) {
-    qs = "";
+  let qs: string = "";
+  if (activeOnly !== undefined) {
+    qs = "?activeOnly=true";
   }
   return httpEdge.getJson(`${EDGEWORKERS_API_BASE}/ids/${ewId}/properties${qs}`).then(r => r.body).catch(err => error.handleError(err,"GET_PROPERTIES"));
 }

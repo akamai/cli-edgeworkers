@@ -201,23 +201,26 @@ export async function getContracts() {
 }
 
 export async function getProperties(ewId: string, activeOnly: boolean) {
-  let properties = await cliUtils.spinner(edgeWorkersSvc.getProperties(ewId, activeOnly), `Retrieving properties for EdgeWorker Id ${ewId}...`);
-  if (properties && !properties.isError) {
-    if (properties.properties.length > 0) {
+  let propList = await cliUtils.spinner(edgeWorkersSvc.getProperties(ewId, activeOnly), `Retrieving properties for EdgeWorker Id ${ewId}...`);
+  if (propList && !propList.isError) {
+    const properties = propList.properties;
+
+    if (properties.length > 0) {
       let msg = `The following properties are associated with the EdgeWorker Id ${ewId}`;
 
       if (edgeWorkersClientSvc.isJSONOutputMode()) {
-        edgeWorkersClientSvc.writeJSONOutput(0, msg, properties);
+        edgeWorkersClientSvc.writeJSONOutput(0, msg, propList);
       } else {
         cliUtils.logWithBorder(msg);
-        console.table(properties.properties);
+        console.table(properties);
+        console.log(`limitedAccessToProperties: ${propList.limitedAccessToProperties}`)
       }
     } else {
       const optionalParam = activeOnly ? " active " : " ";
       cliUtils.logAndExit(0, `INFO: There are currently no${optionalParam}properties associated with the EdgeWorker Id: ${ewId}`);
     }
   } else {
-    cliUtils.logAndExit(1, properties.error_reason);
+    cliUtils.logAndExit(1, propList.error_reason);
   }
 }
 
