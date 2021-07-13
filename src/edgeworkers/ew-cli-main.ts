@@ -187,9 +187,10 @@ program
 program
   .command("delete-id <edgeworker-identifier>")
   .description("Permanently delete an existing EdgeWorker Id.")
-  .action(async function (ewId) {
+  .option("--noPrompt", "Skip the deletion confirmation prompt")
+  .action(async function (ewId, options) {
     try {
-      await cliHandler.deleteEdgeWorkerId(ewId);
+      await cliHandler.deleteEdgeWorkerId(ewId, options.noPrompt)
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
@@ -238,9 +239,10 @@ program
 program
   .command("delete-version <edgeworker-identifier> <version-identifier>")
   .description("Permanently delete an existing version of a given EdgeWorker Id.")
-  .action(async function (ewId, versionId) {
+  .option("--noPrompt", "Skip the deletion confirmation prompt")
+  .action(async function (ewId, versionId, options) {
     try {
-      await cliHandler.deleteVersion(ewId, versionId);
+      await cliHandler.deleteVersion(ewId, versionId, options.noPrompt);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }

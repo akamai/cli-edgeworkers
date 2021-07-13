@@ -133,8 +133,16 @@ export async function updateEdgeWorkerInfo(ewId: string, groupId: string, name: 
   }
 }
 
-export async function deleteEdgeWorkerId(ewId: string) {
-  var deletion = await cliUtils.spinner(edgeWorkersSvc.deleteEdgeWorkerId(ewId), `Deleting EdgeWorker Id ${ewId}`);
+export async function deleteEdgeWorkerId(ewId: string, noPrompt: boolean) {
+  if (noPrompt !== undefined) {
+    var deletion = await cliUtils.spinner(edgeWorkersSvc.deleteEdgeWorkerId(ewId), `Deleting EdgeWorker Id ${ewId}`);
+  } else {
+    if (readline.keyInYN(`Have you checked to make sure that EdgeWorker Id ${ewId} is not in use on any active properties? You can check for active properties by using the list-properties command.`)) {
+      var deletion = await cliUtils.spinner(edgeWorkersSvc.deleteEdgeWorkerId(ewId), `Deleting EdgeWorker Id ${ewId}`);
+    } else {
+      cliUtils.logAndExit(1, `Deletion of EdgeWorker Id ${ewId} cancelled.`)
+    }
+  }
 
   if (deletion && !deletion.isError) {
     let msg = `EdgeWorker ${ewId} was successfully deleted`
@@ -419,8 +427,16 @@ export async function createNewVersion(ewId: string, options: { bundle?: string,
   }
 }
 
-export async function deleteVersion(ewId: string, versionId: string) {
-  var deletion = await cliUtils.spinner(edgeWorkersSvc.deleteVersion(ewId, versionId), `Deleting version ${versionId} of EdgeWorker Id ${ewId}`);
+export async function deleteVersion(ewId: string, versionId: string, noPrompt: boolean) {
+  if (noPrompt !== undefined) {
+    var deletion = await cliUtils.spinner(edgeWorkersSvc.deleteVersion(ewId, versionId), `Deleting version ${versionId} of EdgeWorker Id ${ewId}`);
+  } else {
+    if (readline.keyInYN(`Are you sure you want to delete version ${versionId} of EdgeWorker Id ${ewId}?`)) {
+      var deletion = await cliUtils.spinner(edgeWorkersSvc.deleteVersion(ewId, versionId), `Deleting version ${versionId} of EdgeWorker Id ${ewId}`);
+    } else {
+      cliUtils.logAndExit(1, `Deletion of version ${versionId} of EdgeWorker Id ${ewId} cancelled.`)
+    }
+  }
 
   if (deletion && !deletion.isError) {
     let msg = `Version ${versionId} of Edgeworker Id ${ewId} was successfully deleted.`
