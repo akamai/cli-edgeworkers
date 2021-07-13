@@ -144,8 +144,8 @@ export async function deleteEdgeWorkerId(ewId: string, noPrompt: boolean) {
     }
   }
 
-  if (deletion && !deletion.isError) {
-    let msg = `EdgeWorker ${ewId} was successfully deleted`
+  if (!deletion.isError) {
+    let msg = `EdgeWorker ${ewId} was successfully deleted.`
     cliUtils.logWithBorder(msg);
   } else {
     cliUtils.logAndExit(1, deletion.error_reason);
@@ -438,7 +438,7 @@ export async function deleteVersion(ewId: string, versionId: string, noPrompt: b
     }
   }
 
-  if (deletion && !deletion.isError) {
+  if (!deletion.isError) {
     let msg = `Version ${versionId} of Edgeworker Id ${ewId} was successfully deleted.`
     cliUtils.logWithBorder(msg);
   } else {
