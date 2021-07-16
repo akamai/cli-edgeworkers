@@ -201,6 +201,21 @@ program
   });
 
 program
+  .command("delete-id <edgeworker-identifier>")
+  .description("Permanently delete an existing EdgeWorker Id.")
+  .option("--noPrompt", "Skip the deletion confirmation prompt")
+  .action(async function (ewId, options) {
+    try {
+      await cliHandler.deleteEdgeWorkerId(ewId, options.noPrompt)
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+program
   .command("list-versions <edgeworker-identifier> [version-identifier]")
   .description("List Version information of a given EdgeWorker Id.")
   .alias("lv")
@@ -229,6 +244,21 @@ program
 
     try {
       await cliHandler.createNewVersion(ewId, options);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+program
+  .command("delete-version <edgeworker-identifier> <version-identifier>")
+  .description("Permanently delete an existing version of a given EdgeWorker Id.")
+  .option("--noPrompt", "Skip the deletion confirmation prompt")
+  .action(async function (ewId, versionId, options) {
+    try {
+      await cliHandler.deleteVersion(ewId, versionId, options.noPrompt);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }

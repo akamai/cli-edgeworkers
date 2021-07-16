@@ -4,6 +4,8 @@ export enum ErrorMessage {
     GENERIC_403 = "Permission is invalid.",
     REGISTER_EW_ERROR = "ERROR: Unable to create Edgeworker.",
     UPDATE_EW_ERROR = "ERROR: Unable to update Edgeworker.",
+    DELETE_EW_ERROR = "ERROR: Unable to delete Edgeworker.",
+    DELETE_VERSION_ERROR = "ERROR: Unable to delete Edgeworker version.",
     CLONE_EW_ERROR = "ERROR: Unable to clone the specified edgeworker.",
     LISTALL_EW_ERROR = "ERROR: Unable to retrieve Edgeworkers list.",
     GET_CONTRACT_ERROR = "ERROR: Unable to retrieve contracts for your account.",
