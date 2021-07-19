@@ -140,6 +140,22 @@ program
   });
 
 program
+  .command("list-properties <edgeworkerId>")
+  .description("Allows customer to view the list of properties associated with the EdgeWorker Id")
+  .option("--activeOnly", "Return only active properties")
+  .alias("lp")
+  .action(async function (edgeWorkerId, options) {
+    try {
+      await cliHandler.getProperties(edgeWorkerId, options.activeOnly);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+program
   .command("list-restiers")
   .description("Allows customer to view the list of resource tiers available for the specified contract")
   .alias("li-restiers")
@@ -156,7 +172,7 @@ program
 
 program
   .command("show-restier <edgeworkerId>")
-  .description("allows customer to view the esource tier associated with the EdgeWorker Id")
+  .description("Allows customer to view the resource tier associated with the EdgeWorker Id")
   .action(async function (edgeworkerId) {
     try {
       await cliHandler.getResourceTierForEwid(edgeworkerId);
@@ -176,6 +192,21 @@ program
   .action(async function (ewId, groupId, name, options) {
     try {
       await cliHandler.updateEdgeWorkerInfo(ewId, groupId, name, options.resourceTierId);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+program
+  .command("delete-id <edgeworker-identifier>")
+  .description("Permanently delete an existing EdgeWorker Id.")
+  .option("--noPrompt", "Skip the deletion confirmation prompt")
+  .action(async function (ewId, options) {
+    try {
+      await cliHandler.deleteEdgeWorkerId(ewId, options.noPrompt)
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
@@ -213,6 +244,21 @@ program
 
     try {
       await cliHandler.createNewVersion(ewId, options);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+program
+  .command("delete-version <edgeworker-identifier> <version-identifier>")
+  .description("Permanently delete an existing version of a given EdgeWorker Id.")
+  .option("--noPrompt", "Skip the deletion confirmation prompt")
+  .action(async function (ewId, versionId, options) {
+    try {
+      await cliHandler.deleteVersion(ewId, versionId, options.noPrompt);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }

@@ -103,6 +103,14 @@ export function getContracts() {
   return httpEdge.getJson(`${EDGEWORKERS_API_BASE}/contracts`).then(r => r.body).catch(err => error.handleError(err,"GET_CONTRACT"));
 }
 
+export function getProperties(ewId: string, activeOnly: boolean) {
+  let qs: string = "";
+  if (activeOnly !== undefined) {
+    qs = "?activeOnly=true";
+  }
+  return httpEdge.getJson(`${EDGEWORKERS_API_BASE}/ids/${ewId}/properties${qs}`).then(r => r.body).catch(err => error.handleError(err,"GET_PROPERTIES"));
+}
+
 export function getResourceTiers(contractId: string) {
   return httpEdge.getJson(`${EDGEWORKERS_API_BASE}/resource-tiers?contractId=${contractId}`).then(r => r.body).catch(err => error.handleError(err,"GET_RESTIER"));
 }
@@ -119,6 +127,10 @@ export function updateEdgeWorkerId(ewId: string, groupId: string, name: string, 
   return httpEdge.putJson(`${EDGEWORKERS_API_BASE}/ids/${ewId}`, body).then(r => r.body).catch(err => error.handleError(err,"UPDATE_EW"));
 }
 
+export function deleteEdgeWorkerId(ewId: string) {
+  return httpEdge.deleteReq(`${EDGEWORKERS_API_BASE}/ids/${ewId}`).then(r => r.body).catch(err => error.handleError(err,"DELETE_EW"));
+}
+
 export function getAllVersions(ewId: string) {
   return httpEdge.getJson(`${EDGEWORKERS_API_BASE}/ids/${ewId}/versions`).then(r => r.body);
 }
@@ -133,6 +145,10 @@ export function uploadTarball(ewId: string, tarballPath: string) {
 
 export function downloadTarball(ewId: string, versionId: string, downloadPath: string) {
   return getTarball(`${EDGEWORKERS_API_BASE}/ids/${ewId}/versions/${versionId}/content`, downloadPath).then(r => r.state);
+}
+
+export function deleteVersion(ewId: string, versionId: string) {
+  return httpEdge.deleteReq(`${EDGEWORKERS_API_BASE}/ids/${ewId}/versions/${versionId}`).then(r => r.body).catch(err => error.handleError(err,"DELETE_VERSION"));
 }
 
 export function getAllActivations(ewId: string) {
@@ -185,7 +201,7 @@ function buildTokenBody(hostName: string, acl: string, url: string, expiry: numb
 
   if (hostName != undefined && hostName != null) {
     params["hostname"] = hostName;
-  }  
+  }
 
   if (acl != undefined && acl != null) {
     params["acl"] = acl;

@@ -133,6 +133,25 @@ export async function updateEdgeWorkerInfo(ewId: string, groupId: string, name: 
   }
 }
 
+export async function deleteEdgeWorkerId(ewId: string, noPrompt: boolean) {
+  if (noPrompt !== undefined) {
+    var deletion = await cliUtils.spinner(edgeWorkersSvc.deleteEdgeWorkerId(ewId), `Deleting EdgeWorker Id ${ewId}`);
+  } else {
+    if (readline.keyInYN(`Have you checked to make sure that EdgeWorker Id ${ewId} is not in use on any active properties? You can check for active properties by using the list-properties command.`)) {
+      var deletion = await cliUtils.spinner(edgeWorkersSvc.deleteEdgeWorkerId(ewId), `Deleting EdgeWorker Id ${ewId}`);
+    } else {
+      cliUtils.logAndExit(1, `Deletion of EdgeWorker Id ${ewId} cancelled.`)
+    }
+  }
+
+  if (!deletion.isError) {
+    let msg = `EdgeWorker ${ewId} was successfully deleted.`
+    cliUtils.logWithBorder(msg);
+  } else {
+    cliUtils.logAndExit(1, deletion.error_reason);
+  }
+}
+
 export async function getResourceTierInfo() {
   // get contract list
   let contractList = await cliUtils.spinner(getContractIds(),"Retrieving contract id's...");
@@ -197,6 +216,30 @@ export async function getContracts() {
     }
   } else {
     cliUtils.logAndExit(1, "ERROR: Unable to retrieve contracts for your account.")
+  }
+}
+
+export async function getProperties(ewId: string, activeOnly: boolean) {
+  let propList = await cliUtils.spinner(edgeWorkersSvc.getProperties(ewId, activeOnly), `Retrieving properties for EdgeWorker Id ${ewId}...`);
+  if (propList && !propList.isError) {
+    const properties = propList.properties;
+
+    if (properties.length > 0) {
+      let msg = `The following properties are associated with the EdgeWorker Id ${ewId}`;
+
+      if (edgeWorkersClientSvc.isJSONOutputMode()) {
+        edgeWorkersClientSvc.writeJSONOutput(0, msg, propList);
+      } else {
+        cliUtils.logWithBorder(msg);
+        console.table(properties);
+        console.log(`limitedAccessToProperties: ${propList.limitedAccessToProperties}`)
+      }
+    } else {
+      const optionalParam = activeOnly ? " active " : " ";
+      cliUtils.logAndExit(0, `INFO: There are currently no${optionalParam}properties associated with the EdgeWorker Id: ${ewId}`);
+    }
+  } else {
+    cliUtils.logAndExit(1, propList.error_reason);
   }
 }
 
@@ -405,6 +448,25 @@ export async function createNewVersion(ewId: string, options: { bundle?: string,
       //if all remains good, then upload tarball and output checksum and version number
       await uploadEdgeWorkerVersion(ewId, bundle.tarballPath);
     }
+  }
+}
+
+export async function deleteVersion(ewId: string, versionId: string, noPrompt: boolean) {
+  if (noPrompt !== undefined) {
+    var deletion = await cliUtils.spinner(edgeWorkersSvc.deleteVersion(ewId, versionId), `Deleting version ${versionId} of EdgeWorker Id ${ewId}`);
+  } else {
+    if (readline.keyInYN(`Are you sure you want to delete version ${versionId} of EdgeWorker Id ${ewId}?`)) {
+      var deletion = await cliUtils.spinner(edgeWorkersSvc.deleteVersion(ewId, versionId), `Deleting version ${versionId} of EdgeWorker Id ${ewId}`);
+    } else {
+      cliUtils.logAndExit(1, `Deletion of version ${versionId} of EdgeWorker Id ${ewId} cancelled.`)
+    }
+  }
+
+  if (!deletion.isError) {
+    let msg = `Version ${versionId} of Edgeworker Id ${ewId} was successfully deleted.`
+    cliUtils.logWithBorder(msg);
+  } else {
+    cliUtils.logAndExit(1, deletion.error_reason);
   }
 }
 
