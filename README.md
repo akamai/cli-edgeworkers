@@ -118,6 +118,7 @@ Usage: `akamai edgeworkers register [options] <group-identifier> <edgeworker-nam
 
 | Option | Description |
 | - | - |
+| --resourceTierId | New Resource tier id to which the Edgeworker will be associated. |
 | -h, --help  | output usage information |
 
 | Argument | Existence | Description |
@@ -129,6 +130,8 @@ Usage: `akamai edgeworkers register [options] <group-identifier> <edgeworker-nam
 1. Location response header will be provided with new EdgeWorker Id.
 
 2. EdgeWorker id details response body (JSON) will be provided with 201 response code.
+
+3. To disable prompts for automation purpose "resourceTierId" can be provided as input.
 
 ### Update EdgeWorker Identifier's Information
 Allows Customer Developer to update an existing EdgeWorker Identifier's Luna ACG or Name attributes.
@@ -431,10 +434,12 @@ Usage: `akamai list-restiers`
 
 | Option | Description |
 | - | - |
+| --contractId | Resource tiers for the specified contract id. |
 | -h, --help  | output usage information |
 
 #### Key Details
 1. User will be prompted with list of contract ids that user has access to. The selected contract id will be used to fetch resource tier.
+2. To disable prompt for automation purpose, contract id can be provided as input.
 
 ### Fetch the Resource Tier for a specific EdgeWorker Id
 Customers can get Resource Tier details for a specific EdgeWorker Id.

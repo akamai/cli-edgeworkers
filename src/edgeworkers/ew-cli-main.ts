@@ -91,7 +91,7 @@ program
   .description("List EdgeWorker ids currently registered.")
   .alias("li")
   .option("--groupId <groupId>", "Filter EdgeWorker Id list by Permission Group")
-  .option("--resourceTierId <resourceTierId>", "Filter Edgeworkers by resource tiers")
+  .option("-restier, --resourceTierId <resourceTierId>", "Filter Edgeworkers by resource tiers")
   .action(async function (ewId, options) {
     try {
       await cliHandler.showEdgeWorkerIdOverview(ewId, options.groupId, options.resourceTierId);
@@ -107,14 +107,19 @@ program
   .command("register <group-identifier> <edgeworker-name>")
   .description("Register a new EdgeWorker id to reference in Property Manager behavior.")
   .alias("create-id")
-  .action(async function (groupId, name) {
+  .option("-restier, --resourceTierId <resourceTierId>", "New resource Tier id to associate with Edgeworker")
+  .action(async function (groupId, name, options) {
     try {
+      // for automation resource tier id will be provided , hence no need for prompts
+      let resourceTierId = options.resourceTierId;
+      if (!resourceTierId) {
       // get contract list and get resource tier info
-      let resourceTierId = await cliHandler.getResourceTierInfo();
-      // create edgeworker for the grpid, res tier and ew name
+      resourceTierId = await cliHandler.getResourceTierInfo();
       if (resourceTierId == undefined) {
         cliUtils.logAndExit(1, "ERROR: Please select a valid resource tier id.")
       }
+      }
+      // create edgeworker for the grpid, res tier and ew name
       await cliHandler.createEdgeWorkerId(groupId, name, resourceTierId);
     } catch (e) {
       cliUtils.logAndExit(1, e);
@@ -158,10 +163,11 @@ program
 program
   .command("list-restiers")
   .description("Allows customer to view the list of resource tiers available for the specified contract")
+  .option("--contractId <contractId>", "Contract id for the resource tiers")
   .alias("li-restiers")
-  .action(async function () {
+  .action(async function (options) {
     try {
-      await cliHandler.getResourceTiers();
+      await cliHandler.getResourceTiers(options.contractId);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
@@ -187,7 +193,7 @@ program
 program
   .command("update-id <edgeworker-identifier> <group-identifier> <edgeworker-name>")
   .description("Allows Customer Developer to update an existing EdgeWorker Identifier's Luna ACG or Name attributes.")
-  .option("--resourceTierId <resourceTierId>", "New resource Tier id to associate with Edgeworker")
+  .option("-restier, --resourceTierId <resourceTierId>", "New resource Tier id to associate with Edgeworker")
   .alias("ui")
   .action(async function (ewId, groupId, name, options) {
     try {
