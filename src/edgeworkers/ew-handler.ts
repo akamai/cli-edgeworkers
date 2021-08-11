@@ -243,20 +243,26 @@ export async function getProperties(ewId: string, activeOnly: boolean) {
   }
 }
 
-export async function getResourceTiers() {
-  let contractIdList = await getContractIds();
-  if (contractIdList == undefined) {
-    cliUtils.logAndExit(1, "ERROR: Unable to retrieve contracts for your account.");
-  } else {
-    let contractId = readline.keyInSelect(contractIdList, "Please select from the above contract ids :");
-    let selectedOption = (contractId == -1) ? "cancel" : contractIdList[contractId]
-    console.log('You have selected '+selectedOption);
-    if (contractIdList[contractId] == undefined) {
-      cliUtils.logAndExit(1, "ERROR: Please select a valid contract id");
+export async function getResourceTiers(contractId?: string) {
+
+  if (!contractId) {
+    let contractIdList = await getContractIds();
+    if (contractIdList == undefined) {
+      cliUtils.logAndExit(1, "ERROR: Unable to retrieve contracts for your account.");
+    } else {
+      let contractOption = readline.keyInSelect(contractIdList, "Please select from the above contract ids :");
+      contractId = contractIdList[contractOption];
+      let selectedOption = (contractOption == -1) ? "cancel" : contractId
+      console.log('You have selected ' + selectedOption);
+      if (contractId == undefined) {
+        cliUtils.logAndExit(1, "ERROR: Please select a valid contract id");
+      }
     }
-    let resourceTierList = await getResourceTierList(contractIdList[contractId]);
+  }
+  
+    let resourceTierList = await getResourceTierList(contractId);
     if (resourceTierList) {
-      let msg = `The following Resource Tiers available for the contract id ${contractIdList[contractId]}`;
+      let msg = `The following Resource Tiers available for the contract id ${contractId}`;
       if (edgeWorkersClientSvc.isJSONOutputMode()) {
         edgeWorkersClientSvc.writeJSONOutput(0, msg, resourceTierList);
       } else {
@@ -271,7 +277,6 @@ export async function getResourceTiers() {
         }) 
       }
     }
-  }
 }
 
 export async function getResourceTierForEwid(ewId: string) {
