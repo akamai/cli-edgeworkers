@@ -35,8 +35,9 @@ program
   .on("option:accountkey", function (key) {
     httpEdge.setAccountKey(key);
   })
-  .on("option:timeout", function (timeout){
-    httpEdge.setTimeout(timeout);
+  .on("option:timeout", function (timeout) {
+    envUtils.setTimeout(timeout);
+    // httpEdge.setTimeout(timeout);
   })
   // this fires only when a command is not listed below with a custom action
   .on('command:*', function (command) {

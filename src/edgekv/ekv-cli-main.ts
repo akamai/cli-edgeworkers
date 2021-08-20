@@ -34,7 +34,7 @@ program
     httpEdge.setAccountKey(key);
   })
   .on("option:timeout", function (timeout){
-    httpEdge.setTimeout(timeout);
+    envUtils.setTimeout(timeout);
   })
   // this fires only when a command is not listed below with a custom action
   .on('command:*', function (command) {
@@ -193,10 +193,11 @@ const create = program.command('create')
 create
   .command("ns <environment> <namespace>")
   .requiredOption("--retention <retention>", "Retention period of the namespace in days")
+  .option("--groupId <groupId>", "Authentication Group Identifier")
   .description("Creates an EdgeKV namespace")
   .action(async function (environment, namespace, options) {
     try {
-      await kvCliHandler.createNamespace(environment, namespace, options.retention);
+      await kvCliHandler.createNamespace(environment, namespace, options.retention, options.groupId);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
@@ -226,6 +227,34 @@ create
   .on("--help", function () {
     cliUtils.logAndExit(0, copywrite);
   });
+
+const revoke = program.command('revoke');
+revoke.command("token <tokenName>")
+.action(async function (tokenName) {
+  try {
+    await kvCliHandler.revokeToken(tokenName);
+  } catch (e) {
+    cliUtils.logAndExit(1, e);
+  }
+})
+.on("--help", function () {
+  cliUtils.logAndExit(0, copywrite);
+});
+
+const modify = program.command('modify');
+modify.command("ns <environment> <namespace>")
+  .requiredOption("--retention <retention>", "Retention period of the namespace in days")
+  .action(async function (environment, namespace, options) {
+    try {
+      await kvCliHandler.updateNameSpace(environment, namespace, options);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
 
 const download = program.command('download')
   .alias("dnld")

@@ -144,9 +144,10 @@ Create a namespace
 Usage: `akamai edgekv create ns <environment> <nameSpace>`
 
 | Option | Existence | Description |
-| - | - |
+| - | - | - |
 | -h, --help  | optional | Display information on how to use this EdgeKV command |
 | --retention | Required | Retention period of the namespace in days. |
+| --groupId | Required | Authentication Group Identifier. Set it to 0 if you do not want to restrict the namespace to a specific group. This value MUST be the same for both staging and production instances of a namespace. |
 
 | Argument | Existence | Description |
 | - | - | - |
@@ -189,9 +190,21 @@ Usage: `akamai edgekv show ns <environment> <nameSpace>`
 | environment | required | The Akamai environment from which to retrieve namespace details, either “staging” or “production”. |
 | namespace | required | Namespace identifier. |
 
+### Modify Namespace
+
+Modify the namespace
+
+Usage: `akamai edgekv modify ns <environment> <nameSpace>`
+
+| Option | Existence | Description |
+| - | - | - |
+| -h, --help  | optional | Display information on how to use this EdgeKV command |
+| --retention | Required | Retention period of the namespace in days. |
+
 #### Important Notes
 1. The namespace identifier can only include alphanumeric (0-9, a-z, A-Z), underscore (_), and (-) dash characters.
 2. The namespace identifier can be between 1 and 32 characters in length.
+3. Modifying retention for the "default" namespace is not permitted.
 
 ### Create or Update item
 
@@ -338,7 +351,7 @@ Usage: `akamai edgekv list tokens`
  
 ### Retrieve Access Token
  
-Retrieve an edgeKV access token.
+Retrieve an EdgeKV access token.
  
 Usage:
 `akamai edgekv download token <tokenName> --save_path=<path> --overwrite`
@@ -348,6 +361,21 @@ Usage:
 | --save_path | Optional | Path specifying where to save the edgekv_tokens.js token file. We recommend that you save the token file in the same location as the EdgeWorkers code bundle file (.tgz). The EdgeWorkers code bundle is then automatically updated every time this command updates the edgekv_tokens.js token file. If a path is not provided the token value is displayed. This token must be securely stored and manually added to the edgekv_tokens.js token file and EdgeWorkers code bundle. |
 | -o, --overwrite | Optional | This option is used in conjunction with the --save_path option to overwrite the value of an existing token with the same name in the edgekv_tokens.js file. |
 | -h, --help  | Display information on how to use this EdgeKV command. |
+
+| Argument | Existence | Description |
+| - | - | - |
+| tokenname | required | Token name |
+
+### Revoke Access Token
+
+Revoke an EdeKV access token.
+
+Usage:
+`akamai edgekv revoke token <tokenName>`
+
+| Argument | Existence | Description |
+| - | - | - |
+| tokenname | required | Token name |
 
 ___
 ## Resources

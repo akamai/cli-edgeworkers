@@ -13,7 +13,8 @@ export async function listNameSpaces(environment: string, details) {
       namespace.forEach(function (value) {
         if (details) {
           let retentionPeriod = ekvhelper.convertRetentionPeriod(value["retentionInSeconds"]);
-          nsListResp.push({ "Namespace": value["namespace"], "RetentionPeriod": retentionPeriod,"GeoLocation": value["geoLocation"] });
+          let groupId = (value["groupId"] == undefined) ? 0 : value["groupId"];
+          nsListResp.push({ "Namespace": value["namespace"], "RetentionPeriod": retentionPeriod, "GeoLocation": value["geoLocation"], "GroupId": groupId });
         }
         else {
           nsListResp.push({ "Namespace": value["namespace"] });
@@ -27,11 +28,16 @@ export async function listNameSpaces(environment: string, details) {
   }
 }
 
-export async function createNamespace(environment: string, nameSpace: string, retention: number) {
+export async function createNamespace(environment: string, nameSpace: string, retention: number, groupId: number) {
+
+  if (!groupId) {
+    cliUtils.logAndExit(1, `ERROR: Mandatory "groupId" parameter is missing. Please specify a valid "groupId" or set it to 0 if you do not want to restrict the namespace to a specific auth group.`)
+  }
+
   ekvhelper.validateNetwork(environment);
   let msg = `Namespace ${nameSpace} has been created successfully on the ${environment} environment`
   let retentionPeriod = ekvhelper.convertDaysToSeconds(retention);
-  let createdNamespace = await cliUtils.spinner(edgekvSvc.createNameSpace(environment, nameSpace, retentionPeriod), `Creating namespace for environment ${environment}`);
+  let createdNamespace = await cliUtils.spinner(edgekvSvc.createNameSpace(environment, nameSpace, retentionPeriod, groupId), `Creating namespace for environment ${environment}`);
   if (createdNamespace != undefined && !createdNamespace.isError) {
     cliUtils.logWithBorder(msg);
     response.logNamespace(nameSpace, createdNamespace);
@@ -50,6 +56,32 @@ export async function getNameSpace(environment: string, nameSpace: string) {
     response.logNamespace(nameSpace, createdNamespace);
   } else {
     response.logError(createdNamespace, `ERROR: Error while retrieving namespace from ${environment} environment. ${createdNamespace.error_reason} [TraceId: ${createdNamespace.traceId}]`);
+  }
+}
+
+export async function updateNameSpace(environment: string, nameSpace: string, options: { retention: number, geoLocation?: string }) {
+  
+  if (nameSpace == "default") {
+    cliUtils.logAndExit(1, `ERROR: Modifying retention for the "default" namespace is not permitted.`);
+  }
+
+  let msg = `Namespace ${nameSpace} has been updated successfully on the ${environment} environment`
+  let createdNamespace = await edgekvSvc.getNameSpace(environment, nameSpace);
+  if (createdNamespace != undefined && !createdNamespace.isError) {
+    let retentionPeriod = ekvhelper.convertDaysToSeconds(options.retention);
+    let geoLocation = options.geoLocation;
+    if (!geoLocation) {
+      geoLocation = createdNamespace["geoLocation"];
+    }
+    let updatedNamespace = await cliUtils.spinner(edgekvSvc.updateNameSpace(environment, nameSpace, retentionPeriod, geoLocation), `Updating namespace for id ${nameSpace}`);
+    if (updatedNamespace != undefined && !updatedNamespace.isError) {
+      cliUtils.logWithBorder(msg);
+      response.logNamespace(nameSpace, updatedNamespace);
+    } else {
+      response.logError(updatedNamespace, `ERROR: Error while updating namespace from ${environment} environment. ${updatedNamespace.error_reason} [TraceId: ${updatedNamespace.traceId}]`)
+    }
+  } else {
+    response.logError(createdNamespace, `ERROR: Namespace ${nameSpace} is not found in ${environment} environment. [TraceId: ${createdNamespace.traceId}]`);
   }
 }
 
@@ -81,7 +113,11 @@ export async function initializeEdgeKv() {
     }
     response.logInitialize(initRespBody);
   } else {
-    response.logError(initializedEdgeKv, `ERROR: EdgeKV Initialization failed.  (${initializedEdgeKv.error_reason}) [${initializedEdgeKv.traceId}]`);
+    var errorReason = `${initializedEdgeKv.error_reason}`;
+    if (initializedEdgeKv && initializedEdgeKv.status == 403) {
+      errorReason = "You don't have permission to access that resource. Please make sure you have the EdgeKV product added to your contract.";
+    } 
+    response.logError(initializedEdgeKv, `ERROR: EdgeKV Initialization failed. ${errorReason} [TraceId: ${initializedEdgeKv.traceId}]`);
   }
 }
 
@@ -110,7 +146,11 @@ export async function getInitializationStatus() {
     }
     response.logInitialize(initRespBody);
   } else {
-    response.logError(initializedEdgeKv, `ERROR: Unable to retrieve EdgeKV status.  (${initializedEdgeKv.error_reason}) [TraceId: ${initializedEdgeKv.traceId}]`);
+    var errorReason = `${initializedEdgeKv.error_reason}`;
+    if (initializedEdgeKv && initializedEdgeKv.status == 403) {
+      errorReason = "You don't have permission to access that resource. Please make sure you have the EdgeKV product added to your contract.";
+    } 
+    response.logError(initializedEdgeKv, `ERROR: Unable to retrieve EdgeKV status. ${errorReason} [TraceId: ${initializedEdgeKv.traceId}]`);
   }
 }
 
@@ -234,6 +274,14 @@ export async function retrieveToken(tokenName: string, options: { save_path?: st
   }
 }
 
+export async function revokeToken(tokenName: string) {
+  let revokedToken = await cliUtils.spinner(edgekvSvc.revokeToken(tokenName), "Revoking edgekv token...")
+  if (revokedToken != undefined && !revokedToken.isError) {
+    cliUtils.logWithBorder(`${tokenName} was successfully revoked and removed from the EdgeKV access token list`);
+  } else {
+    response.logError(revokedToken, `ERROR: Unable to revoke edgekv token. Token with name my_token does not exist [TraceId: ${revokedToken.traceId}]`)
+  }
+}
 /**
  * Checks if date is in format yyyy-mm-dd
  * Converts date to iso format to be consumed by API

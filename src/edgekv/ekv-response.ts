@@ -8,10 +8,12 @@ const weekday = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export function logNamespace(nameSpaceId: string, createdNameSpace) {
     let retentionPeriod = ekvhelper.convertRetentionPeriod(createdNameSpace["retentionInSeconds"]);
+    let groupId = (createdNameSpace["groupId"] == undefined) ? 0 : createdNameSpace["groupId"];
     var createNameSpace = {
         Namespace: nameSpaceId,
         RetentionPeriod: retentionPeriod,
-        GeoLocation: createdNameSpace["geoLocation"]
+        GeoLocation: createdNameSpace["geoLocation"],
+        GroupId: groupId
     }
     console.table([createNameSpace]);
 }
