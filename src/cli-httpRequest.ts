@@ -9,10 +9,6 @@ export function setAccountKey(account: string) {
     accountKey = account;
 }
 
-export function setTimeout(timeout: number) {
-    timeoutVal = timeout;
-}
-
 /**
  * This is for non-Tarball gets and all POST/PUT actions that return JSON or string bodies 
  * for both edge CLI and edge KV CLI. This method authenticates, sends request and returns promise
