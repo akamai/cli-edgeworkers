@@ -31,7 +31,7 @@ export async function listNameSpaces(environment: string, details) {
 export async function createNamespace(environment: string, nameSpace: string, retention: number, groupId: number) {
 
   if (!groupId) {
-    cliUtils.logAndExit(1, `ERROR: Mandatory "groupId" parameter is missing. Please specify a valid "groupId" or set it to 0 if you do not want to restrict the namespace to a specific auth group.`)
+    cliUtils.logAndExit(1, `ERROR: The mandatory "groupId" parameter is missing. Please specify a valid "groupId" or set it to 0 if you do not want to restrict the namespace to a specific group.`)
   }
 
   ekvhelper.validateNetwork(environment);
@@ -62,7 +62,7 @@ export async function getNameSpace(environment: string, nameSpace: string) {
 export async function updateNameSpace(environment: string, nameSpace: string, options: { retention: number, geoLocation?: string }) {
   
   if (nameSpace == "default") {
-    cliUtils.logAndExit(1, `ERROR: Modifying retention for the "default" namespace is not permitted.`);
+    cliUtils.logAndExit(1, `ERROR: You cannot modify the retention period for the "default" namespace.`);
   }
 
   let msg = `Namespace ${nameSpace} has been updated successfully on the ${environment} environment`
@@ -78,10 +78,10 @@ export async function updateNameSpace(environment: string, nameSpace: string, op
       cliUtils.logWithBorder(msg);
       response.logNamespace(nameSpace, updatedNamespace);
     } else {
-      response.logError(updatedNamespace, `ERROR: Error while updating namespace from ${environment} environment. ${updatedNamespace.error_reason} [TraceId: ${updatedNamespace.traceId}]`)
+      response.logError(updatedNamespace, `Error while updating the namespace on the ${environment} environment. ${updatedNamespace.error_reason} [TraceId: ${updatedNamespace.traceId}]`)
     }
   } else {
-    response.logError(createdNamespace, `ERROR: Namespace ${nameSpace} is not found in ${environment} environment. [TraceId: ${createdNamespace.traceId}]`);
+    response.logError(createdNamespace, `ERROR: Namespace ${nameSpace} is not found on the ${environment} environment. [TraceId: ${createdNamespace.traceId}]`);
   }
 }
 
@@ -115,9 +115,9 @@ export async function initializeEdgeKv() {
   } else {
     var errorReason = `${initializedEdgeKv.error_reason}`;
     if (initializedEdgeKv && initializedEdgeKv.status == 403) {
-      errorReason = "You don't have permission to access that resource. Please make sure you have the EdgeKV product added to your contract.";
+      errorReason = "You don't have permission to access this resource. Please make sure you have the EdgeKV product added to your contract.";
     } 
-    response.logError(initializedEdgeKv, `ERROR: EdgeKV Initialization failed. ${errorReason} [TraceId: ${initializedEdgeKv.traceId}]`);
+    response.logError(initializedEdgeKv, `ERROR: EdgeKV initialization failed. ${errorReason} [TraceId: ${initializedEdgeKv.traceId}]`);
   }
 }
 
@@ -148,7 +148,7 @@ export async function getInitializationStatus() {
   } else {
     var errorReason = `${initializedEdgeKv.error_reason}`;
     if (initializedEdgeKv && initializedEdgeKv.status == 403) {
-      errorReason = "You don't have permission to access that resource. Please make sure you have the EdgeKV product added to your contract.";
+      errorReason = "You don't have permission to access this resource. Please make sure you have the EdgeKV product added to your contract.";
     } 
     response.logError(initializedEdgeKv, `ERROR: Unable to retrieve EdgeKV status. ${errorReason} [TraceId: ${initializedEdgeKv.traceId}]`);
   }
@@ -275,11 +275,11 @@ export async function retrieveToken(tokenName: string, options: { save_path?: st
 }
 
 export async function revokeToken(tokenName: string) {
-  let revokedToken = await cliUtils.spinner(edgekvSvc.revokeToken(tokenName), "Revoking edgekv token...")
+  let revokedToken = await cliUtils.spinner(edgekvSvc.revokeToken(tokenName), "Revoking EdgeKV token...")
   if (revokedToken != undefined && !revokedToken.isError) {
-    cliUtils.logWithBorder(`${tokenName} was successfully revoked and removed from the EdgeKV access token list`);
+    cliUtils.logWithBorder(`${tokenName} was successfully revoked and removed from the EdgeKV access token list.`);
   } else {
-    response.logError(revokedToken, `ERROR: Unable to revoke edgekv token. Token with name my_token does not exist [TraceId: ${revokedToken.traceId}]`)
+    response.logError(revokedToken, `ERROR: Unable to revoke EdgeKV token. A token with the name my_token does not exist. [TraceId: ${revokedToken.traceId}]`)
   }
 }
 /**

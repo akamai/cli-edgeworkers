@@ -15,6 +15,7 @@
     * [ Create Namespace](###create-namespace)
     * [ List Namespace](###list-namespace)
     * [ Get Namespace](###get-namespace)
+    * [ Modify Namespace](###modify-namespace)
     * [ Create or Update item](###create-or-update-item)
     * [ Read Item](###read-item)
     * [ Delete Item](###delete-item)
@@ -22,6 +23,7 @@
     * [ Create an Access Token](###create-an-access-token)
     * [ List Access Tokens](###list-access-tokens)
     * [ Retrieve Access Token](###retrieve-access-token)
+    * [ Revoke access token](###revoke-access-token)
 * [ Resources](##resources)
 * [ Reporting Issues](##reporting-issues)
 
@@ -101,6 +103,7 @@ Commands:
 | create ns `<environment> <namespace> --retention <retention>` | Create an EdgeKV namespace in an Akamai environment. Specify the retention period of the namespace in days. |
 | show ns `<environment> <namespace>`| Retrieve an EdgeKV namespace in an Akamai environment. |
 | list ns `<environment>` | List the namespaces provisioned in an Akamai environment. |
+| modify ns `<environment> <nameSpace>` | Modify an EdgeKV namespace in an Akamai environment. |
 | write `<itemType> <environment> <namespace> <groupId> <itemId> <items>` | Write the text item or JSON item supplied in a file for the given namespace, group id, and item id in an Akamai environment. |
 | read item `<environment> <namespace> <groupId> <itemId>` | Read an item for the given namespace, group id, and item id in an Akamai environment. |
 | delete item \| del item `<environment> <namespace> <groupId> <itemId>` | Delete an item for the given namespace, group id, and item id in an Akamai environment. |
@@ -108,6 +111,7 @@ Commands:
 | create token \| create tkn `<tokenName> [options]` |  Create an EdgeKV access token. |
 | list tokens `[options]`| List of all tokens the user has permission to download. |
 | download token `<tokenName> [options]` | Download an edgekv token. |
+| revoke token `<tokenName>` | Revoke an EdgKV access token. |
 
 
 Return Codes:
@@ -145,9 +149,9 @@ Usage: `akamai edgekv create ns <environment> <nameSpace>`
 
 | Option | Existence | Description |
 | - | - | - |
-| -h, --help  | optional | Display information on how to use this EdgeKV command |
+| -h, --help  | optional | Display information on how to use this EdgeKV command. |
 | --retention | Required | Retention period of the namespace in days. |
-| --groupId | Required | Authentication Group Identifier. Set it to 0 if you do not want to restrict the namespace to a specific group. This value MUST be the same for both staging and production instances of a namespace. |
+| --groupId | Required | Group identifier. Set it to 0 to allow all groups in your account to access the namespace. If you want to restrict the namespace to a specific group, enter the group id. This value MUST be the same for both the staging and production instances of a namespace. |
 
 | Argument | Existence | Description |
 | - | - | - |
@@ -198,13 +202,13 @@ Usage: `akamai edgekv modify ns <environment> <nameSpace>`
 
 | Option | Existence | Description |
 | - | - | - |
-| -h, --help  | optional | Display information on how to use this EdgeKV command |
+| -h, --help  | optional | Display information on how to use this EdgeKV command. |
 | --retention | Required | Retention period of the namespace in days. |
 
 #### Important Notes
 1. The namespace identifier can only include alphanumeric (0-9, a-z, A-Z), underscore (_), and (-) dash characters.
 2. The namespace identifier can be between 1 and 32 characters in length.
-3. Modifying retention for the "default" namespace is not permitted.
+3. You cannot modify the retention period for the "default" namespace.
 
 ### Create or Update item
 
@@ -328,7 +332,7 @@ Example:
 
 | Argument | Existence | Description |
 | - | - | - |
-| tokenname | required | Token name |
+| tokenName | required | token name |
 
 #### Important Notes
 1. The token name can only include alphanumeric (0-9, a-z, A-Z), underscore (_), and (-) dash characters.
@@ -364,18 +368,18 @@ Usage:
 
 | Argument | Existence | Description |
 | - | - | - |
-| tokenname | required | Token name |
+| tokenName | required | token name |
 
 ### Revoke Access Token
 
-Revoke an EdeKV access token.
+Revoke an EdgKV access token.
 
 Usage:
 `akamai edgekv revoke token <tokenName>`
 
 | Argument | Existence | Description |
 | - | - | - |
-| tokenname | required | Token name |
+| tokenName | required | token name |
 
 ___
 ## Resources
