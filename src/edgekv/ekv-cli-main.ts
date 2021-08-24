@@ -208,7 +208,7 @@ create
 
 create
   .command("token <tokenName>")
-  .description("Creates an edgekv token")
+  .description("Creates an EdgeKV token")
   .alias("tkn")
   .option('--save_path <save_path>', 'The path of the bundle where the token will be saved')
   .requiredOption("--staging <staging>", "Token can be used in staging environment if allowed")
@@ -230,6 +230,7 @@ create
 
 const revoke = program.command('revoke');
 revoke.command("token <tokenName>")
+.description("Revoke an EdgeKV token")
 .action(async function (tokenName) {
   try {
     await kvCliHandler.revokeToken(tokenName);
@@ -244,6 +245,7 @@ revoke.command("token <tokenName>")
 const modify = program.command('modify');
 modify.command("ns <environment> <namespace>")
   .requiredOption("--retention <retention>", "Retention period of the namespace in days")
+  .description("Modify an EdgeKV namespace")
   .action(async function (environment, namespace, options) {
     try {
       await kvCliHandler.updateNameSpace(environment, namespace, options);
@@ -258,11 +260,11 @@ modify.command("ns <environment> <namespace>")
 
 const download = program.command('download')
   .alias("dnld")
-  .description("Download an edgekv token");
+  .description("Download an EdgeKV token");
 
 download
   .command("token <tokenName>")
-  .description("Download an edgekv token")
+  .description("Download an EdgeKV token")
   .option('--save_path <save_path>', 'The path of the bundle where the token will be saved')
   .option("-o, --overwrite", "EdgeKV token placed inside the bundle will be overwritten")
   .action(async function (tokenName, options) {

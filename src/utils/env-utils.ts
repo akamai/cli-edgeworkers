@@ -52,7 +52,7 @@ export function getNodeVersion() {
 }
 
 export function setTimeout(timeout: number) {
-  timeoutVal = timeout;
+  timeoutVal = timeout*1000;
 }
 
 export function getTimeout() {

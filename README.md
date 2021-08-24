@@ -48,7 +48,7 @@ Options:
 | --debug | Show debug information. |
 | --edgerc `<path>` | Use credentials in `edgerc` file for command. (Default file location is _~/.edgerc_) |
 | --section `<name>` | Use this section in `edgerc` file. (Default section is _[default]_)|
-| --timeout `<timeout>` | You can specify a timeout value for a command in milliseconds to override the 2 minute default. For example, if you add "--timeout 1000" to a command, it will timeout if the server takes more than 1 second to respond. |
+| --timeout `<timeout>` | You can specify a timeout value for a command in seconds to override the 2 minute default. For example, if you add "--timeout 10" to a command, it will timeout if the server takes more than 10 second to respond. |
 | --json `[path]` | Write CLI output as JSON to optionally provided path.  If not path provided, write JSON output to CLI home directory |
 | -h, --help | Display usage information for EdgeWorkers CLI. |
  
