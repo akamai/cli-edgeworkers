@@ -4,7 +4,8 @@ import * as httpEdge from '../cli-httpRequest';
 import * as error from './ew-error';
 import * as fs from 'fs';
 
-const EDGEWORKERS_API_BASE = '/edgeworkers/v1';
+export const EDGEWORKERS_API_BASE = '/edgeworkers/v1';
+export const EDGEWORKERS_CLIENT_HEADER = 'X-EW-CLIENT';
 
 // This is only for fetching tarball bodies
 function fetchTarball(pth: string, method: string, body, headers, downloadPath: string) {
@@ -18,6 +19,7 @@ function fetchTarball(pth: string, method: string, body, headers, downloadPath: 
       qs = "?";
     path += `${qs}accountSwitchKey=${accountKey}`;
   }
+  headers[EDGEWORKERS_CLIENT_HEADER] = "CLI";
 
   return new Promise<any>(
     (resolve, reject) => {
