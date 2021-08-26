@@ -189,7 +189,7 @@ export function validateTarball(tarballPath: string) {
   return postTarball(`${EDGEWORKERS_API_BASE}/validations`, tarballPath).then(r => r.body);
 }
 
-export function   getAuthToken(hostName: string, acl: string, url: string, expiry: number, network: string) {
+export function getAuthToken(hostName: string, acl: string, url: string, expiry: number, network: string) {
   let urlPath = `${EDGEWORKERS_API_BASE}/secure-token`;
 
   let body = buildTokenBody(hostName, acl, url, expiry, network);
