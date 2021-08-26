@@ -376,7 +376,7 @@ Usage: `akamai edgeworkers create-auth-token [options] <hostName>`
 
 3. The `--acl` value can be a pattern that matches multiple pages, and is explicitly part of the final token. The default is `/*`.
 
-4. The `--expiry` value must be between 1 and 60 minutes. The default is `15`.
+4. The `--expiry` value must be between 1 and 720 minutes (12 hours). The default is `15`.
 
 ### Generate a Random Secret Key
 Generates a random secret key that can be used to create edgeworkers authentication token and in property PMUSER_EW_DEBUG_KEY.

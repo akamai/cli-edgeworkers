@@ -406,7 +406,7 @@ The default value if not specified is \"/*\". This option is mutually exclusive 
   .option("--url <urlPath>", "The exact path (including filename and extension) of the response page which requires debugging; this value is used as a salt for \
 generating the token, and the URL does NOT appear in the final token itself. The generated token is only valid for the exact URL. This option is mutually \
 exclusive to the --acl option; only use one or the other.")
-  .option("--expiry <expiry>", "The number of minutes during which the token is valid, after which it expires. Max value is 60 minutes; default value is 15 minutes.")
+  .option("--expiry <expiry>", "The number of minutes during which the token is valid, after which it expires. Max value is 720 minutes(12 hours); default value is 15 minutes.")
   .option("--format <format>", "Format in which the output will be printed to console")
   .action(async function (hostName, options) {
     try {
