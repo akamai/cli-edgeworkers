@@ -1,7 +1,6 @@
 import * as envUtils from './utils/env-utils';
 import * as cliUtils from './utils/cli-utils';
 import { promiseTimeout } from './utils/timeout-promise';
-import { EDGEWORKERS_API_BASE, EDGEWORKERS_CLIENT_HEADER } from './edgeworkers/ew-service';
 
 export var accountKey: string = null;
 export var timeoutVal: number = 120000;
@@ -23,9 +22,6 @@ export function sendEdgeRequest(pth: string, method: string, body, headers, time
         if (path.indexOf("?") == -1)
             qs = "?";
         path += `${qs}accountSwitchKey=${accountKey}`;
-    }
-    if (path.includes(EDGEWORKERS_API_BASE)) {
-      headers[EDGEWORKERS_CLIENT_HEADER] = "CLI";
     }
 
     let servicePromise = function () {
