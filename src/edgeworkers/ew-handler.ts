@@ -758,7 +758,7 @@ function validateExpiry(expiry) {
     expiry = parseInt(expiry);
     if (isNaN(expiry)) {
       cliUtils.logAndExit(1, "ERROR: The expiry is invalid. It must be an integer value (in minutes) representing the duration of the validity of the token.");
-    } else if (expiry < 1 || expiry > 60) {
-      cliUtils.logAndExit(1, "ERROR: The expiry is invalid. It must be an integer value (in minutes) between 1 and 60.");
+    } else if (expiry < 1 || expiry > 720) {
+      cliUtils.logAndExit(1, "ERROR: The expiry is invalid. It must be an integer value (in minutes) between 1 and 720 minutes (12 hours).");
     }
 }
