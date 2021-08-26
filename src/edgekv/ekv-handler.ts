@@ -115,9 +115,9 @@ export async function initializeEdgeKv() {
   } else {
     var errorReason = `${initializedEdgeKv.error_reason}`;
     if (initializedEdgeKv && initializedEdgeKv.status == 403) {
-      errorReason = "You don't have permission to access this resource. Please make sure you have the EdgeKV product added to your contract.";
+      errorReason = "(You don't have permission to access this resource). Please make sure you have the EdgeKV product added to your contract.";
     } 
-    response.logError(initializedEdgeKv, `ERROR: EdgeKV initialization failed. ${errorReason} [TraceId: ${initializedEdgeKv.traceId}]`);
+    response.logError(initializedEdgeKv, `ERROR: EdgeKV initialization failed ${errorReason} [TraceId: ${initializedEdgeKv.traceId}]`);
   }
 }
 
@@ -148,9 +148,9 @@ export async function getInitializationStatus() {
   } else {
     var errorReason = `${initializedEdgeKv.error_reason}`;
     if (initializedEdgeKv && initializedEdgeKv.status == 403) {
-      errorReason = "You don't have permission to access this resource. Please make sure you have the EdgeKV product added to your contract.";
+      errorReason = "(You don't have permission to access this resource). Please make sure you have the EdgeKV product added to your contract.";
     } 
-    response.logError(initializedEdgeKv, `ERROR: Unable to retrieve EdgeKV status. ${errorReason} [TraceId: ${initializedEdgeKv.traceId}]`);
+    response.logError(initializedEdgeKv, `ERROR: EdgeKV Initialization failed ${errorReason} [TraceId: ${initializedEdgeKv.traceId}]`);
   }
 }
 
