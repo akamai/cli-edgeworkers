@@ -1,4 +1,5 @@
 import * as edgeWorkersClientSvc from '../edgeworkers/client-manager';
+import * as envUtils from '../utils/env-utils';
 const inquirer = require('inquirer');
 const Spinner = require('cli-spinner').Spinner;
 export const staging = 'STAGING';
@@ -104,4 +105,12 @@ export function getBorder(text: string) {
 
 export function escape(text: string) {
   return encodeURIComponent(text);
+}
+
+export function getTimeout(timeout : number) {
+  let timeoutByUser = envUtils.getTimeout();
+  if (timeoutByUser == 0) {
+    return timeout;
+  }
+  return timeoutByUser;
 }

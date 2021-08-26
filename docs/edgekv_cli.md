@@ -15,6 +15,7 @@
     * [ Create Namespace](###create-namespace)
     * [ List Namespace](###list-namespace)
     * [ Get Namespace](###get-namespace)
+    * [ Modify Namespace](###modify-namespace)
     * [ Create or Update item](###create-or-update-item)
     * [ Read Item](###read-item)
     * [ Delete Item](###delete-item)
@@ -22,6 +23,7 @@
     * [ Create an Access Token](###create-an-access-token)
     * [ List Access Tokens](###list-access-tokens)
     * [ Retrieve Access Token](###retrieve-access-token)
+    * [ Revoke access token](###revoke-access-token)
 * [ Resources](##resources)
 * [ Reporting Issues](##reporting-issues)
 
@@ -88,7 +90,7 @@ Options:
 | --debug | Show debug information. |
 | --edgerc `<path>` | Use credentials in edgerc file for command. (Default file location is ~/.edgerc). Refer to [Get Started with APIs](https://developer.akamai.com/api/getting-started#addcred) for more information. |
 | --section `<name>` | Use this section in `edgerc` file. (Default section is _[default]_)|
-| --timeout `<timeout>` | You can specify a timeout value for a command in milliseconds to override the 2 minute default. For example, if you add "--timeout 1000" to a command, it will timeout if the server takes more than 1 second to respond. |
+| --timeout `<timeout>` | You can specify a timeout value for a command in seconds to override the 1 minute default. For example, if you add "--timeout 10" to a command, it will timeout if the server takes more than 10 second to respond. |
 | -h, --help | Display information on how to use this EdgeKV command. | 
 
 Commands:
@@ -101,6 +103,7 @@ Commands:
 | create ns `<environment> <namespace> --retention <retention>` | Create an EdgeKV namespace in an Akamai environment. Specify the retention period of the namespace in days. |
 | show ns `<environment> <namespace>`| Retrieve an EdgeKV namespace in an Akamai environment. |
 | list ns `<environment>` | List the namespaces provisioned in an Akamai environment. |
+| modify ns `<environment> <nameSpace>` | Modify an EdgeKV namespace in an Akamai environment. |
 | write `<itemType> <environment> <namespace> <groupId> <itemId> <items>` | Write the text item or JSON item supplied in a file for the given namespace, group id, and item id in an Akamai environment. |
 | read item `<environment> <namespace> <groupId> <itemId>` | Read an item for the given namespace, group id, and item id in an Akamai environment. |
 | delete item \| del item `<environment> <namespace> <groupId> <itemId>` | Delete an item for the given namespace, group id, and item id in an Akamai environment. |
@@ -108,6 +111,7 @@ Commands:
 | create token \| create tkn `<tokenName> [options]` |  Create an EdgeKV access token. |
 | list tokens `[options]`| List of all tokens the user has permission to download. |
 | download token `<tokenName> [options]` | Download an edgekv token. |
+| revoke token `<tokenName>` | Revoke an EdgKV access token. |
 
 
 Return Codes:
@@ -144,9 +148,10 @@ Create a namespace
 Usage: `akamai edgekv create ns <environment> <nameSpace>`
 
 | Option | Existence | Description |
-| - | - |
-| -h, --help  | optional | Display information on how to use this EdgeKV command |
+| - | - | - |
+| -h, --help  | optional | Display information on how to use this EdgeKV command. |
 | --retention | Required | Retention period of the namespace in days. |
+| --groupId | Required | Group identifier. Set it to 0 to allow all groups in your account to access the namespace. If you want to restrict the namespace to a specific group, enter the group id. This value MUST be the same for both the staging and production instances of a namespace. |
 
 | Argument | Existence | Description |
 | - | - | - |
@@ -189,9 +194,21 @@ Usage: `akamai edgekv show ns <environment> <nameSpace>`
 | environment | required | The Akamai environment from which to retrieve namespace details, either “staging” or “production”. |
 | namespace | required | Namespace identifier. |
 
+### Modify Namespace
+
+Modify the namespace
+
+Usage: `akamai edgekv modify ns <environment> <nameSpace>`
+
+| Option | Existence | Description |
+| - | - | - |
+| -h, --help  | optional | Display information on how to use this EdgeKV command. |
+| --retention | Required | Retention period of the namespace in days. |
+
 #### Important Notes
 1. The namespace identifier can only include alphanumeric (0-9, a-z, A-Z), underscore (_), and (-) dash characters.
 2. The namespace identifier can be between 1 and 32 characters in length.
+3. You cannot modify the retention period for the "default" namespace.
 
 ### Create or Update item
 
@@ -315,7 +332,7 @@ Example:
 
 | Argument | Existence | Description |
 | - | - | - |
-| tokenname | required | Token name |
+| tokenName | required | token name |
 
 #### Important Notes
 1. The token name can only include alphanumeric (0-9, a-z, A-Z), underscore (_), and (-) dash characters.
@@ -338,7 +355,7 @@ Usage: `akamai edgekv list tokens`
  
 ### Retrieve Access Token
  
-Retrieve an edgeKV access token.
+Retrieve an EdgeKV access token.
  
 Usage:
 `akamai edgekv download token <tokenName> --save_path=<path> --overwrite`
@@ -348,6 +365,21 @@ Usage:
 | --save_path | Optional | Path specifying where to save the edgekv_tokens.js token file. We recommend that you save the token file in the same location as the EdgeWorkers code bundle file (.tgz). The EdgeWorkers code bundle is then automatically updated every time this command updates the edgekv_tokens.js token file. If a path is not provided the token value is displayed. This token must be securely stored and manually added to the edgekv_tokens.js token file and EdgeWorkers code bundle. |
 | -o, --overwrite | Optional | This option is used in conjunction with the --save_path option to overwrite the value of an existing token with the same name in the edgekv_tokens.js file. |
 | -h, --help  | Display information on how to use this EdgeKV command. |
+
+| Argument | Existence | Description |
+| - | - | - |
+| tokenName | required | token name |
+
+### Revoke Access Token
+
+Revoke an EdgKV access token.
+
+Usage:
+`akamai edgekv revoke token <tokenName>`
+
+| Argument | Existence | Description |
+| - | - | - |
+| tokenName | required | token name |
 
 ___
 ## Resources
