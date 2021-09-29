@@ -29,7 +29,7 @@
 
 ## Overview
 
-The command-line interface (CLI) is a downloadable utility you can use to control EdgeKV functionality. It lets you administer EdgeKV without writing code against Akamai’s administrative APIs or using the Akamai Control Center UI. The CLI also enables you to script EdgeKV behaviors.
+The command-line interface (CLI) is a downloadable utility you can use to control EdgeKV functionality. It lets you administer EdgeKV without writing code against Akamai’s administrative APIs or using the Akamai Control Center UI. The CLI also enables you to script EdgeKV behaviors. This CLI is fully integrated with the EdgeWorkers CLI, enabling both products to be administered from a single interface.
 
 You can issue commands to trigger activities including database initialization, namespace management, token creation, and CRUD operations.
 
