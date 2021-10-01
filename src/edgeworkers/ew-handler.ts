@@ -167,14 +167,14 @@ export async function getResourceTierInfo() {
   }
   let resourceTierList = await getResourceTierList(contractList[contractId]);
 
-  cliUtils.log("\n Resource Tiers");
+  cliUtils.log("\nResource Tiers");
   let resourceIds = [];
   resourceTierList.forEach(function (resTier, index) {
     console.log(index + 1 + ". Resource Tier " + resTier["resourceTierId"] + " " + resTier["resourceTierName"] + "\n");
     resourceIds.push(resTier["resourceTierId"]);
     let ewLimit = resTier["edgeWorkerLimits"];
     ewLimit.forEach(function (limit) {
-      console.log(limit["limitName"] + ": " + limit["limitValue"] + " " + limit["limitUnit"]);
+      console.log(limit["limitName"] + ": " + cliUtils.getFormattedValue(limit));
     });
     console.log(); // adding line break
   });
@@ -259,24 +259,24 @@ export async function getResourceTiers(contractId?: string) {
       }
     }
   }
-  
-    let resourceTierList = await getResourceTierList(contractId);
-    if (resourceTierList) {
-      let msg = `The following Resource Tiers available for the contract id ${contractId}`;
-      if (edgeWorkersClientSvc.isJSONOutputMode()) {
-        edgeWorkersClientSvc.writeJSONOutput(0, msg, resourceTierList);
-      } else {
-        cliUtils.logWithBorder(msg);
-        resourceTierList.forEach(function (resTier, index) {
-          console.log(index + 1 + ". ResourceTier " + resTier["resourceTierId"] + " - " + resTier["resourceTierName"]);
-          let ewLimit = resTier["edgeWorkerLimits"];
-          ewLimit.forEach(function (limit) {
-            console.log(limit["limitName"] + ": " + limit["limitValue"] + " " + limit["limitUnit"]);
-          });
-          console.log();
-        }) 
-      }
+
+  let resourceTierList = await getResourceTierList(contractId);
+  if (resourceTierList) {
+    let msg = `The following Resource Tiers available for the contract id ${contractId}`;
+    if (edgeWorkersClientSvc.isJSONOutputMode()) {
+      edgeWorkersClientSvc.writeJSONOutput(0, msg, resourceTierList);
+    } else {
+      cliUtils.logWithBorder(msg);
+      resourceTierList.forEach(function (resTier, index) {
+        console.log(index + 1 + ". ResourceTier " + resTier["resourceTierId"] + " - " + resTier["resourceTierName"]);
+        let ewLimit = resTier["edgeWorkerLimits"];
+        ewLimit.forEach(function (limit) {
+          console.log(limit["limitName"] + ": " + cliUtils.getFormattedValue(limit));
+        });
+        console.log();
+      });
     }
+  }
 }
 
 export async function getResourceTierForEwid(ewId: string) {
@@ -290,7 +290,7 @@ export async function getResourceTierForEwid(ewId: string) {
       cliUtils.logWithBorder(keyVal);
       let ewLimit = resourceTier["edgeWorkerLimits"];
       ewLimit.forEach(function (limit) {
-        console.log(limit["limitName"] + ": " + limit["limitValue"] + " " + limit["limitUnit"]);
+        console.log(limit["limitName"] + ": " + cliUtils.getFormattedValue(limit["limitValue"]));
       });
     }
   } else {
