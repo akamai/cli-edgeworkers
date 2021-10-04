@@ -290,7 +290,7 @@ export async function getResourceTierForEwid(ewId: string) {
       cliUtils.logWithBorder(keyVal);
       let ewLimit = resourceTier["edgeWorkerLimits"];
       ewLimit.forEach(function (limit) {
-        console.log(limit["limitName"] + ": " + cliUtils.getFormattedValue(limit["limitValue"]));
+        console.log(limit["limitName"] + ": " + cliUtils.getFormattedValue(limit));
       });
     }
   } else {
