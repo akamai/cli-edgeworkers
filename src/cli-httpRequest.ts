@@ -1,6 +1,7 @@
 import * as envUtils from './utils/env-utils';
 import * as cliUtils from './utils/cli-utils';
 import { promiseTimeout } from './utils/timeout-promise';
+import { EDGEWORKERS_API_BASE, EDGEWORKERS_CLIENT_HEADER } from './edgeworkers/ew-service';
 
 export var accountKey: string = null;
 export var timeoutVal: number = 120000;
@@ -9,15 +10,11 @@ export function setAccountKey(account: string) {
     accountKey = account;
 }
 
-export function setTimeout(timeout: number) {
-    timeoutVal = timeout;
-}
-
 /**
  * This is for non-Tarball gets and all POST/PUT actions that return JSON or string bodies 
  * for both edge CLI and edge KV CLI. This method authenticates, sends request and returns promise
  */
-export function sendEdgeRequest(pth: string, method: string, body, headers) {
+export function sendEdgeRequest(pth: string, method: string, body, headers, timeout: number) {
     const edge = envUtils.getEdgeGrid();
     var path = pth;
     var qs: string = "&";
@@ -26,6 +23,9 @@ export function sendEdgeRequest(pth: string, method: string, body, headers) {
         if (path.indexOf("?") == -1)
             qs = "?";
         path += `${qs}accountSwitchKey=${accountKey}`;
+    }
+    if (path.includes(EDGEWORKERS_API_BASE)) {
+      headers[EDGEWORKERS_CLIENT_HEADER] = "CLI";
     }
 
     let servicePromise = function () {
@@ -65,27 +65,27 @@ export function sendEdgeRequest(pth: string, method: string, body, headers) {
     }
        
     // race promise to set timeout
-    return promiseTimeout(timeoutVal, servicePromise());
+    return promiseTimeout(timeout, servicePromise());
 }
 
-export function postJson(path: string, body) {
+export function postJson(path: string, body, timeout: number) {
     return sendEdgeRequest(path, 'POST', body, {
         'Content-Type': 'application/json'
-    });
+    }, timeout);
 }
 
-export function putJson(path: string, body) {
+export function putJson(path: string, body, timeout: number) {
     return sendEdgeRequest(path, 'PUT', body, {
         'Content-Type': 'application/json'
-    });
+    }, timeout);
 }
 
-export function getJson(path: string) {
-    return sendEdgeRequest(path, 'GET', '', {});
+export function getJson(path: string, timeout: number) {
+    return sendEdgeRequest(path, 'GET', '', {}, timeout);
 }
 
-export function deleteReq(path: string) {
-    return sendEdgeRequest(path, 'DELETE', '', {});
+export function deleteReq(path: string, timeout: number) {
+    return sendEdgeRequest(path, 'DELETE', '', {}, timeout);
 }
 
 export function isOkStatus(code) {

@@ -48,7 +48,7 @@ Options:
 | --debug | Show debug information. |
 | --edgerc `<path>` | Use credentials in `edgerc` file for command. (Default file location is _~/.edgerc_) |
 | --section `<name>` | Use this section in `edgerc` file. (Default section is _[default]_)|
-| --timeout `<timeout>` | You can specify a timeout value for a command in milliseconds to override the 2 minute default. For example, if you add "--timeout 1000" to a command, it will timeout if the server takes more than 1 second to respond. |
+| --timeout `<timeout>` | You can specify a timeout value for a command in seconds to override the 2 minute default. For example, if you add "--timeout 10" to a command, it will timeout if the server takes more than 10 second to respond. |
 | --json `[path]` | Write CLI output as JSON to optionally provided path.  If not path provided, write JSON output to CLI home directory |
 | --jsonout | Write CLI output as JSON to stdout. |
 | -h, --help | Display usage information for EdgeWorkers CLI. |
@@ -62,8 +62,10 @@ Commands:
 | list-ids \| li `[options] [edgeworker-identifier]` | List EdgeWorker ids currently registered. |
 | register \| create-id `<group-identifier> <edgeworker-name>` | Register a new EdgeWorker id to reference in Property Manager behavior. |
 | update-id \| ui `<edgeworker-identifier> <group-identifier> <edgeworker-name> [options]` | Allows Customer Developer to update an existing EdgeWorker Identifier's Luna ACG or Name attributes. |
+| delete-id \| delete-id `[options] <edgeworker-identifier>` | Permanently delete an existing EdgeWorker Id. |
 | list-versions \| lv `<edgeworker-identifier> [version-identifier]` | List Version information of a given EdgeWorker Id. |
 | upload \| create-version `[options] <edgeworker-identifier>` | Creates a new version of a given EdgeWorker Id which includes the code bundle. |
+| delete-version \| delete-version `[options] <edgeworker-identifier> <version-identifier>` | Permanently delete an existing version of a given EdgeWorker Id. |
 | download \| download-version `[options] <edgeworker-identifier> <version-identifier>` | Download the code bundle of an EdgeWorker version. |
 | status \| list-activations `[options] <edgeworker-identifier>` | List Activation status of a given EdgeWorker Id. |
 | activate \| av `<edgeworker-identifier> <network> <versionId>` | Activate a Version for a given EdgeWorker Id on an Akamai Network. |
@@ -73,6 +75,7 @@ Commands:
 | generate-secret \| secret `[options]` | Generates a secret key that can be used to generate auth token or in property variable. |
 | clone \| clone `<edgeworker-identifier> <resourceTierId> [options]` | Clones an Edgeworker from the existing Edgeworker Id. |
 | list-contracts \| li-contracts `[options]` | List of contract ids that user has access to. |
+| list-properties \| lp `<edgeworker-identifier> [options]` | List of properties associated with a given EdgeWorker Id. |
 | list-restiers \| li-restiers `[options]` | List Resource Tiers that can be used to create or clone EdgeWorker Id. |
 | show-restier \| show-restier `<edgeworker-identifier>` | Customers can get Resource Tier details for a specific EdgeWorker Id. |
 
@@ -116,6 +119,7 @@ Usage: `akamai edgeworkers register [options] <group-identifier> <edgeworker-nam
 
 | Option | Description |
 | - | - |
+| --resourceTierId | New Resource tier id to which the Edgeworker will be associated. |
 | -h, --help  | output usage information |
 
 | Argument | Existence | Description |
@@ -127,6 +131,8 @@ Usage: `akamai edgeworkers register [options] <group-identifier> <edgeworker-nam
 1. Location response header will be provided with new EdgeWorker Id.
 
 2. EdgeWorker id details response body (JSON) will be provided with 201 response code.
+
+3. To disable prompts for automation purpose "resourceTierId" can be provided as input.
 
 ### Update EdgeWorker Identifier's Information
 Allows Customer Developer to update an existing EdgeWorker Identifier's Luna ACG or Name attributes.
@@ -150,6 +156,25 @@ Usage: `akamai edgeworkers update-id [options] <edgeworker-identifier> <group-id
 2. EdgeWorker id details response body (JSON) will be provided with 200 response code.
 
 3. Resource Tier ID provided should be same as the one the EdgeWorker ID already has. In order to provide a different resource tier id, please use the clone operation.
+
+### Delete Existing EdgeWorker Identifier
+Permanently delete an existing EdgeWorker Identifier.
+
+Usage: `akamai edgeworkers delete-id [options] <edgeworker-identifier>`
+
+| Option | Description |
+| - | - |
+| -h, --help  | output usage information |
+| --noPrompt | Skip the deletion confirmation prompt |
+
+| Argument | Existence | Description |
+| - | - | - |
+| edgeworker-identifier | required | A unique integer handle to an EdgeWorkers instance |
+
+#### Key Details
+1. Deleting an EdgeWorker ID is only possible if it doesn't have any version currently active or being activated on the Akamai network.
+
+2. Ensure that there are no active properties associated with an EdgeWorker before deletion.
 
 ### List EdgeWorker Versions
 List Version information of a given EdgeWorker Id.
@@ -207,6 +232,26 @@ Usage: `akamai edgeworkers upload [options] <edgeworker-identifier>`
 10. Location response header will be provided with new EdgeWorker Version id.
 
 11. EdgeWorker version details response body (JSON) will be provided with 201 response code.
+
+### Delete Existing EdgeWorker Version
+Permanently delete an existing version of a given EdgeWorker Id.
+
+Usage: `akamai edgeworkers delete-version [options] <edgeworker-identifier> <version-identifier>`
+
+| Option | Description |
+| - | - |
+| -h, --help  | output usage information |
+| --noPrompt | Skip the deletion confirmation prompt |
+
+| Argument | Existence | Description |
+| - | - | - |
+| edgeworker-identifier | required | A unique integer handle to an EdgeWorkers instance |
+| version-identifier | required | A unique integer handle to version of an EdgeWorkers instance |
+
+#### Key Details
+1. Deleting a version is only possible if it is not currently active or being activated on the Akamai network.
+
+2. If the version is currently active, it will have to be deactivated before it can be deleted.
 
 ### Download an EdgeWorkers Code Bundle
 Download the code bundle of an EdgeWorker version.
@@ -332,7 +377,7 @@ Usage: `akamai edgeworkers create-auth-token [options] <hostName>`
 
 3. The `--acl` value can be a pattern that matches multiple pages, and is explicitly part of the final token. The default is `/*`.
 
-4. The `--expiry` value must be between 1 and 60 minutes. The default is `15`.
+4. The `--expiry` value must be between 1 and 720 minutes (12 hours). The default is `15`.
 
 ### Generate a Random Secret Key
 Generates a random secret key that can be used to create edgeworkers authentication token and in property PMUSER_EW_DEBUG_KEY.
@@ -366,6 +411,23 @@ Usage: `akamai list-contracts`
 | - | - |
 | -h, --help  | output usage information |
 
+### List Properties
+List of properties associated to a specific EdgeWorker Id.
+
+Usage: `akamai edgeworkers list-properties <edgeworker-identifier> [options]`
+
+| Option | Description |
+| - | - |
+| -h, --help  | output usage information |
+| --activeOnly | Returns only active properties |
+
+| Argument | Existence | Description |
+| - | - | - |
+| edgeworker-identifier | required | Edgeworker identifier.
+
+#### Key Details
+1. Note that the returned boolean limitedAccessToProperties is true if the user doesn't have access to the top level group under the account, or if they don't have the admin role for this group.
+
 ### List Resource Tiers for a specific Contract ID
 Allows customers to list Resource Tiers that can be used to create or clone EdgeWorker IDs. 
 
@@ -373,10 +435,12 @@ Usage: `akamai list-restiers`
 
 | Option | Description |
 | - | - |
+| --contractId | Resource tiers for the specified contract id. |
 | -h, --help  | output usage information |
 
 #### Key Details
 1. User will be prompted with list of contract ids that user has access to. The selected contract id will be used to fetch resource tier.
+2. To disable prompt for automation purpose, contract id can be provided as input.
 
 ### Fetch the Resource Tier for a specific EdgeWorker Id
 Customers can get Resource Tier details for a specific EdgeWorker Id.

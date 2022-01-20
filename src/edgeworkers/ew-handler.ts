@@ -133,6 +133,25 @@ export async function updateEdgeWorkerInfo(ewId: string, groupId: string, name: 
   }
 }
 
+export async function deleteEdgeWorkerId(ewId: string, noPrompt: boolean) {
+  if (noPrompt !== undefined) {
+    var deletion = await cliUtils.spinner(edgeWorkersSvc.deleteEdgeWorkerId(ewId), `Deleting EdgeWorker Id ${ewId}`);
+  } else {
+    if (readline.keyInYN(`Have you checked to make sure that EdgeWorker Id ${ewId} is not in use on any active properties? You can check for active properties by using the list-properties command.`)) {
+      var deletion = await cliUtils.spinner(edgeWorkersSvc.deleteEdgeWorkerId(ewId), `Deleting EdgeWorker Id ${ewId}`);
+    } else {
+      cliUtils.logAndExit(1, `Deletion of EdgeWorker Id ${ewId} cancelled.`)
+    }
+  }
+
+  if (!deletion.isError) {
+    let msg = `EdgeWorker ${ewId} was successfully deleted.`
+    cliUtils.logWithBorder(msg);
+  } else {
+    cliUtils.logAndExit(1, deletion.error_reason);
+  }
+}
+
 export async function getResourceTierInfo() {
   // get contract list
   let contractList = await cliUtils.spinner(getContractIds(),"Retrieving contract id's...");
@@ -148,14 +167,14 @@ export async function getResourceTierInfo() {
   }
   let resourceTierList = await getResourceTierList(contractList[contractId]);
 
-  cliUtils.log("\n Resource Tiers");
+  cliUtils.log("\nResource Tiers");
   let resourceIds = [];
   resourceTierList.forEach(function (resTier, index) {
     console.log(index + 1 + ". Resource Tier " + resTier["resourceTierId"] + " " + resTier["resourceTierName"] + "\n");
     resourceIds.push(resTier["resourceTierId"]);
     let ewLimit = resTier["edgeWorkerLimits"];
     ewLimit.forEach(function (limit) {
-      console.log(limit["limitName"] + ": " + limit["limitValue"] + " " + limit["limitUnit"]);
+      console.log(limit["limitName"] + ": " + cliUtils.getFormattedValue(limit));
     });
     console.log(); // adding line break
   });
@@ -200,33 +219,62 @@ export async function getContracts() {
   }
 }
 
-export async function getResourceTiers() {
-  let contractIdList = await getContractIds();
-  if (contractIdList == undefined) {
-    cliUtils.logAndExit(1, "ERROR: Unable to retrieve contracts for your account.");
-  } else {
-    let contractId = readline.keyInSelect(contractIdList, "Please select from the above contract ids :");
-    let selectedOption = (contractId == -1) ? "cancel" : contractIdList[contractId]
-    console.log('You have selected '+selectedOption);
-    if (contractIdList[contractId] == undefined) {
-      cliUtils.logAndExit(1, "ERROR: Please select a valid contract id");
-    }
-    let resourceTierList = await getResourceTierList(contractIdList[contractId]);
-    if (resourceTierList) {
-      let msg = `The following Resource Tiers available for the contract id ${contractIdList[contractId]}`;
+export async function getProperties(ewId: string, activeOnly: boolean) {
+  let propList = await cliUtils.spinner(edgeWorkersSvc.getProperties(ewId, activeOnly), `Retrieving properties for EdgeWorker Id ${ewId}...`);
+  if (propList && !propList.isError) {
+    const properties = propList.properties;
+
+    if (properties.length > 0) {
+      let msg = `The following properties are associated with the EdgeWorker Id ${ewId}`;
+
       if (edgeWorkersClientSvc.isJSONOutputMode()) {
-        edgeWorkersClientSvc.writeJSONOutput(0, msg, resourceTierList);
+        edgeWorkersClientSvc.writeJSONOutput(0, msg, propList);
       } else {
         cliUtils.logWithBorder(msg);
-        resourceTierList.forEach(function (resTier, index) {
-          console.log(index + 1 + ". ResourceTier " + resTier["resourceTierId"] + " - " + resTier["resourceTierName"]);
-          let ewLimit = resTier["edgeWorkerLimits"];
-          ewLimit.forEach(function (limit) {
-            console.log(limit["limitName"] + ": " + limit["limitValue"] + " " + limit["limitUnit"]);
-          });
-          console.log();
-        }) 
+        console.table(properties);
+        console.log(`limitedAccessToProperties: ${propList.limitedAccessToProperties}`)
       }
+    } else {
+      const optionalParam = activeOnly ? " active " : " ";
+      cliUtils.logAndExit(0, `INFO: There are currently no${optionalParam}properties associated with the EdgeWorker Id: ${ewId}`);
+    }
+  } else {
+    cliUtils.logAndExit(1, propList.error_reason);
+  }
+}
+
+export async function getResourceTiers(contractId?: string) {
+
+  if (!contractId) {
+    let contractIdList = await getContractIds();
+    if (contractIdList == undefined) {
+      cliUtils.logAndExit(1, "ERROR: Unable to retrieve contracts for your account.");
+    } else {
+      let contractOption = readline.keyInSelect(contractIdList, "Please select from the above contract ids :");
+      contractId = contractIdList[contractOption];
+      let selectedOption = (contractOption == -1) ? "cancel" : contractId
+      console.log('You have selected ' + selectedOption);
+      if (contractId == undefined) {
+        cliUtils.logAndExit(1, "ERROR: Please select a valid contract id");
+      }
+    }
+  }
+
+  let resourceTierList = await getResourceTierList(contractId);
+  if (resourceTierList) {
+    let msg = `The following Resource Tiers available for the contract id ${contractId}`;
+    if (edgeWorkersClientSvc.isJSONOutputMode()) {
+      edgeWorkersClientSvc.writeJSONOutput(0, msg, resourceTierList);
+    } else {
+      cliUtils.logWithBorder(msg);
+      resourceTierList.forEach(function (resTier, index) {
+        console.log(index + 1 + ". ResourceTier " + resTier["resourceTierId"] + " - " + resTier["resourceTierName"]);
+        let ewLimit = resTier["edgeWorkerLimits"];
+        ewLimit.forEach(function (limit) {
+          console.log(limit["limitName"] + ": " + cliUtils.getFormattedValue(limit));
+        });
+        console.log();
+      });
     }
   }
 }
@@ -242,7 +290,7 @@ export async function getResourceTierForEwid(ewId: string) {
       cliUtils.logWithBorder(keyVal);
       let ewLimit = resourceTier["edgeWorkerLimits"];
       ewLimit.forEach(function (limit) {
-        console.log(limit["limitName"] + ": " + limit["limitValue"] + " " + limit["limitUnit"]);
+        console.log(limit["limitName"] + ": " + cliUtils.getFormattedValue(limit));
       });
     }
   } else {
@@ -405,6 +453,25 @@ export async function createNewVersion(ewId: string, options: { bundle?: string,
       //if all remains good, then upload tarball and output checksum and version number
       await uploadEdgeWorkerVersion(ewId, bundle.tarballPath);
     }
+  }
+}
+
+export async function deleteVersion(ewId: string, versionId: string, noPrompt: boolean) {
+  if (noPrompt !== undefined) {
+    var deletion = await cliUtils.spinner(edgeWorkersSvc.deleteVersion(ewId, versionId), `Deleting version ${versionId} of EdgeWorker Id ${ewId}`);
+  } else {
+    if (readline.keyInYN(`Are you sure you want to delete version ${versionId} of EdgeWorker Id ${ewId}?`)) {
+      var deletion = await cliUtils.spinner(edgeWorkersSvc.deleteVersion(ewId, versionId), `Deleting version ${versionId} of EdgeWorker Id ${ewId}`);
+    } else {
+      cliUtils.logAndExit(1, `Deletion of version ${versionId} of EdgeWorker Id ${ewId} cancelled.`)
+    }
+  }
+
+  if (!deletion.isError) {
+    let msg = `Version ${versionId} of Edgeworker Id ${ewId} was successfully deleted.`
+    cliUtils.logWithBorder(msg);
+  } else {
+    cliUtils.logAndExit(1, deletion.error_reason);
   }
 }
 
@@ -691,7 +758,7 @@ function validateExpiry(expiry) {
     expiry = parseInt(expiry);
     if (isNaN(expiry)) {
       cliUtils.logAndExit(1, "ERROR: The expiry is invalid. It must be an integer value (in minutes) representing the duration of the validity of the token.");
-    } else if (expiry < 1 || expiry > 60) {
-      cliUtils.logAndExit(1, "ERROR: The expiry is invalid. It must be an integer value (in minutes) between 1 and 60.");
+    } else if (expiry < 1 || expiry > 720) {
+      cliUtils.logAndExit(1, "ERROR: The expiry is invalid. It must be an integer value (in minutes) between 1 and 720 minutes (12 hours).");
     }
 }

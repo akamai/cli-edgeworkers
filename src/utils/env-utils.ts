@@ -5,6 +5,8 @@ const fs = require('fs');
 import * as os from 'os';
 import * as cliUtils from './cli-utils';
 
+export var timeoutVal: number = 0;
+
 const edgeRcParams = {
   section: process.env.AKAMAI_EDGERC_SECTION || 'default',
   path: process.env.AKAMAI_EDGERC || path.resolve(os.homedir(), '.edgerc'),
@@ -48,3 +50,13 @@ export function isDebugMode() {
 export function getNodeVersion() {
   return parseInt(process.versions["node"].split('.')[0]);
 }
+
+export function setTimeout(timeout: number) {
+  timeoutVal = timeout*1000;
+}
+
+export function getTimeout() {
+  return timeoutVal;
+}
+
+

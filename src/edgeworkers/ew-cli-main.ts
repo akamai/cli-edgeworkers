@@ -40,8 +40,8 @@ program
   .on("option:accountkey", function (key) {
     httpEdge.setAccountKey(key);
   })
-  .on("option:timeout", function (timeout){
-    httpEdge.setTimeout(timeout);
+  .on("option:timeout", function (timeout) {
+    envUtils.setTimeout(timeout);
   })
   // this fires only when a command is not listed below with a custom action
   .on('command:*', function (command) {
@@ -96,7 +96,7 @@ program
   .description("List EdgeWorker ids currently registered.")
   .alias("li")
   .option("--groupId <groupId>", "Filter EdgeWorker Id list by Permission Group")
-  .option("--resourceTierId <resourceTierId>", "Filter Edgeworkers by resource tiers")
+  .option("-restier, --resourceTierId <resourceTierId>", "Filter Edgeworkers by resource tiers")
   .action(async function (ewId, options) {
     try {
       await cliHandler.showEdgeWorkerIdOverview(ewId, options.groupId, options.resourceTierId);
@@ -112,14 +112,19 @@ program
   .command("register <group-identifier> <edgeworker-name>")
   .description("Register a new EdgeWorker id to reference in Property Manager behavior.")
   .alias("create-id")
-  .action(async function (groupId, name) {
+  .option("-restier, --resourceTierId <resourceTierId>", "New resource Tier id to associate with Edgeworker")
+  .action(async function (groupId, name, options) {
     try {
+      // for automation resource tier id will be provided , hence no need for prompts
+      let resourceTierId = options.resourceTierId;
+      if (!resourceTierId) {
       // get contract list and get resource tier info
-      let resourceTierId = await cliHandler.getResourceTierInfo();
-      // create edgeworker for the grpid, res tier and ew name
+      resourceTierId = await cliHandler.getResourceTierInfo();
       if (resourceTierId == undefined) {
         cliUtils.logAndExit(1, "ERROR: Please select a valid resource tier id.")
       }
+      }
+      // create edgeworker for the grpid, res tier and ew name
       await cliHandler.createEdgeWorkerId(groupId, name, resourceTierId);
     } catch (e) {
       cliUtils.logAndExit(1, e);
@@ -145,12 +150,29 @@ program
   });
 
 program
+  .command("list-properties <edgeworkerId>")
+  .description("Allows customer to view the list of properties associated with the EdgeWorker Id")
+  .option("--activeOnly", "Return only active properties")
+  .alias("lp")
+  .action(async function (edgeWorkerId, options) {
+    try {
+      await cliHandler.getProperties(edgeWorkerId, options.activeOnly);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+program
   .command("list-restiers")
   .description("Allows customer to view the list of resource tiers available for the specified contract")
+  .option("--contractId <contractId>", "Contract id for the resource tiers")
   .alias("li-restiers")
-  .action(async function () {
+  .action(async function (options) {
     try {
-      await cliHandler.getResourceTiers();
+      await cliHandler.getResourceTiers(options.contractId);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
@@ -161,7 +183,7 @@ program
 
 program
   .command("show-restier <edgeworkerId>")
-  .description("allows customer to view the esource tier associated with the EdgeWorker Id")
+  .description("Allows customer to view the resource tier associated with the EdgeWorker Id")
   .action(async function (edgeworkerId) {
     try {
       await cliHandler.getResourceTierForEwid(edgeworkerId);
@@ -176,11 +198,26 @@ program
 program
   .command("update-id <edgeworker-identifier> <group-identifier> <edgeworker-name>")
   .description("Allows Customer Developer to update an existing EdgeWorker Identifier's Luna ACG or Name attributes.")
-  .option("--resourceTierId <resourceTierId>", "New resource Tier id to associate with Edgeworker")
+  .option("-restier, --resourceTierId <resourceTierId>", "New resource Tier id to associate with Edgeworker")
   .alias("ui")
   .action(async function (ewId, groupId, name, options) {
     try {
       await cliHandler.updateEdgeWorkerInfo(ewId, groupId, name, options.resourceTierId);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+program
+  .command("delete-id <edgeworker-identifier>")
+  .description("Permanently delete an existing EdgeWorker Id.")
+  .option("--noPrompt", "Skip the deletion confirmation prompt")
+  .action(async function (ewId, options) {
+    try {
+      await cliHandler.deleteEdgeWorkerId(ewId, options.noPrompt)
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
@@ -218,6 +255,21 @@ program
 
     try {
       await cliHandler.createNewVersion(ewId, options);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+program
+  .command("delete-version <edgeworker-identifier> <version-identifier>")
+  .description("Permanently delete an existing version of a given EdgeWorker Id.")
+  .option("--noPrompt", "Skip the deletion confirmation prompt")
+  .action(async function (ewId, versionId, options) {
+    try {
+      await cliHandler.deleteVersion(ewId, versionId, options.noPrompt);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
@@ -359,7 +411,7 @@ The default value if not specified is \"/*\". This option is mutually exclusive 
   .option("--url <urlPath>", "The exact path (including filename and extension) of the response page which requires debugging; this value is used as a salt for \
 generating the token, and the URL does NOT appear in the final token itself. The generated token is only valid for the exact URL. This option is mutually \
 exclusive to the --acl option; only use one or the other.")
-  .option("--expiry <expiry>", "The number of minutes during which the token is valid, after which it expires. Max value is 60 minutes; default value is 15 minutes.")
+  .option("--expiry <expiry>", "The number of minutes during which the token is valid, after which it expires. Max value is 720 minutes(12 hours); default value is 15 minutes.")
   .option("--format <format>", "Format in which the output will be printed to console")
   .action(async function (hostName, options) {
     try {
