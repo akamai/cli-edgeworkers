@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "cli-spinner": "0.2.8",
-    "commander": "6.2.0",
+    "commander": "6.2.1",
     "console.table": "0.10.0",
     "crypto-js": "^4.0.0",
     "akamai-edgegrid": "^3.0.12",
