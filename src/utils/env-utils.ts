@@ -1,4 +1,4 @@
-var EdgeGrid = require('akamai-edgegrid');
+var EdgeGrid = require('edgegrid');
 const untildify = require('untildify');
 var path = require('path');
 const fs = require('fs');
