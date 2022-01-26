@@ -22,7 +22,7 @@
     "commander": "6.2.0",
     "console.table": "0.10.0",
     "crypto-js": "^4.0.0",
-    "akamai-edgegrid": "^3.0.12",
+    "edgegrid": "^3.0.8",
     "from-seconds": "^1.0.2",
     "inquirer": "7.0.5",
     "is-valid-domain": "^0.0.19",
