@@ -14,7 +14,7 @@ export function setTimeout(timeout: number) {
 }
 
 /**
- * This is for non-Tarball gets and all POST/PUT actions that return JSON or string bodies 
+ * This is for non-Tarball gets and all POST/PUT actions that return JSON or string bodies
  * for both edge CLI and edge KV CLI. This method authenticates, sends request and returns promise
  */
 export function sendEdgeRequest(pth: string, method: string, body, headers) {
@@ -31,7 +31,7 @@ export function sendEdgeRequest(pth: string, method: string, body, headers) {
     let servicePromise = function () {
         return new Promise<any>(
             (resolve, reject) => {
-            
+
                 edge.auth({
                     path,
                     method,
@@ -42,7 +42,7 @@ export function sendEdgeRequest(pth: string, method: string, body, headers) {
                 edge.send(function (error, response, body) {
                     if (error) {
                         reject(error);
-                    } else if (isOkStatus(response.statusCode)) {
+                    } else if (isOkStatus(response.status)) {
                         var obj: any = {
                             response,
                             body: (body == "" || body == "null" || !!body) ? cliUtils.parseIfJSON(body) : undefined // adding null and empty string use case for edgekv
@@ -51,11 +51,11 @@ export function sendEdgeRequest(pth: string, method: string, body, headers) {
                     } else {
                         try {
                             var errorObj = JSON.parse(body);
-                            errorObj["status"] = response.statusCode;
+                            errorObj["status"] = response.status;
                             errorObj["traceId"] = response.headers["x-trace-id"]; // adding trace id for debugging purpose
                             reject(cliUtils.toJsonPretty(errorObj));
                         } catch (ex) {
-                            console.error(`got error code: ${response.statusCode} calling ${method} ${path}\n${body}`);
+                            console.error(`got error code: ${response.status} calling ${method} ${path}\n${body}`);
                             reject(body);
                         }
                     }
@@ -63,7 +63,7 @@ export function sendEdgeRequest(pth: string, method: string, body, headers) {
 
             });
     }
-       
+
     // race promise to set timeout
     return promiseTimeout(timeoutVal, servicePromise());
 }
