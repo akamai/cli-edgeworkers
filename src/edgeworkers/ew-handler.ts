@@ -4,7 +4,6 @@ import * as cliUtils from '../utils/cli-utils';
 import * as edgeWorkersSvc from './ew-service';
 import * as edgeWorkersClientSvc from './client-manager';
 const readline = require('readline-sync');
-require('console.table');
 
 var CryptoJS = require("crypto-js");
 const groupColumnsToKeep = ["groupId", "groupName", "capabilities"];
@@ -259,7 +258,7 @@ export async function getResourceTiers(contractId?: string) {
       }
     }
   }
-  
+
     let resourceTierList = await getResourceTierList(contractId);
     if (resourceTierList) {
       let msg = `The following Resource Tiers available for the contract id ${contractId}`;
@@ -274,7 +273,7 @@ export async function getResourceTiers(contractId?: string) {
             console.log(limit["limitName"] + ": " + limit["limitValue"] + " " + limit["limitUnit"]);
           });
           console.log();
-        }) 
+        })
       }
     }
 }
@@ -656,7 +655,7 @@ export async function createNewActivation(ewId: string, network: string, version
 
 export async function cloneEdgeworker(ewId: string, groupId: string, ewName: string, resourceTierId: string) {
   let clonedEw = await cliUtils.spinner(edgeWorkersSvc.cloneEdgeworker(ewId, ewName, groupId, resourceTierId), "Cloning Edgeworker ...")
-  
+
   if (clonedEw && !clonedEw.isError) {
     let msg = `Cloned Edgeworker from Edgeworker id ${ewId} to resourceTier id ${resourceTierId}`;
     clonedEw = [clonedEw];
@@ -702,15 +701,15 @@ export async function createAuthToken(hostName: string, options?: { acl?: string
     if (options.expiry) {
       validateExpiry(options.expiry);
     }
-  
+
     if (options.acl && options.url) {
         cliUtils.logAndExit(1, "ERROR: The --acl and --url parameters are mutually exclusive; please use only one parameter. Specifying neither will result in a default value for the --acl parameter being used." );
-    } 
+    }
 
     if (options.network) {
       let network = options.network;
       if (network.toUpperCase() !== cliUtils.staging && network.toUpperCase() !== cliUtils.production) {
-        cliUtils.logAndExit(1, `ERROR: Network parameter must be either staging or production - was: ${network}`);  
+        cliUtils.logAndExit(1, `ERROR: Network parameter must be either staging or production - was: ${network}`);
       }
     }
     let authToken = await cliUtils.spinner(edgeWorkersSvc.getAuthToken(hostName, options.acl, options.url, options.expiry, options.network),"Creating auth token ...");
