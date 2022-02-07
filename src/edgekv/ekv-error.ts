@@ -35,25 +35,6 @@ export function handleError(err) {
             }
         }
     }
-    // additional details is sent by pulsar
-    else if (err.hasOwnProperty("additionalDetail")) {
-        let additionalDetail = err["additionalDetail"];
-        if(additionalDetail["detail"]!= undefined && additionalDetail["detail"]!="NO_MESSAGE" && additionalDetail["detail"] != ""){
-            return  {
-                isError: true,
-                error_reason: additionalDetail["detail"],
-                status: statusCode,
-                traceId: traceIdVal
-            }
-        } else {
-            return {
-                isError: true,
-                error_reason: "",
-                status: statusCode,
-                traceId: traceIdVal
-            }
-        }
-    } 
     else {
         let errDetail = err["detail"] == undefined ? "" : err["detail"];
         return {

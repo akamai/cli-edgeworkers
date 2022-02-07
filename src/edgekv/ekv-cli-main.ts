@@ -34,7 +34,7 @@ program
     httpEdge.setAccountKey(key);
   })
   .on("option:timeout", function (timeout){
-    httpEdge.setTimeout(timeout);
+    envUtils.setTimeout(timeout);
   })
   // this fires only when a command is not listed below with a custom action
   .on('command:*', function (command) {
@@ -193,10 +193,11 @@ const create = program.command('create')
 create
   .command("ns <environment> <namespace>")
   .requiredOption("--retention <retention>", "Retention period of the namespace in days")
+  .option("--groupId <groupId>", "Authentication Group Identifier")
   .description("Creates an EdgeKV namespace")
   .action(async function (environment, namespace, options) {
     try {
-      await kvCliHandler.createNamespace(environment, namespace, options.retention);
+      await kvCliHandler.createNamespace(environment, namespace, options.retention, options.groupId);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
@@ -207,7 +208,7 @@ create
 
 create
   .command("token <tokenName>")
-  .description("Creates an edgekv token")
+  .description("Creates an EdgeKV token")
   .alias("tkn")
   .option('--save_path <save_path>', 'The path of the bundle where the token will be saved')
   .requiredOption("--staging <staging>", "Token can be used in staging environment if allowed")
@@ -227,13 +228,43 @@ create
     cliUtils.logAndExit(0, copywrite);
   });
 
+const revoke = program.command('revoke');
+revoke.command("token <tokenName>")
+.description("Revoke an EdgeKV token")
+.action(async function (tokenName) {
+  try {
+    await kvCliHandler.revokeToken(tokenName);
+  } catch (e) {
+    cliUtils.logAndExit(1, e);
+  }
+})
+.on("--help", function () {
+  cliUtils.logAndExit(0, copywrite);
+});
+
+const modify = program.command('modify');
+modify.command("ns <environment> <namespace>")
+  .requiredOption("--retention <retention>", "Retention period of the namespace in days")
+  .description("Modify an EdgeKV namespace")
+  .action(async function (environment, namespace, options) {
+    try {
+      await kvCliHandler.updateNameSpace(environment, namespace, options);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+
 const download = program.command('download')
   .alias("dnld")
-  .description("Download an edgekv token");
+  .description("Download an EdgeKV token");
 
 download
   .command("token <tokenName>")
-  .description("Download an edgekv token")
+  .description("Download an EdgeKV token")
   .option('--save_path <save_path>', 'The path of the bundle where the token will be saved')
   .option("-o, --overwrite", "EdgeKV token placed inside the bundle will be overwritten")
   .action(async function (tokenName, options) {
