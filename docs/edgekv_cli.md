@@ -152,6 +152,7 @@ Usage: `akamai edgekv create ns <environment> <nameSpace>`
 | -h, --help  | optional | Display information on how to use this EdgeKV command. |
 | --retention | Required | Retention period of the namespace in days. |
 | --groupId | Required | Group identifier. Set it to 0 to allow all groups in your account to access the namespace. If you want to restrict the namespace to a specific group, enter the group id. This value MUST be the same for both the staging and production instances of a namespace. |
+| --geolocation | Required | Specifies the storage location for data when creating a namespace on the production network. This can help optimize performance by storing data where most or all of your users are located. The value defaults to `US` on the `STAGING` and `PRODUCTION` networks. The available locations also include `EU` (Europe) and `JP` (Japan) for the `PRODUCTION` network. Once you create this value, you can't modify it.|
 
 | Argument | Existence | Description |
 | - | - | - |
