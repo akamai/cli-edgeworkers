@@ -28,7 +28,7 @@ export async function listNameSpaces(environment: string, details) {
   }
 }
 
-export async function createNamespace(environment: string, nameSpace: string, retention: number, groupId: number) {
+export async function createNamespace(environment: string, nameSpace: string, retention: number, groupId: number, geoLocation: string) {
 
   if (!groupId) {
     cliUtils.logAndExit(1, `ERROR: The mandatory "groupId" parameter is missing. Please specify a valid "groupId" or set it to 0 if you do not want to restrict the namespace to a specific group.`)
@@ -37,7 +37,7 @@ export async function createNamespace(environment: string, nameSpace: string, re
   ekvhelper.validateNetwork(environment);
   let msg = `Namespace ${nameSpace} has been created successfully on the ${environment} environment`
   let retentionPeriod = ekvhelper.convertDaysToSeconds(retention);
-  let createdNamespace = await cliUtils.spinner(edgekvSvc.createNameSpace(environment, nameSpace, retentionPeriod, groupId), `Creating namespace for environment ${environment}`);
+  let createdNamespace = await cliUtils.spinner(edgekvSvc.createNameSpace(environment, nameSpace, retentionPeriod, groupId,geoLocation), `Creating namespace for environment ${environment}`);
   if (createdNamespace != undefined && !createdNamespace.isError) {
     cliUtils.logWithBorder(msg);
     response.logNamespace(nameSpace, createdNamespace);
