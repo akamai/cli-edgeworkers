@@ -57,12 +57,16 @@ export function deleteItem(network: string, namespace: string, groupId: string, 
   return httpEdge.deleteReq(`${EDGEKV_API_BASE}/networks/${network}/namespaces/${namespace}/groups/${groupId}/items/${itemId}`, cliUtils.getTimeout(DEFAULT_EKV_TIMEOUT)).then(r => r.body).catch(err => error.handleError(err));
 }
 
-export function getItemsFromGroup(network: string, namespace: string, groupId: string) {
-  return httpEdge.getJson(`${EDGEKV_API_BASE}/networks/${network}/namespaces/${namespace}/groups/${groupId}`, cliUtils.getTimeout(DEFAULT_EKV_TIMEOUT)).then(r => r.body).catch(err => error.handleError(err));
+export function getItemsFromGroup(network: string, namespace: string, groupId: string, maxItems: number) {
+  var qs: string = "";
+  if (maxItems !== undefined) {
+    qs += `?maxItems=${maxItems}`;
+  }
+  return httpEdge.getJson(`${EDGEKV_API_BASE}/networks/${network}/namespaces/${namespace}/groups/${groupId}${qs}`, cliUtils.getTimeout(DEFAULT_EKV_TIMEOUT)).then(r => r.body).catch(err => error.handleError(err));
 }
 
 export function createEdgeKVToken(tokenName: string, permissionList, allowOnStg: boolean, allowOnProd: boolean, ewids:string, expiry) {
-  
+
   let body = {
     "name": tokenName, "allowOnProduction": allowOnProd, "allowOnStaging": allowOnStg, "ewids":ewids ,"expiry": expiry, "namespacePermissions": permissionList
   };

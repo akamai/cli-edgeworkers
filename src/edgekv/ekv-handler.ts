@@ -60,7 +60,7 @@ export async function getNameSpace(environment: string, nameSpace: string) {
 }
 
 export async function updateNameSpace(environment: string, nameSpace: string, options: { retention: number, geoLocation?: string }) {
-  
+
   if (nameSpace == "default") {
     cliUtils.logAndExit(1, `ERROR: You cannot modify the retention period for the "default" namespace.`);
   }
@@ -116,7 +116,7 @@ export async function initializeEdgeKv() {
     var errorReason = `${initializedEdgeKv.error_reason}`;
     if (initializedEdgeKv && initializedEdgeKv.status == 403) {
       errorReason = "(You don't have permission to access this resource). Please make sure you have the EdgeKV product added to your contract.";
-    } 
+    }
     response.logError(initializedEdgeKv, `ERROR: EdgeKV initialization failed ${errorReason} [TraceId: ${initializedEdgeKv.traceId}]`);
   }
 }
@@ -149,7 +149,7 @@ export async function getInitializationStatus() {
     var errorReason = `${initializedEdgeKv.error_reason}`;
     if (initializedEdgeKv && initializedEdgeKv.status == 403) {
       errorReason = "(You don't have permission to access this resource). Please make sure you have the EdgeKV product added to your contract.";
-    } 
+    }
     response.logError(initializedEdgeKv, `ERROR: EdgeKV Initialization failed ${errorReason} [TraceId: ${initializedEdgeKv.traceId}]`);
   }
 }
@@ -207,9 +207,9 @@ export async function deleteItemFromEdgeKV(environment: string, nameSpace: strin
   }
 }
 
-export async function listItemsFromGroup(environment: string, nameSpace: string, groupId: string) {
+export async function listItemsFromGroup(environment: string, nameSpace: string, groupId: string, maxItems: number) {
   ekvhelper.validateNetwork(environment);
-  let itemsList = await cliUtils.spinner(edgekvSvc.getItemsFromGroup(environment, nameSpace, groupId), `Listing items from namespace ${nameSpace} and group ${groupId}`);
+  let itemsList = await cliUtils.spinner(edgekvSvc.getItemsFromGroup(environment, nameSpace, groupId, maxItems), `Listing items from namespace ${nameSpace} and group ${groupId}`);
   if (itemsList != undefined && !itemsList.isError) {
 
     let msg: string = `There are no items for group ${groupId}, namespace ${nameSpace} and environment ${environment}`;
@@ -255,7 +255,7 @@ export async function createToken(tokenName: string, options: { save_path?: stri
   let createdToken = await cliUtils.spinner(edgekvSvc.createEdgeKVToken(tokenName, permissionList, envAccess[options.staging], envAccess[options.production], options.ewids, expiry), "Creating edgekv token ...");
 
   if (createdToken != undefined && !createdToken.isError) {
-    processToken(createdToken, savePath, options.overwrite); 
+    processToken(createdToken, savePath, options.overwrite);
   } else {
     response.logError(createdToken, `ERROR: Unable to create edgekv token. ${createdToken.error_reason} [TraceId: ${createdToken.traceId}]`);
   }
@@ -285,7 +285,7 @@ export async function revokeToken(tokenName: string) {
 /**
  * Checks if date is in format yyyy-mm-dd
  * Converts date to iso format to be consumed by API
- * @param expiry 
+ * @param expiry
  */
 function getExpiryDate(expiry: string) {
   let errorMsg = "Expiration time specified is invalid. Please specify in format yyyy-mm-dd.";
