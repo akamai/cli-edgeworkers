@@ -157,7 +157,7 @@ list
 
 list
   .command("items <environment> <namespace> <groupId>")
-  .option("--maxItems <maxItems>", "Maximum number of items to return per request (up to system limit)")
+  .option("--maxItems <maxItems>", "Maximum number of items to return per request")
   .description("List items with in a group")
   .action(async function (environment, namespace, groupId, options) {
     try {
