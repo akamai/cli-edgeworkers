@@ -157,10 +157,11 @@ list
 
 list
   .command("items <environment> <namespace> <groupId>")
+  .option("--maxItems <maxItems>", "Maximum number of items to return per request")
   .description("List items with in a group")
-  .action(async function (environment, namespace, groupId) {
+  .action(async function (environment, namespace, groupId, options) {
     try {
-      await kvCliHandler.listItemsFromGroup(environment, namespace, groupId);
+      await kvCliHandler.listItemsFromGroup(environment, namespace, groupId, options.maxItems);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }

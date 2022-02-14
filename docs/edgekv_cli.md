@@ -297,9 +297,10 @@ List items within a namespace and group
 
 Usage: `akamai edgekv list items <environment> <nameSpace> <groupId>`
 
-| Option | Description |
-| - | - |
-| -h, --help  | Display information on how to use this EdgeKV command |
+| Option | Existence | Description |
+| - | - | - |
+| -h, --help  | Optional | Display information on how to use this EdgeKV command |
+| --maxItems  | Optional | Maximum number of items to return per request, up to the system [limits](https://techdocs.akamai.com/edgekv/docs/limits) |
 
 | Argument | Existence | Description |
 | - | - | - |

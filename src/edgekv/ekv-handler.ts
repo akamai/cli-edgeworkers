@@ -208,9 +208,9 @@ export async function deleteItemFromEdgeKV(environment: string, nameSpace: strin
   }
 }
 
-export async function listItemsFromGroup(environment: string, nameSpace: string, groupId: string) {
+export async function listItemsFromGroup(environment: string, nameSpace: string, groupId: string, maxItems: number) {
   ekvhelper.validateNetwork(environment);
-  let itemsList = await cliUtils.spinner(edgekvSvc.getItemsFromGroup(environment, nameSpace, groupId), `Listing items from namespace ${nameSpace} and group ${groupId}`);
+  let itemsList = await cliUtils.spinner(edgekvSvc.getItemsFromGroup(environment, nameSpace, groupId, maxItems), `Listing items from namespace ${nameSpace} and group ${groupId}`);
   if (itemsList != undefined && !itemsList.isError) {
 
     let msg: string = `There are no items for group ${groupId}, namespace ${nameSpace} and environment ${environment}`;
