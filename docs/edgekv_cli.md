@@ -24,6 +24,8 @@
     * [ List Access Tokens](###list-access-tokens)
     * [ Retrieve Access Token](###retrieve-access-token)
     * [ Revoke access token](###revoke-access-token)
+    * [ List permission groups](###list-permission-groups)
+    * [ Modify permission group](###modify-permission-group)
 * [ Resources](##resources)
 * [ Reporting Issues](##reporting-issues)
 
@@ -112,6 +114,9 @@ Commands:
 | list tokens `[options]`| List of all tokens the user has permission to download. |
 | download token `<tokenName> [options]` | Download an edgekv token. |
 | revoke token `<tokenName>` | Revoke an EdgKV access token. |
+| list auth-groups `[options]`| List permission groups with EdgeKV Access. |
+| modify auth-group `<namespaceId> <groupId>` | Modify the permission group associated with the namespace. |
+
 
 
 Return Codes:
@@ -380,6 +385,34 @@ Usage:
 | Argument | Existence | Description |
 | - | - | - |
 | tokenName | required | token name |
+
+### List Permission Groups
+
+List permission groups with EdgeKV access
+
+Usage:
+`edgekv list auth-groups [options]`
+
+Example:
+`edegkv list auth-groups --groupId gid1,gid2 --include_ew_groups`
+
+| Option | Description |
+| - | - |
+| --groupIds | List EdgeKV access capabilities for the specified permission groups separated by comma |
+| --include_ew_groups | List all permission groups with EdgeKV and/or EdgeWorker access capabilities |
+| -h, --help  | Display information on how to use this EdgeKV command |
+
+### Modify Permission Group
+
+Modify the permission group associated with the namespace
+
+Usage:
+`edgekv modify auth-group <namespaceId> <groupId>`
+
+| Argument | Existence | Description |
+| - | - | - |
+| namespaceId | required | Namespace identifier |
+| groupid | required | Group identifier |
 
 ___
 ## Resources

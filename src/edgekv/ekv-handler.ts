@@ -2,6 +2,7 @@ import * as edgekvSvc from './ekv-service';
 import * as cliUtils from '../utils/cli-utils';
 import * as response from './ekv-response';
 import * as ekvhelper from './ekv-helper';
+import * as edgeWorkersSvc from '../edgeworkers/ew-service';
 
 export async function listNameSpaces(environment: string, details) {
   ekvhelper.validateNetwork(environment);
@@ -60,7 +61,7 @@ export async function getNameSpace(environment: string, nameSpace: string) {
 }
 
 export async function updateNameSpace(environment: string, nameSpace: string, options: { retention: number, geoLocation?: string }) {
-  
+
   if (nameSpace == "default") {
     cliUtils.logAndExit(1, `ERROR: You cannot modify the retention period for the "default" namespace.`);
   }
@@ -116,7 +117,7 @@ export async function initializeEdgeKv() {
     var errorReason = `${initializedEdgeKv.error_reason}`;
     if (initializedEdgeKv && initializedEdgeKv.status == 403) {
       errorReason = "(You don't have permission to access this resource). Please make sure you have the EdgeKV product added to your contract.";
-    } 
+    }
     response.logError(initializedEdgeKv, `ERROR: EdgeKV initialization failed ${errorReason} [TraceId: ${initializedEdgeKv.traceId}]`);
   }
 }
@@ -149,7 +150,7 @@ export async function getInitializationStatus() {
     var errorReason = `${initializedEdgeKv.error_reason}`;
     if (initializedEdgeKv && initializedEdgeKv.status == 403) {
       errorReason = "(You don't have permission to access this resource). Please make sure you have the EdgeKV product added to your contract.";
-    } 
+    }
     response.logError(initializedEdgeKv, `ERROR: EdgeKV Initialization failed ${errorReason} [TraceId: ${initializedEdgeKv.traceId}]`);
   }
 }
@@ -255,7 +256,7 @@ export async function createToken(tokenName: string, options: { save_path?: stri
   let createdToken = await cliUtils.spinner(edgekvSvc.createEdgeKVToken(tokenName, permissionList, envAccess[options.staging], envAccess[options.production], options.ewids, expiry), "Creating edgekv token ...");
 
   if (createdToken != undefined && !createdToken.isError) {
-    processToken(createdToken, savePath, options.overwrite); 
+    processToken(createdToken, savePath, options.overwrite);
   } else {
     response.logError(createdToken, `ERROR: Unable to create edgekv token. ${createdToken.error_reason} [TraceId: ${createdToken.traceId}]`);
   }
@@ -282,10 +283,94 @@ export async function revokeToken(tokenName: string) {
     response.logError(revokedToken, `ERROR: Unable to revoke EdgeKV token. A token with the name my_token does not exist. [TraceId: ${revokedToken.traceId}]`)
   }
 }
+
+export async function modifyAuthGroupPermission(namespaceId: string, groupId: number) {
+  let modifiedAuthGroup = await cliUtils.spinner(edgekvSvc.modifyAuthGroupPermission(namespaceId, groupId), "Modifying Auth group permission...");
+  if (modifiedAuthGroup != undefined && !modifiedAuthGroup.isError) {
+    cliUtils.logWithBorder(`The Permission Group for namespace ${namespaceId} was successfully modified to groupId ${groupId}`);
+  } else {
+    response.logError(modifiedAuthGroup, `ERROR: Unable to modify the permission group associated with the namespace. ${modifiedAuthGroup.error_reason} [TraceId: ${modifiedAuthGroup.traceId}]`)
+  }
+}
+
+/**
+ * Retrieves single group or all groups
+ * If include ew group option is provided makes call to EW and returns the capabilites of EW and EKV
+ * @param options
+ */
+export async function listAuthGroups(options: { groupIds?, include_ew_groups?}) {
+  var groupId = options.groupIds;
+  var ewGroups = new Map<number, String>();
+  var authGroups = null;
+
+  // for single group or mutliple groups specified by user
+  if (groupId) {
+    var splitted = groupId.split(",");
+    if (splitted.length > 0) {
+      var groupObj = { groups: []};
+
+      for (let val of splitted) {
+        let authGroup = await cliUtils.spinner(edgekvSvc.listAuthGroups(val), "Retrieving permission groups...")
+        if (authGroup != undefined && !authGroup.isError) {
+          groupObj["groups"].push(authGroup);
+        } else {
+          response.logError(authGroup, `ERROR: Unable to list the permission groups. ${authGroup.error_reason} [TraceId: ${authGroup.traceId}]`)
+        }
+      }
+      authGroups = groupObj;
+    }
+  } else { // for all groups
+    let retreievedAuthGroups = await cliUtils.spinner(edgekvSvc.listAuthGroups(options.groupIds), "Retrieving permission groups...")
+    if (retreievedAuthGroups != undefined && !retreievedAuthGroups.isError) {
+      authGroups = retreievedAuthGroups;
+    } else {
+      response.logError(authGroups, `ERROR: Unable to list the permission groups. ${retreievedAuthGroups.error_reason} [TraceId: ${retreievedAuthGroups.traceId}]`)
+    }
+  }
+  // check if groupId was empty for messaging
+  if (groupId === undefined || groupId === null) {
+    groupId = "any";
+  }
+  if (options.include_ew_groups) {
+    ewGroups = await getEwGroups(options.groupIds);
+  }
+  cliUtils.logWithBorder(`User has the following permission access for group: ${groupId}`)
+  response.logAuthGroups(authGroups, ewGroups, options.include_ew_groups);
+}
+
+/** Retrieve edgeworker capabilities for single or all group ids
+ * and create a map for easy retrieval
+ * @param groupId
+ * @returns
+ */
+async function getEwGroups(groupId: string) {
+  var groups = null;
+  var ewGrpCapabilitiesMap = new Map<number, String>();
+  if (!groupId) {
+    groups = await edgeWorkersSvc.getAllGroups();
+    // remove outer envelope of JSON data
+    if (groups.hasOwnProperty('groups')) {
+      groups = groups["groups"];
+      groups.forEach(group => {
+        ewGrpCapabilitiesMap.set(group["groupId"], group["capabilities"]);
+      });
+    }
+  }
+  else {
+    let splitted = groupId.split(",");
+    if (splitted.length > 0) {
+      for (let val of splitted) {
+        groups = await edgeWorkersSvc.getGroup(val);
+        ewGrpCapabilitiesMap.set(groups["groupId"], groups["capabilities"]);
+      }
+    }
+  }
+  return ewGrpCapabilitiesMap;
+}
 /**
  * Checks if date is in format yyyy-mm-dd
  * Converts date to iso format to be consumed by API
- * @param expiry 
+ * @param expiry
  */
 function getExpiryDate(expiry: string) {
   let errorMsg = "Expiration time specified is invalid. Please specify in format yyyy-mm-dd.";
