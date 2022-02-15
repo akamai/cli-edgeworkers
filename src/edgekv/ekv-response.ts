@@ -155,10 +155,6 @@ export function getNameSpaceFromToken(decodedToken) {
     })
 }
 
-function getEwCapabilities() {
-
-}
-
 enum permissions {
     r = "READ",
     w = "WRITE",
