@@ -185,6 +185,22 @@ list
     cliUtils.logAndExit(0, copywrite);
   });
 
+list
+  .command("auth-groups")
+  .option("--groupIds <groupIds>", "Lists the EdgeKV access capabilities for the specified permission groups")
+  .option("-incewg, --include_ew_groups", "Returns expired tokens in the response")
+  .description("List all tokens for which the user has permission to download.")
+  .action(async function (options) {
+    try {
+      await kvCliHandler.listAuthGroups(options);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
 const create = program.command('create')
   .description("Creates a namespace or creates a token")
   .on("--help", function () {
@@ -259,6 +275,18 @@ modify.command("ns <environment> <namespace>")
     cliUtils.logAndExit(0, copywrite);
   });
 
+  modify.command("auth-group <namespaceId> <groupId>")
+  .description("Modify the permissions group associated with the namespace")
+  .action(async function (namespaceId, groupId) {
+    try {
+      await kvCliHandler.modifyAuthGroupPermission(namespaceId, groupId);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
 
 const download = program.command('download')
   .alias("dnld")
