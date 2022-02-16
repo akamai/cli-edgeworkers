@@ -195,10 +195,11 @@ create
   .command("ns <environment> <namespace>")
   .requiredOption("--retention <retention>", "Retention period of the namespace in days")
   .option("--groupId <groupId>", "Authentication Group Identifier")
+  .option("--geoLocation <geolocation>","Specifies the persistent storage location for data when creating a namespace on the production network. This can help optimize performance by storing data where most or all of your users are located. The value defaults to `US` on the `STAGING` and `PRODUCTION` networks.")
   .description("Creates an EdgeKV namespace")
   .action(async function (environment, namespace, options) {
     try {
-      await kvCliHandler.createNamespace(environment, namespace, options.retention, options.groupId);
+      await kvCliHandler.createNamespace(environment, namespace, options.retention, options.groupId,options.geoLocation);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
