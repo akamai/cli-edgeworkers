@@ -114,7 +114,7 @@ Commands:
 | list tokens `[options]`| List of all tokens the user has permission to download. |
 | download token `<tokenName> [options]` | Download an edgekv token. |
 | revoke token `<tokenName>` | Revoke an EdgKV access token. |
-| list auth-groups `[options]`| List permission groups with EdgeKV Access. |
+| list auth-groups `[options]`| List the permission groups with EdgeKV Access. |
 | modify auth-group `<namespaceId> <groupId>` | Modify the permission group associated with the namespace. |
 
 
@@ -389,7 +389,7 @@ Usage:
 
 ### List Permission Groups
 
-List permission groups with EdgeKV access
+List the permission groups with EdgeKV access
 
 Usage:
 `edgekv list auth-groups [options]`
@@ -399,8 +399,8 @@ Example:
 
 | Option | Description |
 | - | - |
-| --groupIds | List EdgeKV access capabilities for the specified permission groups separated by comma |
-| --include_ew_groups | List all permission groups with EdgeKV and/or EdgeWorker access capabilities |
+| --groupIds | List the EdgeKV access capabilities for the specified permission groups, separated by a comma |
+| --include_ew_groups | List all permission groups with EdgeKV or EdgeWorkers access capabilities |
 | -h, --help  | Display information on how to use this EdgeKV command |
 
 ### Modify Permission Group
