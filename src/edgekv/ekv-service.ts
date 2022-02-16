@@ -88,3 +88,16 @@ export function getTokenList(incExpired: boolean) {
 export function revokeToken(tokenName: string) {
   return httpEdge.deleteReq(`${EDGEKV_API_BASE}/tokens/${tokenName}`, cliUtils.getTimeout(DEFAULT_EKV_TIMEOUT)).then(r => r.body).catch(err => error.handleError(err));
 }
+
+export function modifyAuthGroupPermission(namespace: string, groupId: number) {
+  let body = { "groupId": groupId };
+  return httpEdge.putJson(`${EDGEKV_API_BASE}/auth/namespaces/${namespace}`, body, cliUtils.getTimeout(DEFAULT_EKV_TIMEOUT)).then(r => r.body).catch(err => error.handleError(err));
+}
+
+export function listAuthGroups(groupId: number) {
+  var group: string = "";
+  if (groupId) {
+    group = `/${groupId}`;
+  }
+  return httpEdge.getJson(`${EDGEKV_API_BASE}/auth/groups${group}`, cliUtils.getTimeout(DEFAULT_EKV_TIMEOUT)).then(r => r.body).catch(err => error.handleError(err));
+}
