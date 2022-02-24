@@ -87,9 +87,10 @@ program
 
   program.command("write <itemType> <environment> <namespace> <groupId> <itemId> <items>")
   .description("Write an item to an EdgeKV Namespace")
-  .action(async function (itemType, environment, namespace, groupId, itemId, items) {
+  .option("--sandboxId <sandboxId>","`sandbox-id` to use for the data operation. You can use the `akamai sandbox list` CLI command to view a list of available sandboxes.")
+  .action(async function (itemType, environment, namespace, groupId, itemId, items, options) {
     try {
-      await kvCliHandler.writeItemToEdgeKV(environment, namespace, groupId, itemId, items, itemType);
+      await kvCliHandler.writeItemToEdgeKV(environment, namespace, groupId, itemId, items, itemType,options.sandboxId);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
@@ -106,9 +107,10 @@ const read = program.command('read')
 read
   .command("item <environment> <namespace> <groupId> <itemId>")
   .description("Read an item from an EdgeKV Namespace")
-  .action(async function (environment, namespace, groupId, itemId) {
+  .option("--sandboxId <sandboxId>","`sandbox-id` to use for the data operation. You can use the `akamai sandbox list` CLI command to view a list of available sandboxes.")
+  .action(async function (environment, namespace, groupId, itemId,options) {
     try {
-      await kvCliHandler.readItemFromEdgeKV(environment, namespace, groupId, itemId);
+      await kvCliHandler.readItemFromEdgeKV(environment, namespace, groupId, itemId,options.sandboxId);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
@@ -124,10 +126,11 @@ const del = program.command('delete')
 del
   .command("item <environment> <namespace> <groupId> <itemId>")
   .description("Delete an item from an EdgeKV Namespace")
-  .action(async function (environment, namespace, groupId, itemId) {
+  .option("--sandboxId <sandboxId>","`sandbox-id` to use for the data operation. You can use the `akamai sandbox list` CLI command to view a list of available sandboxes.")
+  .action(async function (environment, namespace, groupId, itemId,options) {
     try {
-      await kvCliHandler.deleteItemFromEdgeKV(environment, namespace, groupId, itemId);
-    } catch (e) {
+      await kvCliHandler.deleteItemFromEdgeKV(environment, namespace, groupId, itemId,options.sandboxId);
+    } catch (e) { 
       cliUtils.logAndExit(1, e);
     }
   })
@@ -158,10 +161,11 @@ list
 list
   .command("items <environment> <namespace> <groupId>")
   .option("--maxItems <maxItems>", "Maximum number of items to return per request")
+  .option("--sandboxId <sandboxId>","`sandbox-id` to use for the data operation. You can use the `akamai sandbox list` CLI command to view a list of available sandboxes.")
   .description("List items with in a group")
   .action(async function (environment, namespace, groupId, options) {
     try {
-      await kvCliHandler.listItemsFromGroup(environment, namespace, groupId, options.maxItems);
+      await kvCliHandler.listItemsFromGroup(environment, namespace, groupId, options.maxItems, options.sandboxId);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
