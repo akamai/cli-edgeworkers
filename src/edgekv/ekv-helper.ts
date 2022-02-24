@@ -40,10 +40,17 @@ export function convertRetentionPeriod(seconds) {
     return result;
 }
 
-export function validateNetwork(network: string) {
-    if (network.toUpperCase() !== cliUtils.staging && network.toUpperCase() !== cliUtils.production) {
-        cliUtils.logAndExit(1, `ERROR: Environment parameter must be either staging or production - was: ${network}`);
+export function validateNetwork(network: string,sandboxId?: string) {
+    if(sandboxId){
+        if (network.toUpperCase() !== cliUtils.staging) {
+            cliUtils.logAndExit(1, `ERROR: Environment parameter must be only staging - was: ${network}`);
+        }
     }
+    else{
+        if (network.toUpperCase() !== cliUtils.staging && network.toUpperCase() !== cliUtils.production) {
+            cliUtils.logAndExit(1, `ERROR: Environment parameter must be either staging or production - was: ${network}`);
+        }
+    } 
 }
 
 /**

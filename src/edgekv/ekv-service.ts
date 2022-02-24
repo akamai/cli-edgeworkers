@@ -3,6 +3,7 @@ import * as httpEdge from '../cli-httpRequest';
 import * as error from './ekv-error';
 import * as cliUtils from '../utils/cli-utils';
 import * as fs from 'fs';
+import { listItemsFromGroup } from './ekv-handler';
 
 export const EDGEKV_API_BASE = '/edgekv/v1';
 const INIT_EKV_TIMEOUT = 120000;
@@ -38,32 +39,58 @@ export function getInitializedEdgeKV() {
   return httpEdge.getJson(`${EDGEKV_API_BASE}/initialize`, cliUtils.getTimeout(DEFAULT_EKV_TIMEOUT), ekvMetrics.showInitStatus).then(r => r.response).catch(err => error.handleError(err));
 }
 
-export function writeItems(network: string, namespace: string, groupId: string, itemId: string, itemList) {
-  let body = itemList;
-  return httpEdge.putJson(`${EDGEKV_API_BASE}/networks/${network}/namespaces/${namespace}/groups/${groupId}/items/${itemId}`, body, cliUtils.getTimeout(DEFAULT_EKV_TIMEOUT), ekvMetrics.writeItem).then(r => r.body).catch(err => error.handleError(err));
+export function writeItems(network: string, namespace: string, groupId: string, itemId: string, itemList,sandboxid:string) {
+  let body = { "itemList": itemList};
+  let writeItemPath = `${EDGEKV_API_BASE}/networks/${network}/namespaces/${namespace}/groups/${groupId}/items/${itemId}`;
+  if(sandboxid){
+    writeItemPath += `?sandboxId=${sandboxid}`
+  }
+  return httpEdge.putJson(writeItemPath, body, cliUtils.getTimeout(DEFAULT_EKV_TIMEOUT),ekvMetrics.writeItem).then(r => r.body).catch(err => error.handleError(err));
 }
 
-export function writeItemsFromFile(network: string, namespace: string, groupId: string, itemId: string, itemPath: string) {
-  let path = `${EDGEKV_API_BASE}/networks/${network}/namespaces/${namespace}/groups/${groupId}/items/${itemId}`;
-  return httpEdge.sendEdgeRequest(path, 'PUT', fs.readFileSync(itemPath, { encoding: null }).toString('utf8'), {
+export function writeItemsFromFile(network: string, namespace: string, groupId: string, itemId: string, itemPath: string, sandboxid:string) {
+  let writeItemFromJsonpath = `${EDGEKV_API_BASE}/networks/${network}/namespaces/${namespace}/groups/${groupId}/items/${itemId}`; 
+  if(sandboxid){
+    writeItemFromJsonpath += `?sandboxId=${sandboxid}`
+  }
+  return httpEdge.sendEdgeRequest(writeItemFromJsonpath, 'PUT', fs.readFileSync(itemPath, { encoding: null}).toString('utf8'), {
     'Content-Type': 'application/json'
   }, cliUtils.getTimeout(DEFAULT_EKV_TIMEOUT), ekvMetrics.writeItem).then(r => r.body).catch(err => error.handleError(err));
 }
 
-export function readItem(network: string, namespace: string, groupId: string, itemId: string) {
-  return httpEdge.getJson(`${EDGEKV_API_BASE}/networks/${network}/namespaces/${namespace}/groups/${groupId}/items/${itemId}`, cliUtils.getTimeout(DEFAULT_EKV_TIMEOUT), ekvMetrics.readItem).then(r => r.body).catch(err => error.handleError(err));
+export function readItem(network: string, namespace: string, groupId: string, itemId: string,sandboxid:string) {
+  let readItemPath = `${EDGEKV_API_BASE}/networks/${network}/namespaces/${namespace}/groups/${groupId}/items/${itemId}`;
+  if(sandboxid){
+    readItemPath += `?sandboxId=${sandboxid}`;
+  }
+  return httpEdge.getJson(readItemPath, cliUtils.getTimeout(DEFAULT_EKV_TIMEOUT),ekvMetrics.readItem).then(r => r.body).catch(err => error.handleError(err));
 }
 
-export function deleteItem(network: string, namespace: string, groupId: string, itemId: string) {
-  return httpEdge.deleteReq(`${EDGEKV_API_BASE}/networks/${network}/namespaces/${namespace}/groups/${groupId}/items/${itemId}`, cliUtils.getTimeout(DEFAULT_EKV_TIMEOUT), ekvMetrics.deleteItem).then(r => r.body).catch(err => error.handleError(err));
+export function deleteItem(network: string, namespace: string, groupId: string, itemId: string,sandboxid:string) {
+  let deleteItemPath = `${EDGEKV_API_BASE}/networks/${network}/namespaces/${namespace}/groups/${groupId}/items/${itemId}`;
+  if(sandboxid){
+    deleteItemPath += `?sandboxId=${sandboxid}`;
+  }
+  return httpEdge.deleteReq(deleteItemPath, cliUtils.getTimeout(DEFAULT_EKV_TIMEOUT),ekvMetrics.deleteItem).then(r => r.body).catch(err => error.handleError(err));
 }
 
-export function getItemsFromGroup(network: string, namespace: string, groupId: string, maxItems: number) {
+export function getItemsFromGroup(network: string, namespace: string, groupId: string, maxItems: number,sandboxid:string) {
   var qs: string = "";
   if (maxItems !== undefined) {
     qs += `?maxItems=${maxItems}`;
   }
-  return httpEdge.getJson(`${EDGEKV_API_BASE}/networks/${network}/namespaces/${namespace}/groups/${groupId}${qs}`, cliUtils.getTimeout(DEFAULT_EKV_TIMEOUT), ekvMetrics.readItemsFromGroup).then(r => r.body).catch(err => error.handleError(err));
+  let listItemsPath = `${EDGEKV_API_BASE}/networks/${network}/namespaces/${namespace}/groups/${groupId}${qs}`;
+  if(sandboxid){
+    let ls:string = "";
+    if(maxItems){
+      ls += "&";
+    }
+    else{
+      ls += "?";
+    }
+    listItemsPath += `${ls}sandboxId=${sandboxid}`;
+  }
+  return httpEdge.getJson(listItemsPath, cliUtils.getTimeout(DEFAULT_EKV_TIMEOUT),ekvMetrics.readItemsFromGroup).then(r => r.body).catch(err => error.handleError(err));
 }
 
 export function createEdgeKVToken(tokenName: string, permissionList, allowOnStg: boolean, allowOnProd: boolean, ewids:string, expiry) {

@@ -155,19 +155,22 @@ export async function getInitializationStatus() {
   }
 }
 
-export async function writeItemToEdgeKV(environment: string, nameSpace: string, groupId: string, itemId: string, items, itemType: string) {
-  ekvhelper.validateNetwork(environment);
-  let msg = `Item ${itemId} was successfully created into the environment: ${environment}, namespace: ${nameSpace} and groupid: ${groupId}`
+export async function writeItemToEdgeKV(environment: string, nameSpace: string, groupId: string, itemId: string, items, itemType: string,sandboxid:string) {
+  ekvhelper.validateNetwork(environment,sandboxid);
+  let msg = `Item ${itemId} was successfully created into the environment: ${environment}, namespace: ${nameSpace} and groupid: ${groupId}`;
+  if(sandboxid){
+    msg = `Item ${itemId} was successfully created into the environment: ${environment}/sandboxid=${sandboxid}, namespace: ${nameSpace} and groupid: ${groupId}`;
+  }
   let createdItem: any;
   if (itemType == "text") {
     if (cliUtils.isJSON(items)) {
       items = JSON.parse(items);
     }
-    createdItem = await edgekvSvc.writeItems(environment, nameSpace, groupId, itemId, items);
+    createdItem = await edgekvSvc.writeItems(environment, nameSpace, groupId, itemId, items, sandboxid);
   }
   else if (itemType == "jsonfile") {
     ekvhelper.validateInputFile(items);
-    createdItem = await edgekvSvc.writeItemsFromFile(environment, nameSpace, groupId, itemId, items);
+    createdItem = await edgekvSvc.writeItemsFromFile(environment, nameSpace, groupId, itemId, items, sandboxid);
   } else {
     cliUtils.logAndExit(1, "ERROR: Unable to write item to EdgeKV. Use 'text' or 'jsonfile' as item type.")
   }
@@ -179,13 +182,15 @@ export async function writeItemToEdgeKV(environment: string, nameSpace: string, 
   }
 }
 
-export async function readItemFromEdgeKV(environment: string, nameSpace: string, groupId: string, itemId: string) {
+export async function readItemFromEdgeKV(environment: string, nameSpace: string, groupId: string, itemId: string, sandboxid:string) {
+  ekvhelper.validateNetwork(environment,sandboxid);
+  let msg = `Item ${itemId} from group ${groupId}, namespace ${nameSpace} and environment ${environment} retrieved successfully`
+  if(sandboxid){
+    msg = `Item ${itemId} from group ${groupId}, namespace ${nameSpace} and environment ${environment}/sandboxid=${sandboxid} retrieved successfully`
+  }
 
-  ekvhelper.validateNetwork(environment);
-
-  let item = await cliUtils.spinner(edgekvSvc.readItem(environment, nameSpace, groupId, itemId), "Reading items from EdgeKV..");
+  let item = await cliUtils.spinner(edgekvSvc.readItem(environment, nameSpace, groupId, itemId,sandboxid), "Reading items from EdgeKV..");
   if ((item != undefined && !item.isError) || item == null) {
-    let msg = `Item ${itemId} from group ${groupId}, namespace ${nameSpace} and environment ${environment} retrieved successfully.`
     cliUtils.logWithBorder(msg);
     if (typeof item == 'object') {
       console.log(JSON.stringify(item));
@@ -197,25 +202,34 @@ export async function readItemFromEdgeKV(environment: string, nameSpace: string,
   }
 }
 
-export async function deleteItemFromEdgeKV(environment: string, nameSpace: string, groupId: string, itemId: string) {
-  ekvhelper.validateNetwork(environment);
-  let deletedItem = await edgekvSvc.deleteItem(environment, nameSpace, groupId, itemId);
+export async function deleteItemFromEdgeKV(environment: string, nameSpace: string, groupId: string, itemId: string,sandboxid:string) {
+  ekvhelper.validateNetwork(environment,sandboxid);
+  let msg = `Item ${itemId} was successfully marked for deletion from group ${groupId}, namespace ${nameSpace} and environment ${environment}`;
+  let errorMsg = `ERROR: Unable to delete item ${itemId} from group ${groupId}, namespace ${nameSpace} and environment ${environment}`;
+  if(sandboxid){
+    msg += `/sandboxid=${sandboxid}`;
+    errorMsg += `/sandboxid=${sandboxid}`;
+  }
+  let deletedItem = await edgekvSvc.deleteItem(environment, nameSpace, groupId, itemId,sandboxid);
   if (deletedItem != undefined && !deletedItem.isError) {
-    let msg = `Item ${itemId} was successfully marked for deletion from group ${groupId}, namespace ${nameSpace} and environment ${environment}`
     cliUtils.logWithBorder(msg);
   } else {
-    response.logError(deletedItem, `ERROR: Unable to delete item ${itemId} from group ${groupId}, namespace ${nameSpace} and environment ${environment}. ${deletedItem.error_reason} [TraceId: ${deletedItem.traceId}]`);
+    response.logError(deletedItem, `${errorMsg}. ${deletedItem.error_reason} [TraceId: ${deletedItem.traceId}]`);
   }
 }
 
-export async function listItemsFromGroup(environment: string, nameSpace: string, groupId: string, maxItems: number) {
-  ekvhelper.validateNetwork(environment);
-  let itemsList = await cliUtils.spinner(edgekvSvc.getItemsFromGroup(environment, nameSpace, groupId, maxItems), `Listing items from namespace ${nameSpace} and group ${groupId}`);
+export async function listItemsFromGroup(environment: string, nameSpace: string, groupId: string, maxItems: number,sandboxid:string) {
+  ekvhelper.validateNetwork(environment,sandboxid);
+  let msg = `There are no items for group ${groupId}, namespace ${nameSpace} and environment ${environment}`;
+  let successMsg = `items from group ${groupId} were retrieved successfully from ${environment}`;
+  if(sandboxid){
+    msg += `/sandboxid=${sandboxid}`;
+    successMsg += `/sandboxid=${sandboxid}`;
+  }
+  let itemsList = await cliUtils.spinner(edgekvSvc.getItemsFromGroup(environment, nameSpace, groupId, maxItems,sandboxid), `Listing items from namespace ${nameSpace} and group ${groupId}`);
   if (itemsList != undefined && !itemsList.isError) {
-
-    let msg: string = `There are no items for group ${groupId}, namespace ${nameSpace} and environment ${environment}`;
     if (itemsList.length != 0) {
-      msg = `${itemsList.length} items from group ${groupId} were retrieved successfully.`;
+      msg = `${itemsList.length} ${successMsg}`;
     }
     cliUtils.logWithBorder(msg);
     itemsList.forEach(element => {
