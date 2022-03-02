@@ -89,10 +89,10 @@ export async function updateNameSpace(environment: string, nameSpace: string, op
 export async function initializeEdgeKv() {
   let initializedEdgeKv = await cliUtils.spinner(edgekvSvc.initializeEdgeKV(), `Initializing EdgeKV...`);
 
-  if (initializedEdgeKv.body != undefined && !initializedEdgeKv.isError) {
-    let initRespBody = JSON.parse(initializedEdgeKv.body);
+  if (initializedEdgeKv.data != undefined && !initializedEdgeKv.isError) {
+    let initRespBody = initializedEdgeKv.data;
 
-    let status = initializedEdgeKv.statusCode;
+    let status = initializedEdgeKv.status;
     if (initRespBody.hasOwnProperty("accountStatus")) {
       let accountStatus = initRespBody["accountStatus"];
       if (accountStatus == "INITIALIZED") {
@@ -125,9 +125,9 @@ export async function initializeEdgeKv() {
 export async function getInitializationStatus() {
   let initializedEdgeKv = await cliUtils.spinner(edgekvSvc.getInitializedEdgeKV(), "Getting Initialization status...");
 
-  if (initializedEdgeKv.body != undefined && !initializedEdgeKv.isError) {
-    let initRespBody = JSON.parse(initializedEdgeKv.body);
-    let status = initializedEdgeKv.statusCode;
+  if (initializedEdgeKv.data != undefined && !initializedEdgeKv.isError) {
+    let initRespBody = initializedEdgeKv.data;
+    let status = initializedEdgeKv.status;
 
     if (initRespBody.hasOwnProperty("accountStatus")) {
       let accountStatus = initRespBody["accountStatus"];

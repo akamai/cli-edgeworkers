@@ -37,7 +37,7 @@ function fetchTarball(pth: string, method: string, body, headers, downloadPath: 
         if (error) {
           reject(error);
         }
-        else if (httpEdge.isOkStatus(response.statusCode)) {
+        else if (httpEdge.isOkStatus(response.status)) {
           var contentType = response.headers['content-type'];
           if (contentType.indexOf('gzip') > -1) {
             const buffer = Buffer.from(body, 'utf8');
@@ -55,7 +55,7 @@ function fetchTarball(pth: string, method: string, body, headers, downloadPath: 
             reject(cliUtils.toJsonPretty(errorObj));
           }
           catch (ex) {
-            console.error(`got error code: ${response.statusCode} calling ${method} ${path}\n${body}`);
+            console.error(`got error code: ${response.status} calling ${method} ${path}\n${body}`);
             reject(body);
           }
         }
