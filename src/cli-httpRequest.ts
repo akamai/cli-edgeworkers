@@ -50,9 +50,7 @@ export function sendEdgeRequest(pth: string, method: string, body, headers, time
                 });
 
                 edge.send(function (error, response, body) {
-                    if (error) {
-                        reject(error);
-                    } else if (isOkStatus(response.status)) {
+                    if (!error && isOkStatus(response.status)) {
                         var obj: any = {
                             response,
                             body: (body == "" || body == "null" || !!body) ? cliUtils.parseIfJSON(body) : undefined // adding null and empty string use case for edgekv
@@ -60,12 +58,12 @@ export function sendEdgeRequest(pth: string, method: string, body, headers, time
                         resolve(obj);
                     } else {
                         try {
-                            var errorObj = JSON.parse(body);
-                            errorObj["status"] = response.status;
-                            errorObj["traceId"] = response.headers["x-trace-id"]; // adding trace id for debugging purpose
+                            var errorObj = error.response.data;
+                            errorObj["status"] = error.response.status;
+                            errorObj["traceId"] = error.response.headers["x-trace-id"]; // adding trace id for debugging purpose
                             reject(cliUtils.toJsonPretty(errorObj));
                         } catch (ex) {
-                            console.error(`got error code: ${response.status} calling ${method} ${path}\n${body}`);
+                            console.error(`got error code: ${error.response.status} calling ${method} ${path}\n${body}`);
                             reject(body);
                         }
                     }
