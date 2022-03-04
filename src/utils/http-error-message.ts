@@ -17,5 +17,7 @@ export enum ErrorMessage {
     UPDATE_EW_400 = "Cloning an EdgeWorkers id is required in order to edit the Resource Tier id.",
     AUTH_TOKEN_ERROR = "ERROR: Unable to create authentication token.",
     EKV_TIMEOUT_ERROR = "The EdgeKV service was unable to respond in time. Please retry the request later.",
-    EW_TIMEOUT_ERROR = "The EdgeWorkers service was unable to respond in time. Please retry the request later."
+    EW_TIMEOUT_ERROR = "The EdgeWorkers service was unable to respond in time. Please retry the request later.",
+    DOWNLOAD_TARBALL_ERROR = "Error: Failed to download tarball."
+
 }
