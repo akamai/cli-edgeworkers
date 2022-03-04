@@ -568,11 +568,11 @@ export async function downloadTarball(ewId: string, versionId: string, rawDownlo
   var wasDownloaded = await cliUtils.spinner(edgeWorkersSvc.downloadTarball(ewId, versionId, pathToStore), `Downloading code bundle for EdgeWorker Id ${ewId}, version ${versionId}`);
 
   // if tarball found, then figure out where to store it
-  if (!!wasDownloaded) {
+  if (!wasDownloaded.isError) {
     cliUtils.logAndExit(0, `INFO: File saved @ ${pathToStore}`);
   }
   else {
-    cliUtils.logAndExit(1, `ERROR: Code bundle for EdgeWorker Id ${ewId}, version ${versionId} was not able to be saved @ ${pathToStore}`);
+    cliUtils.logAndExit(1, `ERROR: Code bundle for EdgeWorker Id ${ewId}, version ${versionId} was not saved. ${wasDownloaded.error_reason}`);
   }
 }
 
