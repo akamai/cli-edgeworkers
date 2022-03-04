@@ -40,16 +40,16 @@ export function getInitializedEdgeKV() {
 }
 
 export function writeItems(network: string, namespace: string, groupId: string, itemId: string, itemList,sandboxid:string) {
-  let body = { "itemList": itemList};
+  let body = itemList;
   let writeItemPath = `${EDGEKV_API_BASE}/networks/${network}/namespaces/${namespace}/groups/${groupId}/items/${itemId}`;
   if(sandboxid){
     writeItemPath += `?sandboxId=${sandboxid}`
   }
-  return httpEdge.putJson(writeItemPath, body, cliUtils.getTimeout(DEFAULT_EKV_TIMEOUT),ekvMetrics.writeItem).then(r => r.body).catch(err => error.handleError(err));
+  return httpEdge.putJson(writeItemPath, body, cliUtils.getTimeout(DEFAULT_EKV_TIMEOUT), ekvMetrics.writeItem).then(r => r.body).catch(err => error.handleError(err));
 }
 
 export function writeItemsFromFile(network: string, namespace: string, groupId: string, itemId: string, itemPath: string, sandboxid:string) {
-  let writeItemFromJsonpath = `${EDGEKV_API_BASE}/networks/${network}/namespaces/${namespace}/groups/${groupId}/items/${itemId}`; 
+  let writeItemFromJsonpath = `${EDGEKV_API_BASE}/networks/${network}/namespaces/${namespace}/groups/${groupId}/items/${itemId}`;
   if(sandboxid){
     writeItemFromJsonpath += `?sandboxId=${sandboxid}`
   }
@@ -74,22 +74,17 @@ export function deleteItem(network: string, namespace: string, groupId: string, 
   return httpEdge.deleteReq(deleteItemPath, cliUtils.getTimeout(DEFAULT_EKV_TIMEOUT),ekvMetrics.deleteItem).then(r => r.body).catch(err => error.handleError(err));
 }
 
-export function getItemsFromGroup(network: string, namespace: string, groupId: string, maxItems: number,sandboxid:string) {
+export function getItemsFromGroup(network: string, namespace: string, groupId: string, maxItems: number, sandboxid:string) {
   var qs: string = "";
   if (maxItems !== undefined) {
     qs += `?maxItems=${maxItems}`;
   }
-  let listItemsPath = `${EDGEKV_API_BASE}/networks/${network}/namespaces/${namespace}/groups/${groupId}${qs}`;
-  if(sandboxid){
-    let ls:string = "";
-    if(maxItems){
-      ls += "&";
-    }
-    else{
-      ls += "?";
-    }
-    listItemsPath += `${ls}sandboxId=${sandboxid}`;
+  if (sandboxid) {
+    qs += (maxItems == undefined) ? "?" : "&";
+    qs += `sandboxId=${sandboxid}`;
   }
+
+  let listItemsPath = `${EDGEKV_API_BASE}/networks/${network}/namespaces/${namespace}/groups/${groupId}${qs}`;
   return httpEdge.getJson(listItemsPath, cliUtils.getTimeout(DEFAULT_EKV_TIMEOUT),ekvMetrics.readItemsFromGroup).then(r => r.body).catch(err => error.handleError(err));
 }
 
