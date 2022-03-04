@@ -145,7 +145,12 @@ export async function deleteEdgeWorkerId(ewId: string, noPrompt: boolean) {
 
   if (!deletion.isError) {
     let msg = `EdgeWorker ${ewId} was successfully deleted.`
-    cliUtils.logWithBorder(msg);
+    if (edgeWorkersClientSvc.isJSONOutputMode()) {
+      edgeWorkersClientSvc.writeJSONOutput(0, msg, [{}]);
+    }
+    else {
+      cliUtils.logWithBorder(msg);
+    }
   } else {
     cliUtils.logAndExit(1, deletion.error_reason);
   }

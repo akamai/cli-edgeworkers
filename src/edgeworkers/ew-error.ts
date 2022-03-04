@@ -2,14 +2,17 @@ import {ErrorMessage} from '../utils/http-error-message';
 
 export function handleError(err, commandId) {
     try {
-        err = JSON.parse(err);
+        if(typeof err == 'object')
+            err = err.response.data;
+        else{
+            err = JSON.parse(err); 
+        }
     } catch (e) {
         return {
             isError: true,
             error_reason: ""
         }
     }
-
     let status = err.status;
     if (status) {
         switch (status) {
