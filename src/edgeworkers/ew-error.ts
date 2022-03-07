@@ -2,7 +2,7 @@ import {ErrorMessage} from '../utils/http-error-message';
 
 export function handleError(err, commandId) {
     try {
-        err = JSON.parse(err);
+        err = JSON.parse(err); 
     } catch (e) {
         return {
             isError: true,
