@@ -38,8 +38,8 @@ function fetchTarball(pth: string, method: string, body, headers, downloadPath: 
         if (!error && httpEdge.isOkStatus(response.status)) {
           var contentType = response.headers['content-type'];
           if (contentType.indexOf('gzip') > -1) {
-            const buffer = Buffer.from(body, 'utf8');
-            fs.writeFileSync(downloadPath, buffer);
+            const buffer = Buffer.from(response.data);
+            fs.writeFileSync(downloadPath, Buffer.from(response.data));
             resolve({state: true});
           }
           else {
@@ -68,7 +68,7 @@ function postTarball(path: string, edgeworkerTarballPath) {
 }
 
 function getTarball(path: string, downloadPath: string) {
-  return fetchTarball(path, 'GET', '', {}, downloadPath);
+  return fetchTarball(path, 'GET', '', {'Content-Type': 'application/gzip'}, downloadPath);
 }
 
 export function getGroup(groupId: string) {
