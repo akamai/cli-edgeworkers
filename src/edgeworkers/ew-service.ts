@@ -22,6 +22,7 @@ function fetchTarball(pth: string, method: string, body, headers, downloadPath: 
     path += `${qs}accountSwitchKey=${accountKey}`;
   }
   headers[EDGEWORKERS_CLIENT_HEADER] = "CLI";
+  headers['Accept'] = 'application/gzip';
 
   return new Promise<any>(
     (resolve, reject) => {
@@ -38,8 +39,8 @@ function fetchTarball(pth: string, method: string, body, headers, downloadPath: 
         if (!error && httpEdge.isOkStatus(response.status)) {
           var contentType = response.headers['content-type'];
           if (contentType.indexOf('gzip') > -1) {
-            const buffer = Buffer.from(response.data);
-            fs.writeFileSync(downloadPath, Buffer.from(response.data));
+            const buffer = Buffer.from(response.data, 'utf8');
+            fs.writeFileSync(downloadPath, buffer);
             resolve({state: true});
           }
           else {
@@ -68,7 +69,7 @@ function postTarball(path: string, edgeworkerTarballPath) {
 }
 
 function getTarball(path: string, downloadPath: string) {
-  return fetchTarball(path, 'GET', '', {'Content-Type': 'application/gzip'}, downloadPath);
+  return fetchTarball(path, 'GET', '', {}, downloadPath);
 }
 
 export function getGroup(groupId: string) {

@@ -88,10 +88,10 @@ export function getItemsFromGroup(network: string, namespace: string, groupId: s
   return httpEdge.getJson(listItemsPath, cliUtils.getTimeout(DEFAULT_EKV_TIMEOUT),ekvMetrics.readItemsFromGroup).then(r => r.body).catch(err => error.handleError(err));
 }
 
-export function createEdgeKVToken(tokenName: string, permissionList, allowOnStg: boolean, allowOnProd: boolean, ewids:string, expiry) {
+export function createEdgeKVToken(tokenName: string, permissionList, allowOnStg: boolean, allowOnProd: boolean, ewids:string[], expiry) {
 
   let body = {
-    "name": tokenName, "allowOnProduction": allowOnProd, "allowOnStaging": allowOnStg, "ewids":ewids ,"expiry": expiry, "namespacePermissions": permissionList
+    "name": tokenName, "allowOnProduction": allowOnProd, "allowOnStaging": allowOnStg, "restrictToEwids": ewids ,"expiry": expiry, "namespacePermissions": permissionList
   };
   return httpEdge.postJson(`${EDGEKV_API_BASE}/tokens`, body, cliUtils.getTimeout(DEFAULT_EKV_TIMEOUT), ekvMetrics.createToken).then(r => r.body).catch(err => error.handleError(err));
 }

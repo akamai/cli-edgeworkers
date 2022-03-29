@@ -15,7 +15,7 @@ export async function listNameSpaces(environment: string, details) {
         if (details) {
           let retentionPeriod = ekvhelper.convertRetentionPeriod(value["retentionInSeconds"]);
           let groupId = (value["groupId"] == undefined) ? 0 : value["groupId"];
-          nsListResp.push({ "Namespace": value["namespace"], "RetentionPeriod": retentionPeriod, "GeoLocation": value["geoLocation"], "GroupId": groupId });
+          nsListResp.push({ "Namespace": value["namespace"], "RetentionPeriod": retentionPeriod, "GeoLocation": value["geoLocation"], "Access GroupId": groupId });
         }
         else {
           nsListResp.push({ "Namespace": value["namespace"] });
@@ -267,7 +267,7 @@ export async function createToken(tokenName: string, options: { save_path?: stri
     process.exit(1);
   }
 
-  let createdToken = await cliUtils.spinner(edgekvSvc.createEdgeKVToken(tokenName, permissionList, envAccess[options.staging], envAccess[options.production], options.ewids, expiry), "Creating edgekv token ...");
+  let createdToken = await cliUtils.spinner(edgekvSvc.createEdgeKVToken(tokenName, permissionList, envAccess[options.staging], envAccess[options.production], options.ewids.split(","), expiry), "Creating edgekv token ...");
 
   if (createdToken != undefined && !createdToken.isError) {
     processToken(createdToken, savePath, options.overwrite);
