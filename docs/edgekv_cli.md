@@ -75,7 +75,7 @@ Runtime workaround - use this if Docker is already running
 
 ## Overview of Commands
 
-EdgeKV CLI enables you to manage the EdgeKV database by calling the [EdgeKV API](https://github.com/akamai/edgeworkers-examples/tree/master/edgekv/apis) from within the utility.
+EdgeKV CLI enables you to manage the EdgeKV database by calling the [EdgeKV API](https://techdocs.akamai.com/edgekv/reference/api) from within the utility.
 
 Conventions:
 * optional arguments are denoted by []
@@ -362,7 +362,7 @@ Usage: `akamai edgekv list tokens`
 | --include-expired | Retrieves both expired and valid tokens. |
 
 #### Important Notes
-1. Note that --include-expired returns all the tokens that count towards your account's token limit. For more details, See [Akamai EdgeKV getting started guide](https://learn.akamai.com/en-us/webhelp/edgeworkers/edgekv-getting-started-guide/GUID-F14C3474-D4B8-47F4-84CF-A999647000E0.html)
+1. Note that --include-expired returns all the tokens that count towards your account's token limit. For more details, See [Akamai EdgeKV getting started guide](https://techdocs.akamai.com/edgekv/docs/limits)
  
 ### Retrieve Access Token
  
