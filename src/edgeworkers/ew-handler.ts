@@ -4,7 +4,6 @@ import * as cliUtils from '../utils/cli-utils';
 import * as edgeWorkersSvc from './ew-service';
 import * as edgeWorkersClientSvc from './client-manager';
 const readline = require('readline-sync');
-require('console.table');
 
 var CryptoJS = require("crypto-js");
 const groupColumnsToKeep = ["groupId", "groupName", "capabilities"];
@@ -146,7 +145,12 @@ export async function deleteEdgeWorkerId(ewId: string, noPrompt: boolean) {
 
   if (!deletion.isError) {
     let msg = `EdgeWorker ${ewId} was successfully deleted.`
-    cliUtils.logWithBorder(msg);
+    if (edgeWorkersClientSvc.isJSONOutputMode()) {
+      edgeWorkersClientSvc.writeJSONOutput(0, msg, [{}]);
+    }
+    else {
+      cliUtils.logWithBorder(msg);
+    }
   } else {
     cliUtils.logAndExit(1, deletion.error_reason);
   }
@@ -469,7 +473,12 @@ export async function deleteVersion(ewId: string, versionId: string, noPrompt: b
 
   if (!deletion.isError) {
     let msg = `Version ${versionId} of Edgeworker Id ${ewId} was successfully deleted.`
-    cliUtils.logWithBorder(msg);
+    if (edgeWorkersClientSvc.isJSONOutputMode()) {
+      edgeWorkersClientSvc.writeJSONOutput(0, msg, [{}]);
+    }
+    else {
+      cliUtils.logWithBorder(msg);
+    }
   } else {
     cliUtils.logAndExit(1, deletion.error_reason);
   }
@@ -569,11 +578,11 @@ export async function downloadTarball(ewId: string, versionId: string, rawDownlo
   var wasDownloaded = await cliUtils.spinner(edgeWorkersSvc.downloadTarball(ewId, versionId, pathToStore), `Downloading code bundle for EdgeWorker Id ${ewId}, version ${versionId}`);
 
   // if tarball found, then figure out where to store it
-  if (!!wasDownloaded) {
+  if (!wasDownloaded.isError) {
     cliUtils.logAndExit(0, `INFO: File saved @ ${pathToStore}`);
   }
   else {
-    cliUtils.logAndExit(1, `ERROR: Code bundle for EdgeWorker Id ${ewId}, version ${versionId} was not able to be saved @ ${pathToStore}`);
+    cliUtils.logAndExit(1, `ERROR: Code bundle for EdgeWorker Id ${ewId}, version ${versionId} was not saved. (${wasDownloaded.error_reason})`);
   }
 }
 
@@ -656,7 +665,7 @@ export async function createNewActivation(ewId: string, network: string, version
 
 export async function cloneEdgeworker(ewId: string, groupId: string, ewName: string, resourceTierId: string) {
   let clonedEw = await cliUtils.spinner(edgeWorkersSvc.cloneEdgeworker(ewId, ewName, groupId, resourceTierId), "Cloning Edgeworker ...")
-  
+
   if (clonedEw && !clonedEw.isError) {
     let msg = `Cloned Edgeworker from Edgeworker id ${ewId} to resourceTier id ${resourceTierId}`;
     clonedEw = [clonedEw];
@@ -702,15 +711,15 @@ export async function createAuthToken(hostName: string, options?: { acl?: string
     if (options.expiry) {
       validateExpiry(options.expiry);
     }
-  
+
     if (options.acl && options.url) {
         cliUtils.logAndExit(1, "ERROR: The --acl and --url parameters are mutually exclusive; please use only one parameter. Specifying neither will result in a default value for the --acl parameter being used." );
-    } 
+    }
 
     if (options.network) {
       let network = options.network;
       if (network.toUpperCase() !== cliUtils.staging && network.toUpperCase() !== cliUtils.production) {
-        cliUtils.logAndExit(1, `ERROR: Network parameter must be either staging or production - was: ${network}`);  
+        cliUtils.logAndExit(1, `ERROR: Network parameter must be either staging or production - was: ${network}`);
       }
     }
     let authToken = await cliUtils.spinner(edgeWorkersSvc.getAuthToken(hostName, options.acl, options.url, options.expiry, options.network),"Creating auth token ...");

@@ -2,6 +2,7 @@ import * as edgekvSvc from './ekv-service';
 import * as cliUtils from '../utils/cli-utils';
 import * as response from './ekv-response';
 import * as ekvhelper from './ekv-helper';
+import * as edgeWorkersSvc from '../edgeworkers/ew-service';
 
 export async function listNameSpaces(environment: string, details) {
   ekvhelper.validateNetwork(environment);
@@ -14,7 +15,7 @@ export async function listNameSpaces(environment: string, details) {
         if (details) {
           let retentionPeriod = ekvhelper.convertRetentionPeriod(value["retentionInSeconds"]);
           let groupId = (value["groupId"] == undefined) ? 0 : value["groupId"];
-          nsListResp.push({ "Namespace": value["namespace"], "RetentionPeriod": retentionPeriod, "GeoLocation": value["geoLocation"], "GroupId": groupId });
+          nsListResp.push({ "Namespace": value["namespace"], "RetentionPeriod": retentionPeriod, "GeoLocation": value["geoLocation"], "Access GroupId": groupId });
         }
         else {
           nsListResp.push({ "Namespace": value["namespace"] });
@@ -28,7 +29,7 @@ export async function listNameSpaces(environment: string, details) {
   }
 }
 
-export async function createNamespace(environment: string, nameSpace: string, retention: number, groupId: number) {
+export async function createNamespace(environment: string, nameSpace: string, retention: number, groupId: number, geoLocation: string) {
 
   if (!groupId) {
     cliUtils.logAndExit(1, `ERROR: The mandatory "groupId" parameter is missing. Please specify a valid "groupId" or set it to 0 if you do not want to restrict the namespace to a specific group.`)
@@ -37,7 +38,7 @@ export async function createNamespace(environment: string, nameSpace: string, re
   ekvhelper.validateNetwork(environment);
   let msg = `Namespace ${nameSpace} has been created successfully on the ${environment} environment`
   let retentionPeriod = ekvhelper.convertDaysToSeconds(retention);
-  let createdNamespace = await cliUtils.spinner(edgekvSvc.createNameSpace(environment, nameSpace, retentionPeriod, groupId), `Creating namespace for environment ${environment}`);
+  let createdNamespace = await cliUtils.spinner(edgekvSvc.createNameSpace(environment, nameSpace, retentionPeriod, groupId,geoLocation), `Creating namespace for environment ${environment}`);
   if (createdNamespace != undefined && !createdNamespace.isError) {
     cliUtils.logWithBorder(msg);
     response.logNamespace(nameSpace, createdNamespace);
@@ -60,7 +61,7 @@ export async function getNameSpace(environment: string, nameSpace: string) {
 }
 
 export async function updateNameSpace(environment: string, nameSpace: string, options: { retention: number, geoLocation?: string }) {
-  
+
   if (nameSpace == "default") {
     cliUtils.logAndExit(1, `ERROR: You cannot modify the retention period for the "default" namespace.`);
   }
@@ -88,10 +89,10 @@ export async function updateNameSpace(environment: string, nameSpace: string, op
 export async function initializeEdgeKv() {
   let initializedEdgeKv = await cliUtils.spinner(edgekvSvc.initializeEdgeKV(), `Initializing EdgeKV...`);
 
-  if (initializedEdgeKv.body != undefined && !initializedEdgeKv.isError) {
-    let initRespBody = JSON.parse(initializedEdgeKv.body);
+  if (initializedEdgeKv.data != undefined && !initializedEdgeKv.isError) {
+    let initRespBody = initializedEdgeKv.data;
 
-    let status = initializedEdgeKv.statusCode;
+    let status = initializedEdgeKv.status;
     if (initRespBody.hasOwnProperty("accountStatus")) {
       let accountStatus = initRespBody["accountStatus"];
       if (accountStatus == "INITIALIZED") {
@@ -116,7 +117,7 @@ export async function initializeEdgeKv() {
     var errorReason = `${initializedEdgeKv.error_reason}`;
     if (initializedEdgeKv && initializedEdgeKv.status == 403) {
       errorReason = "(You don't have permission to access this resource). Please make sure you have the EdgeKV product added to your contract.";
-    } 
+    }
     response.logError(initializedEdgeKv, `ERROR: EdgeKV initialization failed ${errorReason} [TraceId: ${initializedEdgeKv.traceId}]`);
   }
 }
@@ -124,9 +125,9 @@ export async function initializeEdgeKv() {
 export async function getInitializationStatus() {
   let initializedEdgeKv = await cliUtils.spinner(edgekvSvc.getInitializedEdgeKV(), "Getting Initialization status...");
 
-  if (initializedEdgeKv.body != undefined && !initializedEdgeKv.isError) {
-    let initRespBody = JSON.parse(initializedEdgeKv.body);
-    let status = initializedEdgeKv.statusCode;
+  if (initializedEdgeKv.data != undefined && !initializedEdgeKv.isError) {
+    let initRespBody = initializedEdgeKv.data;
+    let status = initializedEdgeKv.status;
 
     if (initRespBody.hasOwnProperty("accountStatus")) {
       let accountStatus = initRespBody["accountStatus"];
@@ -149,24 +150,27 @@ export async function getInitializationStatus() {
     var errorReason = `${initializedEdgeKv.error_reason}`;
     if (initializedEdgeKv && initializedEdgeKv.status == 403) {
       errorReason = "(You don't have permission to access this resource). Please make sure you have the EdgeKV product added to your contract.";
-    } 
+    }
     response.logError(initializedEdgeKv, `ERROR: EdgeKV Initialization failed ${errorReason} [TraceId: ${initializedEdgeKv.traceId}]`);
   }
 }
 
-export async function writeItemToEdgeKV(environment: string, nameSpace: string, groupId: string, itemId: string, items, itemType: string) {
-  ekvhelper.validateNetwork(environment);
-  let msg = `Item ${itemId} was successfully created into the environment: ${environment}, namespace: ${nameSpace} and groupid: ${groupId}`
+export async function writeItemToEdgeKV(environment: string, nameSpace: string, groupId: string, itemId: string, items, itemType: string,sandboxid:string) {
+  ekvhelper.validateNetwork(environment,sandboxid);
+  let msg = `Item ${itemId} was successfully created into the environment: ${environment}, namespace: ${nameSpace} and groupid: ${groupId}`;
+  if(sandboxid){
+    msg = `Item ${itemId} was successfully created into the environment: ${environment}/sandboxid=${sandboxid}, namespace: ${nameSpace} and groupid: ${groupId}`;
+  }
   let createdItem: any;
   if (itemType == "text") {
     if (cliUtils.isJSON(items)) {
       items = JSON.parse(items);
     }
-    createdItem = await edgekvSvc.writeItems(environment, nameSpace, groupId, itemId, items);
+    createdItem = await edgekvSvc.writeItems(environment, nameSpace, groupId, itemId, items, sandboxid);
   }
   else if (itemType == "jsonfile") {
     ekvhelper.validateInputFile(items);
-    createdItem = await edgekvSvc.writeItemsFromFile(environment, nameSpace, groupId, itemId, items);
+    createdItem = await edgekvSvc.writeItemsFromFile(environment, nameSpace, groupId, itemId, items, sandboxid);
   } else {
     cliUtils.logAndExit(1, "ERROR: Unable to write item to EdgeKV. Use 'text' or 'jsonfile' as item type.")
   }
@@ -178,13 +182,15 @@ export async function writeItemToEdgeKV(environment: string, nameSpace: string, 
   }
 }
 
-export async function readItemFromEdgeKV(environment: string, nameSpace: string, groupId: string, itemId: string) {
+export async function readItemFromEdgeKV(environment: string, nameSpace: string, groupId: string, itemId: string, sandboxid:string) {
+  ekvhelper.validateNetwork(environment,sandboxid);
+  let msg = `Item ${itemId} from group ${groupId}, namespace ${nameSpace} and environment ${environment} retrieved successfully`
+  if(sandboxid){
+    msg = `Item ${itemId} from group ${groupId}, namespace ${nameSpace} and environment ${environment}/sandboxid=${sandboxid} retrieved successfully`
+  }
 
-  ekvhelper.validateNetwork(environment);
-
-  let item = await cliUtils.spinner(edgekvSvc.readItem(environment, nameSpace, groupId, itemId), "Reading items from EdgeKV..");
+  let item = await cliUtils.spinner(edgekvSvc.readItem(environment, nameSpace, groupId, itemId,sandboxid), "Reading items from EdgeKV..");
   if ((item != undefined && !item.isError) || item == null) {
-    let msg = `Item ${itemId} from group ${groupId}, namespace ${nameSpace} and environment ${environment} retrieved successfully.`
     cliUtils.logWithBorder(msg);
     if (typeof item == 'object') {
       console.log(JSON.stringify(item));
@@ -196,25 +202,34 @@ export async function readItemFromEdgeKV(environment: string, nameSpace: string,
   }
 }
 
-export async function deleteItemFromEdgeKV(environment: string, nameSpace: string, groupId: string, itemId: string) {
-  ekvhelper.validateNetwork(environment);
-  let deletedItem = await edgekvSvc.deleteItem(environment, nameSpace, groupId, itemId);
+export async function deleteItemFromEdgeKV(environment: string, nameSpace: string, groupId: string, itemId: string,sandboxid:string) {
+  ekvhelper.validateNetwork(environment,sandboxid);
+  let msg = `Item ${itemId} was successfully marked for deletion from group ${groupId}, namespace ${nameSpace} and environment ${environment}`;
+  let errorMsg = `ERROR: Unable to delete item ${itemId} from group ${groupId}, namespace ${nameSpace} and environment ${environment}`;
+  if(sandboxid){
+    msg += `/sandboxid=${sandboxid}`;
+    errorMsg += `/sandboxid=${sandboxid}`;
+  }
+  let deletedItem = await edgekvSvc.deleteItem(environment, nameSpace, groupId, itemId,sandboxid);
   if (deletedItem != undefined && !deletedItem.isError) {
-    let msg = `Item ${itemId} was successfully marked for deletion from group ${groupId}, namespace ${nameSpace} and environment ${environment}`
     cliUtils.logWithBorder(msg);
   } else {
-    response.logError(deletedItem, `ERROR: Unable to delete item ${itemId} from group ${groupId}, namespace ${nameSpace} and environment ${environment}. ${deletedItem.error_reason} [TraceId: ${deletedItem.traceId}]`);
+    response.logError(deletedItem, `${errorMsg}. ${deletedItem.error_reason} [TraceId: ${deletedItem.traceId}]`);
   }
 }
 
-export async function listItemsFromGroup(environment: string, nameSpace: string, groupId: string) {
-  ekvhelper.validateNetwork(environment);
-  let itemsList = await cliUtils.spinner(edgekvSvc.getItemsFromGroup(environment, nameSpace, groupId), `Listing items from namespace ${nameSpace} and group ${groupId}`);
+export async function listItemsFromGroup(environment: string, nameSpace: string, groupId: string, maxItems: number,sandboxid:string) {
+  ekvhelper.validateNetwork(environment,sandboxid);
+  let msg = `There are no items for group ${groupId}, namespace ${nameSpace} and environment ${environment}`;
+  let successMsg = `items from group ${groupId} were retrieved successfully from ${environment}`;
+  if(sandboxid){
+    msg += `/sandboxid=${sandboxid}`;
+    successMsg += `/sandboxid=${sandboxid}`;
+  }
+  let itemsList = await cliUtils.spinner(edgekvSvc.getItemsFromGroup(environment, nameSpace, groupId, maxItems,sandboxid), `Listing items from namespace ${nameSpace} and group ${groupId}`);
   if (itemsList != undefined && !itemsList.isError) {
-
-    let msg: string = `There are no items for group ${groupId}, namespace ${nameSpace} and environment ${environment}`;
     if (itemsList.length != 0) {
-      msg = `${itemsList.length} items from group ${groupId} were retrieved successfully.`;
+      msg = `${itemsList.length} ${successMsg}`;
     }
     cliUtils.logWithBorder(msg);
     itemsList.forEach(element => {
@@ -252,10 +267,10 @@ export async function createToken(tokenName: string, options: { save_path?: stri
     process.exit(1);
   }
 
-  let createdToken = await cliUtils.spinner(edgekvSvc.createEdgeKVToken(tokenName, permissionList, envAccess[options.staging], envAccess[options.production], options.ewids, expiry), "Creating edgekv token ...");
+  let createdToken = await cliUtils.spinner(edgekvSvc.createEdgeKVToken(tokenName, permissionList, envAccess[options.staging], envAccess[options.production], options.ewids.split(","), expiry), "Creating edgekv token ...");
 
   if (createdToken != undefined && !createdToken.isError) {
-    processToken(createdToken, savePath, options.overwrite); 
+    processToken(createdToken, savePath, options.overwrite);
   } else {
     response.logError(createdToken, `ERROR: Unable to create edgekv token. ${createdToken.error_reason} [TraceId: ${createdToken.traceId}]`);
   }
@@ -282,10 +297,94 @@ export async function revokeToken(tokenName: string) {
     response.logError(revokedToken, `ERROR: Unable to revoke EdgeKV token. A token with the name my_token does not exist. [TraceId: ${revokedToken.traceId}]`)
   }
 }
+
+export async function modifyAuthGroupPermission(namespaceId: string, groupId: number) {
+  let modifiedAuthGroup = await cliUtils.spinner(edgekvSvc.modifyAuthGroupPermission(namespaceId, groupId), "Modifying Auth group permission...");
+  if (modifiedAuthGroup != undefined && !modifiedAuthGroup.isError) {
+    cliUtils.logWithBorder(`The Permission Group for namespace ${namespaceId} was successfully modified to groupId ${groupId}`);
+  } else {
+    response.logError(modifiedAuthGroup, `ERROR: Unable to modify the permission group associated with the namespace. ${modifiedAuthGroup.error_reason} [TraceId: ${modifiedAuthGroup.traceId}]`)
+  }
+}
+
+/**
+ * Retrieves single group or all groups
+ * If include ew group option is provided makes call to EW and returns the capabilites of EW and EKV
+ * @param options
+ */
+export async function listAuthGroups(options: { groupIds?, include_ew_groups?}) {
+  var groupId = options.groupIds;
+  var ewGroups = new Map<number, String>();
+  var authGroups = null;
+
+  // for single group or mutliple groups specified by user
+  if (groupId) {
+    var splitted = groupId.split(",");
+    if (splitted.length > 0) {
+      var groupObj = { groups: []};
+
+      for (let val of splitted) {
+        let authGroup = await cliUtils.spinner(edgekvSvc.listAuthGroups(val), "Retrieving permission groups...")
+        if (authGroup != undefined && !authGroup.isError) {
+          groupObj["groups"].push(authGroup);
+        } else {
+          response.logError(authGroup, `ERROR: Unable to list the permission groups. ${authGroup.error_reason} [TraceId: ${authGroup.traceId}]`)
+        }
+      }
+      authGroups = groupObj;
+    }
+  } else { // for all groups
+    let retreievedAuthGroups = await cliUtils.spinner(edgekvSvc.listAuthGroups(options.groupIds), "Retrieving permission groups...")
+    if (retreievedAuthGroups != undefined && !retreievedAuthGroups.isError) {
+      authGroups = retreievedAuthGroups;
+    } else {
+      response.logError(authGroups, `ERROR: Unable to list the permission groups. ${retreievedAuthGroups.error_reason} [TraceId: ${retreievedAuthGroups.traceId}]`)
+    }
+  }
+  // check if groupId was empty for messaging
+  if (groupId === undefined || groupId === null) {
+    groupId = "any";
+  }
+  if (options.include_ew_groups) {
+    ewGroups = await getEwGroups(options.groupIds);
+  }
+  cliUtils.logWithBorder(`User has the following permission access for group: ${groupId}`)
+  response.logAuthGroups(authGroups, ewGroups, options.include_ew_groups);
+}
+
+/** Retrieve edgeworker capabilities for single or all group ids
+ * and create a map for easy retrieval
+ * @param groupId
+ * @returns
+ */
+async function getEwGroups(groupId: string) {
+  var groups = null;
+  var ewGrpCapabilitiesMap = new Map<number, String>();
+  if (!groupId) {
+    groups = await edgeWorkersSvc.getAllGroups();
+    // remove outer envelope of JSON data
+    if (groups.hasOwnProperty('groups')) {
+      groups = groups["groups"];
+      groups.forEach(group => {
+        ewGrpCapabilitiesMap.set(group["groupId"], group["capabilities"]);
+      });
+    }
+  }
+  else {
+    let splitted = groupId.split(",");
+    if (splitted.length > 0) {
+      for (let val of splitted) {
+        groups = await edgeWorkersSvc.getGroup(val);
+        ewGrpCapabilitiesMap.set(groups["groupId"], groups["capabilities"]);
+      }
+    }
+  }
+  return ewGrpCapabilitiesMap;
+}
 /**
  * Checks if date is in format yyyy-mm-dd
  * Converts date to iso format to be consumed by API
- * @param expiry 
+ * @param expiry
  */
 function getExpiryDate(expiry: string) {
   let errorMsg = "Expiration time specified is invalid. Please specify in format yyyy-mm-dd.";

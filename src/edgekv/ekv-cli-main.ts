@@ -87,9 +87,10 @@ program
 
   program.command("write <itemType> <environment> <namespace> <groupId> <itemId> <items>")
   .description("Write an item to an EdgeKV Namespace")
-  .action(async function (itemType, environment, namespace, groupId, itemId, items) {
+  .option("--sandboxId <sandboxId>","`sandbox-id` to use for the data operation. You can use the `akamai sandbox list` CLI command to view a list of available sandboxes.")
+  .action(async function (itemType, environment, namespace, groupId, itemId, items, options) {
     try {
-      await kvCliHandler.writeItemToEdgeKV(environment, namespace, groupId, itemId, items, itemType);
+      await kvCliHandler.writeItemToEdgeKV(environment, namespace, groupId, itemId, items, itemType,options.sandboxId);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
@@ -106,9 +107,10 @@ const read = program.command('read')
 read
   .command("item <environment> <namespace> <groupId> <itemId>")
   .description("Read an item from an EdgeKV Namespace")
-  .action(async function (environment, namespace, groupId, itemId) {
+  .option("--sandboxId <sandboxId>","`sandbox-id` to use for the data operation. You can use the `akamai sandbox list` CLI command to view a list of available sandboxes.")
+  .action(async function (environment, namespace, groupId, itemId,options) {
     try {
-      await kvCliHandler.readItemFromEdgeKV(environment, namespace, groupId, itemId);
+      await kvCliHandler.readItemFromEdgeKV(environment, namespace, groupId, itemId,options.sandboxId);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
@@ -124,10 +126,11 @@ const del = program.command('delete')
 del
   .command("item <environment> <namespace> <groupId> <itemId>")
   .description("Delete an item from an EdgeKV Namespace")
-  .action(async function (environment, namespace, groupId, itemId) {
+  .option("--sandboxId <sandboxId>","`sandbox-id` to use for the data operation. You can use the `akamai sandbox list` CLI command to view a list of available sandboxes.")
+  .action(async function (environment, namespace, groupId, itemId,options) {
     try {
-      await kvCliHandler.deleteItemFromEdgeKV(environment, namespace, groupId, itemId);
-    } catch (e) {
+      await kvCliHandler.deleteItemFromEdgeKV(environment, namespace, groupId, itemId,options.sandboxId);
+    } catch (e) { 
       cliUtils.logAndExit(1, e);
     }
   })
@@ -157,10 +160,12 @@ list
 
 list
   .command("items <environment> <namespace> <groupId>")
+  .option("--maxItems <maxItems>", "Maximum number of items to return per request")
+  .option("--sandboxId <sandboxId>","`sandbox-id` to use for the data operation. You can use the `akamai sandbox list` CLI command to view a list of available sandboxes.")
   .description("List items with in a group")
-  .action(async function (environment, namespace, groupId) {
+  .action(async function (environment, namespace, groupId, options) {
     try {
-      await kvCliHandler.listItemsFromGroup(environment, namespace, groupId);
+      await kvCliHandler.listItemsFromGroup(environment, namespace, groupId, options.maxItems, options.sandboxId);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
@@ -184,6 +189,22 @@ list
     cliUtils.logAndExit(0, copywrite);
   });
 
+list
+  .command("auth-groups")
+  .option("--groupIds <groupIds>", "Lists the EdgeKV access capabilities for the specified permission groups")
+  .option("-incewg, --include_ew_groups", "Returns expired tokens in the response")
+  .description("List all tokens for which the user has permission to download.")
+  .action(async function (options) {
+    try {
+      await kvCliHandler.listAuthGroups(options);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
 const create = program.command('create')
   .description("Creates a namespace or creates a token")
   .on("--help", function () {
@@ -194,10 +215,11 @@ create
   .command("ns <environment> <namespace>")
   .requiredOption("--retention <retention>", "Retention period of the namespace in days")
   .option("--groupId <groupId>", "Authentication Group Identifier")
+  .option("--geoLocation <geolocation>","Specifies the persistent storage location for data when creating a namespace on the production network. This can help optimize performance by storing data where most or all of your users are located. The value defaults to `US` on the `STAGING` and `PRODUCTION` networks.")
   .description("Creates an EdgeKV namespace")
   .action(async function (environment, namespace, options) {
     try {
-      await kvCliHandler.createNamespace(environment, namespace, options.retention, options.groupId);
+      await kvCliHandler.createNamespace(environment, namespace, options.retention, options.groupId,options.geoLocation);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
@@ -257,6 +279,18 @@ modify.command("ns <environment> <namespace>")
     cliUtils.logAndExit(0, copywrite);
   });
 
+  modify.command("auth-group <namespaceId> <groupId>")
+  .description("Modify the permissions group associated with the namespace")
+  .action(async function (namespaceId, groupId) {
+    try {
+      await kvCliHandler.modifyAuthGroupPermission(namespaceId, groupId);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
 
 const download = program.command('download')
   .alias("dnld")
@@ -276,7 +310,7 @@ download
   })
   .on("--help", function () {
     cliUtils.logAndExit(0, copywrite);
-  }); 
+  });
 
 const show = program.command('show')
   .description("Check the initialization status of the EdgeKV or Retrieve an EdgeKV namespace. Use show -h to see available options")

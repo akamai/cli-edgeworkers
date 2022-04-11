@@ -3,6 +3,7 @@ import * as cliUtils from '../utils/cli-utils';
 import * as httpEdge from '../cli-httpRequest';
 import * as error from './ew-error';
 import * as fs from 'fs';
+var zlib = require('zlib')
 
 export const EDGEWORKERS_API_BASE = '/edgeworkers/v1';
 export const EDGEWORKERS_CLIENT_HEADER = 'X-EW-CLIENT';
@@ -21,6 +22,7 @@ function fetchTarball(pth: string, method: string, body, headers, downloadPath: 
     path += `${qs}accountSwitchKey=${accountKey}`;
   }
   headers[EDGEWORKERS_CLIENT_HEADER] = "CLI";
+  headers['Accept'] = 'application/gzip';
 
   return new Promise<any>(
     (resolve, reject) => {
@@ -34,13 +36,10 @@ function fetchTarball(pth: string, method: string, body, headers, downloadPath: 
       });
 
       edge.send(function (error, response, body) {
-        if (error) {
-          reject(error);
-        }
-        else if (httpEdge.isOkStatus(response.statusCode)) {
+        if (!error && httpEdge.isOkStatus(response.status)) {
           var contentType = response.headers['content-type'];
           if (contentType.indexOf('gzip') > -1) {
-            const buffer = Buffer.from(body, 'utf8');
+            const buffer = Buffer.from(response.data, 'utf8');
             fs.writeFileSync(downloadPath, buffer);
             resolve({state: true});
           }
@@ -51,11 +50,11 @@ function fetchTarball(pth: string, method: string, body, headers, downloadPath: 
         }
         else {
           try {
-            var errorObj = JSON.parse(body);
-            reject(cliUtils.toJsonPretty(errorObj));
+            var errorObj = Buffer.from(error.response.data, 'utf8');
+            reject(errorObj.toString());
           }
           catch (ex) {
-            console.error(`got error code: ${response.statusCode} calling ${method} ${path}\n${body}`);
+            console.error(`got error code: ${error.response.status} calling ${method} ${path}\n${body}`);
             reject(body);
           }
         }
@@ -147,7 +146,7 @@ export function uploadTarball(ewId: string, tarballPath: string) {
 }
 
 export function downloadTarball(ewId: string, versionId: string, downloadPath: string) {
-  return getTarball(`${EDGEWORKERS_API_BASE}/ids/${ewId}/versions/${versionId}/content`, downloadPath).then(r => r.state);
+  return getTarball(`${EDGEWORKERS_API_BASE}/ids/${ewId}/versions/${versionId}/content`, downloadPath).then(r => r.state).catch(err => error.handleError(err,"DOWNLOAD_TARBALL"));
 }
 
 export function deleteVersion(ewId: string, versionId: string) {
