@@ -425,8 +425,8 @@ ___
 
 For more information on EdgeKV, refer to the following resources:
 
-* [EdgeKV User Guide](https://learn.akamai.com/en-us/webhelp/edgeworkers/edgekv-getting-started-guide/GUID-FA85D8AF-F277-4FD0-B789-17312DBD3DDE.html)
-* [EdgeKV API Reference](https://github.com/akamai/edgeworkers-examples/tree/master/edgekv/apis)
+* [EdgeKV User Guide](https://techdocs.akamai.com/edgekv/docs)
+* [EdgeKV API Reference](https://techdocs.akamai.com/edgekv/reference/api)
 
 ## Reporting Issues
 
