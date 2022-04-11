@@ -18,6 +18,6 @@ export enum ErrorMessage {
     AUTH_TOKEN_ERROR = "ERROR: Unable to create authentication token.",
     EKV_TIMEOUT_ERROR = "The EdgeKV service was unable to respond in time. Please retry the request later.",
     EW_TIMEOUT_ERROR = "The EdgeWorkers service was unable to respond in time. Please retry the request later.",
-    DOWNLOAD_TARBALL_ERROR = "Error: Failed to download tarball."
+    DOWNLOAD_TARBALL_ERROR = "Failed to download tarball."
 
 }

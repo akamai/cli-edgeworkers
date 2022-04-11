@@ -582,7 +582,7 @@ export async function downloadTarball(ewId: string, versionId: string, rawDownlo
     cliUtils.logAndExit(0, `INFO: File saved @ ${pathToStore}`);
   }
   else {
-    cliUtils.logAndExit(1, `ERROR: Code bundle for EdgeWorker Id ${ewId}, version ${versionId} was not saved. ${wasDownloaded.error_reason}`);
+    cliUtils.logAndExit(1, `ERROR: Code bundle for EdgeWorker Id ${ewId}, version ${versionId} was not saved. (${wasDownloaded.error_reason})`);
   }
 }
 

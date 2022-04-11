@@ -50,8 +50,8 @@ function fetchTarball(pth: string, method: string, body, headers, downloadPath: 
         }
         else {
           try {
-            var errorObj = error.response.data;
-            reject(cliUtils.toJsonPretty(errorObj));
+            var errorObj = Buffer.from(error.response.data, 'utf8');
+            reject(errorObj.toString());
           }
           catch (ex) {
             console.error(`got error code: ${error.response.status} calling ${method} ${path}\n${body}`);
