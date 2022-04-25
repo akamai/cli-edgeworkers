@@ -115,6 +115,7 @@ Commands:
 | download token `<tokenName> [options]` | Download an edgekv token. |
 | revoke token `<tokenName>` | Revoke an EdgKV access token. |
 | list auth-groups `[options]`| List the permission groups with EdgeKV Access. |
+| list groups `<environment> <nameSpace>` | List the groups for a given namespace in an Akamai environment. |
 | modify auth-group `<namespaceId> <groupId>` | Modify the permission group associated with the namespace. |
 
 
@@ -391,6 +392,25 @@ Usage:
 | Argument | Existence | Description |
 | - | - | - |
 | tokenName | required | token name |
+
+### List Groups in Namespace
+
+List the groups for a given namespace in an Akamai environment.
+
+Usage:
+`akamai edgekv list  groups <environment> <namespace>`
+
+Example:
+`akamai edgekv list  groups  production default `
+
+| Option | Description |
+| - | - |
+| -h, --help  | Display information on how to use this EdgeKV command. |
+
+| Argument | Existence | Description |
+| - | - | - |
+| environment | required | The Akamai environment from which to retrieve a list of groups, either “staging” or “production”. |
+| namespace | required | Namespace identifier |
 
 ### List Permission Groups
 
