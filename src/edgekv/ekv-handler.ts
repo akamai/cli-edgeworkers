@@ -28,6 +28,18 @@ export async function listNameSpaces(environment: string, details) {
     response.logError(nameSpaceList, `ERROR: Error while retrieving namespaces. ${nameSpaceList.error_reason} [TraceId: ${nameSpaceList.traceId}]`);
   }
 }
+export async function listGroups(environment: string, namespace:string) {
+  ekvhelper.validateNetwork(environment);
+  let groupsList = await cliUtils.spinner(edgekvSvc.getGroupsList(environment, namespace), `Fetching groups list...`);
+  if (groupsList != undefined && !groupsList.isError) {
+    cliUtils.logWithBorder(`The ${environment} namespace "${namespace}" contains ${groupsList.length} groups.`);
+    groupsList.forEach(element => {
+      console.log(element);
+    });
+  } else {
+    response.logError(groupsList, `ERROR: Error while retrieving groups. ${groupsList.error_reason} [TraceId: ${groupsList.traceId}]`);
+  }
+}
 
 export async function createNamespace(environment: string, nameSpace: string, retention: number, groupId: number, geoLocation: string) {
 

@@ -14,7 +14,8 @@ export const ekvMetrics = {
   readTokenList: "List/tokens",
   deleteToken: "Delete/token",
   listAuthGroup: "List/authgroup",
-  modifyAuthGroup: "Modify/authgroup"
+  modifyAuthGroup: "Modify/authgroup",
+  listGroups: "List/groups"
 } as const;
 
 
