@@ -17,6 +17,10 @@ export function getNameSpaceList(network: string, details: boolean) {
   return httpEdge.getJson(`${EDGEKV_API_BASE}/networks/${network}/namespaces${qs}`, cliUtils.getTimeout(DEFAULT_EKV_TIMEOUT), ekvMetrics.listNameSpaces).then(r => r.body).catch(err => error.handleError(err));
 }
 
+export function getGroupsList(network: string, namespace: string) {
+  return httpEdge.getJson(`${EDGEKV_API_BASE}/networks/${network}/namespaces/${namespace}/groups`, cliUtils.getTimeout(DEFAULT_EKV_TIMEOUT), ekvMetrics.listGroups).then(r => r.body).catch(err => error.handleError(err));
+}
+
 export function createNameSpace(network: string, namespace: string, retention, groupId, geoLocation) {
   var body = { "namespace": namespace, "retentionInSeconds": retention, "groupId": groupId,"geoLocation": geoLocation};
   return httpEdge.postJson(`${EDGEKV_API_BASE}/networks/${network}/namespaces`, body, cliUtils.getTimeout(DEFAULT_EKV_TIMEOUT), ekvMetrics.createNamespace).then(r => r.body).catch(err => error.handleError(err));
