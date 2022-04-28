@@ -141,7 +141,7 @@ del
 
 const list = program.command('list')
   .alias("l")
-  .description("List all the namespaces or list all items with in a group. Use list -h to see available options");
+  .description("List all the namespaces or the data groups for a given namespace in an Akamai environment. Use list -h to see available options");
 
 list
   .command("ns <environment>")
@@ -157,6 +157,20 @@ list
   .on("--help", function () {
     cliUtils.logAndExit(0, copywrite);
   });
+
+list
+  .command("groups <environment> <namespace>")
+  .description("List the data groups for a given namespace in an Akamai environment.")
+  .action(async function (environment,namespace, options) {
+    try {
+      await kvCliHandler.listGroups(environment, namespace);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+});
 
 list
   .command("items <environment> <namespace> <groupId>")
