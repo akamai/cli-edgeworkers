@@ -306,7 +306,7 @@ export async function revokeToken(tokenName: string) {
   if (revokedToken != undefined && !revokedToken.isError) {
     cliUtils.logWithBorder(`${tokenName} was successfully revoked and removed from the EdgeKV access token list.`);
   } else {
-    response.logError(revokedToken, `ERROR: Unable to revoke EdgeKV token. A token with the name my_token does not exist. [TraceId: ${revokedToken.traceId}]`)
+    response.logError(revokedToken, `ERROR: Unable to revoke EdgeKV token. ${revokedToken.error_reason} [TraceId: ${revokedToken.traceId}]`)
   }
 }
 
