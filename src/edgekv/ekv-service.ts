@@ -74,11 +74,13 @@ export function updateNameSpace(
   network: string,
   namespace: string,
   retention,
+  groupId,
   geoLocation
 ) {
   var body = {
     namespace: namespace,
     retentionInSeconds: retention,
+    groupId: groupId,
     geoLocation: geoLocation,
   };
   return httpEdge
