@@ -262,9 +262,11 @@ describe('ekv-services tests', () => {
   describe('testing updateNameSpace', () => {
     const retention = 1000;
     const geoLocation = 'mockLocation';
+    const groupId = 0;
     const mockReqBody = {
       namespace: mockNamespace,
       retentionInSeconds: retention,
+      groupId: groupId,
       geoLocation: geoLocation,
     };
     const mockResBody = { message: 'success' };
@@ -290,6 +292,7 @@ describe('ekv-services tests', () => {
         mockNetwork,
         mockNamespace,
         retention,
+        groupId,
         geoLocation
       );
 
@@ -310,6 +313,7 @@ describe('ekv-services tests', () => {
         mockNetwork,
         mockNamespace,
         retention,
+        0,
         geoLocation
       );
 
