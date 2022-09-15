@@ -313,7 +313,7 @@ describe('ekv-services tests', () => {
         mockNetwork,
         mockNamespace,
         retention,
-        0,
+        groupId,
         geoLocation
       );
 
