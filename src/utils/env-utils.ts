@@ -1,4 +1,4 @@
-var EdgeGrid = require('edgegrid');
+var EdgeGrid = require('akamai-edgegrid');
 const untildify = require('untildify');
 var path = require('path');
 const fs = require('fs');
@@ -10,23 +10,24 @@ export var timeoutVal: number = 0;
 const edgeRcParams = {
   section: process.env.AKAMAI_EDGERC_SECTION || 'default',
   path: process.env.AKAMAI_EDGERC || path.resolve(os.homedir(), '.edgerc'),
-  debug: false
+  debug: false,
 };
 
 export function getEdgeGrid() {
-
   if (!fs.existsSync(untildify(edgeRcParams.path))) {
-    cliUtils.logAndExit(1,`ERROR: Could not find .edgerc to authenticate Akamai API calls. Expected at: ${edgeRcParams.path}`);
+    cliUtils.logAndExit(
+      1,
+      `ERROR: Could not find .edgerc to authenticate Akamai API calls. Expected at: ${edgeRcParams.path}`
+    );
   }
 
   try {
     return new EdgeGrid({
       path: untildify(edgeRcParams.path),
       section: edgeRcParams.section,
-      debug: edgeRcParams.debug
+      debug: edgeRcParams.debug,
     });
-  }
-  catch(e) {
+  } catch (e) {
     cliUtils.logAndExit(1, `ERROR: ${e.message}`);
   }
 }
@@ -48,15 +49,13 @@ export function isDebugMode() {
 }
 
 export function getNodeVersion() {
-  return parseInt(process.versions["node"].split('.')[0]);
+  return parseInt(process.versions['node'].split('.')[0]);
 }
 
 export function setTimeout(timeout: number) {
-  timeoutVal = timeout*1000;
+  timeoutVal = timeout * 1000;
 }
 
 export function getTimeout() {
   return timeoutVal;
 }
-
-

@@ -24,6 +24,8 @@
     * [ List Access Tokens](###list-access-tokens)
     * [ Retrieve Access Token](###retrieve-access-token)
     * [ Revoke access token](###revoke-access-token)
+    * [ List permission groups](###list-permission-groups)
+    * [ Modify permission group](###modify-permission-group)
 * [ Resources](##resources)
 * [ Reporting Issues](##reporting-issues)
 
@@ -40,7 +42,7 @@ To use this tool you need:
     * If you do not have the CLI and are using [Homebrew](https://brew.sh/) on a Mac, run this command: `brew install akamai`
     * You may also [download](https://github.com/akamai/cli) OS-specific CLI binaries or a Docker image
 * Valid EdgeGrid credentials configured via Akamai Control Center (see [Get Started with APIs](https://developer.akamai.com/api/getting-started))
-* Node version 7 or higher
+* Node version 14 or higher
 
 ## Install or Update the EdgeWorkers and EdgeKV CLI
 
@@ -73,7 +75,7 @@ Runtime workaround - use this if Docker is already running
 
 ## Overview of Commands
 
-EdgeKV CLI enables you to manage the EdgeKV database by calling the [EdgeKV API](https://github.com/akamai/edgeworkers-examples/tree/master/edgekv/apis) from within the utility.
+EdgeKV CLI enables you to manage the EdgeKV database by calling the [EdgeKV API](https://techdocs.akamai.com/edgekv/reference/api) from within the utility.
 
 Conventions:
 * optional arguments are denoted by []
@@ -88,7 +90,7 @@ Options:
 | - | - |
 | -V, --version | Display the version number for the EdgeKV CLI program |
 | --debug | Show debug information. |
-| --edgerc `<path>` | Use credentials in edgerc file for command. (Default file location is ~/.edgerc). Refer to [Get Started with APIs](https://developer.akamai.com/api/getting-started#addcred) for more information. |
+| --edgerc `<path>` | Use credentials in edgerc file for command. (Default file location is ~/.edgerc). Refer to [Get Started with APIs](https://techdocs.akamai.com/developer/docs/set-up-authentication-credentials) for more information. |
 | --section `<name>` | Use this section in `edgerc` file. (Default section is _[default]_)|
 | --timeout `<timeout>` | You can specify a timeout value for a command in seconds to override the 1 minute default. For example, if you add "--timeout 10" to a command, it will timeout if the server takes more than 10 second to respond. |
 | -h, --help | Display information on how to use this EdgeKV command. | 
@@ -112,6 +114,10 @@ Commands:
 | list tokens `[options]`| List of all tokens the user has permission to download. |
 | download token `<tokenName> [options]` | Download an edgekv token. |
 | revoke token `<tokenName>` | Revoke an EdgKV access token. |
+| list auth-groups `[options]`| List the permission groups with EdgeKV Access. |
+| list groups `<environment> <nameSpace>` | List the data groups for a given namespace in an Akamai environment.|
+| modify auth-group `<namespaceId> <groupId>` | Modify the permission group associated with the namespace. |
+
 
 
 Return Codes:
@@ -152,6 +158,7 @@ Usage: `akamai edgekv create ns <environment> <nameSpace>`
 | -h, --help  | optional | Display information on how to use this EdgeKV command. |
 | --retention | Required | Retention period of the namespace in days. |
 | --groupId | Required | Group identifier. Set it to 0 to allow all groups in your account to access the namespace. If you want to restrict the namespace to a specific group, enter the group id. This value MUST be the same for both the staging and production instances of a namespace. |
+| --geolocation | optional | Specifies the persistent storage location for data when creating a namespace on the production network. This can help optimize performance by storing data where most or all of your users are located. The value defaults to `US` on the `STAGING` and `PRODUCTION` networks. For more information refer to the [EdgeKV Documenation](https://techdocs.akamai.com/edgekv/docs/edgekv-data-model#namespace).|
 
 | Argument | Existence | Description |
 | - | - | - |
@@ -219,6 +226,7 @@ Usage: `akamai edgekv write <itemType> <environment> <namespace> <groupId> <item
 | Option | Description |
 | - | - |
 | -h, --help  | Display information on how to use this EdgeKV command |
+| --sandboxId| optional |`sandbox-id` to use for the data operation. You can use the `akamai sandbox list` CLI command to view a list of available sandboxes.|
 
 | Argument | Existence | Description |
 | - | - | - |
@@ -246,6 +254,7 @@ Usage: `akamai edgekv read item <environment> <nameSpace> <groupId> <itemId>`
 | Option | Description |
 | - | - |
 | -h, --help  | Display information on how to use this EdgeKV command. |
+| --sandboxId| optional |`sandbox-id` to use for the data operation. You can use the `akamai sandbox list` CLI command to view a list of available sandboxes.|
 
 | Argument | Existence | Description |
 | - | - | - |
@@ -271,6 +280,7 @@ Usage: `akamai edgekv delete item <environment> <nameSpace> <groupId> <itemId>`
 | Option | Description |
 | - | - |
 | -h, --help  | Display information on how to use this EdgeKV command. |
+| --sandboxId| optional |`sandbox-id` to use for the data operation. You can use the `akamai sandbox list` CLI command to view a list of available sandboxes.|
 
 | Argument | Existence | Description |
 | - | - | - |
@@ -287,14 +297,16 @@ Usage: `akamai edgekv delete item <environment> <nameSpace> <groupId> <itemId>`
 5. It usually takes 10 seconds or less before a deleted item is no longer readable. This is normal behavior for EdgeKV, an eventually consistent database.
 
 ### List items
-
 List items within a namespace and group
 
 Usage: `akamai edgekv list items <environment> <nameSpace> <groupId>`
 
-| Option | Description |
-| - | - |
-| -h, --help  | Display information on how to use this EdgeKV command |
+| Option | Existence | Description |
+| - | - | - |
+| -h, --help  | Optional | Display information on how to use this EdgeKV command |
+| --maxItems  | Optional | Maximum number of items to return per request, up to the system [limits](https://techdocs.akamai.com/edgekv/docs/limits) |
+| --sandboxId| optional |`sandbox-id` to use for the data operation. You can use the `akamai sandbox list` CLI command to view a list of available sandboxes.|
+
 
 | Argument | Existence | Description |
 | - | - | - |
@@ -351,7 +363,7 @@ Usage: `akamai edgekv list tokens`
 | --include-expired | Retrieves both expired and valid tokens. |
 
 #### Important Notes
-1. Note that --include-expired returns all the tokens that count towards your account's token limit. For more details, See [Akamai EdgeKV getting started guide](https://learn.akamai.com/en-us/webhelp/edgeworkers/edgekv-getting-started-guide/GUID-F14C3474-D4B8-47F4-84CF-A999647000E0.html)
+1. Note that --include-expired returns all the tokens that count towards your account's token limit. For more details, See [Akamai EdgeKV getting started guide](https://techdocs.akamai.com/edgekv/docs/limits)
  
 ### Retrieve Access Token
  
@@ -381,13 +393,63 @@ Usage:
 | - | - | - |
 | tokenName | required | token name |
 
+### List Groups in Namespace
+
+List the data groups for a given namespace in an Akamai environment.
+Usage:
+`akamai edgekv list groups <environment> <namespace>`
+
+Example:
+`akamai edgekv list groups production default `
+
+| Option | Description |
+| - | - |
+| -h, --help  | Display information on how to use this EdgeKV command. |
+
+| Argument | Existence | Description |
+| - | - | - |
+| environment | required | The Akamai environment from which to retrieve a list of groups, either “staging” or “production”. |
+| namespace | required | Namespace identifier |
+
+#### Important Notes
+1. Note that this operation returns up to 10,000 groups. If the namespace contains more than 10,000 groups, the operation returns a random set of 10,000 groups.
+
+
+### List Permission Groups
+
+List the permission groups with EdgeKV access
+
+Usage:
+`edgekv list auth-groups [options]`
+
+Example:
+`edegkv list auth-groups --groupId gid1,gid2 --include_ew_groups`
+
+| Option | Description |
+| - | - |
+| --groupIds | List the EdgeKV access capabilities for the specified permission groups, separated by a comma |
+| --include_ew_groups | List all permission groups with EdgeKV or EdgeWorkers access capabilities |
+| -h, --help  | Display information on how to use this EdgeKV command |
+
+### Modify Permission Group
+
+Modify the permission group associated with the namespace
+
+Usage:
+`edgekv modify auth-group <namespaceId> <groupId>`
+
+| Argument | Existence | Description |
+| - | - | - |
+| namespaceId | required | Namespace identifier |
+| groupid | required | Group identifier |
+
 ___
 ## Resources
 
 For more information on EdgeKV, refer to the following resources:
 
-* [EdgeKV User Guide](https://learn.akamai.com/en-us/webhelp/edgeworkers/edgekv-getting-started-guide/GUID-FA85D8AF-F277-4FD0-B789-17312DBD3DDE.html)
-* [EdgeKV API Reference](https://github.com/akamai/edgeworkers-examples/tree/master/edgekv/apis)
+* [EdgeKV User Guide](https://techdocs.akamai.com/edgekv/docs)
+* [EdgeKV API Reference](https://techdocs.akamai.com/edgekv/reference/api)
 
 ## Reporting Issues
 
