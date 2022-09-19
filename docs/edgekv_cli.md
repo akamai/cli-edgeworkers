@@ -170,6 +170,7 @@ Usage: `akamai edgekv create ns <environment> <nameSpace>`
 2. The namespace identifier can be between 1 and 32 characters in length.
 3. You cannot use the word "default" as the namespace identifier. The “default” namespace is already created during initialization.
 4. Specifying "0" retention means indefinite retention.
+5. A non-zero retention cannot be less than 1 day or more than 3650 days.
 
 ### List NameSpace
 
@@ -216,6 +217,7 @@ Usage: `akamai edgekv modify ns <environment> <nameSpace>`
 1. The namespace identifier can only include alphanumeric (0-9, a-z, A-Z), underscore (_), and (-) dash characters.
 2. The namespace identifier can be between 1 and 32 characters in length.
 3. You cannot modify the retention period for the "default" namespace.
+4. A non-zero retention cannot be less than 1 day or more than 3650 days.
 
 ### Create or Update item
 
