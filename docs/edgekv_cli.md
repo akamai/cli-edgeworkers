@@ -182,6 +182,9 @@ Usage: `akamai edgekv list ns <environment>`
 | - | - |
 | -h, --help  | Display information on how to use this EdgeKV command. |
 | -d, --details | Displays details of the namespace. |
+| --order-by | Choose column to order by when displaying detailed namespace list. |
+| --asc, --ascending | Sort using acscending order (default). |
+| --desc, --descending | Sort using descending order. |
 
 | Argument | Existence | Description |
 | - | - | - |

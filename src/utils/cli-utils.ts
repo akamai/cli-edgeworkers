@@ -220,3 +220,30 @@ function bytesToSize(bytes: number, decimals: number = 2, kilobyte: number = 102
 
   return `${Number(res).toString()} ${MEMORY_UNITS[i]}`;
 }
+
+export enum sortDirections {
+  ASC = 'ASC',
+  DESC = 'DESC'
+}
+
+export function sortObjectArray (objArray: Array<object>, key: string, sortDirection: sortDirections) {
+  objArray.sort( (a, b) => {
+      let valA, valB;
+      
+      if (typeof a[key] === 'string' && typeof b[key] === 'string'){
+          valA = a[key].toUpperCase();
+          valB = b[key].toUpperCase();
+      } else {
+          valA = a[key];
+          valB = b[key];
+      }
+      
+      if (valA < valB) {
+          return sortDirection === sortDirections.DESC ? 1 : -1;
+      } else if (valA > valB) {
+          return sortDirection === sortDirections.DESC ? -1 : 1;
+      } else {
+          return 0;
+      }
+    });
+}

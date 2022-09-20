@@ -201,10 +201,61 @@ list
     '-d, --details',
     'Setting this option will provide the namespace details'
   )
+  .option(
+    '--order-by <columnName>',
+    'Specify the column to order the list of namespaces by'
+  )
+  .option(
+    '--asc, --ascending',
+    'Set the sort direction to ascending order'
+  )
+  .option(
+    '--desc, --descending',
+    'Set the sort direction to descending order'
+  )
   .description('List all the namespaces')
   .action(async function (environment, options) {
+    let sortDirection: cliUtils.sortDirections, orderBy: string;
+
+    if (options.ascending && options.descending) {
+      cliUtils.logAndExit(1, 'ERROR: Cannot set both ascending and descending sort together.');
+    } else if (options.descending) {
+      sortDirection = cliUtils.sortDirections.DESC;
+    } else {
+      sortDirection = cliUtils.sortDirections.ASC;
+    }
+
+    // map sort column to object properties
+    if (options.orderBy) {
+      if (!options.details){
+        cliUtils.logAndExit(1, 'ERROR: Cannot use order-by without using detailed list.');
+      }
+      switch(options.orderBy.toLowerCase()){
+        case 'namespaceid':
+        case 'namespace':
+          orderBy = 'namespace';
+          break;
+        case 'retentionperiod':
+        case 'retention':
+          orderBy = 'retentionInSeconds';
+          break;
+        case 'geolocation':
+          orderBy = 'geoLocation';
+          break;
+        case 'accessgroupid':
+        case 'groupid':
+          orderBy = 'groupId';
+          break;
+        default:
+          cliUtils.logAndExit(1, `ERROR: Column ${options.orderBy} is not a valid column name.`);
+          break;
+      }
+    } else {
+      orderBy = 'namespace';
+    }
+
     try {
-      await kvCliHandler.listNameSpaces(environment, options.details);
+      await kvCliHandler.listNameSpaces(environment, options.details, sortDirection, orderBy);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
