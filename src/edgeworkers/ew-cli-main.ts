@@ -2,7 +2,7 @@
 import * as envUtils from '../utils/env-utils';
 import * as cliUtils from '../utils/cli-utils';
 import * as cliHandler from './ew-handler';
-import * as httpEdge from '../cli-httpRequest'
+import * as httpEdge from '../cli-httpRequest';
 import * as edgeWorkersClientSvc from './client-manager';
 import * as pkginfo from '../../package.json';
 var program = require('commander');
@@ -424,17 +424,65 @@ exclusive to the --acl option; only use one or the other.")
     cliUtils.logAndExit(0, copywrite);
   });
 
+  const get = program
+  .command('get')
+  .alias('l')
+  .description(
+    'Get an edgeworkers report or get available report types.'
+  );
+
+get
+  .command('reports')
+  .description('Get all available reports')
+  .action(async function () {
+    try {
+      await cliHandler.getAvailableReports();
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on('--help', function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+get
+  .command('report [reportId]')
+  .description('Get an EdgeWorker report')
+  .requiredOption('-s, --startDate <startDate>', 'ISO 8601 timestamp indicating the start time of the EdgeWorker report. (REQUIRED)')
+  .option('-e, --endDate <endDate>', 'ISO 8601 timestamp indicating the end time of the EdgeWorker report. If not specified, the end time defaults to the current time.')
+  .requiredOption('--ewid, --edgeworker-identifier <ewids>', 'Comma-separated string to filter by EdgeWorker IDs. Can specify IDs (eg: 42) or more specific versions (eg: 42-1.0). (REQUIRED)')
+  .option('--status, <status>', 'Comma-separated string to filter by EdgeWorker status. Values: success, genericError, unknownEdgeWorkerId, unimplementedEventHandler, runtimeError, executionError, timeoutError, resourceLimitHit, cpuTimeoutError, wallTimeoutError, initCpuTimeoutError, initWallTimeoutError.')
+  .option('--ev, --eventHandlers <status>', 'Comma-separated string to filter EdgeWorkers by the event that triggers them. Values: onClientRequest, onOriginRequest, onOriginResponse, onClientResponse, responseProvider.')
+  .action(async function (reportId: number, options) {
+    if (!reportId){
+      cliUtils.logAndExit(1, 'ERROR: Please speicify a reportId. Available reportIds can be obtained by running "akamai edgeworkers get reports".');
+    }
+    const {startDate, endDate, edgeworkerIdentifier, status, eventHandlers} = options;
+
+    const statusArray = status ? status.split(',') : [];
+    const eventHandlersArray = eventHandlers ? eventHandlers.split(',') : [];
+
+    try {
+      await cliHandler.getReport(reportId, startDate, endDate, edgeworkerIdentifier, statusArray, eventHandlersArray);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on('--help', function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
 
 program.parse(process.argv);
 
 if (envUtils.getNodeVersion() < 7) {
-  cliUtils.logAndExit(1, "ERROR: The Akamai EdgeWorkers CLI requires Node 7.0.0 or newer.");
+  cliUtils.logAndExit(1, 'ERROR: The Akamai EdgeWorkers CLI requires Node 7.0.0 or newer.');
 }
 
 if (program.args.length === 0) {
   program.outputHelp(function (text) {
     console.log(text);
     console.log(copywrite);
-    cliUtils.logAndExit(1, "ERROR: No commands were provided.");
+    cliUtils.logAndExit(1, 'ERROR: No commands were provided.');
   });
 }
