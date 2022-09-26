@@ -446,24 +446,23 @@ get
   });
 
 get
-  .command('report [reportId]')
+  .command('report [reportId] [edgeworker-identifier]')
   .description('Get an EdgeWorker report')
-  .requiredOption('-s, --startDate <startDate>', 'ISO 8601 timestamp indicating the start time of the EdgeWorker report. (REQUIRED)')
+  .requiredOption('-s, --startDate <startDate>', 'ISO 8601 timestamp indicating the start time of the EdgeWorker report (REQUIRED).')
   .option('-e, --endDate <endDate>', 'ISO 8601 timestamp indicating the end time of the EdgeWorker report. If not specified, the end time defaults to the current time.')
-  .requiredOption('--ewid, --edgeworker-identifier <ewids>', 'Comma-separated string to filter by EdgeWorker IDs. Can specify IDs (eg: 42) or more specific versions (eg: 42-1.0). (REQUIRED)')
   .option('--status, <status>', 'Comma-separated string to filter by EdgeWorker status. Values: success, genericError, unknownEdgeWorkerId, unimplementedEventHandler, runtimeError, executionError, timeoutError, resourceLimitHit, cpuTimeoutError, wallTimeoutError, initCpuTimeoutError, initWallTimeoutError.')
-  .option('--ev, --eventHandlers <status>', 'Comma-separated string to filter EdgeWorkers by the event that triggers them. Values: onClientRequest, onOriginRequest, onOriginResponse, onClientResponse, responseProvider.')
-  .action(async function (reportId: number, options) {
+  .option('--ev, --eventHandlers <eventHandlers>', 'Comma-separated string to filter EdgeWorkers by the event that triggers them. Values: onClientRequest, onOriginRequest, onOriginResponse, onClientResponse, responseProvider.')
+  .action(async function (reportId: number, edgeworkerId: string, options) {
     if (!reportId){
       cliUtils.logAndExit(1, 'ERROR: Please speicify a reportId. Available reportIds can be obtained by running "akamai edgeworkers get reports".');
     }
-    const {startDate, endDate, edgeworkerIdentifier, status, eventHandlers} = options;
+    const {startDate, endDate, status, eventHandlers} = options;
 
     const statusArray = status ? status.split(',') : [];
     const eventHandlersArray = eventHandlers ? eventHandlers.split(',') : [];
 
     try {
-      await cliHandler.getReport(reportId, startDate, endDate, edgeworkerIdentifier, statusArray, eventHandlersArray);
+      await cliHandler.getReport(reportId, startDate, endDate, edgeworkerId, statusArray, eventHandlersArray);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }

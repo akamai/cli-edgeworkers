@@ -77,6 +77,8 @@ Commands:
 | list-properties \| lp `<edgeworker-identifier> [options]` | List of properties associated with a given EdgeWorker Id. |
 | list-restiers \| li-restiers `[options]` | List Resource Tiers that can be used to create or clone EdgeWorker Id. |
 | show-restier \| show-restier `<edgeworker-identifier>` | Customers can get Resource Tier details for a specific EdgeWorker Id. |
+| get reports | Get a list of all available edgeworker reports. |
+| get report `<reportId> <edgeworker-identifier> [options]` | Get an edgeworker report for a specific edgeworker. |
 
 ### List Permission Groups with EdgeWorkers Access
 Customer Developer can find their EdgeWorkers access level per Luna Access Control Group.  
@@ -453,6 +455,40 @@ Usage: `akamai show-restier <edgeworkerId>`
 | Argument | Existence | Description |
 | - | - | - |
 | edgeworkerId | required | Edgeworker identifier.
+
+### Get Available EdgeWorkers Report Types
+Allows customers to list the avaiable report types that can be generated for an EdgeWorker ID.
+
+Usage: `akamai get reports`
+
+| Option | Description |
+| - | - |
+| -h, --help  | output usage information |
+
+#### Key Details
+1. The user will be given a table with reportIds and a description of each report. Use a given reportId with the `get report` command to get a report for a given EdgeWorker.
+
+### Get Edgeworker Report
+Allows customers to get a report for a given EdgeWorker ID.
+
+Usage: `akamai get report <reportId> <edgeworker-identifier>`
+
+| Option | Existence| Description |
+| - | - | - |
+| -h, --help  | optional | output usage information |
+| -s, --startDate `<startDate>` | required | ISO 8601 timestamp indicating the start time of the EdgeWorker report. |
+| -e, --endDate `<startDate>` | optional | ISO 8601 timestamp indicating the end time of the EdgeWorker report. If not specified, the end time defaults to the current time. |
+| --status `<status>` | optional | Comma-separated string to filter by EdgeWorker status. Values: `success`, `genericError`, `unknownEdgeWorkerId`, `unimplementedEventHandler`, `runtimeError`, `executionError`, `timeoutError`, `resourceLimitHit`, `cpuTimeoutError`, `wallTimeoutError`, `initCpuTimeoutError`, `initWallTimeoutError`. |
+| --ev, --eventHandlers `<eventHandlers>` | optional | Comma-separated string to filter EdgeWorkers by the event that triggers them. Values: `onClientRequest`, `onOriginRequest`, `onOriginResponse`, `onClientResponse`, `responseProvider`. |
+
+| Argument | Existence | Description |
+| - | - | - |
+| reportId | required | Report Type. |
+| edgeworker-identifier | required | Edgeworker identifier. |
+
+#### Key Details
+1. For a list of available report IDs, use the `get reports` command.
+2. The `startDate` option is a required option.
 
 ## Resources
 For more information on EdgeWorkers, refer to the following resources:
