@@ -3,14 +3,13 @@ import * as httpEdge from '../cli-httpRequest';
 import * as error from './ekv-error';
 import * as cliUtils from '../utils/cli-utils';
 import * as fs from 'fs';
-import { listItemsFromGroup } from './ekv-handler';
 
 export const EDGEKV_API_BASE = '/edgekv/v1';
 const INIT_EKV_TIMEOUT = 120000;
 const DEFAULT_EKV_TIMEOUT = 60000;
 
 export function getNameSpaceList(network: string, details: boolean) {
-  var qs: string = '';
+  let qs = '';
   if (details) {
     qs += `?details=${details}`;
   }
@@ -42,7 +41,7 @@ export function createNameSpace(
   groupId,
   geoLocation
 ) {
-  var body = {
+  const body = {
     namespace: namespace,
     retentionInSeconds: retention,
     groupId: groupId,
@@ -77,7 +76,7 @@ export function updateNameSpace(
   groupId,
   geoLocation
 ) {
-  var body = {
+  const body = {
     namespace: namespace,
     retentionInSeconds: retention,
     groupId: groupId,
@@ -125,7 +124,7 @@ export function writeItems(
   itemList,
   sandboxid: string
 ) {
-  let body = itemList;
+  const body = itemList;
   let writeItemPath = `${EDGEKV_API_BASE}/networks/${network}/namespaces/${namespace}/groups/${groupId}/items/${itemId}`;
   if (sandboxid) {
     writeItemPath += `?sandboxId=${sandboxid}`;
@@ -233,7 +232,7 @@ export function getItemsFromGroup(
   maxItems?: number,
   sandboxid?: string
 ) {
-  var qs: string = '';
+  let qs = '';
   if (maxItems !== undefined) {
     qs += `?maxItems=${maxItems}`;
   }
@@ -242,7 +241,7 @@ export function getItemsFromGroup(
     qs += `sandboxId=${sandboxid}`;
   }
 
-  let listItemsPath = `${EDGEKV_API_BASE}/networks/${network}/namespaces/${namespace}/groups/${groupId}${qs}`;
+  const listItemsPath = `${EDGEKV_API_BASE}/networks/${network}/namespaces/${namespace}/groups/${groupId}${qs}`;
   return httpEdge
     .getJson(
       listItemsPath,
@@ -261,7 +260,7 @@ export function createEdgeKVToken(
   ewids: string[],
   expiry
 ) {
-  let body = {
+  const body = {
     name: tokenName,
     allowOnProduction: allowOnProd,
     allowOnStaging: allowOnStg,
@@ -292,7 +291,7 @@ export function getSingleToken(tokenName: string) {
 }
 
 export function getTokenList(incExpired: boolean) {
-  var qs: string = '';
+  let qs = '';
   if (incExpired) {
     qs += `?includeExpired=${incExpired}`;
   }
@@ -318,7 +317,7 @@ export function revokeToken(tokenName: string) {
 }
 
 export function modifyAuthGroupPermission(namespace: string, groupId: number) {
-  let body = { groupId: groupId };
+  const body = { groupId: groupId };
   return httpEdge
     .putJson(
       `${EDGEKV_API_BASE}/auth/namespaces/${namespace}`,
@@ -331,7 +330,7 @@ export function modifyAuthGroupPermission(namespace: string, groupId: number) {
 }
 
 export function listAuthGroups(groupId?: number) {
-  var group: string = '';
+  let group = '';
   if (groupId && groupId > 0) {
     group = `/${groupId}`;
   }

@@ -1040,7 +1040,15 @@ export async function getAvailableReports() {
   }
 }
 
-const getExecutionAverages = (executionArray, executionKey: string) => {
+interface Execution {
+  invocations: number
+  execDuration?: Record<string, number>,
+  initDuration?: Record<string, number>,
+  status?: string,
+  memory?: Record<string, number>,
+}
+
+const getExecutionAverages = (executionArray: Array<Execution>, executionKey: string) => {
   if (executionArray){
     let totalAvg = 0, totalInvocations = 0, eventMax = -1, eventMin = Number.MAX_SAFE_INTEGER;
     for (const execution of executionArray){
@@ -1052,7 +1060,7 @@ const getExecutionAverages = (executionArray, executionKey: string) => {
       eventMax = Math.max(eventMax, max);
     }
     return {
-      avg: (totalAvg / totalInvocations).toFixed(5),
+      avg: (totalAvg / totalInvocations).toFixed(4),
       min: eventMin.toFixed(2),
       max: eventMax.toFixed(2)
     };
@@ -1065,12 +1073,6 @@ const getExecutionAverages = (executionArray, executionKey: string) => {
   }
 };
 
-interface ExecutionCategoriesArray {
-  [index: number]: { 
-    invocations: number
-  };
-}
-
 export async function getReport(
   reportId: number,
   start: string,
@@ -1080,13 +1082,14 @@ export async function getReport(
   eventHandlers: Array<string>,
   ) {
   const report = await cliUtils.spinner(
-    edgeWorkersSvc.getReport(reportId, start, end, ewid, statuses, eventHandlers),
+    edgeWorkersSvc.getReport(reportId, ewid, start, statuses, eventHandlers, end),
     'Getting report...'
   );
 
   const EVENT_HANDLERS = ['onClientRequest', 'onOriginRequest', 'onOriginResponse', 'onClientResponse', 'responseProvider'];
-  let executionEventHandlers;
-  if (eventHandlers.length !== 0){
+  let executionEventHandlers: Array<string>;
+  if (eventHandlers.length !== 0) {
+    // remove unwanted event handlers
     executionEventHandlers = EVENT_HANDLERS.filter((event) => eventHandlers.includes(event));
   } else {
     executionEventHandlers = EVENT_HANDLERS;
@@ -1102,6 +1105,7 @@ export async function getReport(
       const msg = `Printing ${report.name} from ${report.start} to ${report.end}`;
       cliUtils.logWithBorder(msg);
       let reportOutput;
+
       switch (report.reportId){
         case 1: {
           // summary
@@ -1113,7 +1117,22 @@ export async function getReport(
             errors,
             invocations
           } = report.data;
-          const initDurationMapped = initDuration ? initDuration : {avg: 'N/A', max: 'N/A', min: 'N/A'};
+          let initDurationMapped = {}; // init duration might be undefined
+
+          if (initDuration) {
+            Object.keys(initDuration).forEach((key) => {
+              initDurationMapped[key] = initDuration[key].toFixed(4);
+            });
+          } else {
+            initDurationMapped = {avg: 'N/A', max: 'N/A', min: 'N/A'};
+          }
+          
+          Object.keys(execDuration).forEach((key) => {
+            execDuration[key] = execDuration[key].toFixed(4);
+          });
+          Object.keys(memory).forEach((key) => {
+            memory[key] = memory[key].toFixed(4);
+          });
           
           reportOutput = [
             {successes, errors, invocations},
@@ -1124,9 +1143,9 @@ export async function getReport(
         }
   
         case 2: {
-          //execution time
+          // execution time
           reportOutput = {};
-          const executionCategories: ExecutionCategoriesArray = report.data[0].data;
+          const executionCategories: Record<string, Array<Execution>> = report.data[0].data;
 
           for (const event of executionEventHandlers) {
             reportOutput[event] = getExecutionAverages(executionCategories[event], 'execDuration');
@@ -1138,16 +1157,16 @@ export async function getReport(
         }
 
         case 3: {
-          //execution status
+          // execution status
           reportOutput = {};
-          const executionCategories: ExecutionCategoriesArray = report.data[0].data;
+          const executionCategories: Record<string, Array<Execution>> = report.data[0].data;
           let errors = 0;
   
           for (const executionArray of Object.values(executionCategories)) {
             for (const execution of executionArray) {
               const {status, invocations} = execution;
               reportOutput[status] = reportOutput[status] + invocations || invocations;
-              if (status !== 'success') {
+              if (status !== 'success' && status !== 'unimplementedEventHandler') {
                 errors += invocations;
               }
             }
@@ -1164,9 +1183,9 @@ export async function getReport(
         }
 
         case 4: {
-          //memory usage
+          // memory usage
           reportOutput = {};
-          const executionCategories: ExecutionCategoriesArray = report.data[0].data;
+          const executionCategories: Record<string, Array<Execution>> = report.data[0].data;
   
           for (const event of executionEventHandlers) {
             reportOutput[event] = getExecutionAverages(executionCategories[event], 'memory');

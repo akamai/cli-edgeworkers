@@ -50,7 +50,7 @@ describe('ekv-services tests', () => {
       expect(res).toEqual(mockResBody);
     });
 
-    test('URL path should contian query parameter when details parameter is true', async () => {
+    test('URL path should contain query parameter when details parameter is true', async () => {
       const details = true;
 
       // Mock getJson() method
@@ -847,7 +847,7 @@ describe('ekv-services tests', () => {
     test('function should handle errors properly', async () => {
       // Mock deleteReq() method
       const deleteReqSpy = jest.spyOn(httpEdge, 'deleteReq');
-      deleteReqSpy.mockImplementation((path, timeout, metricType) => {
+      deleteReqSpy.mockImplementation(() => {
         // The normal error object will be returned as a string
         return Promise.reject(JSON.stringify(mockError));
       });

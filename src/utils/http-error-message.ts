@@ -4,7 +4,6 @@ export enum ErrorMessage {
     GENERIC_403 = 'Permission is invalid.',
     GET_AVAILABLE_REPORTS_ERROR = 'ERROR: Unable to get available edgeworkers reports.',
     GET_REPORT_ERROR = 'ERROR: Unable to get edgeworkers report.',
-    GET_REPORT_400 = 'Bad Request',
     REGISTER_EW_ERROR = 'ERROR: Unable to create Edgeworker.',
     UPDATE_EW_ERROR = 'ERROR: Unable to update Edgeworker.',
     DELETE_EW_ERROR = 'ERROR: Unable to delete Edgeworker.',
