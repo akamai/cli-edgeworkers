@@ -48,6 +48,10 @@ describe('cli-httpRequest tests', () => {
       setAccountKey(key);
       expect(accountKey).toBe('testKey');
     });
+
+    afterAll(() => {
+      setAccountKey('');
+    });
   });
 
   describe('testing sendEdgeRequest', () => {
@@ -65,7 +69,43 @@ describe('cli-httpRequest tests', () => {
         console.error(err);
       });
 
-      expect(authSpy).toHaveBeenCalled();
+      expect(authSpy).toHaveBeenCalledWith({
+        path: PATH,
+        method: GET_METHOD,
+        body: BODY,
+        headers: HEADERS,
+      });
+      expect(sendSpy).toHaveBeenCalled();
+      expect(result.err).toBeUndefined();
+      expect(result.response.status).toEqual(SUCCESS_CODE);
+    });
+
+    test('should call edge.auth with the optional requestConfig', async () => {
+      const authSpy = jest.spyOn(EdgeGrid.prototype, 'auth');
+      const sendSpy = jest.spyOn(EdgeGrid.prototype, 'send');
+
+      const metricType = 'myMetric';
+      const requestConfig = { key1: 'requestValue1', key2: 'requestValue2'};
+
+      const result = await sendEdgeRequest(
+        PATH,
+        GET_METHOD,
+        BODY,
+        HEADERS,
+        TIMEOUT,
+        metricType,
+        requestConfig
+      ).catch((err) => {
+        console.error(err);
+      });
+
+      expect(authSpy).toHaveBeenCalledWith({
+        path: PATH,
+        method: GET_METHOD,
+        body: BODY,
+        headers: HEADERS,
+        ...requestConfig,
+      });
       expect(sendSpy).toHaveBeenCalled();
       expect(result.err).toBeUndefined();
       expect(result.response.status).toEqual(SUCCESS_CODE);
