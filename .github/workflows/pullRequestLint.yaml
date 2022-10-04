@@ -1,0 +1,24 @@
+name: Lint Pull Request
+run-name: ${{ github.actor }} wants to merge ${{ github.head_ref }} into ${{ github.base_ref }}
+
+on:
+  pull_request:
+    branches: [ master, develop ]
+
+jobs:
+  lint_pr:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14.x, 16.x]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm ci
+      - run: npm run lint
