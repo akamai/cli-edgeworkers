@@ -1,10 +1,10 @@
 import * as cliUtils from '../utils/cli-utils';
 import * as os from 'os';
-const fs = require('fs');
-const path = require('path');
-const tar = require('tar');
-const untildify = require('untildify');
-const sha256File = require('sha256-file');
+import fs from 'fs';
+import path from 'path';
+import tar from 'tar';
+import untildify from 'untildify';
+import sha256File from 'sha256-file';
 
 const CLI_CACHE_PATH: string =
   process.env.AKAMAI_CLI_CACHE_DIR ||
@@ -22,13 +22,13 @@ const EDGEWORKERS_CLI_OUTPUT_DIR: string = path.join(
   EDGEWORKERS_DIR,
   `/cli-output/${Date.now()}/`
 );
-const EDGEWORKERS_CLI_OUTPUT_FILENAME: string = 'ewcli_output.json';
-const MAINJS_FILENAME: string = 'main.js';
-const MANIFEST_FILENAME: string = 'bundle.json';
-const TARBALL_VERSION_KEY: string = 'edgeworker-version';
-const BUNDLE_FORMAT_VERSION_KEY: string = 'bundle-version';
-const JSAPI_VERSION_KEY: string = 'api-version';
-var tarballChecksum = undefined;
+const EDGEWORKERS_CLI_OUTPUT_FILENAME = 'ewcli_output.json';
+const MAINJS_FILENAME = 'main.js';
+const MANIFEST_FILENAME = 'bundle.json';
+const TARBALL_VERSION_KEY = 'edgeworker-version';
+const BUNDLE_FORMAT_VERSION_KEY = 'bundle-version';
+const JSAPI_VERSION_KEY = 'api-version';
+let tarballChecksum = undefined;
 
 // set default JSON output options
 const jsonOutputParams = {
@@ -83,11 +83,11 @@ export function validateTarballLocally(
   rawTarballPath: string,
   isValidate?: boolean
 ) {
-  var tarballPath = untildify(rawTarballPath);
+  const tarballPath = untildify(rawTarballPath);
 
   // Check to make sure tarball exists
   if (!fs.existsSync(tarballPath)) {
-    let errMsgPart = isValidate
+    const errMsgPart = isValidate
       ? 'Validation Errors for:'
       : 'ERROR: EdgeWorkers bundle archive';
     cliUtils.logAndExit(
@@ -106,9 +106,9 @@ export function validateTarballLocally(
 }
 
 export function buildTarball(ewId: string, codePath: string) {
-  var codeWorkingDirectory = untildify(codePath);
-  var mainjsPath = path.join(codeWorkingDirectory, MAINJS_FILENAME);
-  var manifestPath = path.join(codeWorkingDirectory, MANIFEST_FILENAME);
+  const codeWorkingDirectory = untildify(codePath);
+  const mainjsPath = path.join(codeWorkingDirectory, MAINJS_FILENAME);
+  const manifestPath = path.join(codeWorkingDirectory, MANIFEST_FILENAME);
 
   if (!fs.existsSync(mainjsPath) || !fs.existsSync(manifestPath)) {
     cliUtils.logAndExit(
@@ -120,12 +120,12 @@ export function buildTarball(ewId: string, codePath: string) {
   const edgeWorkersDir = createEdgeWorkerIdDir(ewId);
 
   // Build tarball file name as ew_<version>_<now-as-epoch>.tgz
-  var tarballFileName: string = 'ew_';
-  var tarballVersion: string;
+  let tarballFileName = 'ew_';
+  let tarballVersion: string;
 
   // Validate Manifest and if valid, grab version identifier
-  var manifest = fs.readFileSync(manifestPath).toString();
-  var manifestValidationData = validateManifest(manifest);
+  const manifest = fs.readFileSync(manifestPath).toString();
+  const manifestValidationData = validateManifest(manifest);
 
   if (!manifestValidationData.isValid) {
     cliUtils.logAndExit(1, manifestValidationData.error_reason);
@@ -191,9 +191,9 @@ function validateManifest(manifest: string) {
 
   manifest = JSON.parse(manifest);
 
-  var tarballVersion = manifest[TARBALL_VERSION_KEY];
-  var manifestFormat = manifest[BUNDLE_FORMAT_VERSION_KEY];
-  var jsAPIVersion = manifest[JSAPI_VERSION_KEY];
+  const tarballVersion = manifest[TARBALL_VERSION_KEY];
+  const manifestFormat = manifest[BUNDLE_FORMAT_VERSION_KEY];
+  const jsAPIVersion = manifest[JSAPI_VERSION_KEY];
 
   // only checks the one required field is found, ignores optional fields (for now)
   if (!tarballVersion) {
@@ -253,7 +253,7 @@ export function determineTarballDownloadDir(
 ) {
   // If download path option provided, try to use it
   // If not provided, default to CLI cache directory under <CLI_CACHE_PATH>/edgeworkers-cli/edgeworkers/<ewid>/
-  var downloadPath = !!rawDownloadPath
+  const downloadPath = rawDownloadPath
     ? untildify(rawDownloadPath)
     : createEdgeWorkerIdDir(ewId);
 
@@ -338,14 +338,14 @@ export function writeJSONOutput(exitCode: number, msg: string, data = {}) {
     outputData = data;
   }
 
-  let output = {
+  const output = {
     cliStatus: exitCode,
     msg: outputMsg,
     data: outputData,
   };
 
   // Then, determine the path and filename to write the JSON output
-  let outputDestination = determineJSONOutputPathAndFilename();
+  const outputDestination = determineJSONOutputPathAndFilename();
   // Last, try to write the output file synchronously
   try {
     fs.writeFileSync(
