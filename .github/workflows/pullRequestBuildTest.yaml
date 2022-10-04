@@ -1,4 +1,4 @@
-name: Build & Test Pull Request
+name: Test Pull Request
 run-name: ${{ github.actor }} wants to merge ${{ github.head_ref }} into ${{ github.base_ref }}
 
 on:
@@ -6,9 +6,9 @@ on:
     branches: [ master, develop ]
 
 jobs:
-  build_test_pr:
+  test_pr:
 
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 
     strategy:
       matrix:
@@ -21,5 +21,4 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: npm ci
-      - run: npm run build
       - run: npm run test:run
