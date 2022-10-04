@@ -4,30 +4,32 @@ import * as response from './ekv-response';
 import * as ekvhelper from './ekv-helper';
 import * as edgeWorkersSvc from '../edgeworkers/ew-service';
 
-export async function listNameSpaces(environment: string, details) {
+export async function listNameSpaces(environment: string, details: boolean, sortDirection: cliUtils.sortDirections, orderBy: string) {
   ekvhelper.validateNetwork(environment);
-  let nameSpaceList = await cliUtils.spinner(
+  const nameSpaceList = await cliUtils.spinner(
     edgekvSvc.getNameSpaceList(environment, details),
     'Fetching namespace list...'
   );
   if (nameSpaceList != undefined && !nameSpaceList.isError) {
-    let nsListResp = [];
+    const nsListResp = [];
     if (nameSpaceList.hasOwnProperty('namespaces')) {
-      let namespace = nameSpaceList['namespaces'];
+      const namespace = nameSpaceList['namespaces'];
+      cliUtils.sortObjectArray(namespace, orderBy, sortDirection);
+
       namespace.forEach(function (value) {
         if (details) {
-          let retentionPeriod = ekvhelper.convertRetentionPeriod(
+          const retentionPeriod = ekvhelper.convertRetentionPeriod(
             value['retentionInSeconds']
           );
-          let groupId = value['groupId'] == undefined ? 0 : value['groupId'];
+          const groupId = value['groupId'] == undefined ? 0 : value['groupId'];
           nsListResp.push({
-            Namespace: value['namespace'],
+            NamespaceId: value['namespace'],
             RetentionPeriod: retentionPeriod,
             GeoLocation: value['geoLocation'],
-            'Access GroupId': groupId,
+            AccessGroupId: groupId,
           });
         } else {
-          nsListResp.push({ Namespace: value['namespace'] });
+          nsListResp.push({ NamespaceId: value['namespace'] });
         }
       });
     }

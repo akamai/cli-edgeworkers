@@ -356,6 +356,10 @@ export function getDateDifference(date) {
 
 export function convertDaysToSeconds(days: number) {
     if (!isNaN(days) && days >= 0) {
+        if (days != 0 && (days < 1 || days > 3650)){
+            // Retention must be either zero or in the range of 86400 sec (1 day) to 315360000 sec (3650 days)
+            cliUtils.logAndExit(1, `ERROR: A non zero value specified for the retention period cannot be less than 1 day or more than 3650 days.`);
+        }
         return days * 86400;
     } else {
         cliUtils.logAndExit(1, "ERROR: Retention period specified is invalid. Please specify the retention in number of days.");
