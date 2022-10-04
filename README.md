@@ -16,7 +16,7 @@ To use this tool you need:
     * If you do not have the CLI and are using [Homebrew](https://brew.sh/) on a Mac, run this command: `brew install akamai`
     * You may also [download](https://github.com/akamai/cli) OS-specific CLI binaries or a Docker image
 * Valid EdgeGrid credentials configured via Akamai Control Center (see [Get Started with APIs](https://developer.akamai.com/api/getting-started))
-* Node version 7 or higher
+* Node version 14 or higher
 
 
 ## Install or Update the EdgeWorkers
