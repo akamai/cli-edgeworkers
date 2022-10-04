@@ -20,8 +20,13 @@ const GET_METHOD = 'GET';
 
 // Status code constants
 const SUCCESS_CODE = 200;
-const BAD_REQIEST_ERROR_CODE = 400;
+const BAD_REQUEST_ERROR_CODE = 400;
 const SERVER_ERROR_CODE = 500;
+
+beforeEach(() => {
+  jest.spyOn(process, 'exit')
+  .mockImplementation((number) => { throw new Error('process.exit: ' + number); });
+});
 
 describe('cli-httpRequest tests', () => {
   beforeEach(() => {
@@ -77,11 +82,11 @@ describe('cli-httpRequest tests', () => {
           {
             response: {
               data: { message: 'mockErrorMessage' },
-              status: BAD_REQIEST_ERROR_CODE,
+              status: BAD_REQUEST_ERROR_CODE,
               headers: { 'x-trace-id': 'test123' },
             },
           },
-          { status: BAD_REQIEST_ERROR_CODE },
+          { status: BAD_REQUEST_ERROR_CODE },
           ''
         );
       });
@@ -91,7 +96,7 @@ describe('cli-httpRequest tests', () => {
           const err = JSON.parse(error);
 
           expect(err).not.toBeUndefined();
-          expect(err.status).toEqual(BAD_REQIEST_ERROR_CODE);
+          expect(err.status).toEqual(BAD_REQUEST_ERROR_CODE);
           expect(err.traceId).toEqual('test123');
           expect(err.message).toEqual('mockErrorMessage');
         }
@@ -195,7 +200,7 @@ describe('cli-httpRequest tests', () => {
     });
 
     test('non 200 series status code should return false', () => {
-      expect(isOkStatus(BAD_REQIEST_ERROR_CODE)).toBe(false);
+      expect(isOkStatus(BAD_REQUEST_ERROR_CODE)).toBe(false);
     });
   });
 });

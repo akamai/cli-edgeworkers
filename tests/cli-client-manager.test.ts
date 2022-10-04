@@ -4,6 +4,10 @@ import { buildTarball, validateTarballLocally } from '../src/edgeworkers/client-
 const TAR_TEMP_DIR = __dirname + '/tmp_tar/';
 
 describe('client-manager tests', () => {
+    beforeEach(() => {
+        jest.spyOn(process, 'exit')
+        .mockImplementation((number) => { throw new Error('process.exit: ' + number); });
+      });
 
     beforeAll(() => {
         if (!existsSync(TAR_TEMP_DIR)) {
