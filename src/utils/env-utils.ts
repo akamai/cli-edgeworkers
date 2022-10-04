@@ -1,11 +1,11 @@
-var EdgeGrid = require('akamai-edgegrid');
-const untildify = require('untildify');
-var path = require('path');
-const fs = require('fs');
+import EdgeGrid from 'akamai-edgegrid';
+import untildify from 'untildify';
+import path from 'path';
+import fs from 'fs';
 import * as os from 'os';
 import * as cliUtils from './cli-utils';
 
-export var timeoutVal: number = 0;
+export let timeoutVal = 0;
 
 const edgeRcParams = {
   section: process.env.AKAMAI_EDGERC_SECTION || 'default',

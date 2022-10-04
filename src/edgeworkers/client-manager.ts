@@ -1,12 +1,11 @@
 import * as cliUtils from '../utils/cli-utils';
 import * as os from 'os';
+import fs from 'fs';
+import path from 'path';
+import tar from 'tar';
+import untildify from 'untildify';
+import sha256File from 'sha256-file';
 import { glob } from 'glob';
-
-const fs = require('fs');
-const path = require('path');
-const tar = require('tar');
-const untildify = require('untildify');
-const sha256File = require('sha256-file');
 
 const CLI_CACHE_PATH: string =
   process.env.AKAMAI_CLI_CACHE_DIR ||
@@ -24,12 +23,12 @@ const EDGEWORKERS_CLI_OUTPUT_DIR: string = path.join(
   EDGEWORKERS_DIR,
   `/cli-output/${Date.now()}/`
 );
-const EDGEWORKERS_CLI_OUTPUT_FILENAME: string = 'ewcli_output.json';
-const MAINJS_FILENAME: string = 'main.js';
-const MANIFEST_FILENAME: string = 'bundle.json';
-const TARBALL_VERSION_KEY: string = 'edgeworker-version';
-const BUNDLE_FORMAT_VERSION_KEY: string = 'bundle-version';
-const JSAPI_VERSION_KEY: string = 'api-version';
+const EDGEWORKERS_CLI_OUTPUT_FILENAME = 'ewcli_output.json';
+const MAINJS_FILENAME = 'main.js';
+const MANIFEST_FILENAME = 'bundle.json';
+const TARBALL_VERSION_KEY = 'edgeworker-version';
+const BUNDLE_FORMAT_VERSION_KEY = 'bundle-version';
+const JSAPI_VERSION_KEY = 'api-version';
 let tarballChecksum = undefined;
 
 // set default JSON output options
@@ -258,7 +257,7 @@ export function determineTarballDownloadDir(
 ) {
   // If download path option provided, try to use it
   // If not provided, default to CLI cache directory under <CLI_CACHE_PATH>/edgeworkers-cli/edgeworkers/<ewid>/
-  const downloadPath = !!rawDownloadPath
+  const downloadPath = rawDownloadPath
     ? untildify(rawDownloadPath)
     : createEdgeWorkerIdDir(ewId);
 

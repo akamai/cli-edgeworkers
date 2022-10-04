@@ -8,40 +8,40 @@ export function handleError(err) {
     } catch (e) {
         return {
             isError: true,
-            error_reason: "",
-            traceId: "-"
-        }
+            error_reason: '',
+            traceId: '-'
+        };
     }
 
-    let statusCode = err["status"] == undefined ? "" : err["status"];
-    let traceIdVal = err["traceId"] == undefined ? "" : err["traceId"];
+    const statusCode = err['status'] == undefined ? '' : err['status'];
+    const traceIdVal = err['traceId'] == undefined ? '' : err['traceId'];
 
     if (statusCode == 504) {
         return {
             isError: true,
             error_reason: ErrorMessage.EKV_TIMEOUT_ERROR
-        }
+        };
     }
 
     // this is sent by edgeKV
-    if (err.hasOwnProperty("errors")) {
-        let errors = err["errors"];
+    if (Object.prototype.hasOwnProperty.call(err, 'errors')) {
+        const errors = err['errors'];
         if (errors.length > 0) {
             return  {
                 isError: true,
-                error_reason: errors[0]["detail"],
+                error_reason: errors[0]['detail'],
                 status: statusCode,
                 traceId: traceIdVal
-            }
+            };
         }
     }
     else {
-        let errDetail = err["detail"] == undefined ? "" : err["detail"];
+        const errDetail = err['detail'] == undefined ? '' : err['detail'];
         return {
             isError: true,
             error_reason: errDetail,
             status: statusCode,
             traceId: traceIdVal
-        }
+        };
     }
 }

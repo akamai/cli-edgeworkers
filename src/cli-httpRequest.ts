@@ -7,11 +7,11 @@ import {
 } from './edgeworkers/ew-service';
 import { EDGEKV_API_BASE } from './edgekv/ekv-service';
 
-export var accountKey: string = null;
-export var timeoutVal: number = 120000;
+export let accountKey = null;
+export const timeoutVal = 120000;
 const versionHeader = 'X-AK-EDGEKV-CLI-VER';
 const ekvcliHeader = 'X-AK-EDGEKV-CLI';
-let pjson = require('../package.json');
+import pjson from '../package.json';
 
 export function setAccountKey(account: string) {
   accountKey = account;
@@ -31,8 +31,8 @@ export function sendEdgeRequest(
 ) {
   const edge = envUtils.getEdgeGrid();
 
-  var path = pth;
-  var qs: string = '&';
+  let path = pth;
+  let qs = '&';
   if (accountKey) {
     // Check if query string already included in path, if not use ? otherwise use &
     if (path.indexOf('?') == -1) qs = '?';
@@ -47,7 +47,8 @@ export function sendEdgeRequest(
     headers[ekvcliHeader] = metricType;
   }
 
-  let servicePromise = function () {
+  const servicePromise = function () {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return new Promise<any>((resolve, reject) => {
       edge.auth({
         path,
@@ -58,7 +59,7 @@ export function sendEdgeRequest(
 
       edge.send(function (error, response, body) {
         if (!error && isOkStatus(response.status)) {
-          var obj: any = {
+          const obj = {
             response,
             body:
               body == '' || body == 'null' || !!body
@@ -68,12 +69,12 @@ export function sendEdgeRequest(
           resolve(obj);
         } else {
           try {
-            var errorObj = error.response.data;
+            const errorObj = error.response.data;
             errorObj['status'] = error.response.status;
             errorObj['traceId'] = error.response.headers['x-trace-id']; // adding trace id for debugging purpose
             reject(cliUtils.toJsonPretty(errorObj));
           } catch (ex) {
-            let commonErrMsg = 'Failed to retrieve the error response. ';
+            const commonErrMsg = 'Failed to retrieve the error response. ';
 
             if (!error) {
               console.error(
