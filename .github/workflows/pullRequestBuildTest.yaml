@@ -6,7 +6,7 @@ on:
     branches: [ master, develop ]
 
 jobs:
-  build_test:
+  build_test_pr:
 
     runs-on: ubuntu-latest
 
