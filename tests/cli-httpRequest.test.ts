@@ -1,4 +1,4 @@
-import EdgeGrid from 'akamai-edgegrid';
+import * as envUtils from '../src/utils/env-utils';
 
 import {
   accountKey,
@@ -23,16 +23,22 @@ const SUCCESS_CODE = 200;
 const BAD_REQUEST_ERROR_CODE = 400;
 const SERVER_ERROR_CODE = 500;
 
+let edgeGrid;
+
 beforeEach(() => {
-  jest.spyOn(process, 'exit')
-  .mockImplementation((number) => { throw new Error('process.exit: ' + number); });
+  edgeGrid = {
+    auth: jest.fn(),
+    send: jest.fn(),
+  };
+  jest.spyOn(envUtils, 'getEdgeGrid')
+  .mockImplementation(() => edgeGrid);
 });
 
 describe('cli-httpRequest tests', () => {
   beforeEach(() => {
     // Mock auth() and send() functions in EdgeGrid library
-    EdgeGrid.prototype.auth = jest.fn().mockReturnThis();
-    EdgeGrid.prototype.send = jest.fn().mockImplementation((callback) => {
+    edgeGrid.auth.mockReturnThis();
+    edgeGrid.send = jest.fn().mockImplementation((callback) => {
       callback(null, { status: SUCCESS_CODE }, '');
     });
   });
@@ -57,8 +63,8 @@ describe('cli-httpRequest tests', () => {
 
   describe('testing sendEdgeRequest', () => {
     test('successful response should return 200 series status', async () => {
-      const authSpy = jest.spyOn(EdgeGrid.prototype, 'auth');
-      const sendSpy = jest.spyOn(EdgeGrid.prototype, 'send');
+      const authSpy = edgeGrid.auth;
+      const sendSpy = edgeGrid.send;
 
       const result = await sendEdgeRequest(
         PATH,
@@ -77,7 +83,7 @@ describe('cli-httpRequest tests', () => {
     });
 
     test('response should return constructed error object when the error response exists', async () => {
-      EdgeGrid.prototype.send = jest.fn().mockImplementation((callback) => {
+      edgeGrid.send.mockImplementation((callback) => {
         callback(
           {
             response: {
@@ -112,7 +118,7 @@ describe('cli-httpRequest tests', () => {
         },
       };
 
-      EdgeGrid.prototype.send = jest.fn().mockImplementation((callback) => {
+      edgeGrid.send.mockImplementation((callback) => {
         callback(expectedError, { status: SERVER_ERROR_CODE }, '');
       });
 
@@ -125,7 +131,7 @@ describe('cli-httpRequest tests', () => {
     });
 
     test('response should return the response status when the error is undefined', async () => {
-      EdgeGrid.prototype.send = jest.fn().mockImplementation((callback) => {
+      edgeGrid.send.mockImplementation((callback) => {
         callback(undefined, { status: SERVER_ERROR_CODE }, '');
       });
 
@@ -140,7 +146,7 @@ describe('cli-httpRequest tests', () => {
 
   describe('testing putJson', () => {
     test('request method is PUT', async () => {
-      EdgeGrid.prototype.auth = jest.fn().mockImplementation((req) => {
+      edgeGrid.auth.mockImplementation((req) => {
         expect(req.method).toEqual('PUT');
         return this;
       });
@@ -154,7 +160,7 @@ describe('cli-httpRequest tests', () => {
 
   describe('testing getJson', () => {
     test('request method is GET', async () => {
-      EdgeGrid.prototype.auth = jest.fn().mockImplementation((req) => {
+      edgeGrid.auth.mockImplementation((req) => {
         expect(req.method).toEqual('GET');
         return this;
       });
@@ -168,7 +174,7 @@ describe('cli-httpRequest tests', () => {
 
   describe('testing postJson', () => {
     test('request method is POST', async () => {
-      EdgeGrid.prototype.auth = jest.fn().mockImplementation((req) => {
+      edgeGrid.auth.mockImplementation((req) => {
         expect(req.method).toEqual('POST');
         return this;
       });
@@ -182,7 +188,7 @@ describe('cli-httpRequest tests', () => {
 
   describe('testing deleteReq', () => {
     test('request method is DELETE', async () => {
-      EdgeGrid.prototype.auth = jest.fn().mockImplementation((req) => {
+      edgeGrid.auth.mockImplementation((req) => {
         expect(req.method).toEqual('DELETE');
         return this;
       });

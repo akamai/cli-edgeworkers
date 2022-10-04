@@ -22,11 +22,6 @@ describe('ekv-services tests', () => {
   const mockEwids = ['123', '456', '789'];
   const mockExpiry = 3600;
 
-  beforeEach(() => {
-    jest.spyOn(process, 'exit')
-    .mockImplementation((number) => { throw new Error('process.exit: ' + number); });
-  });
-
   describe('testing getNameSpaceList', () => {
     const mockResBody = ['space1', 'space2', 'space3'];
 
