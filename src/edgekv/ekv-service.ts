@@ -3,7 +3,6 @@ import * as httpEdge from '../cli-httpRequest';
 import * as error from './ekv-error';
 import * as cliUtils from '../utils/cli-utils';
 import * as fs from 'fs';
-import { listItemsFromGroup } from './ekv-handler';
 
 export const EDGEKV_API_BASE = '/edgekv/v1';
 const INIT_EKV_TIMEOUT = 120000;
@@ -199,9 +198,15 @@ export function readItem(
     .getJson(
       readItemPath,
       cliUtils.getTimeout(DEFAULT_EKV_TIMEOUT),
-      ekvMetrics.readItem
+      ekvMetrics.readItem,
+      {transformResponse: [data => data]},
+      // axios has a bug where when parsing strings that are wrapped in quotes it will remove the extra quotes at the beginning & end
+      // as such, we need to override the response parser to just return the raw response data
     )
-    .then((r) => r.body)
+    .then((r) => {
+      // manually parse body if needed
+      return typeof r.body === 'string' ? r.body : cliUtils.parseIfJSON(r.body);
+    }) 
     .catch((err) => error.handleError(err));
 }
 

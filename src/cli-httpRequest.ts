@@ -7,11 +7,11 @@ import {
 } from './edgeworkers/ew-service';
 import { EDGEKV_API_BASE } from './edgekv/ekv-service';
 
-export var accountKey: string = null;
-export var timeoutVal: number = 120000;
+export let accountKey: string = null;
+export const timeoutVal = 120000;
 const versionHeader = 'X-AK-EDGEKV-CLI-VER';
 const ekvcliHeader = 'X-AK-EDGEKV-CLI';
-let pjson = require('../package.json');
+const pjson = require('../package.json');
 
 export function setAccountKey(account: string) {
   accountKey = account;
@@ -27,12 +27,13 @@ export function sendEdgeRequest(
   body,
   headers,
   timeout: number,
-  metricType?: string
+  metricType?: string,
+  requestConfig? : Record<string, unknown> 
 ) {
   const edge = envUtils.getEdgeGrid();
 
-  var path = pth;
-  var qs: string = '&';
+  let path = pth;
+  let qs = '&';
   if (accountKey) {
     // Check if query string already included in path, if not use ? otherwise use &
     if (path.indexOf('?') == -1) qs = '?';
@@ -47,18 +48,19 @@ export function sendEdgeRequest(
     headers[ekvcliHeader] = metricType;
   }
 
-  let servicePromise = function () {
+  const servicePromise = function () {
     return new Promise<any>((resolve, reject) => {
-      edge.auth({
+       edge.auth({
         path,
         method,
         headers,
         body,
+        ...requestConfig,
       });
 
       edge.send(function (error, response, body) {
         if (!error && isOkStatus(response.status)) {
-          var obj: any = {
+          const obj = {
             response,
             body:
               body == '' || body == 'null' || !!body
@@ -68,12 +70,12 @@ export function sendEdgeRequest(
           resolve(obj);
         } else {
           try {
-            var errorObj = error.response.data;
+            const errorObj = error.response.data;
             errorObj['status'] = error.response.status;
             errorObj['traceId'] = error.response.headers['x-trace-id']; // adding trace id for debugging purpose
             reject(cliUtils.toJsonPretty(errorObj));
           } catch (ex) {
-            let commonErrMsg = 'Failed to retrieve the error response. ';
+            const commonErrMsg = 'Failed to retrieve the error response. ';
 
             if (!error) {
               console.error(
@@ -111,7 +113,8 @@ export function postJson(
   path: string,
   body,
   timeout: number,
-  metricType?: string
+  metricType?: string,
+  requestConfig? : Record<string, unknown>
 ) {
   return sendEdgeRequest(
     path,
@@ -121,7 +124,8 @@ export function postJson(
       'Content-Type': 'application/json',
     },
     timeout,
-    metricType
+    metricType,
+    requestConfig
   );
 }
 
@@ -129,7 +133,8 @@ export function putJson(
   path: string,
   body,
   timeout: number,
-  metricType?: string
+  metricType?: string,
+  requestConfig? : Record<string, unknown>
 ) {
   return sendEdgeRequest(
     path,
@@ -139,16 +144,26 @@ export function putJson(
       'Content-Type': 'application/json',
     },
     timeout,
-    metricType
+    metricType,
+    requestConfig
   );
 }
 
-export function getJson(path: string, timeout: number, metricType?: string) {
-  return sendEdgeRequest(path, 'GET', '', {}, timeout, metricType);
+export function getJson(
+  path: string,
+  timeout: number,
+  metricType?: string,
+  requestConfig? : Record<string, unknown>
+  ) {
+  return sendEdgeRequest(path, 'GET', '', {}, timeout, metricType, requestConfig);
 }
 
-export function deleteReq(path: string, timeout: number, metricType?: string) {
-  return sendEdgeRequest(path, 'DELETE', '', {}, timeout, metricType);
+export function deleteReq(path: string,
+  timeout: number,
+  metricType?: string,
+  requestConfig? : Record<string, unknown> 
+  ) {
+  return sendEdgeRequest(path, 'DELETE', '', {}, timeout, metricType, requestConfig);
 }
 
 export function isOkStatus(code) {
