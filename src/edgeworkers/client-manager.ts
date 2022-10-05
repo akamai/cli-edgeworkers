@@ -1,5 +1,7 @@
 import * as cliUtils from '../utils/cli-utils';
 import * as os from 'os';
+import { glob } from 'glob';
+
 const fs = require('fs');
 const path = require('path');
 const tar = require('tar');
@@ -122,8 +124,8 @@ export function validateTarballLocally(
   };
 }
 
-export function buildTarball(ewId: string, codePath: string) {
-  const codeWorkingDirectory = untildify(codePath);
+export function buildTarball(ewId: string, codePath: string, edgeWorkersDir: string = createEdgeWorkerIdDir(ewId)) {
+  const codeWorkingDirectory = path.resolve(untildify(codePath));
   const mainjsPath = path.join(codeWorkingDirectory, MAINJS_FILENAME);
   const manifestPath = path.join(codeWorkingDirectory, MANIFEST_FILENAME);
 
@@ -133,8 +135,6 @@ export function buildTarball(ewId: string, codePath: string) {
       `ERROR: EdgeWorkers main.js (${mainjsPath}) and/or manifest (${manifestPath}) provided is not found.`
     );
   }
-
-  const edgeWorkersDir = createEdgeWorkerIdDir(ewId);
 
   // Build tarball file name as ew_<version>_<now-as-epoch>.tgz
   let tarballFileName = 'ew_';
@@ -153,22 +153,27 @@ export function buildTarball(ewId: string, codePath: string) {
   tarballFileName += tarballVersion + '_' + Date.now() + '.tgz';
   const tarballPath = path.join(edgeWorkersDir, tarballFileName);
 
+  // get the list of files that we will add to the tarball.  While ['.'] works to create a tarball, it will fail validation
+  // when uploaded.  The validation server will not be able to find the bundle.json/main.js when it lists the files inside.
+  const files = glob.sync('**/*', { cwd: codeWorkingDirectory });
+
   // tar files together with no directory structure (ie: tar czvf ../helloworld.tgz *)
   tar
     .c(
       {
         gzip: true,
-        sync: true,
-        C: codeWorkingDirectory,
         portable: true,
+        file: tarballPath,
+        cwd: codeWorkingDirectory,
+        sync: true
       },
-      [MAINJS_FILENAME, MANIFEST_FILENAME]
-    )
-    .pipe(fs.createWriteStream(tarballPath));
+      files
+    );
 
   // calculate checksum of new tarball
   tarballChecksum = calculateChecksum(tarballPath);
 
+  cliUtils.log(`Created tarball at ${tarballPath}`);
   return {
     tarballPath,
     tarballChecksum,
