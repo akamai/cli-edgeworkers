@@ -24,19 +24,21 @@ const EDGEWORKERS_CLI_OUTPUT_DIR: string = path.join(
   EDGEWORKERS_DIR,
   `/cli-output/${Date.now()}/`
 );
-const EDGEWORKERS_CLI_OUTPUT_FILENAME: string = 'ewcli_output.json';
-const MAINJS_FILENAME: string = 'main.js';
-const MANIFEST_FILENAME: string = 'bundle.json';
-const TARBALL_VERSION_KEY: string = 'edgeworker-version';
-const BUNDLE_FORMAT_VERSION_KEY: string = 'bundle-version';
-const JSAPI_VERSION_KEY: string = 'api-version';
-let tarballChecksum = undefined;
+const EDGEWORKERS_CLI_OUTPUT_FILENAME = 'ewcli_output.json';
+const MAINJS_FILENAME = 'main.js';
+const MANIFEST_FILENAME = 'bundle.json';
+const TARBALL_VERSION_KEY = 'edgeworker-version';
+const BUNDLE_FORMAT_VERSION_KEY = 'bundle-version';
+const JSAPI_VERSION_KEY = 'api-version';
+let tarballChecksum;
 
 // set default JSON output options
 const jsonOutputParams = {
   jsonOutput: false,
   jsonOutputPath: EDGEWORKERS_CLI_OUTPUT_DIR,
   jsonOutputFilename: EDGEWORKERS_CLI_OUTPUT_FILENAME,
+  jsonOutputFile: false,
+  jsonOutputStdout: false
 };
 
 // Add try/catch logic incase user doesnt have permissions to write directories needed
@@ -67,12 +69,27 @@ export function setJSONOutputMode(output: boolean) {
 }
 
 export function setJSONOutputPath(path: string) {
+  jsonOutputParams.jsonOutputFile = true;
   // only set path to new value if it is provided; since its optional, could be null, so leave set to default value
-  if (path) jsonOutputParams.jsonOutputPath = untildify(path);
+  if (path) { 
+    jsonOutputParams.jsonOutputPath = untildify(path);
+  }
+}
+
+export function setJSONOutputStdout(output: boolean) {
+  jsonOutputParams.jsonOutputStdout = output;
 }
 
 export function isJSONOutputMode() {
   return jsonOutputParams.jsonOutput;
+}
+
+export function isJSONOutputStdout() {
+  return jsonOutputParams.jsonOutputStdout;
+}
+
+export function isJSONOutputFile() {
+  return jsonOutputParams.jsonOutputFile;
 }
 
 /**
@@ -258,7 +275,7 @@ export function determineTarballDownloadDir(
 ) {
   // If download path option provided, try to use it
   // If not provided, default to CLI cache directory under <CLI_CACHE_PATH>/edgeworkers-cli/edgeworkers/<ewid>/
-  const downloadPath = !!rawDownloadPath
+  const downloadPath = rawDownloadPath
     ? untildify(rawDownloadPath)
     : createEdgeWorkerIdDir(ewId);
 
@@ -320,9 +337,6 @@ function determineJSONOutputPathAndFilename() {
     );
   }
 
-  console.log(
-    `Saving JSON output at: ${path.join(jsonOutputPath, jsonOutputFilename)}`
-  );
   return {
     path: jsonOutputPath,
     filename: jsonOutputFilename,
@@ -349,17 +363,30 @@ export function writeJSONOutput(exitCode: number, msg: string, data = {}) {
     data: outputData,
   };
 
-  // Then, determine the path and filename to write the JSON output
-  const outputDestination = determineJSONOutputPathAndFilename();
-  // Last, try to write the output file synchronously
-  try {
-    fs.writeFileSync(
-      path.join(outputDestination.path, outputDestination.filename),
-      cliUtils.toJsonPretty(output)
-    );
-  } catch (e) {
-    // unset JSON mode since we cant write the file before writing out error
-    setJSONOutputMode(false);
-    cliUtils.logAndExit(1, `ERROR: Cannot create JSON output \n${e.message}`);
+  const jsonResult = cliUtils.toJsonPretty(output);
+
+  // Check if we should output JSON to stdout
+  if (isJSONOutputStdout()) {
+    console.log(jsonResult);
+  }
+
+  if (isJSONOutputFile()) {
+    // Determine the path and filename to write the JSON output
+    const outputDestination = determineJSONOutputPathAndFilename();
+    // Last, try to write the output file synchronously
+    try {
+      // support writing to both file and stdout; if stdout is on, don't leave a log message
+      if (!isJSONOutputStdout()) {
+        console.log(`Saving JSON output at: ${path.join(outputDestination.path, outputDestination.filename)}`);
+      }
+      fs.writeFileSync(
+        path.join(outputDestination.path, outputDestination.filename),
+        jsonResult
+      );
+    } catch (e) {
+      // unset JSON mode since we cant write the file before writing out error
+      setJSONOutputMode(false);
+      cliUtils.logAndExit(1, `ERROR: Cannot create JSON output \n${e.message}`);
+    }
   }
 }
