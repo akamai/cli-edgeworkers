@@ -64,7 +64,9 @@ program
       cliUtils.logAndExit(0, copywrite);
     }
     else {
-      const command = (program.commands.find(c => c.name == arg)) ? program.commands.find(c => c.name == arg) : program.commands.find(c => c.aliases[0] == arg);
+      const command = (program.commands.find(c => c.name() == arg)) 
+      ? program.commands.find(c => c.name() == arg)
+      : program.commands.find(c => c.aliases()[0] == arg);
       if (!command) {
         cliUtils.logAndExit(1, `ERROR: Could not find a command for ${arg}`);
       }
