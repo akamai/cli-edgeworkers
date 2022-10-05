@@ -18,6 +18,7 @@ program
   .option('--edgerc <path>', 'Use edgerc file for authentication.')
   .option('--section <name>', 'Use this section in edgerc file that contains the credential set.')
   .option('--json [path]', 'Write command output to JSON file at given path, otherwise written to CLI cache directory')
+  .option('--jsonout', 'Write command output as JSON to stdout')
   .option('--accountkey <account-id>', 'internal parameter')
   .option('--timeout <timeout>', 'Use this for custom timeout')
   .on('option:debug', function () {
@@ -32,6 +33,10 @@ program
   .on('option:json', function (path) {
     edgeWorkersClientSvc.setJSONOutputMode(true);
     edgeWorkersClientSvc.setJSONOutputPath(path);
+  })
+  .on('option:jsonout', function () {
+    edgeWorkersClientSvc.setJSONOutputMode(true);
+    edgeWorkersClientSvc.setJSONOutputStdout(true);
   })
   .on('option:accountkey', function (key) {
     httpEdge.setAccountKey(key);

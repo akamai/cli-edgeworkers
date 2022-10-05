@@ -29,13 +29,15 @@ const MANIFEST_FILENAME = 'bundle.json';
 const TARBALL_VERSION_KEY = 'edgeworker-version';
 const BUNDLE_FORMAT_VERSION_KEY = 'bundle-version';
 const JSAPI_VERSION_KEY = 'api-version';
-let tarballChecksum = undefined;
+let tarballChecksum;
 
 // set default JSON output options
 const jsonOutputParams = {
   jsonOutput: false,
   jsonOutputPath: EDGEWORKERS_CLI_OUTPUT_DIR,
   jsonOutputFilename: EDGEWORKERS_CLI_OUTPUT_FILENAME,
+  jsonOutputFile: false,
+  jsonOutputStdout: false
 };
 
 // Add try/catch logic incase user doesnt have permissions to write directories needed
@@ -66,12 +68,27 @@ export function setJSONOutputMode(output: boolean) {
 }
 
 export function setJSONOutputPath(path: string) {
+  jsonOutputParams.jsonOutputFile = true;
   // only set path to new value if it is provided; since its optional, could be null, so leave set to default value
-  if (path) jsonOutputParams.jsonOutputPath = untildify(path);
+  if (path) { 
+    jsonOutputParams.jsonOutputPath = untildify(path);
+  }
+}
+
+export function setJSONOutputStdout(output: boolean) {
+  jsonOutputParams.jsonOutputStdout = output;
 }
 
 export function isJSONOutputMode() {
   return jsonOutputParams.jsonOutput;
+}
+
+export function isJSONOutputStdout() {
+  return jsonOutputParams.jsonOutputStdout;
+}
+
+export function isJSONOutputFile() {
+  return jsonOutputParams.jsonOutputFile;
 }
 
 /**
@@ -319,9 +336,6 @@ function determineJSONOutputPathAndFilename() {
     );
   }
 
-  console.log(
-    `Saving JSON output at: ${path.join(jsonOutputPath, jsonOutputFilename)}`
-  );
   return {
     path: jsonOutputPath,
     filename: jsonOutputFilename,
@@ -348,17 +362,30 @@ export function writeJSONOutput(exitCode: number, msg: string, data = {}) {
     data: outputData,
   };
 
-  // Then, determine the path and filename to write the JSON output
-  const outputDestination = determineJSONOutputPathAndFilename();
-  // Last, try to write the output file synchronously
-  try {
-    fs.writeFileSync(
-      path.join(outputDestination.path, outputDestination.filename),
-      cliUtils.toJsonPretty(output)
-    );
-  } catch (e) {
-    // unset JSON mode since we cant write the file before writing out error
-    setJSONOutputMode(false);
-    cliUtils.logAndExit(1, `ERROR: Cannot create JSON output \n${e.message}`);
+  const jsonResult = cliUtils.toJsonPretty(output);
+
+  // Check if we should output JSON to stdout
+  if (isJSONOutputStdout()) {
+    console.log(jsonResult);
+  }
+
+  if (isJSONOutputFile()) {
+    // Determine the path and filename to write the JSON output
+    const outputDestination = determineJSONOutputPathAndFilename();
+    // Last, try to write the output file synchronously
+    try {
+      // support writing to both file and stdout; if stdout is on, don't leave a log message
+      if (!isJSONOutputStdout()) {
+        console.log(`Saving JSON output at: ${path.join(outputDestination.path, outputDestination.filename)}`);
+      }
+      fs.writeFileSync(
+        path.join(outputDestination.path, outputDestination.filename),
+        jsonResult
+      );
+    } catch (e) {
+      // unset JSON mode since we cant write the file before writing out error
+      setJSONOutputMode(false);
+      cliUtils.logAndExit(1, `ERROR: Cannot create JSON output \n${e.message}`);
+    }
   }
 }

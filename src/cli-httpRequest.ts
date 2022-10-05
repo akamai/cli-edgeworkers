@@ -27,7 +27,8 @@ export function sendEdgeRequest(
   body,
   headers,
   timeout: number,
-  metricType?: string
+  metricType?: string,
+  requestConfig? : Record<string, unknown> 
 ) {
   const edge = envUtils.getEdgeGrid();
 
@@ -50,11 +51,12 @@ export function sendEdgeRequest(
   const servicePromise = function () {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return new Promise<any>((resolve, reject) => {
-      edge.auth({
+       edge.auth({
         path,
         method,
         headers,
         body,
+        ...requestConfig,
       });
 
       edge.send(function (error, response, body) {
@@ -112,7 +114,8 @@ export function postJson(
   path: string,
   body,
   timeout: number,
-  metricType?: string
+  metricType?: string,
+  requestConfig? : Record<string, unknown>
 ) {
   return sendEdgeRequest(
     path,
@@ -122,7 +125,8 @@ export function postJson(
       'Content-Type': 'application/json',
     },
     timeout,
-    metricType
+    metricType,
+    requestConfig
   );
 }
 
@@ -130,7 +134,8 @@ export function putJson(
   path: string,
   body,
   timeout: number,
-  metricType?: string
+  metricType?: string,
+  requestConfig? : Record<string, unknown>
 ) {
   return sendEdgeRequest(
     path,
@@ -140,16 +145,26 @@ export function putJson(
       'Content-Type': 'application/json',
     },
     timeout,
-    metricType
+    metricType,
+    requestConfig
   );
 }
 
-export function getJson(path: string, timeout: number, metricType?: string) {
-  return sendEdgeRequest(path, 'GET', '', {}, timeout, metricType);
+export function getJson(
+  path: string,
+  timeout: number,
+  metricType?: string,
+  requestConfig? : Record<string, unknown>
+  ) {
+  return sendEdgeRequest(path, 'GET', '', {}, timeout, metricType, requestConfig);
 }
 
-export function deleteReq(path: string, timeout: number, metricType?: string) {
-  return sendEdgeRequest(path, 'DELETE', '', {}, timeout, metricType);
+export function deleteReq(path: string,
+  timeout: number,
+  metricType?: string,
+  requestConfig? : Record<string, unknown> 
+  ) {
+  return sendEdgeRequest(path, 'DELETE', '', {}, timeout, metricType, requestConfig);
 }
 
 export function isOkStatus(code) {
