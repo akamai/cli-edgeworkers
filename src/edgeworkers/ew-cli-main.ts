@@ -160,7 +160,7 @@ program
     cliUtils.logAndExit(0, copywrite);
   });
 
-program
+  program
   .command("list-restiers")
   .description("Allows customer to view the list of resource tiers available for the specified contract")
   .option("--contractId <contractId>", "Contract id for the resource tiers")
@@ -173,6 +173,21 @@ program
     }
   })
   .on("--help", function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+program
+  .command('list-limits')
+  .description('List the various limits EdgeWorkers imposes on the number of activations, EdgeWorkers IDs, and versions you can deploy.')
+  .alias('li-limits')
+  .action(async function () {
+    try {
+      await cliHandler.getLimits();
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on('--help', function () {
     cliUtils.logAndExit(0, copywrite);
   });
 
