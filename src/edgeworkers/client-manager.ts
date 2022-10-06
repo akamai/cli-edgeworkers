@@ -1,10 +1,11 @@
 import * as cliUtils from '../utils/cli-utils';
 import * as os from 'os';
-const fs = require('fs');
-const path = require('path');
-const tar = require('tar');
-const untildify = require('untildify');
-const sha256File = require('sha256-file');
+import fs from 'fs';
+import path from 'path';
+import tar from 'tar';
+import untildify from 'untildify';
+import sha256File from 'sha256-file';
+import { glob } from 'glob';
 
 const CLI_CACHE_PATH: string =
   process.env.AKAMAI_CLI_CACHE_DIR ||
@@ -22,19 +23,21 @@ const EDGEWORKERS_CLI_OUTPUT_DIR: string = path.join(
   EDGEWORKERS_DIR,
   `/cli-output/${Date.now()}/`
 );
-const EDGEWORKERS_CLI_OUTPUT_FILENAME: string = 'ewcli_output.json';
-const MAINJS_FILENAME: string = 'main.js';
-const MANIFEST_FILENAME: string = 'bundle.json';
-const TARBALL_VERSION_KEY: string = 'edgeworker-version';
-const BUNDLE_FORMAT_VERSION_KEY: string = 'bundle-version';
-const JSAPI_VERSION_KEY: string = 'api-version';
-var tarballChecksum = undefined;
+const EDGEWORKERS_CLI_OUTPUT_FILENAME = 'ewcli_output.json';
+const MAINJS_FILENAME = 'main.js';
+const MANIFEST_FILENAME = 'bundle.json';
+const TARBALL_VERSION_KEY = 'edgeworker-version';
+const BUNDLE_FORMAT_VERSION_KEY = 'bundle-version';
+const JSAPI_VERSION_KEY = 'api-version';
+let tarballChecksum;
 
 // set default JSON output options
 const jsonOutputParams = {
   jsonOutput: false,
   jsonOutputPath: EDGEWORKERS_CLI_OUTPUT_DIR,
   jsonOutputFilename: EDGEWORKERS_CLI_OUTPUT_FILENAME,
+  jsonOutputFile: false,
+  jsonOutputStdout: false
 };
 
 // Add try/catch logic incase user doesnt have permissions to write directories needed
@@ -65,12 +68,27 @@ export function setJSONOutputMode(output: boolean) {
 }
 
 export function setJSONOutputPath(path: string) {
+  jsonOutputParams.jsonOutputFile = true;
   // only set path to new value if it is provided; since its optional, could be null, so leave set to default value
-  if (path) jsonOutputParams.jsonOutputPath = untildify(path);
+  if (path) { 
+    jsonOutputParams.jsonOutputPath = untildify(path);
+  }
+}
+
+export function setJSONOutputStdout(output: boolean) {
+  jsonOutputParams.jsonOutputStdout = output;
 }
 
 export function isJSONOutputMode() {
   return jsonOutputParams.jsonOutput;
+}
+
+export function isJSONOutputStdout() {
+  return jsonOutputParams.jsonOutputStdout;
+}
+
+export function isJSONOutputFile() {
+  return jsonOutputParams.jsonOutputFile;
 }
 
 /**
@@ -83,11 +101,11 @@ export function validateTarballLocally(
   rawTarballPath: string,
   isValidate?: boolean
 ) {
-  var tarballPath = untildify(rawTarballPath);
+  const tarballPath = untildify(rawTarballPath);
 
   // Check to make sure tarball exists
   if (!fs.existsSync(tarballPath)) {
-    let errMsgPart = isValidate
+    const errMsgPart = isValidate
       ? 'Validation Errors for:'
       : 'ERROR: EdgeWorkers bundle archive';
     cliUtils.logAndExit(
@@ -105,10 +123,10 @@ export function validateTarballLocally(
   };
 }
 
-export function buildTarball(ewId: string, codePath: string) {
-  var codeWorkingDirectory = untildify(codePath);
-  var mainjsPath = path.join(codeWorkingDirectory, MAINJS_FILENAME);
-  var manifestPath = path.join(codeWorkingDirectory, MANIFEST_FILENAME);
+export function buildTarball(ewId: string, codePath: string, edgeWorkersDir: string = createEdgeWorkerIdDir(ewId)) {
+  const codeWorkingDirectory = path.resolve(untildify(codePath));
+  const mainjsPath = path.join(codeWorkingDirectory, MAINJS_FILENAME);
+  const manifestPath = path.join(codeWorkingDirectory, MANIFEST_FILENAME);
 
   if (!fs.existsSync(mainjsPath) || !fs.existsSync(manifestPath)) {
     cliUtils.logAndExit(
@@ -117,15 +135,13 @@ export function buildTarball(ewId: string, codePath: string) {
     );
   }
 
-  const edgeWorkersDir = createEdgeWorkerIdDir(ewId);
-
   // Build tarball file name as ew_<version>_<now-as-epoch>.tgz
-  var tarballFileName: string = 'ew_';
-  var tarballVersion: string;
+  let tarballFileName = 'ew_';
+  let tarballVersion: string;
 
   // Validate Manifest and if valid, grab version identifier
-  var manifest = fs.readFileSync(manifestPath).toString();
-  var manifestValidationData = validateManifest(manifest);
+  const manifest = fs.readFileSync(manifestPath).toString();
+  const manifestValidationData = validateManifest(manifest);
 
   if (!manifestValidationData.isValid) {
     cliUtils.logAndExit(1, manifestValidationData.error_reason);
@@ -136,22 +152,27 @@ export function buildTarball(ewId: string, codePath: string) {
   tarballFileName += tarballVersion + '_' + Date.now() + '.tgz';
   const tarballPath = path.join(edgeWorkersDir, tarballFileName);
 
+  // get the list of files that we will add to the tarball.  While ['.'] works to create a tarball, it will fail validation
+  // when uploaded.  The validation server will not be able to find the bundle.json/main.js when it lists the files inside.
+  const files = glob.sync('**/*', { cwd: codeWorkingDirectory });
+
   // tar files together with no directory structure (ie: tar czvf ../helloworld.tgz *)
   tar
     .c(
       {
         gzip: true,
-        sync: true,
-        C: codeWorkingDirectory,
         portable: true,
+        file: tarballPath,
+        cwd: codeWorkingDirectory,
+        sync: true
       },
-      [MAINJS_FILENAME, MANIFEST_FILENAME]
-    )
-    .pipe(fs.createWriteStream(tarballPath));
+      files
+    );
 
   // calculate checksum of new tarball
   tarballChecksum = calculateChecksum(tarballPath);
 
+  cliUtils.log(`Created tarball at ${tarballPath}`);
   return {
     tarballPath,
     tarballChecksum,
@@ -191,9 +212,9 @@ function validateManifest(manifest: string) {
 
   manifest = JSON.parse(manifest);
 
-  var tarballVersion = manifest[TARBALL_VERSION_KEY];
-  var manifestFormat = manifest[BUNDLE_FORMAT_VERSION_KEY];
-  var jsAPIVersion = manifest[JSAPI_VERSION_KEY];
+  const tarballVersion = manifest[TARBALL_VERSION_KEY];
+  const manifestFormat = manifest[BUNDLE_FORMAT_VERSION_KEY];
+  const jsAPIVersion = manifest[JSAPI_VERSION_KEY];
 
   // only checks the one required field is found, ignores optional fields (for now)
   if (!tarballVersion) {
@@ -253,7 +274,7 @@ export function determineTarballDownloadDir(
 ) {
   // If download path option provided, try to use it
   // If not provided, default to CLI cache directory under <CLI_CACHE_PATH>/edgeworkers-cli/edgeworkers/<ewid>/
-  var downloadPath = !!rawDownloadPath
+  const downloadPath = rawDownloadPath
     ? untildify(rawDownloadPath)
     : createEdgeWorkerIdDir(ewId);
 
@@ -315,9 +336,6 @@ function determineJSONOutputPathAndFilename() {
     );
   }
 
-  console.log(
-    `Saving JSON output at: ${path.join(jsonOutputPath, jsonOutputFilename)}`
-  );
   return {
     path: jsonOutputPath,
     filename: jsonOutputFilename,
@@ -338,23 +356,36 @@ export function writeJSONOutput(exitCode: number, msg: string, data = {}) {
     outputData = data;
   }
 
-  let output = {
+  const output = {
     cliStatus: exitCode,
     msg: outputMsg,
     data: outputData,
   };
 
-  // Then, determine the path and filename to write the JSON output
-  let outputDestination = determineJSONOutputPathAndFilename();
-  // Last, try to write the output file synchronously
-  try {
-    fs.writeFileSync(
-      path.join(outputDestination.path, outputDestination.filename),
-      cliUtils.toJsonPretty(output)
-    );
-  } catch (e) {
-    // unset JSON mode since we cant write the file before writing out error
-    setJSONOutputMode(false);
-    cliUtils.logAndExit(1, `ERROR: Cannot create JSON output \n${e.message}`);
+  const jsonResult = cliUtils.toJsonPretty(output);
+
+  // Check if we should output JSON to stdout
+  if (isJSONOutputStdout()) {
+    console.log(jsonResult);
+  }
+
+  if (isJSONOutputFile()) {
+    // Determine the path and filename to write the JSON output
+    const outputDestination = determineJSONOutputPathAndFilename();
+    // Last, try to write the output file synchronously
+    try {
+      // support writing to both file and stdout; if stdout is on, don't leave a log message
+      if (!isJSONOutputStdout()) {
+        console.log(`Saving JSON output at: ${path.join(outputDestination.path, outputDestination.filename)}`);
+      }
+      fs.writeFileSync(
+        path.join(outputDestination.path, outputDestination.filename),
+        jsonResult
+      );
+    } catch (e) {
+      // unset JSON mode since we cant write the file before writing out error
+      setJSONOutputMode(false);
+      cliUtils.logAndExit(1, `ERROR: Cannot create JSON output \n${e.message}`);
+    }
   }
 }

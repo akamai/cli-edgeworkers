@@ -28,6 +28,7 @@ function fetchTarball(
   headers[EDGEWORKERS_CLIENT_HEADER] = 'CLI';
   headers['Accept'] = 'application/gzip';
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return new Promise<any>((resolve, reject) => {
     edge.auth({
       path,

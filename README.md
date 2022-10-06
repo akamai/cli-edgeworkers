@@ -16,7 +16,7 @@ To use this tool you need:
     * If you do not have the CLI and are using [Homebrew](https://brew.sh/) on a Mac, run this command: `brew install akamai`
     * You may also [download](https://github.com/akamai/cli) OS-specific CLI binaries or a Docker image
 * Valid EdgeGrid credentials configured via Akamai Control Center (see [Get Started with APIs](https://developer.akamai.com/api/getting-started))
-* Node version 7 or higher
+* Node version 14 or higher
 
 
 ## Install or Update the EdgeWorkers
@@ -50,6 +50,7 @@ Options:
 | --section `<name>` | Use this section in `edgerc` file. (Default section is _[default]_)|
 | --timeout `<timeout>` | You can specify a timeout value for a command in seconds to override the 2 minute default. For example, if you add "--timeout 10" to a command, it will timeout if the server takes more than 10 second to respond. |
 | --json `[path]` | Write CLI output as JSON to optionally provided path.  If not path provided, write JSON output to CLI home directory |
+| --jsonout | Write CLI output as JSON to stdout. |
 | -h, --help | Display usage information for EdgeWorkers CLI. |
  
 Commands:
@@ -498,6 +499,12 @@ For more information on EdgeWorkers, refer to the following resources:
 
 ## Reporting Issues
 You are all set, happy coding! If you experience any issues with the EdgeWorkers CLI, raise them as a [github issue](https://github.com/akamai/cli-edgeworkers/issues). Feel free to create a pull request with the fix or suggestion.
+
+## Contributing
+We welcome contributions from Akamai staff, customers, or others. Before opening up a PR please double check the following:
+1. Please add some test cases to accompany your PR. This verifies the functionality added or modified in the PR and proves to others that your code works :)
+2. Please make sure that your code passes all pre-commit checks. Your code should build successfully, pass all unit tests, and have no linting issues.
+3. All PR's should be targeting develop, not master. Merges to master will immediately release to all customers.
 
 <!--esi
 <esi:eval src="/internal/footer.html?http" dca="esi" />
