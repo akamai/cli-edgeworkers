@@ -5,6 +5,6 @@
  */
 
 module.exports = {
-  EdgeKV: require("./src/edgekv/ekv-cli-main"),
-  EdgeWorkers: require("./src/edgeworkers/ew-cli-main")
+  EdgeKV: require('./src/edgekv/ekv-cli-main'),
+  EdgeWorkers: require('./src/edgeworkers/ew-cli-main')
 };

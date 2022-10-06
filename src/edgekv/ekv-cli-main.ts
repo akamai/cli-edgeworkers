@@ -5,10 +5,10 @@ import * as kvCliHandler from './ekv-handler';
 import * as edgeWorkersClientSvc from '../edgeworkers/client-manager';
 import * as httpEdge from '../cli-httpRequest';
 import * as pkginfo from '../../package.json';
-const commander = require('commander');
-const program = new commander.Command();
+import { Command } from 'commander';
+const program = new Command();
 const copywrite =
-  "\nCopyright (c) 2019-2021 Akamai Technologies, Inc. Licensed under Apache 2 license.\nYour use of Akamai's products and services is subject to the terms and provisions outlined in Akamai's legal policies.\nVisit http://github.com/akamai/cli-edgeworkers for detailed documentation";
+  '\nCopyright (c) 2019-2021 Akamai Technologies, Inc. Licensed under Apache 2 license.\nYour use of Akamai\'s products and services is subject to the terms and provisions outlined in Akamai\'s legal policies.\nVisit http://github.com/akamai/cli-edgeworkers for detailed documentation';
 program
   .version(pkginfo.version)
   .description(pkginfo.description)
@@ -64,9 +64,9 @@ program
       program.outputHelp();
       cliUtils.logAndExit(0, copywrite);
     } else {
-      var command = !!program.commands.find((c) => c._name == arg)
-        ? program.commands.find((c) => c._name == arg)
-        : program.commands.find((c) => c._aliases[0] == arg);
+      const command = program.commands.find((c) => c.name() == arg)
+        ? program.commands.find((c) => c.name() == arg)
+        : program.commands.find((c) => c.aliases()[0] == arg);
       if (!command) {
         cliUtils.logAndExit(1, `ERROR: Could not find a command for ${arg}`);
       } else {
@@ -269,7 +269,7 @@ list
   .description(
     'List the data groups for a given namespace in an Akamai environment.'
   )
-  .action(async function (environment, namespace, options) {
+  .action(async function (environment, namespace) {
     try {
       await kvCliHandler.listGroups(environment, namespace);
     } catch (e) {
@@ -536,12 +536,4 @@ if (envUtils.getNodeVersion() < 7) {
     1,
     'ERROR: The Akamai EdgeWorkers CLI requires Node 7.0.0 or newer.'
   );
-}
-
-if (program.args.length === 0) {
-  program.outputHelp(function (text) {
-    console.log(text);
-    console.log(copywrite);
-    cliUtils.logAndExit(1, 'ERROR: No commands were provided.');
-  });
 }

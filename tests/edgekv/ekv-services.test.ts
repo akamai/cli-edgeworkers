@@ -423,7 +423,7 @@ describe('ekv-services tests', () => {
     });
   });
 
-  describe('testing wrtieItems', () => {
+  describe('testing writeItems', () => {
     const textItem = 'mockItem';
     const jsonItems = {
       item1: 'item1',

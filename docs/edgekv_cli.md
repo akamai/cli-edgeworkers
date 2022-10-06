@@ -42,7 +42,7 @@ To use this tool you need:
     * If you do not have the CLI and are using [Homebrew](https://brew.sh/) on a Mac, run this command: `brew install akamai`
     * You may also [download](https://github.com/akamai/cli) OS-specific CLI binaries or a Docker image
 * Valid EdgeGrid credentials configured via Akamai Control Center (see [Get Started with APIs](https://developer.akamai.com/api/getting-started))
-* Node version 7 or higher
+* Node version 14 or higher
 
 ## Install or Update the EdgeWorkers and EdgeKV CLI
 
@@ -75,7 +75,7 @@ Runtime workaround - use this if Docker is already running
 
 ## Overview of Commands
 
-EdgeKV CLI enables you to manage the EdgeKV database by calling the [EdgeKV API](https://github.com/akamai/edgeworkers-examples/tree/master/edgekv/apis) from within the utility.
+EdgeKV CLI enables you to manage the EdgeKV database by calling the [EdgeKV API](https://techdocs.akamai.com/edgekv/reference/api) from within the utility.
 
 Conventions:
 * optional arguments are denoted by []
@@ -90,7 +90,7 @@ Options:
 | - | - |
 | -V, --version | Display the version number for the EdgeKV CLI program |
 | --debug | Show debug information. |
-| --edgerc `<path>` | Use credentials in edgerc file for command. (Default file location is ~/.edgerc). Refer to [Get Started with APIs](https://developer.akamai.com/api/getting-started#addcred) for more information. |
+| --edgerc `<path>` | Use credentials in edgerc file for command. (Default file location is ~/.edgerc). Refer to [Get Started with APIs](https://techdocs.akamai.com/developer/docs/set-up-authentication-credentials) for more information. |
 | --section `<name>` | Use this section in `edgerc` file. (Default section is _[default]_)|
 | --timeout `<timeout>` | You can specify a timeout value for a command in seconds to override the 1 minute default. For example, if you add "--timeout 10" to a command, it will timeout if the server takes more than 10 second to respond. |
 | -h, --help | Display information on how to use this EdgeKV command. | 
@@ -368,7 +368,7 @@ Usage: `akamai edgekv list tokens`
 | --include-expired | Retrieves both expired and valid tokens. |
 
 #### Important Notes
-1. Note that --include-expired returns all the tokens that count towards your account's token limit. For more details, See [Akamai EdgeKV getting started guide](https://learn.akamai.com/en-us/webhelp/edgeworkers/edgekv-getting-started-guide/GUID-F14C3474-D4B8-47F4-84CF-A999647000E0.html)
+1. Note that --include-expired returns all the tokens that count towards your account's token limit. For more details, See [Akamai EdgeKV getting started guide](https://techdocs.akamai.com/edgekv/docs/limits)
  
 ### Retrieve Access Token
  
@@ -453,8 +453,8 @@ ___
 
 For more information on EdgeKV, refer to the following resources:
 
-* [EdgeKV User Guide](https://learn.akamai.com/en-us/webhelp/edgeworkers/edgekv-getting-started-guide/GUID-FA85D8AF-F277-4FD0-B789-17312DBD3DDE.html)
-* [EdgeKV API Reference](https://github.com/akamai/edgeworkers-examples/tree/master/edgekv/apis)
+* [EdgeKV User Guide](https://techdocs.akamai.com/edgekv/docs)
+* [EdgeKV API Reference](https://techdocs.akamai.com/edgekv/reference/api)
 
 ## Reporting Issues
 
