@@ -38,7 +38,7 @@ describe('cli-httpRequest tests', () => {
   beforeEach(() => {
     // Mock auth() and send() functions in EdgeGrid library
     edgeGrid.auth.mockReturnThis();
-    edgeGrid.send = jest.fn().mockImplementation((callback) => {
+    edgeGrid.send.mockImplementation((callback) => {
       callback(null, { status: SUCCESS_CODE }, '');
     });
   });

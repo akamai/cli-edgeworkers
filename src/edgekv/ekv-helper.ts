@@ -6,7 +6,7 @@ import { fromSeconds } from 'from-seconds';
 import fs from 'fs';
 import path from 'path';
 import untildify from 'untildify';
-import tar from 'tar-stream';
+import * as tar from 'tar-stream';
 import zlib from 'zlib';
 const tkn_var = 'var edgekv_access_tokens = {';
 const tkn_export = '\n}\nexport { edgekv_access_tokens };';

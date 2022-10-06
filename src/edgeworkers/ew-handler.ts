@@ -3,7 +3,7 @@ import * as envUtils from '../utils/env-utils';
 import * as cliUtils from '../utils/cli-utils';
 import * as edgeWorkersSvc from './ew-service';
 import * as edgeWorkersClientSvc from './client-manager';
-import readline from 'readline-sync';
+import * as readline from 'readline-sync';
 
 import CryptoJS from 'crypto-js';
 const groupColumnsToKeep = ['groupId', 'groupName', 'capabilities'];

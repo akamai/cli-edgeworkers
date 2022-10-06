@@ -11,7 +11,7 @@ export let accountKey = null;
 export const timeoutVal = 120000;
 const versionHeader = 'X-AK-EDGEKV-CLI-VER';
 const ekvcliHeader = 'X-AK-EDGEKV-CLI';
-import pjson from '../package.json';
+import * as pjson from '../package.json';
 
 export function setAccountKey(account: string) {
   accountKey = account;
