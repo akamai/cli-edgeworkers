@@ -464,6 +464,12 @@ For more information on EdgeWorkers, refer to the following resources:
 ## Reporting Issues
 You are all set, happy coding! If you experience any issues with the EdgeWorkers CLI, raise them as a [github issue](https://github.com/akamai/cli-edgeworkers/issues). Feel free to create a pull request with the fix or suggestion.
 
+## Contributing
+We welcome contributions from Akamai staff, customers, or others. Before opening up a PR please double check the following:
+1. Please add some test cases to accompany your PR. This verifies the functionality added or modified in the PR and proves to others that your code works :)
+2. Please make sure that your code passes all pre-commit checks. Your code should build successfully, pass all unit tests, and have no linting issues.
+3. All PR's should be targeting develop, not master. Merges to master will immediately release to all customers.
+
 <!--esi
 <esi:eval src="/internal/footer.html?http" dca="esi" />
 -->

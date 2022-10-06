@@ -1,8 +1,8 @@
 export const promiseTimeout = function (ms, promise) {
-  let timeoutHandle: any;
+  let timeoutHandle;
    // Create a promise that rejects in <ms> milliseconds
   const timeoutPromise = new Promise<never>((resolve, reject) => {
-    let timeoutObj = { "status": 504 };
+    const timeoutObj = { 'status': 504 };
     timeoutHandle = setTimeout(() => reject(JSON.stringify(timeoutObj)),ms);
   });
 
@@ -14,4 +14,4 @@ export const promiseTimeout = function (ms, promise) {
     clearTimeout(timeoutHandle);
     return result;
   });
-}
+};

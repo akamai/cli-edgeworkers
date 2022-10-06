@@ -423,7 +423,7 @@ describe('ekv-services tests', () => {
     });
   });
 
-  describe('testing wrtieItems', () => {
+  describe('testing writeItems', () => {
     const textItem = 'mockItem';
     const jsonItems = {
       item1: 'item1',
@@ -847,7 +847,7 @@ describe('ekv-services tests', () => {
     test('function should handle errors properly', async () => {
       // Mock deleteReq() method
       const deleteReqSpy = jest.spyOn(httpEdge, 'deleteReq');
-      deleteReqSpy.mockImplementation((path, timeout, metricType) => {
+      deleteReqSpy.mockImplementation(() => {
         // The normal error object will be returned as a string
         return Promise.reject(JSON.stringify(mockError));
       });

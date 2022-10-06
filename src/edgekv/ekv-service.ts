@@ -9,7 +9,7 @@ const INIT_EKV_TIMEOUT = 120000;
 const DEFAULT_EKV_TIMEOUT = 60000;
 
 export function getNameSpaceList(network: string, details: boolean) {
-  var qs: string = '';
+  let qs = '';
   if (details) {
     qs += `?details=${details}`;
   }
@@ -41,7 +41,7 @@ export function createNameSpace(
   groupId,
   geoLocation
 ) {
-  var body = {
+  const body = {
     namespace: namespace,
     retentionInSeconds: retention,
     groupId: groupId,
@@ -76,7 +76,7 @@ export function updateNameSpace(
   groupId,
   geoLocation
 ) {
-  var body = {
+  const body = {
     namespace: namespace,
     retentionInSeconds: retention,
     groupId: groupId,
@@ -124,12 +124,13 @@ export function writeItems(
   itemList,
   sandboxid: string
 ) {
-  let body = itemList;
+  const body = itemList;
   let writeItemPath = `${EDGEKV_API_BASE}/networks/${network}/namespaces/${namespace}/groups/${groupId}/items/${itemId}`;
   if (sandboxid) {
     writeItemPath += `?sandboxId=${sandboxid}`;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let request: Promise<any>;
   if (typeof body === 'string') {
     // If the body is a string
@@ -153,7 +154,9 @@ export function writeItems(
     );
   }
 
-  return request.then((r) => r.body).catch((err) => error.handleError(err));
+  return request
+  .then((r) => r.body)
+  .catch((err) => error.handleError(err));
 }
 
 export function writeItemsFromFile(
@@ -238,7 +241,7 @@ export function getItemsFromGroup(
   maxItems?: number,
   sandboxid?: string
 ) {
-  var qs: string = '';
+  let qs = '';
   if (maxItems !== undefined) {
     qs += `?maxItems=${maxItems}`;
   }
@@ -247,7 +250,7 @@ export function getItemsFromGroup(
     qs += `sandboxId=${sandboxid}`;
   }
 
-  let listItemsPath = `${EDGEKV_API_BASE}/networks/${network}/namespaces/${namespace}/groups/${groupId}${qs}`;
+  const listItemsPath = `${EDGEKV_API_BASE}/networks/${network}/namespaces/${namespace}/groups/${groupId}${qs}`;
   return httpEdge
     .getJson(
       listItemsPath,
@@ -266,7 +269,7 @@ export function createEdgeKVToken(
   ewids: string[],
   expiry
 ) {
-  let body = {
+  const body = {
     name: tokenName,
     allowOnProduction: allowOnProd,
     allowOnStaging: allowOnStg,
@@ -297,7 +300,7 @@ export function getSingleToken(tokenName: string) {
 }
 
 export function getTokenList(incExpired: boolean) {
-  var qs: string = '';
+  let qs = '';
   if (incExpired) {
     qs += `?includeExpired=${incExpired}`;
   }
@@ -323,7 +326,7 @@ export function revokeToken(tokenName: string) {
 }
 
 export function modifyAuthGroupPermission(namespace: string, groupId: number) {
-  let body = { groupId: groupId };
+  const body = { groupId: groupId };
   return httpEdge
     .putJson(
       `${EDGEKV_API_BASE}/auth/namespaces/${namespace}`,
@@ -336,7 +339,7 @@ export function modifyAuthGroupPermission(namespace: string, groupId: number) {
 }
 
 export function listAuthGroups(groupId?: number) {
-  var group: string = '';
+  let group = '';
   if (groupId && groupId > 0) {
     group = `/${groupId}`;
   }

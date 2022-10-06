@@ -4,7 +4,6 @@ import { buildTarball, validateTarballLocally } from '../src/edgeworkers/client-
 const TAR_TEMP_DIR = __dirname + '/tmp_tar/';
 
 describe('client-manager tests', () => {
-
     beforeAll(() => {
         if (!existsSync(TAR_TEMP_DIR)) {
             mkdirSync(TAR_TEMP_DIR);

@@ -7,11 +7,11 @@ import {
 } from './edgeworkers/ew-service';
 import { EDGEKV_API_BASE } from './edgekv/ekv-service';
 
-export let accountKey: string = null;
+export let accountKey = null;
 export const timeoutVal = 120000;
 const versionHeader = 'X-AK-EDGEKV-CLI-VER';
 const ekvcliHeader = 'X-AK-EDGEKV-CLI';
-const pjson = require('../package.json');
+import * as pjson from '../package.json';
 
 export function setAccountKey(account: string) {
   accountKey = account;
@@ -49,6 +49,7 @@ export function sendEdgeRequest(
   }
 
   const servicePromise = function () {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return new Promise<any>((resolve, reject) => {
        edge.auth({
         path,

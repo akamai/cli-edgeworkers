@@ -1,8 +1,8 @@
 import * as edgeWorkersClientSvc from '../edgeworkers/client-manager';
 import * as envUtils from '../utils/env-utils';
 
-const inquirer = require('inquirer');
-const Spinner = require('cli-spinner').Spinner;
+import inquirer from 'inquirer';
+import {Spinner} from  'cli-spinner';
 const TIME_UNITS: string[] = ['ms', 's', 'min', 'h'];
 const MEMORY_UNITS: string[] = ['B', 'kB', 'MB', 'GB', 'TB'];
 const COUNT_UNITS: string[] = ['', 'Thousand', 'Million', 'Billion', 'Trillion'];
@@ -11,8 +11,8 @@ export const staging = 'STAGING';
 export const production = 'PRODUCTION';
 
 export function logWithBorder(str, type = 'log') {
-  var t: string = `--- ${str} ---`;
-  var border = getBorder(t);
+  const t = `--- ${str} ---`;
+  const border = getBorder(t);
   log(border, type);
   log(t, type);
   log(border, type);
@@ -39,17 +39,17 @@ export function logAndExit(exitCode: number, msg: string, data =[{}]) {
 }
 
 export function getFormattedValue(limit) {
-  if (limit["limitUnit"] === 'MILLISECOND') {
-    return formatMilliseconds(limit["limitValue"]);
-  } else if (limit["limitUnit"]  === 'BYTE') {
-    return bytesToBinarySize(limit["limitValue"]);
+  if (limit['limitUnit'] === 'MILLISECOND') {
+    return formatMilliseconds(limit['limitValue']);
+  } else if (limit['limitUnit']  === 'BYTE') {
+    return bytesToBinarySize(limit['limitValue']);
   }
 
-  return formatCount(limit["limitValue"]);
+  return formatCount(limit['limitValue']);
 }
 
 export async function confirm(msg: string) {
-  var answer = await inquirer.prompt([
+  const answer = await inquirer.prompt([
     {
       type: 'confirm',
       message: msg,
@@ -59,7 +59,7 @@ export async function confirm(msg: string) {
   return answer.result;
 }
 
-export async function spinner(func, userMsg: string = '') {
+export async function spinner(func, userMsg = '') {
   const spinner = new Spinner({
     text: `${userMsg} %s`,
     stream: process.stderr,
@@ -97,11 +97,11 @@ export function isJSON(str) {
   }
 }
 
-export async function progress(func, userMsg: string = '') {
+export async function progress(func, userMsg = '') {
   console.log(userMsg);
-  var written: number = 0;
+  let written = 0;
   const interval = setInterval(function () {
-    process.stdout.write(".");
+    process.stdout.write('.');
     written++;
   }, 1000);
   try {
@@ -109,7 +109,7 @@ export async function progress(func, userMsg: string = '') {
   } finally {
     clearInterval(interval);
     if (written > 0) {
-      process.stdout.write("\n");
+      process.stdout.write('\n');
     }
   }
 }
@@ -123,7 +123,7 @@ export function escape(text: string) {
 }
 
 export function getTimeout(timeout : number) {
-  let timeoutByUser = envUtils.getTimeout();
+  const timeoutByUser = envUtils.getTimeout();
   if (timeoutByUser == 0) {
     return timeout;
   }
@@ -136,7 +136,7 @@ export function getTimeout(timeout : number) {
  * @param {number} decimals: Number of decimals
  * @return {string} Formatted time
  */
-function formatMilliseconds(milliseconds: number, decimals: number = 2): string {
+function formatMilliseconds(milliseconds: number, decimals = 2): string {
   const fixedValue: string = milliseconds.toFixed(2);
   let value: string = fixedValue === '-0.00' ? '0.00' : fixedValue;
   let unit: string = TIME_UNITS[0];
@@ -171,7 +171,7 @@ function formatMilliseconds(milliseconds: number, decimals: number = 2): string 
  * @param {number} decimals: Number of decimals
  * @return {string} Formatted count
  */
-function formatCount(count: number, decimals: number = 2): string {
+function formatCount(count: number, decimals = 2): string {
   decimals = decimals < 0 ? 0 : decimals;
 
   const i: number = Math.log10(count) / 3 | 0;
@@ -190,7 +190,7 @@ function formatCount(count: number, decimals: number = 2): string {
  * @param {number} decimals: Number of decimals
  * @return {string} Formatted size
  */
-function bytesToBinarySize(bytes: number, decimals: number = 2): string {
+function bytesToBinarySize(bytes: number, decimals = 2): string {
   return bytesToSize(bytes, decimals);
 }
 
@@ -201,7 +201,7 @@ function bytesToBinarySize(bytes: number, decimals: number = 2): string {
  * @param {number} kilobyte: Value of 1 kilobyte (1000 decimal or 1024 binary)
  * @return {string} Formatted size
  */
-function bytesToSize(bytes: number, decimals: number = 2, kilobyte: number = 1024): string {
+function bytesToSize(bytes: number, decimals = 2, kilobyte = 1024): string {
   if (bytes === null) {
     return 'N/A';
   } else if (bytes === 0) {

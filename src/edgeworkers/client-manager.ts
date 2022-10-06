@@ -1,12 +1,11 @@
 import * as cliUtils from '../utils/cli-utils';
 import * as os from 'os';
+import fs from 'fs';
+import path from 'path';
+import tar from 'tar';
+import untildify from 'untildify';
+import sha256File from 'sha256-file';
 import { glob } from 'glob';
-
-const fs = require('fs');
-const path = require('path');
-const tar = require('tar');
-const untildify = require('untildify');
-const sha256File = require('sha256-file');
 
 const CLI_CACHE_PATH: string =
   process.env.AKAMAI_CLI_CACHE_DIR ||

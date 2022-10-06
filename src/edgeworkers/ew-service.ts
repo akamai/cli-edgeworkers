@@ -3,7 +3,6 @@ import * as cliUtils from '../utils/cli-utils';
 import * as httpEdge from '../cli-httpRequest';
 import * as error from './ew-error';
 import * as fs from 'fs';
-var zlib = require('zlib');
 
 export const EDGEWORKERS_API_BASE = '/edgeworkers/v1';
 export const EDGEWORKERS_CLIENT_HEADER = 'X-EW-CLIENT';
@@ -18,9 +17,9 @@ function fetchTarball(
   downloadPath: string
 ) {
   const edge = envUtils.getEdgeGrid();
-  var path = pth;
-  var qs: string = '&';
-  let accountKey = httpEdge.accountKey;
+  let path = pth;
+  let qs = '&';
+  const accountKey = httpEdge.accountKey;
   if (accountKey) {
     // Check if query string already included in path, if not use ? otherwise use &
     if (path.indexOf('?') == -1) qs = '?';
@@ -29,6 +28,7 @@ function fetchTarball(
   headers[EDGEWORKERS_CLIENT_HEADER] = 'CLI';
   headers['Accept'] = 'application/gzip';
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return new Promise<any>((resolve, reject) => {
     edge.auth({
       path,
@@ -40,7 +40,7 @@ function fetchTarball(
 
     edge.send(function (error, response, body) {
       if (!error && httpEdge.isOkStatus(response.status)) {
-        var contentType = response.headers['content-type'];
+        const contentType = response.headers['content-type'];
         if (contentType.indexOf('gzip') > -1) {
           const buffer = Buffer.from(response.data, 'utf8');
           fs.writeFileSync(downloadPath, buffer);
@@ -51,7 +51,7 @@ function fetchTarball(
         }
       } else {
         try {
-          var errorObj = Buffer.from(error.response.data, 'utf8');
+          const errorObj = Buffer.from(error.response.data, 'utf8');
           reject(errorObj.toString());
         } catch (ex) {
           console.error(
@@ -108,7 +108,7 @@ export function getEdgeWorkerId(ewId: string) {
 }
 
 export function getAllEdgeWorkerIds(groupId?: string, resourceTierId?: string) {
-  var qs: string = '';
+  let qs = '';
   if (groupId != undefined || groupId != null) {
     qs += `?groupId=${groupId}`;
   }
@@ -130,7 +130,7 @@ export function createEdgeWorkerId(
   name: string,
   resourceTierId: string
 ) {
-  var body = { groupId: groupId, name: name, resourceTierId: resourceTierId };
+  const body = { groupId: groupId, name: name, resourceTierId: resourceTierId };
   return httpEdge
     .postJson(
       `${EDGEWORKERS_API_BASE}/ids`,
@@ -152,7 +152,7 @@ export function getContracts() {
 }
 
 export function getProperties(ewId: string, activeOnly: boolean) {
-  let qs: string = '';
+  let qs = '';
   if (activeOnly !== undefined) {
     qs = '?activeOnly=true';
   }
@@ -191,7 +191,7 @@ export function updateEdgeWorkerId(
   name: string,
   resourceTierId: string
 ) {
-  var body = { groupId: groupId, name: name };
+  const body = { groupId: groupId, name: name };
   if (resourceTierId != undefined && resourceTierId != null) {
     body['resourceTierId'] = resourceTierId;
   }
@@ -282,7 +282,7 @@ export function getActivationID(ewId: string, activationId: string) {
 }
 
 export function getVersionActivations(ewId: string, versionId: string) {
-  var qs: string = '?version=';
+  let qs = '?version=';
   if (versionId === undefined || versionId === null) {
     qs = '';
     versionId = '';
@@ -300,7 +300,7 @@ export function createActivationId(
   network: string,
   versionId: string
 ) {
-  var body = { network: network, version: versionId };
+  const body = { network: network, version: versionId };
   return httpEdge
     .postJson(
       `${EDGEWORKERS_API_BASE}/ids/${ewId}/activations`,
@@ -316,7 +316,7 @@ export function cloneEdgeworker(
   groupId: string,
   resourceTierId: string
 ) {
-  let body = { resourceTierId: resourceTierId };
+  const body = { resourceTierId: resourceTierId };
   if (groupId != undefined) {
     body['groupId'] = groupId;
   }
@@ -346,9 +346,9 @@ export function getAuthToken(
   expiry: number,
   network: string
 ) {
-  let urlPath = `${EDGEWORKERS_API_BASE}/secure-token`;
+  const urlPath = `${EDGEWORKERS_API_BASE}/secure-token`;
 
-  let body = buildTokenBody(hostName, acl, url, expiry, network);
+  const body = buildTokenBody(hostName, acl, url, expiry, network);
 
   return httpEdge
     .postJson(urlPath, body, cliUtils.getTimeout(DEFAULT_EW_TIMEOUT))
@@ -363,7 +363,7 @@ function buildTokenBody(
   expiry: number,
   network: string
 ) {
-  let params = {};
+  const params = {};
 
   if (hostName != undefined && hostName != null) {
     params['hostname'] = hostName;
@@ -390,7 +390,7 @@ export function deactivateEdgeworker(
   network: string,
   versionId: string
 ) {
-  var body = { network: network, version: versionId };
+  const body = { network: network, version: versionId };
   return httpEdge
     .postJson(
       `${EDGEWORKERS_API_BASE}/ids/${ewId}/deactivations`,
