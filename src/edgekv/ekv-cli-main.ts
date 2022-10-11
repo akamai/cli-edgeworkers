@@ -2,7 +2,7 @@
 import * as envUtils from '../utils/env-utils';
 import * as cliUtils from '../utils/cli-utils';
 import * as kvCliHandler from './ekv-handler';
-import * as edgeWorkersClientSvc from '../edgeworkers/client-manager';
+import { ekvJsonOutput } from './client-manager';
 import * as httpEdge from '../cli-httpRequest';
 import * as pkginfo from '../../package.json';
 import { Command } from 'commander';
@@ -18,6 +18,8 @@ program
     '--section <name>',
     'Use this section in edgerc file that contains the credential set.'
   )
+  .option('--json [path]', 'Write command output to JSON file at given path, otherwise written to CLI cache directory')
+  .option('--jsonout', 'Write command output as JSON to stdout')
   // .option('--json [path]', 'Write command output to JSON file at given path, otherwise written to CLI cache directory')
   .option('--accountkey <account-id>', 'internal parameter')
   .option('--timeout <timeout>', 'Use this for custom timeout')
@@ -31,8 +33,12 @@ program
     envUtils.setEdgeRcSection(section);
   })
   .on('option:json', function (path) {
-    edgeWorkersClientSvc.setJSONOutputMode(false); // set this to true when we enable json output mode
-    edgeWorkersClientSvc.setJSONOutputPath(path);
+    ekvJsonOutput.setJSONOutputMode(true);
+    ekvJsonOutput.setJSONOutputPath(path);
+  })
+  .on('option:jsonout', function () {
+    ekvJsonOutput.setJSONOutputMode(true);
+    ekvJsonOutput.setJSONOutputStdout(true);
   })
   .on('option:accountkey', function (key) {
     httpEdge.setAccountKey(key);
