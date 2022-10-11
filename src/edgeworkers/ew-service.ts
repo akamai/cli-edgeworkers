@@ -399,3 +399,39 @@ export function deactivateEdgeworker(
     )
     .then((r) => r.body);
 }
+
+export function getAvailableReports () {
+  return httpEdge
+    .getJson(
+      `${EDGEWORKERS_API_BASE}/reports`,
+      cliUtils.getTimeout(DEFAULT_EW_TIMEOUT)
+    )
+    .then((r) => r.body)
+    .catch((err) => error.handleError(err, 'GET_AVAILABLE_REPORTS'));
+}
+
+export function getReport (
+  reportId: number,
+  ewid: string,
+  start: string,
+  statuses: Array<string>,
+  eventHandlers: Array<string>,
+  end?: string,
+) {
+  let qs = `?start=${start}&edgeWorker=${ewid}`;
+  if (end) qs += `&end=${end}`;
+  for (const status of statuses){
+    qs += `&status=${status}`;
+  }
+  for (const eventHandler of eventHandlers){
+    qs += `&eventHandler=${eventHandler}`;
+  }
+
+  return httpEdge
+    .getJson(
+      `${EDGEWORKERS_API_BASE}/reports/${reportId}${qs}`,
+      cliUtils.getTimeout(DEFAULT_EW_TIMEOUT)
+    )
+    .then((r) => r.body)
+    .catch((err) => error.handleError(err, 'GET_REPORT'));
+}

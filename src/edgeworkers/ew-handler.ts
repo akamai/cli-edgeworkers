@@ -1031,6 +1031,199 @@ export async function generateRandomSecretKey(length: number) {
   }
 }
 
+export async function getAvailableReports() {
+  const availableReports = await cliUtils.spinner(
+    edgeWorkersSvc.getAvailableReports(),
+    'Getting list of available reports...'
+  );
+
+  if (availableReports && !availableReports.isError) {
+    const msg = 'The following reports are available:';
+    const reportList = availableReports.reports.map((report)=>{
+      return {ReportId: report.reportId, ReportType: report.name};
+    });
+    
+    if (edgeWorkersClientSvc.isJSONOutputMode()) {
+      edgeWorkersClientSvc.writeJSONOutput(0, msg, reportList);
+    } else {
+      cliUtils.logWithBorder(msg);
+      console.table(reportList);
+    }
+  } else {
+    cliUtils.logAndExit(1, availableReports.error_reason);
+  }
+}
+
+interface Execution {
+  invocations: number
+  execDuration?: Record<string, number>,
+  initDuration?: Record<string, number>,
+  status?: string,
+  memory?: Record<string, number>,
+}
+
+const getExecutionAverages = (executionArray: Array<Execution>, executionKey: string) => {
+  if (executionArray){
+    let totalAvg = 0, totalInvocations = 0, eventMax = -1, eventMin = Number.MAX_SAFE_INTEGER;
+    for (const execution of executionArray){
+      const {avg, min, max} = execution[executionKey];
+
+      totalAvg += avg * execution.invocations;
+      totalInvocations += execution.invocations;
+      eventMin = Math.min(eventMin, min);
+      eventMax = Math.max(eventMax, max);
+    }
+    return {
+      avg: (totalAvg / totalInvocations).toFixed(4),
+      min: eventMin.toFixed(2),
+      max: eventMax.toFixed(2)
+    };
+  } else {
+    return {
+      avg: 'N/A',
+      min: 'N/A',
+      max: 'N/A'
+    };
+  }
+};
+
+export async function getReport(
+  reportId: number,
+  start: string,
+  end:string,
+  ewid: string,
+  statuses: Array<string>,
+  eventHandlers: Array<string>,
+  ) {
+  const report = await cliUtils.spinner(
+    edgeWorkersSvc.getReport(reportId, ewid, start, statuses, eventHandlers, end),
+    'Getting report...'
+  );
+
+  const EVENT_HANDLERS = ['onClientRequest', 'onOriginRequest', 'onOriginResponse', 'onClientResponse', 'responseProvider'];
+  let executionEventHandlers: Array<string>;
+  if (eventHandlers.length !== 0) {
+    // remove unwanted event handlers
+    executionEventHandlers = EVENT_HANDLERS.filter((event) => eventHandlers.includes(event));
+  } else {
+    executionEventHandlers = EVENT_HANDLERS;
+  }
+  
+
+  if (report && !report.isError) {
+    const data: Record<string, unknown> = report.data;
+    if (typeof data === 'object' && Object.keys(data).length === 0) {
+      // check if data is empty object or empty array
+      cliUtils.logWithBorder(`${report.name} from ${report.start} to ${report.end} has no data`);
+    } else {
+      const msg = `Printing ${report.name} from ${report.start} to ${report.end}`;
+      cliUtils.logWithBorder(msg);
+      let reportOutput;
+
+      switch (report.reportId){
+        case 1: {
+          // summary
+          const {
+            memory,
+            initDuration,
+            execDuration,
+            successes,
+            errors,
+            invocations
+          } = report.data;
+          let initDurationMapped = {}; // init duration might be undefined
+
+          if (initDuration) {
+            Object.keys(initDuration).forEach((key) => {
+              initDurationMapped[key] = initDuration[key].toFixed(4);
+            });
+          } else {
+            initDurationMapped = {avg: 'N/A', max: 'N/A', min: 'N/A'};
+          }
+          
+          Object.keys(execDuration).forEach((key) => {
+            execDuration[key] = execDuration[key].toFixed(4);
+          });
+          Object.keys(memory).forEach((key) => {
+            memory[key] = memory[key].toFixed(4);
+          });
+          
+          reportOutput = [
+            {successes, errors, invocations},
+            {initDuration: initDurationMapped, execDuration},
+            {memory}
+          ];
+          break;
+        }
+  
+        case 2: {
+          // execution time
+          reportOutput = {};
+          const executionCategories: Record<string, Array<Execution>> = report.data[0].data;
+
+          for (const event of executionEventHandlers) {
+            reportOutput[event] = getExecutionAverages(executionCategories[event], 'execDuration');
+          }
+          // execution time has an additional property for init times
+          reportOutput['init'] = getExecutionAverages(executionCategories['init'], 'initDuration');
+          
+          break;
+        }
+
+        case 3: {
+          // execution status
+          reportOutput = {};
+          const executionCategories: Record<string, Array<Execution>> = report.data[0].data;
+          let errors = 0;
+  
+          for (const executionArray of Object.values(executionCategories)) {
+            for (const execution of executionArray) {
+              const {status, invocations} = execution;
+              reportOutput[status] = reportOutput[status] + invocations || invocations;
+              if (status !== 'success' && status !== 'unimplementedEventHandler') {
+                errors += invocations;
+              }
+            }
+          }
+          
+          if (!reportOutput['success']){
+            // add success count if no successful executions
+            reportOutput['success'] = 0;
+          }
+          //add property for total errors
+          reportOutput['errors'] = errors;
+
+          break;
+        }
+
+        case 4: {
+          // memory usage
+          reportOutput = {};
+          const executionCategories: Record<string, Array<Execution>> = report.data[0].data;
+  
+          for (const event of executionEventHandlers) {
+            reportOutput[event] = getExecutionAverages(executionCategories[event], 'memory');
+          }
+
+          break;
+        }
+      }
+      if (edgeWorkersClientSvc.isJSONOutputMode()) {
+        edgeWorkersClientSvc.writeJSONOutput(0, msg, reportOutput);
+      } else {
+        if (Array.isArray(reportOutput)){
+          // report 1 (summary) will return an array of table objects
+          reportOutput.forEach( (table) => console.table(table));
+        } else {
+          console.table(reportOutput);
+        }
+      }
+    }
+  } else {
+    cliUtils.logAndExit(1, report.error_reason);
+  }
+}
+
 /* ========== Local Helpers ========== */
 function filterJsonData(data, columnsToKeep: string[]) {
   //Dont filter data if in debug mode

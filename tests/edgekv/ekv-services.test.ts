@@ -50,7 +50,7 @@ describe('ekv-services tests', () => {
       expect(res).toEqual(mockResBody);
     });
 
-    test('URL path should contian query parameter when details parameter is true', async () => {
+    test('URL path should contain query parameter when details parameter is true', async () => {
       const details = true;
 
       // Mock getJson() method
