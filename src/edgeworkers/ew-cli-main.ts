@@ -99,7 +99,7 @@ program
   .description('List EdgeWorker ids currently registered.')
   .alias('li')
   .option('--groupId <groupId>', 'Filter EdgeWorker Id list by Permission Group')
-  .option('-restier, --resourceTierId <resourceTierId>', 'Filter Edgeworkers by resource tiers')
+  .option('-restier, --resourceTierId <resourceTierId>', 'Filter EdgeWorkers by resource tiers')
   .action(async function (ewId, options) {
     try {
       await cliHandler.showEdgeWorkerIdOverview(ewId, options.groupId, options.resourceTierId);
@@ -115,7 +115,7 @@ program
   .command('register <group-identifier> <edgeworker-name>')
   .description('Register a new EdgeWorker id to reference in Property Manager behavior.')
   .alias('create-id')
-  .option('-restier, --resourceTierId <resourceTierId>', 'New resource Tier id to associate with Edgeworker')
+  .option('-restier, --resourceTierId <resourceTierId>', 'New resource Tier id to associate with EdgeWorker')
   .action(async function (groupId, name, options) {
     try {
       // for automation resource tier id will be provided , hence no need for prompts
@@ -201,7 +201,7 @@ program
 program
   .command('update-id <edgeworker-identifier> <group-identifier> <edgeworker-name>')
   .description('Allows Customer Developer to update an existing EdgeWorker Identifier\'s Luna ACG or Name attributes.')
-  .option('-restier, --resourceTierId <resourceTierId>', 'New resource Tier id to associate with Edgeworker')
+  .option('-restier, --resourceTierId <resourceTierId>', 'New resource Tier id to associate with EdgeWorker')
   .alias('ui')
   .action(async function (ewId, groupId, name, options) {
     try {
@@ -339,9 +339,9 @@ program
 
 program
   .command('clone <edgeworker-identifier> <resourceTierId>')
-  .description('Clone the given Edgeworker Id on an akamai network')
-  .option('--ewName <name>', 'Name of the Edgeworker')
-  .option('--groupId <groupId>', 'GroupId in which Edgeworker will be cloned')
+  .description('Clone the given EdgeWorker Id on an akamai network')
+  .option('--ewName <name>', 'Name of the EdgeWorker')
+  .option('--groupId <groupId>', 'GroupId in which EdgeWorker will be cloned')
   .action(async function (ewId, resourceTierId, options) {
     try {
       await cliHandler.cloneEdgeworker(ewId, options.groupId, options.ewName, resourceTierId);
@@ -424,6 +424,53 @@ exclusive to the --acl option; only use one or the other.')
       } 
 
       await cliHandler.createAuthToken(hostName, options);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on('--help', function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+  const get = program
+  .command('get')
+  .alias('l')
+  .description(
+    'Get an EdgeWorkers report or get available report types.'
+  );
+
+get
+  .command('reports')
+  .description('Get all available reports')
+  .action(async function () {
+    try {
+      await cliHandler.getAvailableReports();
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on('--help', function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+get
+  .command('report [reportId] [edgeworker-identifier]')
+  .description('Get an EdgeWorkers report')
+  .requiredOption('-s, --startDate <startDate>', 'ISO 8601 timestamp indicating the start time of the EdgeWorkers report (REQUIRED).')
+  .option('-e, --endDate <endDate>', 'ISO 8601 timestamp indicating the end time of the EdgeWorkers report. If not specified, the end time defaults to the current time.')
+  .option('--status, <status>', 'Comma-separated string to filter by EdgeWorker status. Values: success, genericError, unknownEdgeWorkerId, unimplementedEventHandler, runtimeError, executionError, timeoutError, resourceLimitHit, cpuTimeoutError, wallTimeoutError, initCpuTimeoutError, initWallTimeoutError.')
+  .option('--ev, --eventHandlers <eventHandlers>', 'Comma-separated string to filter EdgeWorkers by the event that triggers them. Values: onClientRequest, onOriginRequest, onOriginResponse, onClientResponse, responseProvider.')
+  .action(async function (reportId: number, edgeworkerId: string, options) {
+    if (!reportId){
+      cliUtils.logAndExit(1, 'ERROR: Please specify a reportId. To obtain the available report ID run "akamai edgeworkers get reports".');
+    }
+    const {startDate, endDate, status, eventHandlers} = options;
+
+    const statusArray = status ? status.split(',') : [];
+    const eventHandlersArray = eventHandlers ? eventHandlers.split(',') : [];
+
+    try {
+      await cliHandler.getReport(reportId, startDate, endDate, edgeworkerId, statusArray, eventHandlersArray);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
