@@ -1,6 +1,4 @@
-import * as cliUtils from '../utils/cli-utils';
 import * as os from 'os';
-import fs from 'fs';
 import path from 'path';
 import JsonHandler from '../utils/json-handler';
 
@@ -17,17 +15,6 @@ const EDGEKV_CLI_OUTPUT_DIR: string = path.join(
 );
 
 const EDGEKV_CLI_OUTPUT_FILENAME = 'ekvcli_output.json';
-// Add try/catch logic incase user doesnt have permissions to write directories needed
-try {
-  if (!fs.existsSync(EDGEKV_DIR)) {
-    fs.mkdirSync(EDGEKV_DIR, { recursive: true });
-  }
-} catch (e) {
-  cliUtils.logAndExit(
-    1,
-    `ERROR: Cannot create ${EDGEKV_DIR}\n${e.message}`
-  );
-}
 
 export const ekvJsonOutput = new JsonHandler(
   EDGEKV_CLI_OUTPUT_DIR,

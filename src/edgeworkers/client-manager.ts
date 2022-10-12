@@ -34,18 +34,6 @@ const BUNDLE_FORMAT_VERSION_KEY = 'bundle-version';
 const JSAPI_VERSION_KEY = 'api-version';
 let tarballChecksum;
 
-// Add try/catch logic incase user doesnt have permissions to write directories needed
-try {
-  if (!fs.existsSync(EDGEWORKERS_DIR)) {
-    fs.mkdirSync(EDGEWORKERS_DIR, { recursive: true });
-  }
-} catch (e) {
-  cliUtils.logAndExit(
-    1,
-    `ERROR: Cannot create ${EDGEWORKERS_DIR}\n${e.message}`
-  );
-}
-
 export const ewJsonOutput = new JsonHandler(
   EDGEWORKERS_CLI_OUTPUT_DIR,
   EDGEWORKERS_CLI_OUTPUT_FILENAME
