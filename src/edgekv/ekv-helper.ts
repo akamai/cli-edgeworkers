@@ -8,6 +8,7 @@ import path from 'path';
 import untildify from 'untildify';
 import * as tar from 'tar-stream';
 import zlib from 'zlib';
+import { ekvJsonOutput } from './client-manager';
 const tkn_var = 'var edgekv_access_tokens = {';
 const tkn_export = '\n}\nexport { edgekv_access_tokens };';
 
@@ -159,8 +160,17 @@ export function saveTokenToBundle(savePath, overWrite, createdToken, decodedToke
     const oldTarBallStream = fs.createReadStream(savePath);
 
     oldTarBallStream.on('error', function () {
-        cliUtils.logWithBorder('ERROR: Unable to read the tar bundle. Add the token in file edgekv_tokens.js and place it in your tar bundle');
-        response.logToken(createdToken['name'], createdToken['value'], decodedToken, nameSpaceList, false);
+        const errMsg = 'ERROR: Unable to read the tar bundle. Add the token in file edgekv_tokens.js and place it in your tar bundle';
+        if (ekvJsonOutput.isJSONOutputMode()) {
+            ekvJsonOutput.writeJSONOutput(
+                0,
+                errMsg,
+                response.logTokenToJson(createdToken, decodedToken, nameSpaceList)
+            );
+        } else {
+            cliUtils.logWithBorder(errMsg);
+            response.logToken(createdToken['name'], createdToken['value'], decodedToken, nameSpaceList, false);
+        }
         process.exit(1);
     });
 
@@ -199,9 +209,17 @@ export function saveTokenToBundle(savePath, overWrite, createdToken, decodedToke
 
         const newTarBallStream = fs.createWriteStream(savePath);// create writestream at the last stage
         pack.pipe(zlib.createGzip()).pipe(newTarBallStream);// gzips and writes the contents to the new tarball
-
-        cliUtils.logWithBorder(msg);
-        response.logToken(createdToken['name'], createdToken['value'], decodedToken, nameSpaceList, true);
+        
+        if (ekvJsonOutput.isJSONOutputMode()) {
+            ekvJsonOutput.writeJSONOutput(
+                0,
+                msg,
+                response.logTokenToJson(createdToken, decodedToken, nameSpaceList)
+            );
+        } else {
+            cliUtils.logWithBorder(msg);
+            response.logToken(createdToken['name'], createdToken['value'], decodedToken, nameSpaceList, true);
+        }
     });
 }
 
@@ -254,13 +272,31 @@ export function createTokenFileWithoutBundle(savePath, overWrite, createdToken, 
     tokenFileContent = constructTokenFile(tokenContent);
     fs.writeFile(tokenFilePath, tokenFileContent, function (err) {
         if (err) {
-            cliUtils.logWithBorder('ERROR: Unable to create a token file. Add the token in file edgekv_tokens.js and place it in your tar bundle');
-            response.logToken(createdToken['name'], createdToken['value'], decodedToken, nameSpaceList, false);
+            const errMsg = 'ERROR: Unable to create a token file. Add the token in file edgekv_tokens.js and place it in your tar bundle';
+            if (ekvJsonOutput.isJSONOutputMode()) {
+                ekvJsonOutput.writeJSONOutput(
+                    0,
+                    msg,
+                    response.logTokenToJson(createdToken, decodedToken, nameSpaceList)
+                );
+              } else {
+                cliUtils.logWithBorder(errMsg);
+                response.logToken(createdToken['name'], createdToken['value'], decodedToken, nameSpaceList, false);
+              }
             process.exit(1);
         }
     });
-    cliUtils.logWithBorder(msg);
-    response.logToken(createdToken['name'], createdToken['value'], decodedToken, nameSpaceList, true);
+    if (ekvJsonOutput.isJSONOutputMode()) {
+        ekvJsonOutput.writeJSONOutput(
+            0,
+            msg,
+            response.logTokenToJson(createdToken, decodedToken, nameSpaceList),
+        );
+      } else {
+        cliUtils.logWithBorder(msg);
+        response.logToken(createdToken['name'], createdToken['value'], decodedToken, nameSpaceList, true);
+      }
+    
 }
 
 /**
