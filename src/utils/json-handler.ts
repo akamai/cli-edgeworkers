@@ -59,34 +59,33 @@ export default class JsonHandler {
     const isPathNewDirectory =
       !fs.existsSync(this.jsonOutputPath) && this.jsonOutputPath.endsWith('/');
 
-    // is jsonOutputPath a path
     const isPathDirectory = isPathExistingDirectory || isPathNewDirectory;
 
-    let outputPath: string;
+    let outputDirectory: string;
     let outputFilename: string;
 
     if (isPathDirectory) {
-      // use provided path and default filename
-      outputPath = this.jsonOutputPath;
+      // use provided directory and default filename
+      outputDirectory = this.jsonOutputPath;
       outputFilename = this.jsonOutputDefaultFilename;
     } else {
-      // get filename and directory from path
-      outputPath = path.dirname(this.jsonOutputPath);
+      // get filename and directory from provided path
+      outputDirectory = path.dirname(this.jsonOutputPath);
       outputFilename = path.basename(this.jsonOutputPath);
     }
 
     // try to create path if it does not exist
     try {
-      if (!fs.existsSync(outputPath)) {
-        fs.mkdirSync(outputPath, { recursive: true });
+      if (!fs.existsSync(outputDirectory)) {
+        fs.mkdirSync(outputDirectory, { recursive: true });
       }
     } catch (e) {
       this.setJSONOutputMode(false);
-      logAndExit(1, `ERROR: Cannot create ${outputPath}\n${e.message}`);
+      logAndExit(1, `ERROR: Cannot create ${outputDirectory}\n${e.message}`);
     }
 
     return {
-      path: outputPath,
+      path: outputDirectory,
       filename: outputFilename,
     };
   }
