@@ -5,28 +5,32 @@ import { logAndExit, isJSON, toJsonPretty } from '../utils/cli-utils';
 
 export default class JsonHandler {
   jsonOutput: boolean;
-  jsonOutputPath: string;
-  readonly jsonOutputFilename: string;
   jsonOutputFile: boolean;
   jsonOutputStdout: boolean;
+  jsonOutputPath: string;
+  readonly jsonOutputDefaultFilename: string;
 
-  constructor(jsonOutputPath: string, jsonOutputFilename: string) {
+  constructor(jsonOutputPath: string, defaultOutputFilename: string) {
     this.jsonOutput = false;
-    this.jsonOutputPath = jsonOutputPath;
-    this.jsonOutputFilename = jsonOutputFilename;
     this.jsonOutputFile = false;
     this.jsonOutputStdout = false;
+    this.jsonOutputPath = jsonOutputPath;
+    this.jsonOutputDefaultFilename = defaultOutputFilename;
   }
 
   setJSONOutputMode(output: boolean) {
     this.jsonOutput = output;
   }
 
-  setJSONOutputPath(path: string) {
+  setJSONOutputPath(path: string | null) {
     this.jsonOutputFile = true;
-    if (path) {
+    if (typeof path === 'string') {
       this.jsonOutputPath = untildify(path);
     }
+  }
+
+  setJsonOutputFile(output: boolean) {
+    this.jsonOutputFile = output;
   }
 
   setJSONOutputStdout(output: boolean) {
@@ -45,7 +49,7 @@ export default class JsonHandler {
     return this.jsonOutputFile;
   }
 
-  determineJSONOutputPathAndFilename() {
+  determineJSONOutputPathAndFilename(): Record<string, string> {
     // if the path exists, check if it is a directory
     const isPathExistingDirectory =
       fs.existsSync(this.jsonOutputPath) &&
@@ -64,7 +68,7 @@ export default class JsonHandler {
     if (isPathDirectory) {
       // use provided path and default filename
       outputPath = this.jsonOutputPath;
-      outputFilename = this.jsonOutputFilename;
+      outputFilename = this.jsonOutputDefaultFilename;
     } else {
       // get filename and directory from path
       outputPath = path.dirname(this.jsonOutputPath);
@@ -87,7 +91,7 @@ export default class JsonHandler {
     };
   }
 
-  writeJSONOutput(exitCode: number, msg: string, data = {}) {
+  writeJSONOutput(exitCode: number, msg: string, data = {}): void {
     // First, build the JSON object
     let outputMsg: string;
     let outputData;
@@ -117,9 +121,10 @@ export default class JsonHandler {
     if (this.isJSONOutputFile()) {
       // Determine the path and filename to write the JSON output
       const outputDestination = this.determineJSONOutputPathAndFilename();
-      // Last, try to write the output file synchronously
+      // Try to write the output file synchronously
       try {
-        // support writing to both file and stdout; if stdout is on, don't leave a log message
+        // Support writing to both file and stdout
+        // If stdout is on, don't leave a log message
         if (!this.isJSONOutputStdout()) {
           console.log(
             `Saving JSON output at: ${path.join(
