@@ -386,33 +386,58 @@ create
   .description('Creates an EdgeKV token')
   .alias('tkn')
   .option(
-    '--save_path <save_path>',
-    'The path of the bundle where the token will be saved'
-  )
-  .requiredOption(
     '--staging <staging>',
-    'Token can be used in staging environment if allowed'
+    'Specifies whether the token will be allowed or denied in the staging environment. Values: "allow", "deny" (REQUIRED)'
   )
-  .requiredOption(
+  .option(
     '--production <production>',
-    'Token can be used in production environment if allowed'
+    'Specifies whether the token will be allowed or denied in the production environment. Values: "allow", "deny" (REQUIRED)'
   )
-  .requiredOption(
+  .option(
     '--ewids <ewIds>',
-    'All or specific ewids for which the token can be applied'
+    'A comma separated list of up to a maximum of 8 EdgeWorker IDs. Use "all" to allow all EdgeWorkers. (REQUIRED)'
   )
-  .requiredOption(
+  .option(
     '--expiry <expiry>',
-    'Expiry date of the token in the format yyyy-mm-dd'
+    'Expiration date of the token. Format of the expiry date is ISO 8601 format: yyyy-mm-dd. (REQUIRED)'
   )
-  .requiredOption('--namespace <namespace>', 'Permissions for the namespaces')
+  .option(
+    '--namespace <namespace>',
+    'A comma separated list of up to a maximum of 20 namespace identifier and permission combinations. Use the namespace name combined with "+rwd" (read, write, delete) to set permissions. Ex: "namespace1+rwd,namespace2+rw" (REQUIRED)'
+  )
+  .option(
+    '--save_path <save_path>',
+    'Path specifying where to save the edgekv_tokens.js token file.' 
+  )
   .option(
     '-o, --overwrite',
-    'EdgeKV token placed inside the bundle will be overwritten'
+    'This option is used in conjunction with the --save_path option to overwrite the value of an existing token with the same name in the edgekv_tokens.js file.'
   )
   .action(async function (tokenName, options) {
     try {
-      await kvCliHandler.createToken(tokenName, options);
+      // implement our own option checking here since we want the help msg to appear
+      // when no options are specified instead of a missing option error
+      if (Object.keys(options).length === 0) {
+        create.commands[1].help();
+        cliUtils.logAndExit(0, copywrite);
+      } else {
+        const requiredOptions = [
+          'staging',
+          'production',
+          'ewids',
+          'expiry',
+          'namespace',
+        ];
+        cliUtils.checkOptions(options, requiredOptions);
+
+        if (options.staging == 'deny' && options.production == 'deny') {
+          cliUtils.logAndExit(
+            1,
+            'ERROR: Unable to create token. At least one of the staging or production options must be set to "allow".'
+          );
+        }
+        await kvCliHandler.createToken(tokenName, options);
+      }
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }

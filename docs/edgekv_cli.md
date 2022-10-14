@@ -343,7 +343,7 @@ Example:
 | --staging | Required | Acceptable value: 'allow', 'deny'. <br />Specifies whether the token will be allowed or denied in the staging environment. |
 | -- production | Required | Acceptable value: 'allow', 'deny'. <br />Specifies whether the token will be allowed or denied in the production environment. |
 | -- ewids | Required | Acceptable value: <br /> - 'all', <br /> - A comma separated list of up to a maximum of 8 EdgeWorker IDs. This  restricts token usage to the specified  EdgeWorker IDs. |
-| --namespace | Required | Value: A comma separated list of up to a maximum of 20 namespace identifier and permission combinations. This list specifies where the token can be used. The permissions format is any combination of the following letters: <br /> - 'r' to authorize the token for read operations <br /> - 'w' to authorize the token for write operations <br /> - 'd' to authorize the token for delete operations. |
+| --namespace | Required | Value: A comma separated list of up to a maximum of 20 namespace identifier and permission combinations. This list specifies where the token can be used. The permissions format is any combination of the following letters: <br /> - 'r' to authorize the token for read operations <br /> - 'w' to authorize the token for write operations <br /> - 'd' to authorize the token for delete operations.  <br /> Example: "myNamespace1+rwd,myNamespace2+rw" |
 | --expiry | Required | Expiration date of the token. Format of the expiry date is ISO 8601 format: yyyy-mm-dd. |
 | -h, --help  | Optional | Display information on how to use this EdgeKV command. |
 

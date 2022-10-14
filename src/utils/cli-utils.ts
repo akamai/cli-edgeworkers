@@ -221,6 +221,14 @@ function bytesToSize(bytes: number, decimals = 2, kilobyte = 1024): string {
   return `${Number(res).toString()} ${MEMORY_UNITS[i]}`;
 }
 
+export function checkOptions (options: Record<string, unknown>, requiredOptions: string[]) {
+  for (const option of requiredOptions){
+    if (!(option in options)){
+      logAndExit(1, `error: required option '--${option} <${option}>' not specified`);
+    }
+  }
+}
+
 export enum sortDirections {
   ASC = 'ASC',
   DESC = 'DESC'

@@ -457,13 +457,6 @@ export async function createToken(
   const savePath = options.save_path;
   validateSavePath(savePath);
 
-  if (options.staging == 'deny' && options.production == 'deny') {
-    cliUtils.logWithBorder(
-      'ERROR: Unable to create token. Either one of staging or production access should be set to "allow". Please provide a valid access permissions.'
-    );
-    process.exit(1);
-  }
-
   const createdToken = await cliUtils.spinner(
     edgekvSvc.createEdgeKVToken(
       tokenName,
