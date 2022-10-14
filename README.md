@@ -76,6 +76,7 @@ Commands:
 | clone \| clone `<edgeworker-identifier> <resourceTierId> [options]` | Clones an EdgeWorker from the existing EdgeWorker Id. |
 | list-contracts \| li-contracts `[options]` | List of contract ids that user has access to. |
 | list-properties \| lp `<edgeworker-identifier> [options]` | List of properties associated with a given EdgeWorker Id. |
+| list-limits \| li-limits | View the various limits EdgeWorkers imposes on the number of activations, EdgeWorkers IDs, and versions you can deploy. |
 | list-restiers \| li-restiers `[options]` | List Resource Tiers that can be used to create or clone EdgeWorker Id. |
 | show-restier \| show-restier `<edgeworker-identifier>` | Customers can get Resource Tier details for a specific EdgeWorker Id. |
 | get reports | Get a list of all available EdgeWorkers reports. |
@@ -429,6 +430,16 @@ Usage: `akamai edgeworkers list-properties <edgeworker-identifier> [options]`
 
 #### Key Details
 1. Note that the returned boolean limitedAccessToProperties is true if the user doesn't have access to the top level group under the account, or if they don't have the admin role for this group.
+
+### List Limits
+List the various limits EdgeWorkers imposes on the number of activations, EdgeWorkers IDs, and versions you can deploy.
+
+Usage: `akamai edgeworkers list-limits [options]`
+
+| Option | Description |
+| - | - |
+| -h, --help  | output usage information |
+
 
 ### List Resource Tiers for a specific Contract ID
 Allows customers to list Resource Tiers that can be used to create or clone EdgeWorker IDs. 

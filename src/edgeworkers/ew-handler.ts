@@ -1031,6 +1031,25 @@ export async function generateRandomSecretKey(length: number) {
   }
 }
 
+export async function getLimits() {
+  const limitsResponse = await cliUtils.spinner(
+    edgeWorkersSvc.getLimits(),
+    'Getting limits list...'
+  );
+
+  if (limitsResponse.limits && !limitsResponse.isError) {
+    const msg = 'EdgeWorkers imposes the following limits:';
+    if (edgeWorkersClientSvc.isJSONOutputMode()) {
+      edgeWorkersClientSvc.writeJSONOutput(0, msg, limitsResponse.limits);
+    } else {
+      cliUtils.logWithBorder(msg);
+      console.table(limitsResponse.limits);
+    }
+  } else {
+    cliUtils.logAndExit(1, limitsResponse.error_reason);
+  }
+}
+
 export async function getAvailableReports() {
   const availableReports = await cliUtils.spinner(
     edgeWorkersSvc.getAvailableReports(),

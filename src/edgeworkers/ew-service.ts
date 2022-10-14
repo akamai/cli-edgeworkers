@@ -400,6 +400,16 @@ export function deactivateEdgeworker(
     .then((r) => r.body);
 }
 
+export function getLimits () {
+  return httpEdge
+    .getJson(
+      `${EDGEWORKERS_API_BASE}/limits`,
+      cliUtils.getTimeout(DEFAULT_EW_TIMEOUT)
+    )
+    .then((r) => r.body)
+    .catch((err) => error.handleError(err, 'GET_LIMITS'));
+}
+
 export function getAvailableReports () {
   return httpEdge
     .getJson(

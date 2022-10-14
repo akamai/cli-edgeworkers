@@ -2,6 +2,7 @@ export enum ErrorMessage {
     permissionError = 'ERROR: Operation could not be performed. The identity is not authorized to manage any context.',
     CLONE_EW_404 = 'The requested resource Tier is not found.',
     GENERIC_403 = 'Permission is invalid.',
+    GET_LIMITS_ERROR = 'ERROR: Unable to get EdgeWorkers limits.',
     GET_AVAILABLE_REPORTS_ERROR = 'ERROR: Unable to get available EdgeWorkers reports.',
     GET_REPORT_ERROR = 'ERROR: Unable to get EdgeWorkers report.',
     REGISTER_EW_ERROR = 'ERROR: Unable to create Edgeworker.',

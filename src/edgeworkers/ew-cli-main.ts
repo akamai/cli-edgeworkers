@@ -185,6 +185,21 @@ program
   });
 
 program
+  .command('list-limits')
+  .description('List the various limits EdgeWorkers imposes on the number of activations, EdgeWorkers IDs, and versions you can deploy.')
+  .alias('li-limits')
+  .action(async function () {
+    try {
+      await cliHandler.getLimits();
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on('--help', function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+program
   .command('show-restier <edgeworkerId>')
   .description('Allows customer to view the resource tier associated with the EdgeWorker Id')
   .action(async function (edgeworkerId) {
