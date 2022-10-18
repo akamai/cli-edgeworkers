@@ -3,7 +3,7 @@ import * as envUtils from '../utils/env-utils';
 import * as cliUtils from '../utils/cli-utils';
 import * as cliHandler from './ew-handler';
 import * as httpEdge from '../cli-httpRequest';
-import * as edgeWorkersClientSvc from './client-manager';
+import { ewJsonOutput } from './client-manager';
 import * as pkginfo from '../../package.json';
 import { Command } from 'commander';
 const program = new Command();
@@ -31,12 +31,12 @@ program
     envUtils.setEdgeRcSection(section);
   })
   .on('option:json', function (path) {
-    edgeWorkersClientSvc.setJSONOutputMode(true);
-    edgeWorkersClientSvc.setJSONOutputPath(path);
+    ewJsonOutput.setJSONOutputMode(true);
+    ewJsonOutput.setJSONOutputPath(path);
   })
   .on('option:jsonout', function () {
-    edgeWorkersClientSvc.setJSONOutputMode(true);
-    edgeWorkersClientSvc.setJSONOutputStdout(true);
+    ewJsonOutput.setJSONOutputMode(true);
+    ewJsonOutput.setJSONOutputStdout(true);
   })
   .on('option:accountkey', function (key) {
     httpEdge.setAccountKey(key);

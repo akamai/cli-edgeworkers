@@ -145,6 +145,8 @@ export function logToken(tokenName: string, tokenValue, decodedToken, nameSpaceL
     }
 }
 
+export const logTokenToJson = (token, decodedToken, nameSpaceList) => ({ token, decodedToken, nameSpaceList });
+
 export function getNameSpaceFromToken(decodedToken) {
     const nameSpaceList = [];
     Object.keys(decodedToken).forEach(function (key) {

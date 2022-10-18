@@ -3,8 +3,14 @@ import * as cliUtils from '../utils/cli-utils';
 import * as response from './ekv-response';
 import * as ekvhelper from './ekv-helper';
 import * as edgeWorkersSvc from '../edgeworkers/ew-service';
+import { ekvJsonOutput } from './client-manager';
 
-export async function listNameSpaces(environment: string, details: boolean, sortDirection: cliUtils.sortDirections, orderBy: string) {
+export async function listNameSpaces(
+  environment: string,
+  details: boolean,
+  sortDirection: cliUtils.sortDirections,
+  orderBy: string
+) {
   ekvhelper.validateNetwork(environment);
   const nameSpaceList = await cliUtils.spinner(
     edgekvSvc.getNameSpaceList(environment, details),
@@ -33,10 +39,15 @@ export async function listNameSpaces(environment: string, details: boolean, sort
         }
       });
     }
-    cliUtils.logWithBorder(
-      `The following namespaces are provisioned on the ${environment} environment`
-    );
-    console.table(nsListResp);
+    const msg =
+      'The following namespaces are provisioned on the ${environment} environment';
+
+    if (ekvJsonOutput.isJSONOutputMode()) {
+      ekvJsonOutput.writeJSONOutput(0, msg, nsListResp);
+    } else {
+      cliUtils.logWithBorder(msg);
+      console.table(nsListResp);
+    }
   } else {
     response.logError(
       nameSpaceList,
@@ -51,12 +62,15 @@ export async function listGroups(environment: string, namespace: string) {
     'Fetching groups list...'
   );
   if (groupsList != undefined && !groupsList.isError) {
-    cliUtils.logWithBorder(
-      `The ${environment} namespace "${namespace}" contains ${groupsList.length} groups.`
-    );
-    groupsList.forEach((element) => {
-      console.log(element);
-    });
+    const msg = `The ${environment} namespace "${namespace}" contains ${groupsList.length} groups.`;
+    if (ekvJsonOutput.isJSONOutputMode()) {
+      ekvJsonOutput.writeJSONOutput(0, msg, groupsList);
+    } else {
+      cliUtils.logWithBorder(msg);
+      groupsList.forEach((element) => {
+        console.log(element);
+      });
+    }
   } else {
     response.logError(
       groupsList,
@@ -93,8 +107,12 @@ export async function createNamespace(
     `Creating namespace for environment ${environment}`
   );
   if (createdNamespace != undefined && !createdNamespace.isError) {
-    cliUtils.logWithBorder(msg);
-    response.logNamespace(nameSpace, createdNamespace);
+    if (ekvJsonOutput.isJSONOutputMode()) {
+      ekvJsonOutput.writeJSONOutput(0, msg, createdNamespace);
+    } else {
+      cliUtils.logWithBorder(msg);
+      response.logNamespace(nameSpace, createdNamespace);
+    }
   } else {
     response.logError(
       createdNamespace,
@@ -111,8 +129,12 @@ export async function getNameSpace(environment: string, nameSpace: string) {
     `Fetching namespace for id ${nameSpace}`
   );
   if (createdNamespace != undefined && !createdNamespace.isError) {
-    cliUtils.logWithBorder(msg);
-    response.logNamespace(nameSpace, createdNamespace);
+    if (ekvJsonOutput.isJSONOutputMode()) {
+      ekvJsonOutput.writeJSONOutput(0, msg, createdNamespace);
+    } else {
+      cliUtils.logWithBorder(msg);
+      response.logNamespace(nameSpace, createdNamespace);
+    }
   } else {
     response.logError(
       createdNamespace,
@@ -154,8 +176,12 @@ export async function updateNameSpace(
       `Updating namespace for id ${nameSpace}`
     );
     if (updatedNamespace != undefined && !updatedNamespace.isError) {
-      cliUtils.logWithBorder(msg);
-      response.logNamespace(nameSpace, updatedNamespace);
+      if (ekvJsonOutput.isJSONOutputMode()) {
+        ekvJsonOutput.writeJSONOutput(0, msg, updatedNamespace);
+      } else {
+        cliUtils.logWithBorder(msg);
+        response.logNamespace(nameSpace, updatedNamespace);
+      }
     } else {
       response.logError(
         updatedNamespace,
@@ -180,29 +206,31 @@ export async function initializeEdgeKv() {
     const initRespBody = initializedEdgeKv.data;
 
     const status = initializedEdgeKv.status;
+    let msg;
     if (Object.prototype.hasOwnProperty.call(initRespBody, 'accountStatus')) {
       const accountStatus = initRespBody['accountStatus'];
       if (accountStatus == 'INITIALIZED') {
         if (status == 201) {
-          cliUtils.logWithBorder('EdgeKV INITIALIZED successfully');
+          msg = 'EdgeKV INITIALIZED successfully';
         } else {
-          cliUtils.logWithBorder('EdgeKV already INITIALIZED');
+          msg = 'EdgeKV already INITIALIZED';
         }
       } else if (status == 200 && accountStatus != 'INITIALIZED') {
-        cliUtils.logWithBorder('EdgeKV initialization is IN PROGRESS');
+        msg = 'EdgeKV initialization is IN PROGRESS';
       } else if (status == 404) {
-        cliUtils.logWithBorder('EdgeKV was not INITIALIZED');
+        msg = 'EdgeKV was not INITIALIZED';
       } else if (accountStatus == 'UNINITIALIZED') {
-        cliUtils.logWithBorder(
-          'EdgeKV Initialization failed. Please try again.'
-        );
+        msg = 'EdgeKV Initialization failed. Please try again.';
       } else {
-        cliUtils.logWithBorder(
-          `EdgeKV initialization is ${initRespBody.account_status}`
-        );
+        msg = `EdgeKV initialization is ${initRespBody.account_status}`;
       }
     }
-    response.logInitialize(initRespBody);
+    if (ekvJsonOutput.isJSONOutputMode()) {
+      ekvJsonOutput.writeJSONOutput(0, msg, initRespBody);
+    } else {
+      cliUtils.logWithBorder(msg);
+      response.logInitialize(initRespBody);
+    }
   } else {
     let errorReason = `${initializedEdgeKv.error_reason}`;
     if (initializedEdgeKv && initializedEdgeKv.status == 403) {
@@ -225,27 +253,29 @@ export async function getInitializationStatus() {
   if (initializedEdgeKv.data != undefined && !initializedEdgeKv.isError) {
     const initRespBody = initializedEdgeKv.data;
     const status = initializedEdgeKv.status;
+    let msg;
     if (Object.prototype.hasOwnProperty.call(initRespBody, 'accountStatus')) {
       const accountStatus = initRespBody['accountStatus'];
       if (accountStatus == 'INITIALIZED') {
         if (status == 200) {
-          cliUtils.logWithBorder('EdgeKV already INITIALIZED');
+          msg = 'EdgeKV already INITIALIZED';
         } else if (status == 201) {
-          cliUtils.logWithBorder('EdgeKV INITIALIZED successfully');
+          msg = 'EdgeKV INITIALIZED successfully';
         }
       } else if (status == 102) {
-        cliUtils.logWithBorder('EdgeKV initialization is IN PROGRESS');
+        msg = 'EdgeKV initialization is IN PROGRESS';
       } else if (accountStatus == 'UNINITIALIZED') {
-        cliUtils.logWithBorder(
-          'EdgeKV Initialization failed. Please try again'
-        );
+        msg = 'EdgeKV Initialization failed. Please try again';
       } else {
-        cliUtils.logWithBorder(
-          `EdgeKV initialization is ${initRespBody.account_status}`
-        );
+        msg = `EdgeKV initialization is ${initRespBody.account_status}`;
       }
     }
-    response.logInitialize(initRespBody);
+    if (ekvJsonOutput.isJSONOutputMode()) {
+      ekvJsonOutput.writeJSONOutput(0, msg, initRespBody);
+    } else {
+      cliUtils.logWithBorder(msg);
+      response.logInitialize(initRespBody);
+    }
   } else {
     let errorReason = `${initializedEdgeKv.error_reason}`;
     if (initializedEdgeKv && initializedEdgeKv.status == 403) {
@@ -304,7 +334,11 @@ export async function writeItemToEdgeKV(
   }
 
   if (createdItem != undefined && !createdItem.isError) {
-    cliUtils.logWithBorder(msg);
+    if (ekvJsonOutput.isJSONOutputMode()) {
+      ekvJsonOutput.writeJSONOutput(0, msg);
+    } else {
+      cliUtils.logWithBorder(msg);
+    }
   } else {
     response.logError(
       createdItem,
@@ -331,11 +365,15 @@ export async function readItemFromEdgeKV(
     'Reading items from EdgeKV..'
   );
   if ((item != undefined && !item.isError) || item == null) {
-    cliUtils.logWithBorder(msg);
-    if (typeof item == 'object') {
-      console.log(JSON.stringify(item));
+    if (ekvJsonOutput.isJSONOutputMode()) {
+      ekvJsonOutput.writeJSONOutput(0, msg, item);
     } else {
-      console.log(item);
+      cliUtils.logWithBorder(msg);
+      if (typeof item == 'object') {
+        console.log(JSON.stringify(item));
+      } else {
+        console.log(item);
+      }
     }
   } else {
     response.logError(
@@ -367,7 +405,11 @@ export async function deleteItemFromEdgeKV(
     sandboxid
   );
   if (deletedItem != undefined && !deletedItem.isError) {
-    cliUtils.logWithBorder(msg);
+    if (ekvJsonOutput.isJSONOutputMode()) {
+      ekvJsonOutput.writeJSONOutput(0, msg);
+    } else {
+      cliUtils.logWithBorder(msg);
+    }
   } else {
     response.logError(
       deletedItem,
@@ -404,10 +446,14 @@ export async function listItemsFromGroup(
     if (itemsList.length != 0) {
       msg = `${itemsList.length} ${successMsg}`;
     }
-    cliUtils.logWithBorder(msg);
-    itemsList.forEach((element) => {
-      console.log(element);
-    });
+    if (ekvJsonOutput.isJSONOutputMode()) {
+      ekvJsonOutput.writeJSONOutput(0, msg, itemsList);
+    } else {
+      cliUtils.logWithBorder(msg);
+      itemsList.forEach((element) => {
+        console.log(element);
+      });
+    }
   } else {
     response.logError(
       itemsList,
@@ -423,11 +469,15 @@ export async function listTokens(incExpired) {
   );
   const msg = 'The following tokens are available for you to download';
   if (tokenList != undefined && !tokenList.isError) {
-    cliUtils.logWithBorder(msg);
-    response.logTokenList(tokenList);
-    cliUtils.log(
-      `You have ${tokenList['tokens'].length} tokens available to download.`
-    );
+    if (ekvJsonOutput.isJSONOutputMode()) {
+      ekvJsonOutput.writeJSONOutput(0, msg, tokenList);
+    } else {
+      cliUtils.logWithBorder(msg);
+      response.logTokenList(tokenList);
+      cliUtils.log(
+        `You have ${tokenList['tokens'].length} tokens available to download.`
+      );
+    }
   } else {
     response.logError(
       tokenList,
@@ -507,9 +557,12 @@ export async function revokeToken(tokenName: string) {
     'Revoking EdgeKV token...'
   );
   if (revokedToken != undefined && !revokedToken.isError) {
-    cliUtils.logWithBorder(
-      `${tokenName} was successfully revoked and removed from the EdgeKV access token list.`
-    );
+    const msg = `${tokenName} was successfully revoked and removed from the EdgeKV access token list.`;
+    if (ekvJsonOutput.isJSONOutputMode()) {
+      ekvJsonOutput.writeJSONOutput(0, msg);
+    } else {
+      cliUtils.logWithBorder(msg);
+    }
   } else {
     response.logError(
       revokedToken,
@@ -527,9 +580,12 @@ export async function modifyAuthGroupPermission(
     'Modifying Auth group permission...'
   );
   if (modifiedAuthGroup != undefined && !modifiedAuthGroup.isError) {
-    cliUtils.logWithBorder(
-      `The Permission Group for namespace ${namespaceId} was successfully modified to groupId ${groupId}`
-    );
+    const msg = `The Permission Group for namespace ${namespaceId} was successfully modified to groupId ${groupId}`;
+    if (ekvJsonOutput.isJSONOutputMode()) {
+      ekvJsonOutput.writeJSONOutput(0, msg);
+    } else {
+      cliUtils.logWithBorder(msg);
+    }
   } else {
     response.logError(
       modifiedAuthGroup,
@@ -595,10 +651,18 @@ export async function listAuthGroups(options: {
   if (options.include_ew_groups) {
     ewGroups = await getEwGroups(options.groupIds);
   }
-  cliUtils.logWithBorder(
-    `User has the following permission access for group: ${groupId}`
-  );
-  response.logAuthGroups(authGroups, ewGroups, options.include_ew_groups);
+  const msg = `User has the following permission access for group: ${groupId}`;
+  
+  if (ekvJsonOutput.isJSONOutputMode()) {
+    const obj = {
+      authGroups,
+      ...( options.include_ew_groups && { ewGroups: [...ewGroups] }),
+    };
+    ekvJsonOutput.writeJSONOutput(0, msg, obj);
+  } else {
+    cliUtils.logWithBorder(msg);
+    response.logAuthGroups(authGroups, ewGroups, options.include_ew_groups);
+  }
 }
 
 /** Retrieve edgeworker capabilities for single or all group ids
@@ -703,7 +767,8 @@ function processToken(token, savePath, overwrite) {
   // decodes the jwt token
   const decodedToken = ekvhelper.decodeJWTToken(token['value']);
   const nameSpaceList = ekvhelper.getNameSpaceListFromJWT(decodedToken);
-  const msg = 'Add the token value in edgekv_tokens.js file and place it in your bundle. Use --save_path option to save the token file to your bundle';
+  const msg =
+    'Add the token value in edgekv_tokens.js file and place it in your bundle. Use --save_path option to save the token file to your bundle';
   if (savePath) {
     if (ekvhelper.getFileExtension(savePath) != '.tgz') {
       ekvhelper.createTokenFileWithoutBundle(
@@ -723,13 +788,21 @@ function processToken(token, savePath, overwrite) {
       );
     }
   } else {
-    cliUtils.logWithBorder(msg);
-    response.logToken(
-      token['name'],
-      token['value'],
-      decodedToken,
-      nameSpaceList,
-      false
-    );
+    if (ekvJsonOutput.isJSONOutputMode()) {
+      ekvJsonOutput.writeJSONOutput(
+        0,
+        msg,
+        response.logTokenToJson(token, decodedToken, nameSpaceList)
+      );
+    } else {
+      cliUtils.logWithBorder(msg);
+      response.logToken(
+        token['name'],
+        token['value'],
+        decodedToken,
+        nameSpaceList,
+        false
+      );
+    }
   }
 }
