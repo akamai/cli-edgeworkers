@@ -1039,8 +1039,8 @@ export async function getLimits() {
 
   if (limitsResponse.limits && !limitsResponse.isError) {
     const msg = 'EdgeWorkers imposes the following limits:';
-    if (edgeWorkersClientSvc.isJSONOutputMode()) {
-      edgeWorkersClientSvc.writeJSONOutput(0, msg, limitsResponse.limits);
+    if (ewJsonOutput.isJSONOutputMode()) {
+      ewJsonOutput.writeJSONOutput(0, msg, limitsResponse.limits);
     } else {
       cliUtils.logWithBorder(msg);
       console.table(limitsResponse.limits);
