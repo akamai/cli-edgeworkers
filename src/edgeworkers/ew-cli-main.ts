@@ -449,7 +449,6 @@ exclusive to the --acl option; only use one or the other.')
 
   const get = program
   .command('get')
-  .alias('l')
   .description(
     'Get an EdgeWorkers report or get available report types.'
   );
