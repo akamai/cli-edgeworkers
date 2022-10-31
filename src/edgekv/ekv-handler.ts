@@ -40,7 +40,7 @@ export async function listNameSpaces(
       });
     }
     const msg =
-      'The following namespaces are provisioned on the ${environment} environment';
+      `The following namespaces are provisioned on the ${environment} environment`;
 
     if (ekvJsonOutput.isJSONOutputMode()) {
       ekvJsonOutput.writeJSONOutput(0, msg, nsListResp);
