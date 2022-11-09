@@ -60,18 +60,22 @@ Usage:
 
 1. When installing the Akamai CLI using the "akamai install edgeworkers" command you may run into a *"Package directory already exists"* error. This is likely because you already have the EdgeWorkers CLI package installed. In this case, please try updating the EdgeWorkers CLI package using “akamai update edgeworkers”.
 
-If you continue to encounter this error when trying to update the Akamai CLI using the “akamai update edgeworkers” command,  uninstall the Akamai CLI using the “akamai uninstall edgeworkers” command. This will remove the existing installation, allowing you to reinstall using the “akamai install edgeworkers” command.
+    If you continue to encounter this error when trying to update the Akamai CLI using the “akamai update edgeworkers” command,  uninstall the Akamai CLI using the “akamai uninstall edgeworkers” command. This will remove the existing installation, allowing you to reinstall using the “akamai install edgeworkers” command.
 
 2. Docker installation error  
-When installing Akamai CLI using docker, you may run into "Error: Cannot find module. '.bin/src/edgekv/ekv-cli-main.js".
+    When installing Akamai CLI using docker, you may run into "Error: Cannot find module. '.bin/src/edgekv/ekv-cli-main.js".
 
-Build-time workaround - use this when building the Docker image  
-RUN `akamai install edgeworkers && cd $AKAMAI_CLI_HOME/.akamai-cli/src/cli-edgeworkers/ && npm run build`
+    Build-time workaround - use this when building the Docker image  
+    RUN `akamai install edgeworkers && cd $AKAMAI_CLI_HOME/.akamai-cli/src/cli-edgeworkers/ && npm run build`
 
-Runtime workaround - use this if Docker is already running  
-`cd ~/.akamai-cli/src/cli-edgeworkers/ && npm install --unsafe-perm`
+    Runtime workaround - use this if Docker is already running  
+    `cd ~/.akamai-cli/src/cli-edgeworkers/ && npm install --unsafe-perm`
 
+3. The EdgeKV CLI --overwrite option for the token create and download commands does not work when you change the token name associated with a namespace.
 
+    As a workaround, you can manually delete the token in question from the edgekv_tokens.js file before using the --save_path option. You can then use the token create and download CLI commands with the --save_path option to update the edgekv_tokens.js file.
+
+For a broader list of all known EdgeKV issues please refer to the Akamai TechDocs [here](https://techdocs.akamai.com/edgekv/docs/known-issues]).
 
 ## Overview of Commands
 
@@ -170,6 +174,7 @@ Usage: `akamai edgekv create ns <environment> <nameSpace>`
 2. The namespace identifier can be between 1 and 32 characters in length.
 3. You cannot use the word "default" as the namespace identifier. The “default” namespace is already created during initialization.
 4. Specifying "0" retention means indefinite retention.
+5. A non-zero retention cannot be less than 1 day or more than 3650 days.
 
 ### List NameSpace
 
@@ -181,6 +186,9 @@ Usage: `akamai edgekv list ns <environment>`
 | - | - |
 | -h, --help  | Display information on how to use this EdgeKV command. |
 | -d, --details | Displays details of the namespace. |
+| --order-by | Choose column to order by when displaying detailed namespace list. |
+| --asc, --ascending | Sort using acscending order (default). |
+| --desc, --descending | Sort using descending order. |
 
 | Argument | Existence | Description |
 | - | - | - |
@@ -216,6 +224,7 @@ Usage: `akamai edgekv modify ns <environment> <nameSpace>`
 1. The namespace identifier can only include alphanumeric (0-9, a-z, A-Z), underscore (_), and (-) dash characters.
 2. The namespace identifier can be between 1 and 32 characters in length.
 3. You cannot modify the retention period for the "default" namespace.
+4. A non-zero retention cannot be less than 1 day or more than 3650 days.
 
 ### Create or Update item
 
@@ -338,7 +347,7 @@ Example:
 | --staging | Required | Acceptable value: 'allow', 'deny'. <br />Specifies whether the token will be allowed or denied in the staging environment. |
 | -- production | Required | Acceptable value: 'allow', 'deny'. <br />Specifies whether the token will be allowed or denied in the production environment. |
 | -- ewids | Required | Acceptable value: <br /> - 'all', <br /> - A comma separated list of up to a maximum of 8 EdgeWorker IDs. This  restricts token usage to the specified  EdgeWorker IDs. |
-| --namespace | Required | Value: A comma separated list of up to a maximum of 20 namespace identifier and permission combinations. This list specifies where the token can be used. The permissions format is any combination of the following letters: <br /> - 'r' to authorize the token for read operations <br /> - 'w' to authorize the token for write operations <br /> - 'd' to authorize the token for delete operations. |
+| --namespace | Required | Value: A comma separated list of up to a maximum of 20 namespace identifier and permission combinations. This list specifies where the token can be used. The permissions format is any combination of the following letters: <br /> - 'r' to authorize the token for read operations <br /> - 'w' to authorize the token for write operations <br /> - 'd' to authorize the token for delete operations.  <br /> Example: "myNamespace1+rwd,myNamespace2+rw" |
 | --expiry | Required | Expiration date of the token. Format of the expiry date is ISO 8601 format: yyyy-mm-dd. |
 | -h, --help  | Optional | Display information on how to use this EdgeKV command. |
 

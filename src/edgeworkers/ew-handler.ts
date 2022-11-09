@@ -2,10 +2,10 @@ import * as path from 'path';
 import * as envUtils from '../utils/env-utils';
 import * as cliUtils from '../utils/cli-utils';
 import * as edgeWorkersSvc from './ew-service';
-import * as edgeWorkersClientSvc from './client-manager';
-const readline = require('readline-sync');
+import { ewJsonOutput, validateTarballLocally, buildTarball, determineTarballDownloadDir } from './client-manager';
+import * as readline from 'readline-sync';
 
-var CryptoJS = require('crypto-js');
+import CryptoJS from 'crypto-js';
 const groupColumnsToKeep = ['groupId', 'groupName', 'capabilities'];
 const idColumnsToKeep = ['edgeWorkerId', 'name', 'groupId', 'resourceTierId'];
 const clonedColumnsToKeep = [
@@ -43,6 +43,7 @@ const deactivationColumnsToKeep = [
   'createdBy',
   'createdTime',
 ];
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const resourceTierColumnsToKeep = [
   'resourceTierId',
   'resourceTierName',
@@ -51,8 +52,8 @@ const resourceTierColumnsToKeep = [
 const errorColumnsToKeep = ['type', 'message'];
 
 export async function showGroupOverview(groupId: string) {
-  var groups = null;
-  var group = [];
+  let groups = null;
+  const group = [];
 
   if (!groupId) {
     groups = await cliUtils.spinner(
@@ -60,7 +61,9 @@ export async function showGroupOverview(groupId: string) {
       'Fetching Permission Groups...'
     );
     // remove outer envelope of JSON data
-    if (groups.hasOwnProperty('groups')) groups = groups['groups'];
+    if (Object.prototype.hasOwnProperty.call(groups, 'groups')) {
+      groups = groups['groups'];
+    }
   } else {
     groups = await cliUtils.spinner(
       edgeWorkersSvc.getGroup(groupId),
@@ -78,9 +81,9 @@ export async function showGroupOverview(groupId: string) {
       group.push(filterJsonData(groups[key], groupColumnsToKeep));
     });
 
-    let msg = `User has the following Permission Group access for group: ${groupId}`;
-    if (edgeWorkersClientSvc.isJSONOutputMode()) {
-      edgeWorkersClientSvc.writeJSONOutput(0, msg, group);
+    const msg = `User has the following Permission Group access for group: ${groupId}`;
+    if (ewJsonOutput.isJSONOutputMode()) {
+      ewJsonOutput.writeJSONOutput(0, msg, group);
     } else {
       cliUtils.logWithBorder(msg);
       console.table(group);
@@ -98,9 +101,9 @@ export async function showEdgeWorkerIdOverview(
   groupId: string,
   resourceTierId: string
 ) {
-  var ids = null;
-  var id = [];
-  var accountId: string = '';
+  let ids = null;
+  const id = [];
+  let accountId = '';
 
   if (!ewId) {
     ids = await cliUtils.spinner(
@@ -108,7 +111,9 @@ export async function showEdgeWorkerIdOverview(
       'Fetching EdgeWorker Ids...'
     );
     // remove outer envelope of JSON data
-    if (ids.hasOwnProperty('edgeWorkerIds')) ids = ids['edgeWorkerIds'];
+    if (Object.prototype.hasOwnProperty.call(ids, 'edgeWorkerIds')){
+      ids = ids['edgeWorkerIds'];
+    }
   } else {
     console.log(
       `INFO: Since EdgeWorker Id (${ewId}) was provided, ignoring unnecessary Group Id, group: ${groupId}...`
@@ -140,9 +145,9 @@ export async function showEdgeWorkerIdOverview(
     id.sort(function (a, b) {
       return a.edgeWorkerId - b.edgeWorkerId;
     });
-    let msg = `The following EdgeWorker Ids are currently registered for account: ${accountId}, group: ${groupId}, ewId: ${ewId}`;
-    if (edgeWorkersClientSvc.isJSONOutputMode()) {
-      edgeWorkersClientSvc.writeJSONOutput(0, msg, id);
+    const msg = `The following EdgeWorker Ids are currently registered for account: ${accountId}, group: ${groupId}, ewId: ${ewId}`;
+    if (ewJsonOutput.isJSONOutputMode()) {
+      ewJsonOutput.writeJSONOutput(0, msg, id);
     } else {
       cliUtils.logWithBorder(msg);
       console.table(id);
@@ -163,20 +168,20 @@ export async function updateEdgeWorkerInfo(
   name: string,
   resourceTierId?: string
 ) {
-  var ids = await cliUtils.spinner(
+  let ids = await cliUtils.spinner(
     edgeWorkersSvc.updateEdgeWorkerId(ewId, groupId, name, resourceTierId),
     `Updating info for EdgeWorker Id ${ewId}`
   );
 
   if (ids && !ids.isError) {
     ids = [ids];
-    var id = [];
+    const id = [];
     Object.keys(ids).forEach(function (key) {
       id.push(filterJsonData(ids[key], idColumnsToKeep));
     });
-    let msg = `Updated EdgeWorker Id info for ewId: ${ewId}`;
-    if (edgeWorkersClientSvc.isJSONOutputMode()) {
-      edgeWorkersClientSvc.writeJSONOutput(0, msg, id);
+    const msg = `Updated EdgeWorker Id info for ewId: ${ewId}`;
+    if (ewJsonOutput.isJSONOutputMode()) {
+      ewJsonOutput.writeJSONOutput(0, msg, id);
     } else {
       cliUtils.logWithBorder(msg);
       console.table(id);
@@ -187,8 +192,9 @@ export async function updateEdgeWorkerInfo(
 }
 
 export async function deleteEdgeWorkerId(ewId: string, noPrompt: boolean) {
+  let deletion;
   if (noPrompt !== undefined) {
-    var deletion = await cliUtils.spinner(
+    deletion = await cliUtils.spinner(
       edgeWorkersSvc.deleteEdgeWorkerId(ewId),
       `Deleting EdgeWorker Id ${ewId}`
     );
@@ -198,7 +204,7 @@ export async function deleteEdgeWorkerId(ewId: string, noPrompt: boolean) {
         `Have you checked to make sure that EdgeWorker Id ${ewId} is not in use on any active properties? You can check for active properties by using the list-properties command.`
       )
     ) {
-      var deletion = await cliUtils.spinner(
+      deletion = await cliUtils.spinner(
         edgeWorkersSvc.deleteEdgeWorkerId(ewId),
         `Deleting EdgeWorker Id ${ewId}`
       );
@@ -208,9 +214,9 @@ export async function deleteEdgeWorkerId(ewId: string, noPrompt: boolean) {
   }
 
   if (!deletion.isError) {
-    let msg = `EdgeWorker ${ewId} was successfully deleted.`;
-    if (edgeWorkersClientSvc.isJSONOutputMode()) {
-      edgeWorkersClientSvc.writeJSONOutput(0, msg, [{}]);
+    const msg = `EdgeWorker ${ewId} was successfully deleted.`;
+    if (ewJsonOutput.isJSONOutputMode()) {
+      ewJsonOutput.writeJSONOutput(0, msg, [{}]);
     } else {
       cliUtils.logWithBorder(msg);
     }
@@ -221,9 +227,9 @@ export async function deleteEdgeWorkerId(ewId: string, noPrompt: boolean) {
 
 export async function getResourceTierInfo() {
   // get contract list
-  let contractList = await cliUtils.spinner(
+  const contractList = await cliUtils.spinner(
     getContractIds(),
-    "Retrieving contract id's..."
+    'Retrieving contract id\'s...'
   );
   if (contractList == undefined) {
     cliUtils.logAndExit(
@@ -232,19 +238,19 @@ export async function getResourceTierInfo() {
     );
   }
 
-  let contractId = readline.keyInSelect(
+  const contractId = readline.keyInSelect(
     contractList,
     'Please select from the above contract ids :'
   );
-  let selectedOption = contractId == -1 ? 'cancel' : contractList[contractId];
+  const selectedOption = contractId == -1 ? 'cancel' : contractList[contractId];
   console.log('You have selected ' + selectedOption);
   if (contractList[contractId] == undefined) {
     cliUtils.logAndExit(1, 'ERROR: Please select a valid contract id');
   }
-  let resourceTierList = await getResourceTierList(contractList[contractId]);
+  const resourceTierList = await getResourceTierList(contractList[contractId]);
 
   cliUtils.log('\nResource Tiers');
-  let resourceIds = [];
+  const resourceIds = [];
   resourceTierList.forEach(function (resTier, index) {
     console.log(
       index +
@@ -256,7 +262,7 @@ export async function getResourceTierInfo() {
         '\n'
     );
     resourceIds.push(resTier['resourceTierId']);
-    let ewLimit = resTier['edgeWorkerLimits'];
+    const ewLimit = resTier['edgeWorkerLimits'];
     ewLimit.forEach(function (limit) {
       console.log(
         limit['limitName'] + ': ' + cliUtils.getFormattedValue(limit)
@@ -265,7 +271,7 @@ export async function getResourceTierInfo() {
     console.log(); // adding line break
   });
 
-  let resourceTrIdx = readline.keyInSelect(
+  const resourceTrIdx = readline.keyInSelect(
     resourceIds,
     'Please select from the above resource tier ids'
   );
@@ -277,12 +283,12 @@ export async function getResourceTierInfo() {
  * @returns contract id list
  */
 async function getContractIds() {
-  let contractIdList = await cliUtils.spinner(
+  const contractIdList = await cliUtils.spinner(
     edgeWorkersSvc.getContracts(),
-    "Retrieving contract id's..."
+    'Retrieving contract id\'s...'
   );
   if (contractIdList && !contractIdList.isError) {
-    let contractIds = contractIdList['contractIds'];
+    const contractIds = contractIdList['contractIds'];
     if (contractIds.length == 0) {
       cliUtils.logAndExit(1, 'Unable to retrieve contracts for your account.');
     }
@@ -293,15 +299,15 @@ async function getContractIds() {
 }
 
 export async function getContracts() {
-  let contractIdList = await getContractIds();
+  const contractIdList = await getContractIds();
   if (contractIdList != undefined) {
-    let msg = "List of contract id's associated with this account";
-    let contractList = [];
+    const msg = 'List of contract id\'s associated with this account';
+    const contractList = [];
     contractIdList.forEach(function (value) {
       contractList.push({ ContractIds: value });
     });
-    if (edgeWorkersClientSvc.isJSONOutputMode()) {
-      edgeWorkersClientSvc.writeJSONOutput(0, msg, contractList);
+    if (ewJsonOutput.isJSONOutputMode()) {
+      ewJsonOutput.writeJSONOutput(0, msg, contractList);
     } else {
       cliUtils.logWithBorder(msg);
       console.table(contractList);
@@ -315,7 +321,7 @@ export async function getContracts() {
 }
 
 export async function getProperties(ewId: string, activeOnly: boolean) {
-  let propList = await cliUtils.spinner(
+  const propList = await cliUtils.spinner(
     edgeWorkersSvc.getProperties(ewId, activeOnly),
     `Retrieving properties for EdgeWorker Id ${ewId}...`
   );
@@ -323,10 +329,10 @@ export async function getProperties(ewId: string, activeOnly: boolean) {
     const properties = propList.properties;
 
     if (properties.length > 0) {
-      let msg = `The following properties are associated with the EdgeWorker Id ${ewId}`;
+      const msg = `The following properties are associated with the EdgeWorker Id ${ewId}`;
 
-      if (edgeWorkersClientSvc.isJSONOutputMode()) {
-        edgeWorkersClientSvc.writeJSONOutput(0, msg, propList);
+      if (ewJsonOutput.isJSONOutputMode()) {
+        ewJsonOutput.writeJSONOutput(0, msg, propList);
       } else {
         cliUtils.logWithBorder(msg);
         console.table(properties);
@@ -348,19 +354,19 @@ export async function getProperties(ewId: string, activeOnly: boolean) {
 
 export async function getResourceTiers(contractId?: string) {
   if (!contractId) {
-    let contractIdList = await getContractIds();
+    const contractIdList = await getContractIds();
     if (contractIdList == undefined) {
       cliUtils.logAndExit(
         1,
         'ERROR: Unable to retrieve contracts for your account.'
       );
     } else {
-      let contractOption = readline.keyInSelect(
+      const contractOption = readline.keyInSelect(
         contractIdList,
         'Please select from the above contract ids :'
       );
       contractId = contractIdList[contractOption];
-      let selectedOption = contractOption == -1 ? 'cancel' : contractId;
+      const selectedOption = contractOption == -1 ? 'cancel' : contractId;
       console.log('You have selected ' + selectedOption);
       if (contractId == undefined) {
         cliUtils.logAndExit(1, 'ERROR: Please select a valid contract id');
@@ -368,11 +374,11 @@ export async function getResourceTiers(contractId?: string) {
     }
   }
 
-  let resourceTierList = await getResourceTierList(contractId);
+  const resourceTierList = await getResourceTierList(contractId);
   if (resourceTierList) {
-    let msg = `The following Resource Tiers available for the contract id ${contractId}`;
-    if (edgeWorkersClientSvc.isJSONOutputMode()) {
-      edgeWorkersClientSvc.writeJSONOutput(0, msg, resourceTierList);
+    const msg = `The following Resource Tiers available for the contract id ${contractId}`;
+    if (ewJsonOutput.isJSONOutputMode()) {
+      ewJsonOutput.writeJSONOutput(0, msg, resourceTierList);
     } else {
       cliUtils.logWithBorder(msg);
       resourceTierList.forEach(function (resTier, index) {
@@ -384,7 +390,7 @@ export async function getResourceTiers(contractId?: string) {
             ' - ' +
             resTier['resourceTierName']
         );
-        let ewLimit = resTier['edgeWorkerLimits'];
+        const ewLimit = resTier['edgeWorkerLimits'];
         ewLimit.forEach(function (limit) {
           console.log(
             limit['limitName'] + ': ' + cliUtils.getFormattedValue(limit)
@@ -397,22 +403,22 @@ export async function getResourceTiers(contractId?: string) {
 }
 
 export async function getResourceTierForEwid(ewId: string) {
-  let resourceTier = await cliUtils.spinner(
+  const resourceTier = await cliUtils.spinner(
     edgeWorkersSvc.getResourceTierForEwid(ewId),
     `Retrieving resource tier for Edgeworker id ${ewId}...`
   );
   if (resourceTier && !resourceTier.isError) {
-    if (edgeWorkersClientSvc.isJSONOutputMode()) {
-      let msg = `The following resource tier is associated with the edgeworker id ${ewId}`;
-      edgeWorkersClientSvc.writeJSONOutput(0, msg, resourceTier);
+    if (ewJsonOutput.isJSONOutputMode()) {
+      const msg = `The following resource tier is associated with the edgeworker id ${ewId}`;
+      ewJsonOutput.writeJSONOutput(0, msg, resourceTier);
     } else {
-      let keyVal =
+      const keyVal =
         'ResourceTier ' +
         resourceTier['resourceTierId'] +
         ' - ' +
         resourceTier['resourceTierName'];
       cliUtils.logWithBorder(keyVal);
-      let ewLimit = resourceTier['edgeWorkerLimits'];
+      const ewLimit = resourceTier['edgeWorkerLimits'];
       ewLimit.forEach(function (limit) {
         console.log(
           limit['limitName'] + ': ' + cliUtils.getFormattedValue(limit)
@@ -425,7 +431,7 @@ export async function getResourceTierForEwid(ewId: string) {
 }
 
 async function getResourceTierList(contractId) {
-  let resourceTierList = await cliUtils.spinner(
+  const resourceTierList = await cliUtils.spinner(
     edgeWorkersSvc.getResourceTiers(contractId),
     `Retrieving resource tiers for contract id ${contractId}...`
   );
@@ -448,20 +454,20 @@ export async function createEdgeWorkerId(
   name: string,
   resourceTierId: string
 ) {
-  var ids = await cliUtils.spinner(
+  let ids = await cliUtils.spinner(
     edgeWorkersSvc.createEdgeWorkerId(groupId, name, resourceTierId),
     `Creating new EdgeWorker Id in group: ${groupId}, with name: ${name}`
   );
 
   if (ids && !ids.isError) {
     ids = [ids];
-    var id = [];
+    const id = [];
     Object.keys(ids).forEach(function (key) {
       id.push(filterJsonData(ids[key], idColumnsToKeep));
     });
-    let msg = `Created new EdgeWorker Identifier:`;
-    if (edgeWorkersClientSvc.isJSONOutputMode()) {
-      edgeWorkersClientSvc.writeJSONOutput(0, msg, id);
+    const msg = 'Created new EdgeWorker Identifier:';
+    if (ewJsonOutput.isJSONOutputMode()) {
+      ewJsonOutput.writeJSONOutput(0, msg, id);
     } else {
       cliUtils.logWithBorder(msg);
       console.table(id);
@@ -475,11 +481,11 @@ export async function showEdgeWorkerIdVersionOverview(
   ewId: string,
   options?: { versionId?: string; showResult?: boolean }
 ) {
-  var versions = null;
-  var version = [];
-  var accountId: string = '';
-  var versionId = options.versionId;
-  var showResult: boolean =
+  let versions = null;
+  const version = [];
+  let accountId = '';
+  let versionId = options.versionId;
+  const showResult: boolean =
     options.showResult != null && options.showResult != undefined
       ? options.showResult
       : true;
@@ -490,7 +496,9 @@ export async function showEdgeWorkerIdVersionOverview(
       `Fetching all Versions for EdgeWorker Id ${ewId}`
     );
     // remove outer envelope of JSON data
-    if (versions.hasOwnProperty('versions')) versions = versions['versions'];
+    if (Object.prototype.hasOwnProperty.call(versions, 'versions')) {
+      versions = versions['versions'];
+    }
   } else {
     versions = await cliUtils.spinner(
       edgeWorkersSvc.getVersionId(ewId, versionId),
@@ -523,9 +531,9 @@ export async function showEdgeWorkerIdVersionOverview(
     }
 
     if (showResult) {
-      let msg = `The following EdgeWorker Versions are currently registered for account: ${accountId}, ewId: ${ewId}, version: ${versionId}`;
-      if (edgeWorkersClientSvc.isJSONOutputMode()) {
-        edgeWorkersClientSvc.writeJSONOutput(0, msg, version);
+      const msg = `The following EdgeWorker Versions are currently registered for account: ${accountId}, ewId: ${ewId}, version: ${versionId}`;
+      if (ewJsonOutput.isJSONOutputMode()) {
+        ewJsonOutput.writeJSONOutput(0, msg, version);
       } else {
         cliUtils.logWithBorder(msg);
         console.table(version);
@@ -549,22 +557,22 @@ export async function createNewVersion(
   ewId: string,
   options: { bundle?: string; codeDir?: string }
 ) {
-  var bundle = null;
-  var versions = null;
-  var matchedVersion = null;
-  var checksumMatches = false;
+  let bundle = null;
+  let versions = null;
+  let matchedVersion = null;
+  let checksumMatches = false;
 
   // Depending on options used, validate or build tarball from code files
   // New Validation API is run during code bundle upload so no need to explicitly validate the provided tarball locally, rather delegate that to the OPEN API
   // However we still need to ensure the tarball exists locally if provided
   if (options.bundle)
     bundle = await cliUtils.spinner(
-      edgeWorkersClientSvc.validateTarballLocally(options.bundle),
+      validateTarballLocally(options.bundle),
       'Validating provided tarball exists'
     );
   else
     bundle = await cliUtils.spinner(
-      edgeWorkersClientSvc.buildTarball(ewId, options.codeDir),
+      buildTarball(ewId, options.codeDir),
       'Building tarball from working directory code'
     );
 
@@ -586,8 +594,8 @@ export async function createNewVersion(
     });
     if (checksumMatches) {
       let errorValues = {};
-      if (!edgeWorkersClientSvc.isJSONOutputMode()) {
-        var errorInfo = [];
+      if (!ewJsonOutput.isJSONOutputMode()) {
+        const errorInfo = [];
         errorInfo.push(['error_info', 'value']);
         errorInfo.push(['bundle', bundle.tarballPath]);
         errorInfo.push(['new checksum', bundle.tarballChecksum]);
@@ -607,7 +615,7 @@ export async function createNewVersion(
       }
       cliUtils.logAndExit(
         1,
-        `ERROR: Checksum for EdgeWorkers bundle provided matches existing version!`,
+        'ERROR: Checksum for EdgeWorkers bundle provided matches existing version!',
         [errorValues]
       );
     } else {
@@ -622,8 +630,9 @@ export async function deleteVersion(
   versionId: string,
   noPrompt: boolean
 ) {
+  let deletion;
   if (noPrompt !== undefined) {
-    var deletion = await cliUtils.spinner(
+    deletion = await cliUtils.spinner(
       edgeWorkersSvc.deleteVersion(ewId, versionId),
       `Deleting version ${versionId} of EdgeWorker Id ${ewId}`
     );
@@ -633,7 +642,7 @@ export async function deleteVersion(
         `Are you sure you want to delete version ${versionId} of EdgeWorker Id ${ewId}?`
       )
     ) {
-      var deletion = await cliUtils.spinner(
+      deletion = await cliUtils.spinner(
         edgeWorkersSvc.deleteVersion(ewId, versionId),
         `Deleting version ${versionId} of EdgeWorker Id ${ewId}`
       );
@@ -646,9 +655,9 @@ export async function deleteVersion(
   }
 
   if (!deletion.isError) {
-    let msg = `Version ${versionId} of Edgeworker Id ${ewId} was successfully deleted.`;
-    if (edgeWorkersClientSvc.isJSONOutputMode()) {
-      edgeWorkersClientSvc.writeJSONOutput(0, msg, [{}]);
+    const msg = `Version ${versionId} of Edgeworker Id ${ewId} was successfully deleted.`;
+    if (ewJsonOutput.isJSONOutputMode()) {
+      ewJsonOutput.writeJSONOutput(0, msg, [{}]);
     } else {
       cliUtils.logWithBorder(msg);
     }
@@ -661,14 +670,14 @@ export async function uploadEdgeWorkerVersion(
   ewId: string,
   tarballPath: string
 ) {
-  var versions = await cliUtils.spinner(
+  let versions = await cliUtils.spinner(
     edgeWorkersSvc.uploadTarball(ewId, tarballPath),
     `Uploading new version for EdgeWorker Id ${ewId} from ${tarballPath}`
   );
 
   if (versions) {
     versions = [versions];
-    var version = [];
+    const version = [];
     Object.keys(versions).forEach(function (key) {
       version.push(filterJsonData(versions[key], versionColumnsToKeep));
     });
@@ -677,9 +686,9 @@ export async function uploadEdgeWorkerVersion(
         delete version[key]['sequenceNumber'];
       });
     }
-    let msg = `New version uploaded for EdgeWorker Id: ${ewId}`;
-    if (edgeWorkersClientSvc.isJSONOutputMode()) {
-      edgeWorkersClientSvc.writeJSONOutput(0, msg, version);
+    const msg = `New version uploaded for EdgeWorker Id: ${ewId}`;
+    if (ewJsonOutput.isJSONOutputMode()) {
+      ewJsonOutput.writeJSONOutput(0, msg, version);
     } else {
       cliUtils.logWithBorder(msg);
       console.table(version);
@@ -694,8 +703,8 @@ export async function uploadEdgeWorkerVersion(
 
 export async function validateNewVersion(bundlePath: string) {
   // first verify the tarball provided exists locally
-  var bundle = await cliUtils.spinner(
-    edgeWorkersClientSvc.validateTarballLocally(bundlePath, true),
+  const bundle = await cliUtils.spinner(
+    validateTarballLocally(bundlePath, true),
     'Validating provided tarball exists'
   );
 
@@ -708,27 +717,28 @@ export async function validateNewVersion(bundlePath: string) {
 }
 
 export async function validateEdgeWorkerVersion(tarballPath: string) {
-  var hasErrors = true;
-  var errors = await cliUtils.spinner(
+  let hasErrors = true;
+  let errors = await cliUtils.spinner(
     edgeWorkersSvc.validateTarball(tarballPath),
     `Validating new code bundle version from ${tarballPath}`
   );
 
   if (errors) {
     // take off outer layer of JSON envelope
-    if (errors.hasOwnProperty('errors')) errors = errors['errors'];
-
+    if (Object.prototype.hasOwnProperty.call(errors, 'errors')) {
+      errors = errors['errors'];
+    }
     // if the Validation API returns successfully, but payload illustrates code bundle has errors, flag this as CLI failure
     if (JSON.stringify(errors) === '[]') hasErrors = false;
 
-    var error = [];
+    const error = [];
     Object.keys(errors).forEach(function (key) {
       error.push(filterJsonData(errors[key], errorColumnsToKeep));
     });
 
-    let msg = `Validation Errors for: ${tarballPath}`;
-    if (edgeWorkersClientSvc.isJSONOutputMode()) {
-      edgeWorkersClientSvc.writeJSONOutput(hasErrors ? 1 : 0, msg, error);
+    const msg = `Validation Errors for: ${tarballPath}`;
+    if (ewJsonOutput.isJSONOutputMode()) {
+      ewJsonOutput.writeJSONOutput(hasErrors ? 1 : 0, msg, error);
       // we want to set a failure exit code if the CLI executed successfully, but the Validation API indicated the code bundle is invalid
       if (hasErrors) {
         process.exit(1);
@@ -754,16 +764,16 @@ export async function downloadTarball(
   rawDownloadPath?: string
 ) {
   // Determine where the tarball should be store
-  var downloadPath = edgeWorkersClientSvc.determineTarballDownloadDir(
+  const downloadPath = determineTarballDownloadDir(
     ewId,
     rawDownloadPath
   );
   // Build tarball file name as ew_<version>_<now-as-epoch>.tgz
-  var tarballFileName: string = `ew_${versionId}_${Date.now()}.tgz`;
-  var pathToStore = path.join(downloadPath, tarballFileName);
+  const tarballFileName = `ew_${versionId}_${Date.now()}.tgz`;
+  const pathToStore = path.join(downloadPath, tarballFileName);
 
   // First try to fetch tarball
-  var wasDownloaded = await cliUtils.spinner(
+  const wasDownloaded = await cliUtils.spinner(
     edgeWorkersSvc.downloadTarball(ewId, versionId, pathToStore),
     `Downloading code bundle for EdgeWorker Id ${ewId}, version ${versionId}`
   );
@@ -783,19 +793,21 @@ export async function showEdgeWorkerActivationOverview(
   ewId: string,
   options?: { versionId?: string; activationId?: string }
 ) {
-  var activations = null;
-  var activation = [];
-  var accountId: string = '';
-  var versionId = options.versionId;
-  var activationId = options.activationId;
+  let activations = null;
+  const activation = [];
+  let accountId = '';
+  let versionId = options.versionId;
+  let activationId = options.activationId;
 
   if (versionId) {
     activations = await cliUtils.spinner(
       edgeWorkersSvc.getVersionActivations(ewId, versionId),
       `Fetching all Activations for EdgeWorker Id ${ewId}, Version ${versionId}`
     );
-    if (activations.hasOwnProperty('activations'))
+    
+    if (Object.prototype.hasOwnProperty.call(activations, 'activations')){
       activations = activations['activations'];
+    }
   } else if (activationId) {
     activations = await cliUtils.spinner(
       edgeWorkersSvc.getActivationID(ewId, activationId),
@@ -808,8 +820,10 @@ export async function showEdgeWorkerActivationOverview(
       `Fetching all Activations for EdgeWorker Id ${ewId}`
     );
     // remove outer envelope of JSON data
-    if (activations.hasOwnProperty('activations'))
+    
+    if (Object.prototype.hasOwnProperty.call(activations, 'activations')){
       activations = activations['activations'];
+    }
   }
 
   // check if versionId was empty for messaging
@@ -829,9 +843,9 @@ export async function showEdgeWorkerActivationOverview(
       );
     });
 
-    let msg = `The following EdgeWorker Activations currently exist for account: ${accountId}, ewId: ${ewId}, version: ${versionId}, activationId: ${activationId}`;
-    if (edgeWorkersClientSvc.isJSONOutputMode()) {
-      edgeWorkersClientSvc.writeJSONOutput(0, msg, activation);
+    const msg = `The following EdgeWorker Activations currently exist for account: ${accountId}, ewId: ${ewId}, version: ${versionId}, activationId: ${activationId}`;
+    if (ewJsonOutput.isJSONOutputMode()) {
+      ewJsonOutput.writeJSONOutput(0, msg, activation);
     } else {
       cliUtils.logWithBorder(msg);
       console.table(activation);
@@ -849,22 +863,22 @@ export async function createNewActivation(
   network: string,
   versionId: string
 ) {
-  var activations = await cliUtils.spinner(
+  let activations = await cliUtils.spinner(
     edgeWorkersSvc.createActivationId(ewId, network, versionId),
     `Creating Activation record for EdgeWorker Id ${ewId}, version: ${versionId} on network: ${network}`
   );
 
   if (activations) {
     activations = [activations];
-    var activation = [];
+    const activation = [];
     Object.keys(activations).forEach(function (key) {
       activation.push(
         filterJsonData(activations[key], activationColumnsToKeep)
       );
     });
-    let msg = `New Activation record created for EdgeWorker Id: ${ewId}, version: ${versionId}, on network: ${network}`;
-    if (edgeWorkersClientSvc.isJSONOutputMode()) {
-      edgeWorkersClientSvc.writeJSONOutput(0, msg, activation);
+    const msg = `New Activation record created for EdgeWorker Id: ${ewId}, version: ${versionId}, on network: ${network}`;
+    if (ewJsonOutput.isJSONOutputMode()) {
+      ewJsonOutput.writeJSONOutput(0, msg, activation);
     } else {
       cliUtils.logWithBorder(msg);
       console.table(activation);
@@ -889,14 +903,14 @@ export async function cloneEdgeworker(
   );
 
   if (clonedEw && !clonedEw.isError) {
-    let msg = `Cloned Edgeworker from Edgeworker id ${ewId} to resourceTier id ${resourceTierId}`;
+    const msg = `Cloned Edgeworker from Edgeworker id ${ewId} to resourceTier id ${resourceTierId}`;
     clonedEw = [clonedEw];
-    var id = [];
+    const id = [];
     Object.keys(clonedEw).forEach(function (key) {
       id.push(filterJsonData(clonedEw[key], clonedColumnsToKeep));
     });
-    if (edgeWorkersClientSvc.isJSONOutputMode()) {
-      edgeWorkersClientSvc.writeJSONOutput(0, msg, id);
+    if (ewJsonOutput.isJSONOutputMode()) {
+      ewJsonOutput.writeJSONOutput(0, msg, id);
     } else {
       cliUtils.logWithBorder(msg);
       console.table(id);
@@ -911,21 +925,21 @@ export async function deactivateEdgeworker(
   network: string,
   versionId: string
 ) {
-  var deactivate = await cliUtils.spinner(
+  let deactivate = await cliUtils.spinner(
     edgeWorkersSvc.deactivateEdgeworker(ewId, network, versionId),
     `Deactivating Edgeworker for Id ${ewId}, version: ${versionId} on network: ${network}`
   );
   if (deactivate) {
     deactivate = [deactivate];
-    var deactivation = [];
+    const deactivation = [];
     Object.keys(deactivate).forEach(function (key) {
       deactivation.push(
         filterJsonData(deactivate[key], deactivationColumnsToKeep)
       );
     });
-    let msg = `EdgeWorker deactivated for Id: ${ewId}, version: ${versionId}, on network: ${network}`;
-    if (edgeWorkersClientSvc.isJSONOutputMode()) {
-      edgeWorkersClientSvc.writeJSONOutput(0, msg, deactivate);
+    const msg = `EdgeWorker deactivated for Id: ${ewId}, version: ${versionId}, on network: ${network}`;
+    if (ewJsonOutput.isJSONOutputMode()) {
+      ewJsonOutput.writeJSONOutput(0, msg, deactivate);
     } else {
       cliUtils.logWithBorder(msg);
       console.table(deactivate);
@@ -960,7 +974,7 @@ export async function createAuthToken(
   }
 
   if (options.network) {
-    let network = options.network;
+    const network = options.network;
     if (
       network.toUpperCase() !== cliUtils.staging &&
       network.toUpperCase() !== cliUtils.production
@@ -985,9 +999,9 @@ export async function createAuthToken(
     Object.keys(authToken).forEach(function (key) {
       authToken = authToken[key];
     });
-    let token = 'Akamai-EW-Trace: ' + authToken;
-    if (edgeWorkersClientSvc.isJSONOutputMode()) {
-      edgeWorkersClientSvc.writeJSONOutput(0, token);
+    const token = 'Akamai-EW-Trace: ' + authToken;
+    if (ewJsonOutput.isJSONOutputMode()) {
+      ewJsonOutput.writeJSONOutput(0, token);
     } else if (options.format && options.format == 'curl') {
       cliUtils.log(`-H '${token}'`);
     } else {
@@ -1003,17 +1017,229 @@ export async function createAuthToken(
 }
 
 export async function generateRandomSecretKey(length: number) {
-  var randomToken = CryptoJS.lib.WordArray.random(length).toString(
+  const randomToken = CryptoJS.lib.WordArray.random(length).toString(
     CryptoJS.enc.Hex
   );
-  let secretToken = `Secret: ${randomToken}`;
-  let msg =
-    `The following secret can be used to generate auth token or be used in the variable "PMUSER_EW_DEBUG_KEY" in the property.\n ` +
+  const secretToken = `Secret: ${randomToken}`;
+  const msg =
+    'The following secret can be used to generate auth token or be used in the variable "PMUSER_EW_DEBUG_KEY" in the property.\n ' +
     secretToken;
-  if (edgeWorkersClientSvc.isJSONOutputMode()) {
-    edgeWorkersClientSvc.writeJSONOutput(0, secretToken);
+  if (ewJsonOutput.isJSONOutputMode()) {
+    ewJsonOutput.writeJSONOutput(0, secretToken);
   } else {
     cliUtils.logWithBorder(msg);
+  }
+}
+
+export async function getLimits() {
+  const limitsResponse = await cliUtils.spinner(
+    edgeWorkersSvc.getLimits(),
+    'Getting limits list...'
+  );
+
+  if (limitsResponse.limits && !limitsResponse.isError) {
+    const msg = 'EdgeWorkers imposes the following limits:';
+    if (ewJsonOutput.isJSONOutputMode()) {
+      ewJsonOutput.writeJSONOutput(0, msg, limitsResponse.limits);
+    } else {
+      cliUtils.logWithBorder(msg);
+      console.table(limitsResponse.limits);
+    }
+  } else {
+    cliUtils.logAndExit(1, limitsResponse.error_reason);
+  }
+}
+
+export async function getAvailableReports() {
+  const availableReports = await cliUtils.spinner(
+    edgeWorkersSvc.getAvailableReports(),
+    'Getting list of available reports...'
+  );
+
+  if (availableReports && !availableReports.isError) {
+    const msg = 'The following reports are available:';
+    const reportList = availableReports.reports.map((report)=>{
+      return {ReportId: report.reportId, ReportType: report.name};
+    });
+    
+    if (ewJsonOutput.isJSONOutputMode()) {
+      ewJsonOutput.writeJSONOutput(0, msg, reportList);
+    } else {
+      cliUtils.logWithBorder(msg);
+      console.table(reportList);
+    }
+  } else {
+    cliUtils.logAndExit(1, availableReports.error_reason);
+  }
+}
+
+interface Execution {
+  invocations: number
+  execDuration?: Record<string, number>,
+  initDuration?: Record<string, number>,
+  status?: string,
+  memory?: Record<string, number>,
+}
+
+const getExecutionAverages = (executionArray: Array<Execution>, executionKey: string) => {
+  if (executionArray){
+    let totalAvg = 0, totalInvocations = 0, eventMax = -1, eventMin = Number.MAX_SAFE_INTEGER;
+    for (const execution of executionArray){
+      const {avg, min, max} = execution[executionKey];
+
+      totalAvg += avg * execution.invocations;
+      totalInvocations += execution.invocations;
+      eventMin = Math.min(eventMin, min);
+      eventMax = Math.max(eventMax, max);
+    }
+    return {
+      avg: (totalAvg / totalInvocations).toFixed(4),
+      min: eventMin.toFixed(2),
+      max: eventMax.toFixed(2)
+    };
+  } else {
+    return {
+      avg: 'N/A',
+      min: 'N/A',
+      max: 'N/A'
+    };
+  }
+};
+
+export async function getReport(
+  reportId: number,
+  start: string,
+  end:string,
+  ewid: string,
+  statuses: Array<string>,
+  eventHandlers: Array<string>,
+  ) {
+  const report = await cliUtils.spinner(
+    edgeWorkersSvc.getReport(reportId, ewid, start, statuses, eventHandlers, end),
+    'Getting report...'
+  );
+
+  const EVENT_HANDLERS = ['onClientRequest', 'onOriginRequest', 'onOriginResponse', 'onClientResponse', 'responseProvider'];
+  let executionEventHandlers: Array<string>;
+  if (eventHandlers.length !== 0) {
+    // remove unwanted event handlers
+    executionEventHandlers = EVENT_HANDLERS.filter((event) => eventHandlers.includes(event));
+  } else {
+    executionEventHandlers = EVENT_HANDLERS;
+  }
+  
+
+  if (report && !report.isError) {
+    const data: Record<string, unknown> = report.data;
+    if (typeof data === 'object' && Object.keys(data).length === 0) {
+      // check if data is empty object or empty array
+      cliUtils.logWithBorder(`${report.name} from ${report.start} to ${report.end} has no data`);
+    } else {
+      const msg = `Printing ${report.name} from ${report.start} to ${report.end}`;
+      cliUtils.logWithBorder(msg);
+      let reportOutput;
+
+      switch (report.reportId){
+        case 1: {
+          // summary
+          const {
+            memory,
+            initDuration,
+            execDuration,
+            successes,
+            errors,
+            invocations
+          } = report.data;
+          let initDurationMapped = {}; // init duration might be undefined
+
+          if (initDuration) {
+            Object.keys(initDuration).forEach((key) => {
+              initDurationMapped[key] = initDuration[key].toFixed(4);
+            });
+          } else {
+            initDurationMapped = {avg: 'N/A', max: 'N/A', min: 'N/A'};
+          }
+          
+          Object.keys(execDuration).forEach((key) => {
+            execDuration[key] = execDuration[key].toFixed(4);
+          });
+          Object.keys(memory).forEach((key) => {
+            memory[key] = memory[key].toFixed(4);
+          });
+          
+          reportOutput = [
+            {successes, errors, invocations},
+            {initDuration: initDurationMapped, execDuration},
+            {memory}
+          ];
+          break;
+        }
+  
+        case 2: {
+          // execution time
+          reportOutput = {};
+          const executionCategories: Record<string, Array<Execution>> = report.data[0].data;
+
+          for (const event of executionEventHandlers) {
+            reportOutput[event] = getExecutionAverages(executionCategories[event], 'execDuration');
+          }
+          // execution time has an additional property for init times
+          reportOutput['init'] = getExecutionAverages(executionCategories['init'], 'initDuration');
+          
+          break;
+        }
+
+        case 3: {
+          // execution status
+          reportOutput = {};
+          const executionCategories: Record<string, Array<Execution>> = report.data[0].data;
+          let errors = 0;
+  
+          for (const executionArray of Object.values(executionCategories)) {
+            for (const execution of executionArray) {
+              const {status, invocations} = execution;
+              reportOutput[status] = reportOutput[status] + invocations || invocations;
+              if (status !== 'success' && status !== 'unimplementedEventHandler') {
+                errors += invocations;
+              }
+            }
+          }
+          
+          if (!reportOutput['success']){
+            // add success count if no successful executions
+            reportOutput['success'] = 0;
+          }
+          //add property for total errors
+          reportOutput['errors'] = errors;
+
+          break;
+        }
+
+        case 4: {
+          // memory usage
+          reportOutput = {};
+          const executionCategories: Record<string, Array<Execution>> = report.data[0].data;
+  
+          for (const event of executionEventHandlers) {
+            reportOutput[event] = getExecutionAverages(executionCategories[event], 'memory');
+          }
+
+          break;
+        }
+      }
+      if (ewJsonOutput.isJSONOutputMode()) {
+        ewJsonOutput.writeJSONOutput(0, msg, reportOutput);
+      } else {
+        if (Array.isArray(reportOutput)){
+          // report 1 (summary) will return an array of table objects
+          reportOutput.forEach( (table) => console.table(table));
+        } else {
+          console.table(reportOutput);
+        }
+      }
+    }
+  } else {
+    cliUtils.logAndExit(1, report.error_reason);
   }
 }
 
