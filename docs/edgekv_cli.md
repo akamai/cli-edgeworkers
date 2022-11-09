@@ -60,18 +60,22 @@ Usage:
 
 1. When installing the Akamai CLI using the "akamai install edgeworkers" command you may run into a *"Package directory already exists"* error. This is likely because you already have the EdgeWorkers CLI package installed. In this case, please try updating the EdgeWorkers CLI package using “akamai update edgeworkers”.
 
-If you continue to encounter this error when trying to update the Akamai CLI using the “akamai update edgeworkers” command,  uninstall the Akamai CLI using the “akamai uninstall edgeworkers” command. This will remove the existing installation, allowing you to reinstall using the “akamai install edgeworkers” command.
+    If you continue to encounter this error when trying to update the Akamai CLI using the “akamai update edgeworkers” command,  uninstall the Akamai CLI using the “akamai uninstall edgeworkers” command. This will remove the existing installation, allowing you to reinstall using the “akamai install edgeworkers” command.
 
 2. Docker installation error  
-When installing Akamai CLI using docker, you may run into "Error: Cannot find module. '.bin/src/edgekv/ekv-cli-main.js".
+    When installing Akamai CLI using docker, you may run into "Error: Cannot find module. '.bin/src/edgekv/ekv-cli-main.js".
 
-Build-time workaround - use this when building the Docker image  
-RUN `akamai install edgeworkers && cd $AKAMAI_CLI_HOME/.akamai-cli/src/cli-edgeworkers/ && npm run build`
+    Build-time workaround - use this when building the Docker image  
+    RUN `akamai install edgeworkers && cd $AKAMAI_CLI_HOME/.akamai-cli/src/cli-edgeworkers/ && npm run build`
 
-Runtime workaround - use this if Docker is already running  
-`cd ~/.akamai-cli/src/cli-edgeworkers/ && npm install --unsafe-perm`
+    Runtime workaround - use this if Docker is already running  
+    `cd ~/.akamai-cli/src/cli-edgeworkers/ && npm install --unsafe-perm`
 
+3. The EdgeKV CLI --overwrite option for the token create and download commands does not work when you change the token name associated with a namespace.
 
+    As a workaround, you can manually delete the token in question from the edgekv_tokens.js file before using the --save_path option. You can then use the token create and download CLI commands with the --save_path option to update the edgekv_tokens.js file.
+
+For a broader list of all known EdgeKV issues please refer to the Akamai TechDocs [here](https://techdocs.akamai.com/edgekv/docs/known-issues]).
 
 ## Overview of Commands
 
