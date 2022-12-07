@@ -55,9 +55,20 @@ program
     cliUtils.logAndExit(0, copywrite);
   });
 
+const helper = program.createHelp();
+program.configureHelp({
+  optionDescription: () => '',
+  optionTerm: (cmd) => 
+    helper.optionTerm(cmd) + '\n\t' + helper.optionDescription(cmd),
+
+  subcommandDescription: () => '' ,
+  subcommandTerm: (cmd) => 
+    helper.subcommandTerm(cmd) + '\n\t' + helper.subcommandDescription(cmd),
+});
+
 program
   .command('help [command]')
-  .description('Displays help information for the given command.')
+  .description('Displays help information for the given command')
   .action(function (arg) {
     if (!arg) {
       program.outputHelp();
@@ -81,7 +92,7 @@ program
 
 program
   .command('list-groups [group-identifier]')
-  .description('Customer Developer can find their EdgeWorkers access level per Luna Access Control Group.')
+  .description('View a list of groups and the associated permission capabilities')
   .alias('lg')
   .action(async function (groupId) {
     try {
@@ -96,7 +107,7 @@ program
 
 program
   .command('list-ids [edgeworker-identifier]')
-  .description('List EdgeWorker ids currently registered.')
+  .description('List EdgeWorker ids currently registered')
   .alias('li')
   .option('--groupId <groupId>', 'Filter EdgeWorker Id list by Permission Group')
   .option('-restier, --resourceTierId <resourceTierId>', 'Filter EdgeWorkers by resource tiers')
@@ -113,9 +124,9 @@ program
 
 program
   .command('register <group-identifier> <edgeworker-name>')
-  .description('Register a new EdgeWorker id to reference in Property Manager behavior.')
+  .description('Register a new EdgeWorker Id to reference in Property Manager behavior')
   .alias('create-id')
-  .option('-restier, --resourceTierId <resourceTierId>', 'New resource Tier id to associate with EdgeWorker')
+  .option('-restier, --resourceTierId <resourceTierId>', 'New resource Tier Id to associate with EdgeWorker')
   .action(async function (groupId, name, options) {
     try {
       // for automation resource tier id will be provided , hence no need for prompts
@@ -124,7 +135,7 @@ program
       // get contract list and get resource tier info
       resourceTierId = await cliHandler.getResourceTierInfo();
       if (resourceTierId == undefined) {
-        cliUtils.logAndExit(1, 'ERROR: Please select a valid resource tier id.');
+        cliUtils.logAndExit(1, 'ERROR: Please select a valid resource tier Id.');
       }
       }
       // create edgeworker for the grpid, res tier and ew name
@@ -139,7 +150,7 @@ program
 
 program
   .command('list-contracts')
-  .description('Allows customer to view the list of contracts associated with their account')
+  .description('View the list of contracts associated with an account')
   .alias('li-contracts')
   .action(async function () {
     try {
@@ -154,7 +165,7 @@ program
 
 program
   .command('list-properties <edgeworkerId>')
-  .description('Allows customer to view the list of properties associated with the EdgeWorker Id')
+  .description('View the list of properties associated with an EdgeWorker Id')
   .option('--activeOnly', 'Return only active properties')
   .alias('lp')
   .action(async function (edgeWorkerId, options) {
@@ -170,7 +181,7 @@ program
 
 program
   .command('list-restiers')
-  .description('Allows customer to view the list of resource tiers available for the specified contract')
+  .description('View the list of resource tiers available for a specified contract')
   .option('--contractId <contractId>', 'Contract id for the resource tiers')
   .alias('li-restiers')
   .action(async function (options) {
@@ -186,7 +197,7 @@ program
 
 program
   .command('list-limits')
-  .description('List the various limits EdgeWorkers imposes on the number of activations, EdgeWorkers IDs, and versions you can deploy.')
+  .description('List the various limits EdgeWorkers imposes on the number of activations, EdgeWorkers IDs, and versions you can deploy')
   .alias('li-limits')
   .action(async function () {
     try {
@@ -201,7 +212,7 @@ program
 
 program
   .command('show-restier <edgeworkerId>')
-  .description('Allows customer to view the resource tier associated with the EdgeWorker Id')
+  .description('View the resource tier associated with an EdgeWorker Id')
   .action(async function (edgeworkerId) {
     try {
       await cliHandler.getResourceTierForEwid(edgeworkerId);
@@ -215,8 +226,8 @@ program
 
 program
   .command('update-id <edgeworker-identifier> <group-identifier> <edgeworker-name>')
-  .description('Allows Customer Developer to update an existing EdgeWorker Identifier\'s Luna ACG or Name attributes.')
-  .option('-restier, --resourceTierId <resourceTierId>', 'New resource Tier id to associate with EdgeWorker')
+  .description('Update an existing EdgeWorker Identifier\'s Luna ACG or Name attributes')
+  .option('-restier, --resourceTierId <resourceTierId>', 'New resource Tier Id to associate with EdgeWorker')
   .alias('ui')
   .action(async function (ewId, groupId, name, options) {
     try {
@@ -231,7 +242,7 @@ program
 
 program
   .command('delete-id <edgeworker-identifier>')
-  .description('Permanently delete an existing EdgeWorker Id.')
+  .description('Permanently delete an existing EdgeWorker Id')
   .option('--noPrompt', 'Skip the deletion confirmation prompt')
   .action(async function (ewId, options) {
     try {
@@ -246,7 +257,7 @@ program
 
 program
   .command('list-versions <edgeworker-identifier> [version-identifier]')
-  .description('List Version information of a given EdgeWorker Id.')
+  .description('List Version information of a given EdgeWorker Id')
   .alias('lv')
   .action(async function (ewId, versionId) {
     try {
@@ -261,7 +272,7 @@ program
 
 program
   .command('upload <edgeworker-identifier>')
-  .description('Creates a new version of a given EdgeWorker Id which includes the code bundle.')
+  .description('Creates a new version of a given EdgeWorker Id which includes the code bundle')
   .alias('create-version')
   .option('--bundle <bundlePath>', 'Path to bundle file in tgz format')
   .option('--codeDir <workingDirectory>', 'Working directory that includes main.js and bundle.json files')
@@ -283,7 +294,7 @@ program
 
 program
   .command('delete-version <edgeworker-identifier> <version-identifier>')
-  .description('Permanently delete an existing version of a given EdgeWorker Id.')
+  .description('Permanently delete an existing version of a given EdgeWorker Id')
   .option('--noPrompt', 'Skip the deletion confirmation prompt')
   .action(async function (ewId, versionId, options) {
     try {
@@ -298,7 +309,7 @@ program
 
 program
   .command('download <edgeworker-identifier> <version-identifier>')
-  .description('Download the code bundle of an EdgeWorker version.')
+  .description('Download the code bundle of an EdgeWorker version')
   .alias('download-version')
   .option('--downloadPath <downloadPath>', 'Path to store downloaded bundle file; defaults to CLI home directory if not provided')
   .action(async function (ewId, versionId, options) {
@@ -314,7 +325,7 @@ program
 
 program
   .command('status <edgeworker-identifier>')
-  .description('List Activation status of a given EdgeWorker Id.')
+  .description('List Activation status of a given EdgeWorker Id')
   .alias('list-activations')
   .option('--versionId <versionId>', 'Version Identifier')
   .option('--activationId <activationId>', 'Activation Identifier')
@@ -354,7 +365,7 @@ program
 
 program
   .command('clone <edgeworker-identifier> <resourceTierId>')
-  .description('Clone the given EdgeWorker Id on an akamai network')
+  .description('Clone the given EdgeWorker Id on an Akamai network')
   .option('--ewName <name>', 'Name of the EdgeWorker')
   .option('--groupId <groupId>', 'GroupId in which EdgeWorker will be cloned')
   .action(async function (ewId, resourceTierId, options) {
@@ -389,7 +400,7 @@ program
 
 program
   .command('validate <bundlePath>')
-  .description('Validates a code bundle version without uploading the code bundle.')
+  .description('Validates a code bundle version without uploading the code bundle')
   .alias('vv')
   .action(async function (bundlePath) {
 
@@ -405,7 +416,7 @@ program
 
 program
   .command('generate-secret')
-  .description('Generates a random secret key that can be used in the variable PMUSER_EW_DEBUG_KEY in their property.')
+  .description('Generates a random secret key that can be used in the variable PMUSER_EW_DEBUG_KEY in their property')
   .alias('secret')
   .action(async function () {
     const length = 32;
@@ -421,7 +432,7 @@ program
 
 program
   .command('create-auth-token <hostName>')
-  .description('Generates an authentication token that can be used to get detailed EdgeWorker debug response headers.')
+  .description('Generates an authentication token that can be used to get detailed EdgeWorker debug response headers')
   .alias('auth')
   .option('--network <network>','The Akamai environment on which to create this token, either “staging” or “production”')
   .option('--acl <aclPath>', 'The path prefix of the response pages which require debugging; this value is used to restrict for which pages the token is valid. \
@@ -476,7 +487,7 @@ get
   .option('--ev, --eventHandlers <eventHandlers>', 'Comma-separated string to filter EdgeWorkers by the event that triggers them. Values: onClientRequest, onOriginRequest, onOriginResponse, onClientResponse, responseProvider.')
   .action(async function (reportId: number, edgeworkerId: string, options) {
     if (!reportId){
-      cliUtils.logAndExit(1, 'ERROR: Please specify a reportId. To obtain the available report ID run "akamai edgeworkers get reports".');
+      cliUtils.logAndExit(1, 'ERROR: Please specify a reportId. To obtain the available report Id run "akamai edgeworkers get reports".');
     }
     const {startDate, endDate, status, eventHandlers} = options;
 
