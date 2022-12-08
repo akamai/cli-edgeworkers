@@ -62,9 +62,20 @@ program
     cliUtils.logAndExit(0, copywrite);
   });
 
+  const helper = program.createHelp();
+  program.configureHelp({
+    optionDescription: () => '',
+    optionTerm: (cmd) => 
+      helper.optionTerm(cmd) + '\n\t' + helper.optionDescription(cmd),
+  
+    subcommandDescription: () => '' ,
+    subcommandTerm: (cmd) => 
+      helper.subcommandTerm(cmd) + '\n\t' + helper.subcommandDescription(cmd),
+  });
+
 program
   .command('help [command]')
-  .description('Displays help information for the given command.')
+  .description('Displays help information for the given command')
   .action(function (arg) {
     if (!arg) {
       program.outputHelp();
@@ -86,7 +97,7 @@ program
 
 program
   .command('initialize')
-  .description('Initialize edgeKV for the first time')
+  .description('Initialize EdgeKV for the first time')
   .alias('init')
   .action(async function () {
     try {
@@ -198,7 +209,7 @@ const list = program
   .command('list')
   .alias('l')
   .description(
-    'List all the namespaces or the data groups for a given namespace in an Akamai environment. Use list -h to see available options'
+    'List all the namespaces or the data groups for a given namespace in an Akamai environment'
   );
 
 list
@@ -219,7 +230,7 @@ list
     '--desc, --descending',
     'Set the sort direction to descending order'
   )
-  .description('List all the namespaces')
+  .description('List all namespaces')
   .action(async function (environment, options) {
     let sortDirection: cliUtils.sortDirections, orderBy: string;
 
@@ -296,7 +307,7 @@ list
     '--sandboxId <sandboxId>',
     '`sandbox-id` to use for the data operation. You can use the `akamai sandbox list` CLI command to view a list of available sandboxes.'
   )
-  .description('List items with in a group')
+  .description('List items within a group')
   .action(async function (environment, namespace, groupId, options) {
     try {
       await kvCliHandler.listItemsFromGroup(
@@ -317,7 +328,7 @@ list
 list
   .command('tokens')
   .option('--include-expired', 'Returns expired tokens in the response')
-  .description('List all tokens for which the user has permission to download.')
+  .description('List all tokens for which the user has permission to download')
   .action(async function (options) {
     try {
       await kvCliHandler.listTokens(options.includeExpired);
@@ -339,7 +350,7 @@ list
     '-incewg, --include_ew_groups',
     'Returns expired tokens in the response'
   )
-  .description('List all tokens for which the user has permission to download.')
+  .description('List group identifiers created when writing items to a namespace')
   .action(async function (options) {
     try {
       await kvCliHandler.listAuthGroups(options);
@@ -452,7 +463,8 @@ create
     cliUtils.logAndExit(0, copywrite);
   });
 
-const revoke = program.command('revoke');
+const revoke = program.command('revoke')
+  .description('Revoke an EdgeKV token');
 revoke
   .command('token <tokenName>')
   .description('Revoke an EdgeKV token')
@@ -467,7 +479,8 @@ revoke
     cliUtils.logAndExit(0, copywrite);
   });
 
-const modify = program.command('modify');
+const modify = program.command('modify')
+  .description('Modify EdgeKV namespace or permission group');
 modify
   .command('ns <environment> <namespace>')
   .requiredOption(
@@ -529,12 +542,10 @@ download
 
 const show = program
   .command('show')
-  .description(
-    'Check the initialization status of the EdgeKV or Retrieve an EdgeKV namespace. Use show -h to see available options'
-  );
+  .description('Check the initialization status of the EdgeKV or Retrieve an EdgeKV namespace');
 show
   .command('status')
-  .description('Check the initialization status of the edgeKV')
+  .description('Check the EdgeKV initialization status')
   .action(async function () {
     try {
       await kvCliHandler.getInitializationStatus();
