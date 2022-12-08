@@ -109,7 +109,7 @@ program
   .command('list-ids [edgeworker-identifier]')
   .description('List EdgeWorker ids currently registered')
   .alias('li')
-  .option('--groupId <groupId>', 'Filter EdgeWorker Id list by Permission Group')
+  .option('--groupId <groupId>', 'Filter EdgeWorker ID list by Permission Group')
   .option('-restier, --resourceTierId <resourceTierId>', 'Filter EdgeWorkers by resource tiers')
   .action(async function (ewId, options) {
     try {
@@ -124,9 +124,9 @@ program
 
 program
   .command('register <group-identifier> <edgeworker-name>')
-  .description('Register a new EdgeWorker Id to reference in Property Manager behavior')
+  .description('Register a new EdgeWorker ID to reference in Property Manager behavior')
   .alias('create-id')
-  .option('-restier, --resourceTierId <resourceTierId>', 'New resource Tier Id to associate with EdgeWorker')
+  .option('-restier, --resourceTierId <resourceTierId>', 'New resource Tier ID to associate with EdgeWorker')
   .action(async function (groupId, name, options) {
     try {
       // for automation resource tier id will be provided , hence no need for prompts
@@ -135,7 +135,7 @@ program
       // get contract list and get resource tier info
       resourceTierId = await cliHandler.getResourceTierInfo();
       if (resourceTierId == undefined) {
-        cliUtils.logAndExit(1, 'ERROR: Please select a valid resource tier Id.');
+        cliUtils.logAndExit(1, 'ERROR: Please select a valid resource tier ID.');
       }
       }
       // create edgeworker for the grpid, res tier and ew name
@@ -165,7 +165,7 @@ program
 
 program
   .command('list-properties <edgeworkerId>')
-  .description('View the list of properties associated with an EdgeWorker Id')
+  .description('View the list of properties associated with an EdgeWorker ID')
   .option('--activeOnly', 'Return only active properties')
   .alias('lp')
   .action(async function (edgeWorkerId, options) {
@@ -182,7 +182,7 @@ program
 program
   .command('list-restiers')
   .description('View the list of resource tiers available for a specified contract')
-  .option('--contractId <contractId>', 'Contract id for the resource tiers')
+  .option('--contractId <contractId>', 'Contract ID for the resource tiers')
   .alias('li-restiers')
   .action(async function (options) {
     try {
@@ -212,7 +212,7 @@ program
 
 program
   .command('show-restier <edgeworkerId>')
-  .description('View the resource tier associated with an EdgeWorker Id')
+  .description('View the resource tier associated with an EdgeWorker ID')
   .action(async function (edgeworkerId) {
     try {
       await cliHandler.getResourceTierForEwid(edgeworkerId);
@@ -227,7 +227,7 @@ program
 program
   .command('update-id <edgeworker-identifier> <group-identifier> <edgeworker-name>')
   .description('Update an existing EdgeWorker Identifier\'s Luna ACG or Name attributes')
-  .option('-restier, --resourceTierId <resourceTierId>', 'New resource Tier Id to associate with EdgeWorker')
+  .option('-restier, --resourceTierId <resourceTierId>', 'New resource Tier ID to associate with EdgeWorker')
   .alias('ui')
   .action(async function (ewId, groupId, name, options) {
     try {
@@ -242,7 +242,7 @@ program
 
 program
   .command('delete-id <edgeworker-identifier>')
-  .description('Permanently delete an existing EdgeWorker Id')
+  .description('Permanently delete an existing EdgeWorker ID')
   .option('--noPrompt', 'Skip the deletion confirmation prompt')
   .action(async function (ewId, options) {
     try {
@@ -257,7 +257,7 @@ program
 
 program
   .command('list-versions <edgeworker-identifier> [version-identifier]')
-  .description('List Version information of a given EdgeWorker Id')
+  .description('List Version information of a given EdgeWorker ID')
   .alias('lv')
   .action(async function (ewId, versionId) {
     try {
@@ -272,7 +272,7 @@ program
 
 program
   .command('upload <edgeworker-identifier>')
-  .description('Creates a new version of a given EdgeWorker Id which includes the code bundle')
+  .description('Creates a new version of a given EdgeWorker ID which includes the code bundle')
   .alias('create-version')
   .option('--bundle <bundlePath>', 'Path to bundle file in tgz format')
   .option('--codeDir <workingDirectory>', 'Working directory that includes main.js and bundle.json files')
@@ -294,7 +294,7 @@ program
 
 program
   .command('delete-version <edgeworker-identifier> <version-identifier>')
-  .description('Permanently delete an existing version of a given EdgeWorker Id')
+  .description('Permanently delete an existing version of a given EdgeWorker ID')
   .option('--noPrompt', 'Skip the deletion confirmation prompt')
   .action(async function (ewId, versionId, options) {
     try {
@@ -325,7 +325,7 @@ program
 
 program
   .command('status <edgeworker-identifier>')
-  .description('List Activation status of a given EdgeWorker Id')
+  .description('List Activation status of a given EdgeWorker ID')
   .alias('list-activations')
   .option('--versionId <versionId>', 'Version Identifier')
   .option('--activationId <activationId>', 'Activation Identifier')
@@ -346,7 +346,7 @@ program
 
 program
   .command('activate <edgeworker-identifier> <network> <version-identifier>')
-  .description('Activate a Version for a given EdgeWorker Id on an Akamai Network')
+  .description('Activate a Version for a given EdgeWorker ID on an Akamai Network')
   .alias('av')
   .action(async function (ewId, network, versionId) {
 
@@ -365,7 +365,7 @@ program
 
 program
   .command('clone <edgeworker-identifier> <resourceTierId>')
-  .description('Clone the given EdgeWorker Id on an Akamai network')
+  .description('Clone the given EdgeWorker ID on an Akamai network')
   .option('--ewName <name>', 'Name of the EdgeWorker')
   .option('--groupId <groupId>', 'GroupId in which EdgeWorker will be cloned')
   .action(async function (ewId, resourceTierId, options) {
@@ -381,7 +381,7 @@ program
 
 program
   .command('deactivate <edgeworker-identifier> <network> <version-identifier>')
-  .description('De-activate a version for a given EdgeWorker Id on an Akamai Network')
+  .description('De-activate a version for a given EdgeWorker ID on an Akamai Network')
   .alias('deact')
   .action(async function (ewId, network, versionId) {
     
@@ -487,7 +487,7 @@ get
   .option('--ev, --eventHandlers <eventHandlers>', 'Comma-separated string to filter EdgeWorkers by the event that triggers them. Values: onClientRequest, onOriginRequest, onOriginResponse, onClientResponse, responseProvider.')
   .action(async function (reportId: number, edgeworkerId: string, options) {
     if (!reportId){
-      cliUtils.logAndExit(1, 'ERROR: Please specify a reportId. To obtain the available report Id run "akamai edgeworkers get reports".');
+      cliUtils.logAndExit(1, 'ERROR: Please specify a reportId. To obtain the available report ID run "akamai edgeworkers get reports".');
     }
     const {startDate, endDate, status, eventHandlers} = options;
 
