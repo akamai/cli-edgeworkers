@@ -670,10 +670,24 @@ export async function uploadEdgeWorkerVersion(
   ewId: string,
   tarballPath: string
 ) {
-  let versions = await cliUtils.spinner(
-    edgeWorkersSvc.uploadTarball(ewId, tarballPath),
-    `Uploading new version for EdgeWorker Id ${ewId} from ${tarballPath}`
-  );
+  let versions;
+  try {
+    versions = await cliUtils.spinner(
+      edgeWorkersSvc.uploadTarball(ewId, tarballPath),
+      `Uploading new version for EdgeWorker Id ${ewId} from ${tarballPath}`
+    );
+  } catch (error) {
+    const errorObj = JSON.parse(error);
+
+    if (errorObj.type === '/edgeworkers/error-types/edgeworkers-invalid-argument'){
+      return validateEdgeWorkerVersion(tarballPath);
+    } else {
+      cliUtils.logAndExit(
+        1,
+        `ERROR: Code bundle was not able to be uploaded for EdgeWorker Id ${ewId} from ${tarballPath}, reason: ${errorObj.detail}`
+      );
+    }
+  }
 
   if (versions) {
     versions = [versions];
