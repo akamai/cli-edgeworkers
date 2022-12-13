@@ -4,10 +4,12 @@ import { promiseTimeout } from './utils/timeout-promise';
 import {
   EDGEWORKERS_API_BASE,
   EDGEWORKERS_CLIENT_HEADER,
+  EDGEWORKERS_IDE_HEADER,
 } from './edgeworkers/ew-service';
 import { EDGEKV_API_BASE } from './edgekv/ekv-service';
 
 export let accountKey = null;
+export let ideExtensionType = null;
 export const timeoutVal = 120000;
 const versionHeader = 'X-AK-EDGEKV-CLI-VER';
 const ekvcliHeader = 'X-AK-EDGEKV-CLI';
@@ -15,6 +17,9 @@ import * as pjson from '../package.json';
 
 export function setAccountKey(account: string) {
   accountKey = account;
+}
+export function setIdeExtension(ideExtension: string) {
+  ideExtensionType = ideExtension;
 }
 
 /**
@@ -42,7 +47,10 @@ export function sendEdgeRequest(
   if (path.includes(EDGEWORKERS_API_BASE)) {
     headers[EDGEWORKERS_CLIENT_HEADER] = 'CLI';
   }
-
+  if (ideExtensionType) {
+    // Check if the ide extension is calling the CLi then add to header
+    headers[EDGEWORKERS_IDE_HEADER] = ideExtensionType;
+  }
   if (path.includes(EDGEKV_API_BASE)) {
     headers[versionHeader] = pjson.version;
     headers[ekvcliHeader] = metricType;
