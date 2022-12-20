@@ -191,6 +191,10 @@ export function updateEdgeWorkerId(
   name: string,
   resourceTierId: string
 ) {
+  if(!cliUtils.isValidEwId(ewId)) {
+    return error.invalidParameterError('UPDATE_EW');
+  }
+
   const body = { groupId: groupId, name: name };
   if (resourceTierId != undefined && resourceTierId != null) {
     body['resourceTierId'] = resourceTierId;

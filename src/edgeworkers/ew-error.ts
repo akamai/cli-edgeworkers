@@ -1,3 +1,4 @@
+import * as cliUtils from '../utils/cli-utils';
 import {ErrorMessage} from '../utils/http-error-message';
 
 export function handleError(err, commandId) {
@@ -59,4 +60,8 @@ export function handleError(err, commandId) {
 
         }
     }
+}
+
+export function invalidParameterError(commandId, errDetail=null) {
+    return handleError(cliUtils.toJsonPretty({status: 400, detail: errDetail}), commandId);
 }
