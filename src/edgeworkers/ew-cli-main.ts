@@ -8,7 +8,8 @@ import * as pkginfo from '../../package.json';
 import { Command } from 'commander';
 const program = new Command();
 import isValidDomain from 'is-valid-domain';
-const copywrite = '\nCopyright (c) 2019-2021 Akamai Technologies, Inc. Licensed under Apache 2 license.\nYour use of Akamai\'s products and services is subject to the terms and provisions outlined in Akamai\'s legal policies.\nVisit http://github.com/akamai/cli-edgeworkers for detailed documentation';
+const currentYear = new Date().getFullYear();
+const copywrite = '\nCopyright (c) 2019-' + currentYear + ' Akamai Technologies, Inc. Licensed under Apache 2 license.\nYour use of Akamai\'s products and services is subject to the terms and provisions outlined in Akamai\'s legal policies.\nVisit http://github.com/akamai/cli-edgeworkers for detailed documentation';
 
 /* ========== EdgeWorkers CLI Program Commands ========== */
 program
@@ -58,11 +59,11 @@ program
 const helper = program.createHelp();
 program.configureHelp({
   optionDescription: () => '',
-  optionTerm: (cmd) => 
+  optionTerm: (cmd) =>
     helper.optionTerm(cmd) + '\n\t' + helper.optionDescription(cmd),
 
   subcommandDescription: () => '' ,
-  subcommandTerm: (cmd) => 
+  subcommandTerm: (cmd) =>
     helper.subcommandTerm(cmd) + '\n\t' + helper.subcommandDescription(cmd),
 });
 
@@ -75,7 +76,7 @@ program
       cliUtils.logAndExit(0, copywrite);
     }
     else {
-      const command = (program.commands.find(c => c.name() == arg)) 
+      const command = (program.commands.find(c => c.name() == arg))
       ? program.commands.find(c => c.name() == arg)
       : program.commands.find(c => c.aliases()[0] == arg);
       if (!command) {
@@ -384,7 +385,7 @@ program
   .description('De-activate a version for a given EdgeWorker ID on an Akamai Network')
   .alias('deact')
   .action(async function (ewId, network, versionId) {
-    
+
     // Network must use correct keyword STAGING|PRODUCTION
     if (network.toUpperCase() !== cliUtils.staging && network.toUpperCase() !== cliUtils.production)
       cliUtils.logAndExit(1, `ERROR: Network parameter must be either staging or production - was: ${network}`);
@@ -447,7 +448,7 @@ exclusive to the --acl option; only use one or the other.')
       // deprecation msg for people using older CLI. This will be removed eventually.
       if (!isValidDomain(hostName)) {
         cliUtils.logAndExit(1, 'ERROR: Creating auth token with secret is deprecated with version CLI 1.1.0. Please use your host name to create an authentication token.');
-      } 
+      }
 
       await cliHandler.createAuthToken(hostName, options);
     } catch (e) {
