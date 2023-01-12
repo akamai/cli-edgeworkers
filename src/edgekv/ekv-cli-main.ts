@@ -7,8 +7,9 @@ import * as httpEdge from '../cli-httpRequest';
 import * as pkginfo from '../../package.json';
 import { Command } from 'commander';
 const program = new Command();
+const currentYear = new Date().getFullYear();
 const copywrite =
-  '\nCopyright (c) 2019-2021 Akamai Technologies, Inc. Licensed under Apache 2 license.\nYour use of Akamai\'s products and services is subject to the terms and provisions outlined in Akamai\'s legal policies.\nVisit http://github.com/akamai/cli-edgeworkers for detailed documentation';
+  '\nCopyright (c) 2019-' + currentYear + ' Akamai Technologies, Inc. Licensed under Apache 2 license.\nYour use of Akamai\'s products and services is subject to the terms and provisions outlined in Akamai\'s legal policies.\nVisit http://github.com/akamai/cli-edgeworkers for detailed documentation';
 program
   .version(pkginfo.version)
   .description(pkginfo.description)
@@ -65,11 +66,11 @@ program
   const helper = program.createHelp();
   program.configureHelp({
     optionDescription: () => '',
-    optionTerm: (cmd) => 
+    optionTerm: (cmd) =>
       helper.optionTerm(cmd) + '\n\t' + helper.optionDescription(cmd),
-  
+
     subcommandDescription: () => '' ,
-    subcommandTerm: (cmd) => 
+    subcommandTerm: (cmd) =>
       helper.subcommandTerm(cmd) + '\n\t' + helper.subcommandDescription(cmd),
   });
 
@@ -424,7 +425,7 @@ create
   )
   .option(
     '--save_path <save_path>',
-    'Path specifying where to save the edgekv_tokens.js token file.' 
+    'Path specifying where to save the edgekv_tokens.js token file.'
   )
   .option(
     '-o, --overwrite',
