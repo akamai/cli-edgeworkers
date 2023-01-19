@@ -2,7 +2,9 @@ import * as envUtils from '../src/utils/env-utils';
 
 import {
   accountKey,
+  ideExtensionType,
   setAccountKey,
+  setIdeExtension,
   sendEdgeRequest,
   postJson,
   putJson,
@@ -64,7 +66,21 @@ describe('cli-httpRequest tests', () => {
       setAccountKey('');
     });
   });
+  describe('testing setIDEExtension', () => {
+    test('ide extension should be null by default', () => {
+      expect(ideExtensionType).toBeNull();
+    });
 
+    test('string should be set successfully', () => {
+      const ide = 'vscode';
+      setIdeExtension(ide);
+      expect(ideExtensionType).toBe('vscode');
+    });
+
+    afterAll(() => {
+      setIdeExtension('');
+    });
+  });
   describe('testing sendEdgeRequest', () => {
     test('successful response should return 200 series status', async () => {
       const authSpy = edgeGrid.auth;

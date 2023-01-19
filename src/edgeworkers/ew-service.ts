@@ -6,6 +6,7 @@ import * as fs from 'fs';
 
 export const EDGEWORKERS_API_BASE = '/edgeworkers/v1';
 export const EDGEWORKERS_CLIENT_HEADER = 'X-EW-CLIENT';
+export const EDGEWORKERS_IDE_HEADER = 'X-EW-IDE';
 const DEFAULT_EW_TIMEOUT = 120000;
 
 // This is only for fetching tarball bodies
@@ -26,6 +27,7 @@ function fetchTarball(
     path += `${qs}accountSwitchKey=${accountKey}`;
   }
   headers[EDGEWORKERS_CLIENT_HEADER] = 'CLI';
+  // headers[EDGEWORKERS_IDE_HEADER] = 'VSCODE';
   headers['Accept'] = 'application/gzip';
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
