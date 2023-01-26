@@ -1,18 +1,24 @@
-import * as edgeWorkersClientSvc from '../edgeworkers/client-manager';
 import * as envUtils from '../utils/env-utils';
-
-const inquirer = require('inquirer');
-const Spinner = require('cli-spinner').Spinner;
+import inquirer from 'inquirer';
+import { Spinner } from 'cli-spinner';
+import { ewJsonOutput } from '../edgeworkers/client-manager';
+import { ekvJsonOutput } from '../edgekv/client-manager';
 const TIME_UNITS: string[] = ['ms', 's', 'min', 'h'];
 const MEMORY_UNITS: string[] = ['B', 'kB', 'MB', 'GB', 'TB'];
-const COUNT_UNITS: string[] = ['', 'Thousand', 'Million', 'Billion', 'Trillion'];
+const COUNT_UNITS: string[] = [
+  '',
+  'Thousand',
+  'Million',
+  'Billion',
+  'Trillion',
+];
 
 export const staging = 'STAGING';
 export const production = 'PRODUCTION';
 
 export function logWithBorder(str, type = 'log') {
-  var t: string = `--- ${str} ---`;
-  var border = getBorder(t);
+  const t = `--- ${str} ---`;
+  const border = getBorder(t);
   log(border, type);
   log(t, type);
   log(border, type);
@@ -28,38 +34,39 @@ export function log(txt, type = 'log') {
   }
 }
 
-export function logAndExit(exitCode: number, msg: string, data =[{}]) {
-
-  if(edgeWorkersClientSvc.isJSONOutputMode())
-    edgeWorkersClientSvc.writeJSONOutput(exitCode, msg, data);
-  else
+export function logAndExit(exitCode: number, msg: string, data = [{}]) {
+  if (ewJsonOutput.isJSONOutputMode()) {
+    ewJsonOutput.writeJSONOutput(exitCode, msg, data);
+  } else if (ekvJsonOutput.isJSONOutputMode()) {
+    ekvJsonOutput.writeJSONOutput(exitCode, msg, data);
+  } else {
     console.log(msg);
-
+  }
   process.exit(exitCode);
 }
 
 export function getFormattedValue(limit) {
-  if (limit["limitUnit"] === 'MILLISECOND') {
-    return formatMilliseconds(limit["limitValue"]);
-  } else if (limit["limitUnit"]  === 'BYTE') {
-    return bytesToBinarySize(limit["limitValue"]);
+  if (limit['limitUnit'] === 'MILLISECOND') {
+    return formatMilliseconds(limit['limitValue']);
+  } else if (limit['limitUnit'] === 'BYTE') {
+    return bytesToBinarySize(limit['limitValue']);
   }
 
-  return formatCount(limit["limitValue"]);
+  return formatCount(limit['limitValue']);
 }
 
 export async function confirm(msg: string) {
-  var answer = await inquirer.prompt([
+  const answer = await inquirer.prompt([
     {
       type: 'confirm',
       message: msg,
-      name: 'result'
-    }
+      name: 'result',
+    },
   ]);
   return answer.result;
 }
 
-export async function spinner(func, userMsg: string = '') {
+export async function spinner(func, userMsg = '') {
   const spinner = new Spinner({
     text: `${userMsg} %s`,
     stream: process.stderr,
@@ -90,18 +97,17 @@ export function isJSON(str) {
   try {
     const result = JSON.parse(str);
     const type = Object.prototype.toString.call(result);
-    return type === '[object Object]'
-      || type === '[object Array]';
+    return type === '[object Object]' || type === '[object Array]';
   } catch (err) {
     return false;
   }
 }
 
-export async function progress(func, userMsg: string = '') {
+export async function progress(func, userMsg = '') {
   console.log(userMsg);
-  var written: number = 0;
+  let written = 0;
   const interval = setInterval(function () {
-    process.stdout.write(".");
+    process.stdout.write('.');
     written++;
   }, 1000);
   try {
@@ -109,7 +115,7 @@ export async function progress(func, userMsg: string = '') {
   } finally {
     clearInterval(interval);
     if (written > 0) {
-      process.stdout.write("\n");
+      process.stdout.write('\n');
     }
   }
 }
@@ -122,8 +128,8 @@ export function escape(text: string) {
   return encodeURIComponent(text);
 }
 
-export function getTimeout(timeout : number) {
-  let timeoutByUser = envUtils.getTimeout();
+export function getTimeout(timeout: number) {
+  const timeoutByUser = envUtils.getTimeout();
   if (timeoutByUser == 0) {
     return timeout;
   }
@@ -136,7 +142,7 @@ export function getTimeout(timeout : number) {
  * @param {number} decimals: Number of decimals
  * @return {string} Formatted time
  */
-function formatMilliseconds(milliseconds: number, decimals: number = 2): string {
+function formatMilliseconds(milliseconds: number, decimals = 2): string {
   const fixedValue: string = milliseconds.toFixed(2);
   let value: string = fixedValue === '-0.00' ? '0.00' : fixedValue;
   let unit: string = TIME_UNITS[0];
@@ -155,7 +161,6 @@ function formatMilliseconds(milliseconds: number, decimals: number = 2): string 
         value = minutes.toFixed(decimals);
         unit = TIME_UNITS[2];
       }
-
     } else {
       value = seconds.toFixed(decimals);
       unit = TIME_UNITS[1];
@@ -171,10 +176,10 @@ function formatMilliseconds(milliseconds: number, decimals: number = 2): string 
  * @param {number} decimals: Number of decimals
  * @return {string} Formatted count
  */
-function formatCount(count: number, decimals: number = 2): string {
+function formatCount(count: number, decimals = 2): string {
   decimals = decimals < 0 ? 0 : decimals;
 
-  const i: number = Math.log10(count) / 3 | 0;
+  const i: number = (Math.log10(count) / 3) | 0;
   if (i === 0) {
     return `${Number(count.toFixed(decimals)).toString()}`;
   }
@@ -190,7 +195,7 @@ function formatCount(count: number, decimals: number = 2): string {
  * @param {number} decimals: Number of decimals
  * @return {string} Formatted size
  */
-function bytesToBinarySize(bytes: number, decimals: number = 2): string {
+function bytesToBinarySize(bytes: number, decimals = 2): string {
   return bytesToSize(bytes, decimals);
 }
 
@@ -201,7 +206,7 @@ function bytesToBinarySize(bytes: number, decimals: number = 2): string {
  * @param {number} kilobyte: Value of 1 kilobyte (1000 decimal or 1024 binary)
  * @return {string} Formatted size
  */
-function bytesToSize(bytes: number, decimals: number = 2, kilobyte: number = 1024): string {
+function bytesToSize(bytes: number, decimals = 2, kilobyte = 1024): string {
   if (bytes === null) {
     return 'N/A';
   } else if (bytes === 0) {
@@ -210,13 +215,55 @@ function bytesToSize(bytes: number, decimals: number = 2, kilobyte: number = 102
 
   decimals = decimals < 0 ? 0 : decimals;
 
-  const i: number = parseInt(String(Math.floor(Math.log(bytes) / Math.log(kilobyte))), 10);
+  const i: number = parseInt(
+    String(Math.floor(Math.log(bytes) / Math.log(kilobyte))),
+    10
+  );
 
   if (i === 0) {
     return `${Number(bytes.toFixed(decimals)).toString()} ${MEMORY_UNITS[i]}`;
   }
 
-  const res: string = (bytes / (kilobyte ** i)).toFixed(decimals);
+  const res: string = (bytes / kilobyte ** i).toFixed(decimals);
 
   return `${Number(res).toString()} ${MEMORY_UNITS[i]}`;
+}
+
+export function checkOptions (options: Record<string, unknown>, requiredOptions: string[]) {
+  for (const option of requiredOptions){
+    if (!(option in options)){
+      logAndExit(1, `error: required option '--${option} <${option}>' not specified`);
+    }
+  }
+}
+
+export enum sortDirections {
+  ASC = 'ASC',
+  DESC = 'DESC',
+}
+
+export function sortObjectArray(
+  objArray: Array<object>,
+  key: string,
+  sortDirection: sortDirections
+) {
+  objArray.sort((a, b) => {
+    let valA, valB;
+
+    if (typeof a[key] === 'string' && typeof b[key] === 'string') {
+      valA = a[key].toUpperCase();
+      valB = b[key].toUpperCase();
+    } else {
+      valA = a[key];
+      valB = b[key];
+    }
+
+    if (valA < valB) {
+      return sortDirection === sortDirections.DESC ? 1 : -1;
+    } else if (valA > valB) {
+      return sortDirection === sortDirections.DESC ? -1 : 1;
+    } else {
+      return 0;
+    }
+  });
 }

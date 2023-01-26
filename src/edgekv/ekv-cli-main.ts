@@ -2,13 +2,13 @@
 import * as envUtils from '../utils/env-utils';
 import * as cliUtils from '../utils/cli-utils';
 import * as kvCliHandler from './ekv-handler';
-import * as edgeWorkersClientSvc from '../edgeworkers/client-manager';
+import { ekvJsonOutput } from './client-manager';
 import * as httpEdge from '../cli-httpRequest';
 import * as pkginfo from '../../package.json';
-const commander = require('commander');
-const program = new commander.Command();
+import { Command } from 'commander';
+const program = new Command();
 const copywrite =
-  "\nCopyright (c) 2019-2021 Akamai Technologies, Inc. Licensed under Apache 2 license.\nYour use of Akamai's products and services is subject to the terms and provisions outlined in Akamai's legal policies.\nVisit http://github.com/akamai/cli-edgeworkers for detailed documentation";
+  '\nCopyright (c) 2019-2021 Akamai Technologies, Inc. Licensed under Apache 2 license.\nYour use of Akamai\'s products and services is subject to the terms and provisions outlined in Akamai\'s legal policies.\nVisit http://github.com/akamai/cli-edgeworkers for detailed documentation';
 program
   .version(pkginfo.version)
   .description(pkginfo.description)
@@ -18,6 +18,8 @@ program
     '--section <name>',
     'Use this section in edgerc file that contains the credential set.'
   )
+  .option('--json [path]', 'Write command output to JSON file at given path, otherwise written to CLI cache directory')
+  .option('--jsonout', 'Write command output as JSON to stdout')
   // .option('--json [path]', 'Write command output to JSON file at given path, otherwise written to CLI cache directory')
   .option('--accountkey <account-id>', 'internal parameter')
   .option('--timeout <timeout>', 'Use this for custom timeout')
@@ -31,8 +33,12 @@ program
     envUtils.setEdgeRcSection(section);
   })
   .on('option:json', function (path) {
-    edgeWorkersClientSvc.setJSONOutputMode(false); // set this to true when we enable json output mode
-    edgeWorkersClientSvc.setJSONOutputPath(path);
+    ekvJsonOutput.setJSONOutputMode(true);
+    ekvJsonOutput.setJSONOutputPath(path);
+  })
+  .on('option:jsonout', function () {
+    ekvJsonOutput.setJSONOutputMode(true);
+    ekvJsonOutput.setJSONOutputStdout(true);
   })
   .on('option:accountkey', function (key) {
     httpEdge.setAccountKey(key);
@@ -56,17 +62,28 @@ program
     cliUtils.logAndExit(0, copywrite);
   });
 
+  const helper = program.createHelp();
+  program.configureHelp({
+    optionDescription: () => '',
+    optionTerm: (cmd) => 
+      helper.optionTerm(cmd) + '\n\t' + helper.optionDescription(cmd),
+  
+    subcommandDescription: () => '' ,
+    subcommandTerm: (cmd) => 
+      helper.subcommandTerm(cmd) + '\n\t' + helper.subcommandDescription(cmd),
+  });
+
 program
   .command('help [command]')
-  .description('Displays help information for the given command.')
+  .description('Displays help information for the given command')
   .action(function (arg) {
     if (!arg) {
       program.outputHelp();
       cliUtils.logAndExit(0, copywrite);
     } else {
-      var command = !!program.commands.find((c) => c._name == arg)
-        ? program.commands.find((c) => c._name == arg)
-        : program.commands.find((c) => c._aliases[0] == arg);
+      const command = program.commands.find((c) => c.name() == arg)
+        ? program.commands.find((c) => c.name() == arg)
+        : program.commands.find((c) => c.aliases()[0] == arg);
       if (!command) {
         cliUtils.logAndExit(1, `ERROR: Could not find a command for ${arg}`);
       } else {
@@ -80,7 +97,7 @@ program
 
 program
   .command('initialize')
-  .description('Initialize edgeKV for the first time')
+  .description('Initialize EdgeKV for the first time')
   .alias('init')
   .action(async function () {
     try {
@@ -192,7 +209,7 @@ const list = program
   .command('list')
   .alias('l')
   .description(
-    'List all the namespaces or the data groups for a given namespace in an Akamai environment. Use list -h to see available options'
+    'List all the namespaces or the data groups for a given namespace in an Akamai environment'
   );
 
 list
@@ -201,10 +218,61 @@ list
     '-d, --details',
     'Setting this option will provide the namespace details'
   )
-  .description('List all the namespaces')
+  .option(
+    '--order-by <columnName>',
+    'Specify the column to order the list of namespaces by'
+  )
+  .option(
+    '--asc, --ascending',
+    'Set the sort direction to ascending order'
+  )
+  .option(
+    '--desc, --descending',
+    'Set the sort direction to descending order'
+  )
+  .description('List all namespaces')
   .action(async function (environment, options) {
+    let sortDirection: cliUtils.sortDirections, orderBy: string;
+
+    if (options.ascending && options.descending) {
+      cliUtils.logAndExit(1, 'ERROR: Cannot set both ascending and descending sort together.');
+    } else if (options.descending) {
+      sortDirection = cliUtils.sortDirections.DESC;
+    } else {
+      sortDirection = cliUtils.sortDirections.ASC;
+    }
+
+    // map sort column to object properties
+    if (options.orderBy) {
+      if (!options.details){
+        cliUtils.logAndExit(1, 'ERROR: Cannot use order-by without using detailed list.');
+      }
+      switch(options.orderBy.toLowerCase()){
+        case 'namespaceid':
+        case 'namespace':
+          orderBy = 'namespace';
+          break;
+        case 'retentionperiod':
+        case 'retention':
+          orderBy = 'retentionInSeconds';
+          break;
+        case 'geolocation':
+          orderBy = 'geoLocation';
+          break;
+        case 'accessgroupid':
+        case 'groupid':
+          orderBy = 'groupId';
+          break;
+        default:
+          cliUtils.logAndExit(1, `ERROR: Column ${options.orderBy} is not a valid column name.`);
+          break;
+      }
+    } else {
+      orderBy = 'namespace';
+    }
+
     try {
-      await kvCliHandler.listNameSpaces(environment, options.details);
+      await kvCliHandler.listNameSpaces(environment, options.details, sortDirection, orderBy);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
@@ -218,7 +286,7 @@ list
   .description(
     'List the data groups for a given namespace in an Akamai environment.'
   )
-  .action(async function (environment, namespace, options) {
+  .action(async function (environment, namespace) {
     try {
       await kvCliHandler.listGroups(environment, namespace);
     } catch (e) {
@@ -239,7 +307,7 @@ list
     '--sandboxId <sandboxId>',
     '`sandbox-id` to use for the data operation. You can use the `akamai sandbox list` CLI command to view a list of available sandboxes.'
   )
-  .description('List items with in a group')
+  .description('List items within a group')
   .action(async function (environment, namespace, groupId, options) {
     try {
       await kvCliHandler.listItemsFromGroup(
@@ -260,7 +328,7 @@ list
 list
   .command('tokens')
   .option('--include-expired', 'Returns expired tokens in the response')
-  .description('List all tokens for which the user has permission to download.')
+  .description('List all tokens for which the user has permission to download')
   .action(async function (options) {
     try {
       await kvCliHandler.listTokens(options.includeExpired);
@@ -282,7 +350,7 @@ list
     '-incewg, --include_ew_groups',
     'Returns expired tokens in the response'
   )
-  .description('List all tokens for which the user has permission to download.')
+  .description('List group identifiers created when writing items to a namespace')
   .action(async function (options) {
     try {
       await kvCliHandler.listAuthGroups(options);
@@ -335,33 +403,58 @@ create
   .description('Creates an EdgeKV token')
   .alias('tkn')
   .option(
-    '--save_path <save_path>',
-    'The path of the bundle where the token will be saved'
-  )
-  .requiredOption(
     '--staging <staging>',
-    'Token can be used in staging environment if allowed'
+    'Specifies whether the token will be allowed or denied in the staging environment. Values: "allow", "deny" (REQUIRED)'
   )
-  .requiredOption(
+  .option(
     '--production <production>',
-    'Token can be used in production environment if allowed'
+    'Specifies whether the token will be allowed or denied in the production environment. Values: "allow", "deny" (REQUIRED)'
   )
-  .requiredOption(
+  .option(
     '--ewids <ewIds>',
-    'All or specific ewids for which the token can be applied'
+    'A comma separated list of up to a maximum of 8 EdgeWorker IDs. Use "all" to allow all EdgeWorkers. (REQUIRED)'
   )
-  .requiredOption(
+  .option(
     '--expiry <expiry>',
-    'Expiry date of the token in the format yyyy-mm-dd'
+    'Expiration date of the token. Format of the expiry date is ISO 8601 format: yyyy-mm-dd. (REQUIRED)'
   )
-  .requiredOption('--namespace <namespace>', 'Permissions for the namespaces')
+  .option(
+    '--namespace <namespace>',
+    'A comma separated list of up to a maximum of 20 namespace identifier and permission combinations. Use the namespace name combined with "+rwd" (read, write, delete) to set permissions. Ex: "namespace1+rwd,namespace2+rw" (REQUIRED)'
+  )
+  .option(
+    '--save_path <save_path>',
+    'Path specifying where to save the edgekv_tokens.js token file.' 
+  )
   .option(
     '-o, --overwrite',
-    'EdgeKV token placed inside the bundle will be overwritten'
+    'This option is used in conjunction with the --save_path option to overwrite the value of an existing token with the same name in the edgekv_tokens.js file.'
   )
   .action(async function (tokenName, options) {
     try {
-      await kvCliHandler.createToken(tokenName, options);
+      // implement our own option checking here since we want the help msg to appear
+      // when no options are specified instead of a missing option error
+      if (Object.keys(options).length === 0) {
+        create.commands[1].help();
+        cliUtils.logAndExit(0, copywrite);
+      } else {
+        const requiredOptions = [
+          'staging',
+          'production',
+          'ewids',
+          'expiry',
+          'namespace',
+        ];
+        cliUtils.checkOptions(options, requiredOptions);
+
+        if (options.staging == 'deny' && options.production == 'deny') {
+          cliUtils.logAndExit(
+            1,
+            'ERROR: Unable to create token. At least one of the staging or production options must be set to "allow".'
+          );
+        }
+        await kvCliHandler.createToken(tokenName, options);
+      }
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
@@ -370,7 +463,8 @@ create
     cliUtils.logAndExit(0, copywrite);
   });
 
-const revoke = program.command('revoke');
+const revoke = program.command('revoke')
+  .description('Revoke an EdgeKV token');
 revoke
   .command('token <tokenName>')
   .description('Revoke an EdgeKV token')
@@ -385,7 +479,8 @@ revoke
     cliUtils.logAndExit(0, copywrite);
   });
 
-const modify = program.command('modify');
+const modify = program.command('modify')
+  .description('Modify EdgeKV namespace or permission group');
 modify
   .command('ns <environment> <namespace>')
   .requiredOption(
@@ -447,12 +542,10 @@ download
 
 const show = program
   .command('show')
-  .description(
-    'Check the initialization status of the EdgeKV or Retrieve an EdgeKV namespace. Use show -h to see available options'
-  );
+  .description('Check the initialization status of the EdgeKV or Retrieve an EdgeKV namespace');
 show
   .command('status')
-  .description('Check the initialization status of the edgeKV')
+  .description('Check the EdgeKV initialization status')
   .action(async function () {
     try {
       await kvCliHandler.getInitializationStatus();
@@ -485,12 +578,4 @@ if (envUtils.getNodeVersion() < 7) {
     1,
     'ERROR: The Akamai EdgeWorkers CLI requires Node 7.0.0 or newer.'
   );
-}
-
-if (program.args.length === 0) {
-  program.outputHelp(function (text) {
-    console.log(text);
-    console.log(copywrite);
-    cliUtils.logAndExit(1, 'ERROR: No commands were provided.');
-  });
 }

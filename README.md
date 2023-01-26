@@ -50,6 +50,7 @@ Options:
 | --section `<name>` | Use this section in `edgerc` file. (Default section is _[default]_)|
 | --timeout `<timeout>` | You can specify a timeout value for a command in seconds to override the 2 minute default. For example, if you add "--timeout 10" to a command, it will timeout if the server takes more than 10 second to respond. |
 | --json `[path]` | Write CLI output as JSON to optionally provided path.  If not path provided, write JSON output to CLI home directory |
+| --jsonout | Write CLI output as JSON to stdout. |
 | -h, --help | Display usage information for EdgeWorkers CLI. |
  
 Commands:
@@ -72,11 +73,14 @@ Commands:
 | validate \| vv `<bundlePath>` | Validates a code bundle version without uploading the code bundle. |
 | create-auth-token \| auth `[options] <hostName>` | Generates an authentication token that can be used to get detailed EdgeWorker debug response headers. |
 | generate-secret \| secret `[options]` | Generates a secret key that can be used to generate auth token or in property variable. |
-| clone \| clone `<edgeworker-identifier> <resourceTierId> [options]` | Clones an Edgeworker from the existing Edgeworker Id. |
+| clone \| clone `<edgeworker-identifier> <resourceTierId> [options]` | Clones an EdgeWorker from the existing EdgeWorker Id. |
 | list-contracts \| li-contracts `[options]` | List of contract ids that user has access to. |
 | list-properties \| lp `<edgeworker-identifier> [options]` | List of properties associated with a given EdgeWorker Id. |
+| list-limits \| li-limits | View the various limits EdgeWorkers imposes on the number of activations, EdgeWorkers IDs, and versions you can deploy. |
 | list-restiers \| li-restiers `[options]` | List Resource Tiers that can be used to create or clone EdgeWorker Id. |
 | show-restier \| show-restier `<edgeworker-identifier>` | Customers can get Resource Tier details for a specific EdgeWorker Id. |
+| get reports | Get a list of all available EdgeWorkers reports. |
+| get report `<reportId> <edgeworker-identifier> [options]` | Get an EdgeWorkers report for a specific EdgeWorker ID. |
 
 ### List Permission Groups with EdgeWorkers Access
 Customer Developer can find their EdgeWorkers access level per Luna Access Control Group.  
@@ -105,7 +109,7 @@ Usage: `akamai edgeworkers list-ids [options] [edgeworker-identifier]`
 | - | - |
 | -h, --help  | output usage information |
 | --groupId `<groupId>` | Filter EdgeWorker Id list by Permission Group |
-| --resourceTierId `<resourceTierId>` | Filter Edgeworker Id by Resource Tier |
+| --resourceTierId `<resourceTierId>` | Filter EdgeWorker Id by Resource Tier |
 
 | Argument | Existence | Description |
 | - | - | - |
@@ -118,7 +122,7 @@ Usage: `akamai edgeworkers register [options] <group-identifier> <edgeworker-nam
 
 | Option | Description |
 | - | - |
-| --resourceTierId | New Resource tier id to which the Edgeworker will be associated. |
+| --resourceTierId | New Resource tier id to which the EdgeWorker will be associated. |
 | -h, --help  | output usage information |
 
 | Argument | Existence | Description |
@@ -140,7 +144,7 @@ Usage: `akamai edgeworkers update-id [options] <edgeworker-identifier> <group-id
 
 | Option | Description |
 | - | - |
-| --resourceTierId | New Resource tier id to which the Edgeworker will be associated |
+| --resourceTierId | New Resource tier id to which the EdgeWorker will be associated |
 | -h, --help  | output usage information |
 
 | Argument | Existence | Description |
@@ -383,20 +387,20 @@ Generates a random secret key that can be used to create edgeworkers authenticat
 
 Usage: `akamai edgeworkers generate-secret`
 
-### Clone an Edgeworker Id
-Allows customer to clone an Edgeworker from an existing Edgeworker Id.
+### Clone an EdgeWorker Id
+Allows customer to clone an EdgeWorker from an existing EdgeWorker Id.
 
 Usage: `akamai edgeworkers clone <edgeworker-identifier> <resourceTierId> [options]`
 
 | Option | Description |
 | - | - |
 | -h, --help  | output usage information |
-| --ewName | Name of the Edgeworker |
+| --ewName | Name of the EdgeWorker |
 | --groupId | Group identifier |
 
 | Argument | Existence | Description |
 | - | - | - |
-| resourceTierId | required | Resource tier id to which the Edgeworker will be cloned.
+| resourceTierId | required | Resource tier id to which the EdgeWorker will be cloned.
 
 #### Key Details
 1. This endpoint allows user to select a different Resource Tier ID for a specific EdgeWorker id by cloning it. Cloning to the same resource tier will fail.
@@ -422,10 +426,20 @@ Usage: `akamai edgeworkers list-properties <edgeworker-identifier> [options]`
 
 | Argument | Existence | Description |
 | - | - | - |
-| edgeworker-identifier | required | Edgeworker identifier.
+| edgeworker-identifier | required | EdgeWorker identifier.
 
 #### Key Details
 1. Note that the returned boolean limitedAccessToProperties is true if the user doesn't have access to the top level group under the account, or if they don't have the admin role for this group.
+
+### List Limits
+List the various limits EdgeWorkers imposes on the number of activations, EdgeWorkers IDs, and versions you can deploy.
+
+Usage: `akamai edgeworkers list-limits [options]`
+
+| Option | Description |
+| - | - |
+| -h, --help  | output usage information |
+
 
 ### List Resource Tiers for a specific Contract ID
 Allows customers to list Resource Tiers that can be used to create or clone EdgeWorker IDs. 
@@ -452,7 +466,41 @@ Usage: `akamai show-restier <edgeworkerId>`
 
 | Argument | Existence | Description |
 | - | - | - |
-| edgeworkerId | required | Edgeworker identifier.
+| edgeworkerId | required | EdgeWorker identifier.
+
+### Get Available EdgeWorkers Report Types
+Allows customers to list the available report types that can be generated for an EdgeWorker ID.
+
+Usage: `akamai get reports`
+
+| Option | Description |
+| - | - |
+| -h, --help  | output usage information |
+
+#### Key Details
+1. The user will be given a table with reportIds and a description of each report. Use a given reportId with the `get report` command to get a report for a given EdgeWorker.
+
+### Get EdgeWorker Report
+Allows customers to get a report for a given EdgeWorker ID.
+
+Usage: `akamai get report <reportId> <edgeworker-identifier>`
+
+| Option | Existence| Description |
+| - | - | - |
+| -h, --help  | optional | output usage information |
+| -s, --startDate `<startDate>` | required | ISO 8601 timestamp indicating the start time of the EdgeWorkers report. |
+| -e, --endDate `<startDate>` | optional | ISO 8601 timestamp indicating the end time of the EdgeWorkers report. If not specified, the end time defaults to the current time. |
+| --status `<status>` | optional | Comma-separated string to filter by EdgeWorkers status. Values: `success`, `genericError`, `unknownEdgeWorkerId`, `unimplementedEventHandler`, `runtimeError`, `executionError`, `timeoutError`, `resourceLimitHit`, `cpuTimeoutError`, `wallTimeoutError`, `initCpuTimeoutError`, `initWallTimeoutError`. |
+| --ev, --eventHandlers `<eventHandlers>` | optional | Comma-separated string to filter EdgeWorkers by the event that triggers them. Values: `onClientRequest`, `onOriginRequest`, `onOriginResponse`, `onClientResponse`, `responseProvider`. |
+
+| Argument | Existence | Description |
+| - | - | - |
+| reportId | required | Report Type. |
+| edgeworker-identifier | required | EdgeWorker identifier. |
+
+#### Key Details
+1. For a list of available report IDs, use the `get reports` command.
+2. The `startDate` option is a required option.
 
 ## Resources
 For more information on EdgeWorkers, refer to the following resources:
@@ -462,6 +510,12 @@ For more information on EdgeWorkers, refer to the following resources:
 
 ## Reporting Issues
 You are all set, happy coding! If you experience any issues with the EdgeWorkers CLI, raise them as a [github issue](https://github.com/akamai/cli-edgeworkers/issues). Feel free to create a pull request with the fix or suggestion.
+
+## Contributing
+We welcome contributions from Akamai staff, customers, or others. Before opening up a PR please double check the following:
+1. Please add some test cases to accompany your PR. This verifies the functionality added or modified in the PR and proves to others that your code works :)
+2. Please make sure that your code passes all pre-commit checks. Your code should build successfully, pass all unit tests, and have no linting issues.
+3. All PR's should be targeting develop, not master. Merges to master will immediately release to all customers.
 
 <!--esi
 <esi:eval src="/internal/footer.html?http" dca="esi" />
