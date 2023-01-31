@@ -7,7 +7,6 @@ import { ewJsonOutput } from './client-manager';
 import * as pkginfo from '../../package.json';
 import { Command } from 'commander';
 const program = new Command();
-import isValidDomain from 'is-valid-domain';
 const copywrite = '\nCopyright (c) 2019-2021 Akamai Technologies, Inc. Licensed under Apache 2 license.\nYour use of Akamai\'s products and services is subject to the terms and provisions outlined in Akamai\'s legal policies.\nVisit http://github.com/akamai/cli-edgeworkers for detailed documentation';
 
 /* ========== EdgeWorkers CLI Program Commands ========== */
