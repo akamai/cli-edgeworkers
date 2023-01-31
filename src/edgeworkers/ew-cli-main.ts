@@ -6,8 +6,12 @@ import * as httpEdge from '../cli-httpRequest';
 import { ewJsonOutput } from './client-manager';
 import * as pkginfo from '../../package.json';
 import { Command } from 'commander';
+import {exec} from 'child_process';
 const program = new Command();
-const copywrite = '\nCopyright (c) 2019-2021 Akamai Technologies, Inc. Licensed under Apache 2 license.\nYour use of Akamai\'s products and services is subject to the terms and provisions outlined in Akamai\'s legal policies.\nVisit http://github.com/akamai/cli-edgeworkers for detailed documentation';
+import * as path from 'path';
+import * as os from 'os';
+const currentYear = new Date().getFullYear();
+const copywrite = '\nCopyright (c) 2019-' + currentYear + ' Akamai Technologies, Inc. Licensed under Apache 2 license.\nYour use of Akamai\'s products and services is subject to the terms and provisions outlined in Akamai\'s legal policies.\nVisit http://github.com/akamai/cli-edgeworkers for detailed documentation';
 
 /* ========== EdgeWorkers CLI Program Commands ========== */
 program
@@ -19,6 +23,7 @@ program
   .option('--json [path]', 'Write command output to JSON file at given path, otherwise written to CLI cache directory')
   .option('--jsonout', 'Write command output as JSON to stdout')
   .option('--accountkey <account-id>', 'internal parameter')
+  .option('--ideExtension <ideExtensionTYpe>', 'extension parameter')
   .option('--timeout <timeout>', 'Use this for custom timeout')
   .on('option:debug', function () {
     envUtils.setDebugMode(true);
@@ -39,6 +44,9 @@ program
   })
   .on('option:accountkey', function (key) {
     httpEdge.setAccountKey(key);
+  })
+  .on('option:ideExtension', function (ideExtensionType) {
+    httpEdge.setIdeExtension(ideExtensionType);
   })
   .on('option:timeout', function (timeout) {
     envUtils.setTimeout(timeout);
@@ -112,7 +120,7 @@ program
   .option('-restier, --resourceTierId <resourceTierId>', 'Filter EdgeWorkers by resource tiers')
   .action(async function (ewId, options) {
     try {
-      await cliHandler.showEdgeWorkerIdOverview(ewId, options.groupId, options.resourceTierId);
+     cliHandler.showEdgeWorkerIdOverview(ewId, options.groupId, options.resourceTierId);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
