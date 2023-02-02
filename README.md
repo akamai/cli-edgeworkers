@@ -363,24 +363,15 @@ Usage: `akamai edgeworkers create-auth-token [options] <hostName>`
 | Option | Description |
 | - | - |
 | -h, --help  | output usage information |
-| --acl `<aclPath>` | Path prefix of the response pages which require debugging |
-| --url `<urlPath>` | Exact path of response page which requires debugging |
 | --expiry `<expiry>` | Expiry duration of token, in minutes. |
-| --network `<network>` |  The Akamai environment on which to create this token, either “staging” or “production”
 | --format `<format>` | Format in which the output will be printed |
 
 | Argument | Existence | Description |
 | - | - | - |
-| hostName | required | HostName of the property. Eg: www.test.com |
+| hostName | opional | HostName of the property. If no hostname is provided then token is created for all hosts(`/*`) under the property. Eg: www.test.com, www.test1.com |
 
 #### Key Details
-1. The `--acl` and `--url` options are mutually exclusive to each other.
-
-2. The `--url` value is not explicitly part of the final token, but is used as a salt in the HMAC computation.
-
-3. The `--acl` value can be a pattern that matches multiple pages, and is explicitly part of the final token. The default is `/*`.
-
-4. The `--expiry` value must be between 1 and 720 minutes (12 hours). The default is `15`.
+1. The `--expiry` value must be between 1 and 720 minutes (12 hours). The default is `8 hours`.
 
 ### Generate a Random Secret Key
 Generates a random secret key that can be used to create edgeworkers authentication token and in property PMUSER_EW_DEBUG_KEY.
