@@ -12,9 +12,6 @@ import {
   VERSION_ID, 
   ACTIVATION_ID, 
   EDGEWORKER_NAME, 
-  NETWORK, 
-  ACL_PATH, 
-  URL_PATH, 
   EXPIRY, 
   FORMAT, 
   REPORT_ID, 
@@ -26,10 +23,7 @@ import * as httpEdge from '../cli-httpRequest';
 import { ewJsonOutput } from './client-manager';
 import * as pkginfo from '../../package.json';
 import { Command } from 'commander';
-import {exec} from 'child_process'; 
 const program = new Command();
-import * as path from 'path'; 
-import * as os from 'os'; 
 import isValidDomain from 'is-valid-domain';
 const currentYear = new Date().getFullYear();
 const copywrite = '\nCopyright (c) 2019-' + currentYear + ' Akamai Technologies, Inc. Licensed under Apache 2 license.\nYour use of Akamai\'s products and services is subject to the terms and provisions outlined in Akamai\'s legal policies.\nVisit http://github.com/akamai/cli-edgeworkers for detailed documentation';
@@ -488,18 +482,9 @@ program
   .command('create-auth-token [hostName]')
   .description('Generates an authentication token that can be used to get detailed EdgeWorker debug response headers. ')
   .alias('auth')
-  .option('--network <network>','The Akamai environment on which to create this token, either “staging” or “production”')
-  .option('--acl <aclPath>', 'The path prefix of the response pages which require debugging; this value is used to restrict for which pages the token is valid. \
-The default value if not specified is "/*". This option is mutually exclusive to the --url option; only use one or the other.')
-  .option('--url <urlPath>', 'The exact path (including filename and extension) of the response page which requires debugging; this value is used as a salt for \
-generating the token, and the URL does NOT appear in the final token itself. The generated token is only valid for the exact URL. This option is mutually \
-exclusive to the --acl option; only use one or the other.')
   .option('--expiry <expiry>', 'The number of minutes during which the token is valid, after which it expires. Max value is 720 minutes(12 hours); default value is 15 minutes.')
   .option('--format <format>', 'Format in which the output will be printed to console')
   .action(async function (hostName, options) {
-    options['network'] = options.network || configUtils.searchProperty(NETWORK);
-    options['acl'] = options.acl || configUtils.searchProperty(ACL_PATH);
-    options['url'] = options.url || configUtils.searchProperty(URL_PATH);
     options['expiry'] = options.expiry || configUtils.searchProperty(EXPIRY);
     options['format'] = options.format || configUtils.searchProperty(FORMAT);
 
