@@ -32,7 +32,7 @@ Usage:
 
 ## Provide Default Config Properties
 
-EdgeWorkers CLI supports setting default values for the options of commands. There are two ways to create a config file:  
+The EdgeWorkers CLI lets you set default values for the command options. There are two ways to create a config file:  
 
 1. Create a config file `~/.akamai/ew-config`, and store the properties as follows:
 ```bash
@@ -45,7 +45,7 @@ versionId=1-0-2
 2. Use the `config` command to set default properties:
 `akamai edgeworkers config set <key> <value>`
 
-Available properties names are displayed [here](./src/utils/constants.ts).
+Available property names are displayed [here](./src/utils/constants.ts).
 
 ## Overview of Commands
 EdgeWorkers CLI enables you to manage EdgeWorkers functions by calling the [EdgeWorkers API](https://developer.akamai.com/api/web_performance/edgeworkers/v1.html).
@@ -65,7 +65,7 @@ Options:
 | --debug | Show debug information. |
 | --edgerc `<path>` | Use credentials in `edgerc` file for command. (Default file location is _~/.edgerc_) |
 | --section `<name>` | Use this section in `edgerc` file. (Default section is _[default]_)|
-| --configSection `<configSection>` | Use this section in `ew-config` file that contains the default config properties set. (Default section is _[default]_)|
+| --configSection `<configSection>` | Use this section in the `ew-config` file that contains the default config properties set. (Default section is _[default]_)|
 | --timeout `<timeout>` | You can specify a timeout value for a command in seconds to override the 2 minute default. For example, if you add "--timeout 10" to a command, it will timeout if the server takes more than 10 second to respond. |
 | --json `[path]` | Write CLI output as JSON to optionally provided path.  If not path provided, write JSON output to CLI home directory |
 | --jsonout | Write CLI output as JSON to stdout. |
@@ -456,7 +456,7 @@ Usage: `akamai edgeworkers list-limits [options]`
 
 
 ### List Resource Tiers for a specific Contract ID
-Allows customers to list Resource Tiers that can be used to create or clone EdgeWorker IDs. 
+List Resource Tiers that can be used to create or clone EdgeWorker IDs. 
 
 Usage: `akamai list-restiers`
 
@@ -483,7 +483,7 @@ Usage: `akamai show-restier <edgeworkerId>`
 | edgeworkerId | required | EdgeWorker identifier.
 
 ### Get Available EdgeWorkers Report Types
-Allows customers to list the available report types that can be generated for an EdgeWorker ID.
+List the available report types that can be generated for an EdgeWorker ID.
 
 Usage: `akamai get reports`
 
@@ -495,7 +495,7 @@ Usage: `akamai get reports`
 1. The user will be given a table with reportIds and a description of each report. Use a given reportId with the `get report` command to get a report for a given EdgeWorker.
 
 ### Get EdgeWorker Report
-Allows customers to get a report for a given EdgeWorker ID.
+Get a report for a given EdgeWorker ID.
 
 Usage: `akamai get report <reportId> <edgeworker-identifier>`
 
@@ -517,7 +517,7 @@ Usage: `akamai get report <reportId> <edgeworker-identifier>`
 2. The `startDate` option is a required option.
 
 ### List All Default Values of a Section in Config File
-Allows customers to get all default properties in a section of the config file.
+Get all default properties in a section of the config file.
 
 Usage: `akamai config list`
 
@@ -530,7 +530,7 @@ Usage: `akamai config list`
 2. Same approach should apply to the following `config` commands.
 
 ### Get a Default Value of a Section in Config File
-Allows customers to get one specific default value in a section of the config file.
+Get one specific default value in a section of the config file.
 
 Usage: `akamai config get <key>`
 

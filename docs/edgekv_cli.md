@@ -64,7 +64,7 @@ Usage:
 
 ## Provide Default Config Properties
 
-EdgeWorkers CLI supports setting default values for the options of commands. There are two ways to create a config file:  
+The EdgeWorkers CLI lets you set default values for the command options. There are two ways to create a config file:  
 
 1. Create a config file `~/.akamai/ew-config`, and store the properties as follows:
 ```bash
@@ -77,7 +77,7 @@ versionId=1-0-2
 2. Use the `config` command to set default properties:
 `akamai edgeworkers config set <key> <value>`
 
-Available properties names are displayed [here](../src/utils/constants.ts).
+Available property names are displayed [here](../src/utils/constants.ts).
 
 ## Known Issues
 
@@ -119,7 +119,7 @@ Options:
 | --debug | Show debug information. |
 | --edgerc `<path>` | Use credentials in edgerc file for command. (Default file location is ~/.edgerc). Refer to [Get Started with APIs](https://techdocs.akamai.com/developer/docs/set-up-authentication-credentials) for more information. |
 | --section `<name>` | Use this section in `edgerc` file. (Default section is _[default]_)|
-| --configSection `<configSection>` | Use this section in `ew-config` file that contains the default config properties set. (Default section is _[default]_)|
+| --configSection `<configSection>` | Use this section in the `ew-config` file that contains the default config properties set. (Default section is _[default]_)|
 | --timeout `<timeout>` | You can specify a timeout value for a command in seconds to override the 1 minute default. For example, if you add "--timeout 10" to a command, it will timeout if the server takes more than 10 second to respond. |
 | -h, --help | Display information on how to use this EdgeKV command. | 
 
@@ -481,7 +481,7 @@ Usage:
 | groupid | required | Group identifier |
 
 ### List All Default Values of a Section in Config File
-Allows customers to get all default properties in a section of the config file.
+Get all default properties in a section of the config file.
 
 Usage: `akamai config list`
 
@@ -490,11 +490,11 @@ Usage: `akamai config list`
 | -h, --help  | optional | output usage information |
 
 #### Key Details
-1. The config section is `default` by default. To use a different seciont, users should specify the `akamai edgeworkers` command with option `--configSection <configSeciont>`.
-2. Same approach should apply to the following `config` commands.
+1. By default the config section is `default`. To use a different section, specify the `akamai edgeworkers` command with option `--configSection <configSeciont>`.
+2. Use the same approach with the following `config` commands.
 
 ### Get a Default Value of a Section in Config File
-Allows customers to get one specific default value in a section of the config file.
+Get one specific default value in a section of the config file.
 
 Usage: `akamai config get <key>`
 
