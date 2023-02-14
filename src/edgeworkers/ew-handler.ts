@@ -818,7 +818,7 @@ export async function showEdgeWorkerActivationOverview(
       edgeWorkersSvc.getVersionActivations(ewId, versionId),
       `Fetching all Activations for EdgeWorker Id ${ewId}, Version ${versionId}`
     );
-    
+
     if (Object.prototype.hasOwnProperty.call(activations, 'activations')){
       activations = activations['activations'];
     }
@@ -834,7 +834,7 @@ export async function showEdgeWorkerActivationOverview(
       `Fetching all Activations for EdgeWorker Id ${ewId}`
     );
     // remove outer envelope of JSON data
-    
+
     if (Object.prototype.hasOwnProperty.call(activations, 'activations')){
       activations = activations['activations'];
     }
@@ -969,10 +969,7 @@ export async function deactivateEdgeworker(
 export async function createAuthToken(
   hostName: string,
   options?: {
-    acl?: string;
-    url?: string;
     expiry?: number;
-    network?: string;
     format?;
   }
 ) {
@@ -980,33 +977,10 @@ export async function createAuthToken(
     validateExpiry(options.expiry);
   }
 
-  if (options.acl && options.url) {
-    cliUtils.logAndExit(
-      1,
-      'ERROR: The --acl and --url parameters are mutually exclusive; please use only one parameter. Specifying neither will result in a default value for the --acl parameter being used.'
-    );
-  }
-
-  if (options.network) {
-    const network = options.network;
-    if (
-      network.toUpperCase() !== cliUtils.staging &&
-      network.toUpperCase() !== cliUtils.production
-    ) {
-      cliUtils.logAndExit(
-        1,
-        `ERROR: Network parameter must be either staging or production - was: ${network}`
-      );
-    }
-  }
   let authToken = await cliUtils.spinner(
     edgeWorkersSvc.getAuthToken(
       hostName,
-      options.acl,
-      options.url,
-      options.expiry,
-      options.network
-    ),
+      options.expiry),
     'Creating auth token ...'
   );
   if (authToken && !authToken.isError) {
@@ -1019,11 +993,8 @@ export async function createAuthToken(
     } else if (options.format && options.format == 'curl') {
       cliUtils.log(`-H '${token}'`);
     } else {
-      cliUtils.logWithBorder(
-        '\nAdd the following request header to your requests to get additional trace information.\n' +
-          token +
-          '\n'
-      );
+      cliUtils.logWithBorder('Add the following request header to your requests to get additional trace information.');
+      cliUtils.log(token+'\n');
     }
   } else {
     cliUtils.logAndExit(1, authToken.error_reason);
@@ -1075,7 +1046,7 @@ export async function getAvailableReports() {
     const reportList = availableReports.reports.map((report)=>{
       return {ReportId: report.reportId, ReportType: report.name};
     });
-    
+
     if (ewJsonOutput.isJSONOutputMode()) {
       ewJsonOutput.writeJSONOutput(0, msg, reportList);
     } else {
@@ -1141,7 +1112,7 @@ export async function getReport(
   } else {
     executionEventHandlers = EVENT_HANDLERS;
   }
-  
+
 
   if (report && !report.isError) {
     const data: Record<string, unknown> = report.data;
@@ -1173,14 +1144,14 @@ export async function getReport(
           } else {
             initDurationMapped = {avg: 'N/A', max: 'N/A', min: 'N/A'};
           }
-          
+
           Object.keys(execDuration).forEach((key) => {
             execDuration[key] = execDuration[key].toFixed(4);
           });
           Object.keys(memory).forEach((key) => {
             memory[key] = memory[key].toFixed(4);
           });
-          
+
           reportOutput = [
             {successes, errors, invocations},
             {initDuration: initDurationMapped, execDuration},
@@ -1188,7 +1159,7 @@ export async function getReport(
           ];
           break;
         }
-  
+
         case 2: {
           // execution time
           reportOutput = {};
@@ -1199,7 +1170,7 @@ export async function getReport(
           }
           // execution time has an additional property for init times
           reportOutput['init'] = getExecutionAverages(executionCategories['init'], 'initDuration');
-          
+
           break;
         }
 
@@ -1208,7 +1179,7 @@ export async function getReport(
           reportOutput = {};
           const executionCategories: Record<string, Array<Execution>> = report.data[0].data;
           let errors = 0;
-  
+
           for (const executionArray of Object.values(executionCategories)) {
             for (const execution of executionArray) {
               const {status, invocations} = execution;
@@ -1218,7 +1189,7 @@ export async function getReport(
               }
             }
           }
-          
+
           if (!reportOutput['success']){
             // add success count if no successful executions
             reportOutput['success'] = 0;
@@ -1233,7 +1204,7 @@ export async function getReport(
           // memory usage
           reportOutput = {};
           const executionCategories: Record<string, Array<Execution>> = report.data[0].data;
-  
+
           for (const event of executionEventHandlers) {
             reportOutput[event] = getExecutionAverages(executionCategories[event], 'memory');
           }
