@@ -1,26 +1,11 @@
 #!/usr/bin/env node
 import * as envUtils from '../utils/env-utils';
 import * as cliUtils from '../utils/cli-utils';
-import * as configUtils from '../utils/config-utils';
-import { 
-  ORDER_BY, 
-  MAX_ITEMS, 
-  GROUP_ID, 
-  RETENTION, 
-  GEO_LOCATION, 
-  STAGING, 
-  PRODUCTION, 
-  EW_IDS, 
-  EXPIRY, 
-  NAMESPACE, 
-  SAVE_PATH } from './../utils/constants';
-import { SANDBOX_ID } from '../utils/constants';
 import * as kvCliHandler from './ekv-handler';
 import { ekvJsonOutput } from './client-manager';
 import * as httpEdge from '../cli-httpRequest';
 import * as pkginfo from '../../package.json';
 import { Command } from 'commander';
-
 const program = new Command();
 const currentYear = new Date().getFullYear();
 const copywrite =
@@ -34,7 +19,6 @@ program
     '--section <name>',
     'Use this section in edgerc file that contains the credential set.'
   )
-  .option('--configSection <configSection>', 'Use this section in ew-config file that contains the default config properties set.')
   .option('--json [path]', 'Write command output to JSON file at given path, otherwise written to CLI cache directory')
   .option('--jsonout', 'Write command output as JSON to stdout')
   // .option('--json [path]', 'Write command output to JSON file at given path, otherwise written to CLI cache directory')
@@ -48,9 +32,6 @@ program
   })
   .on('option:section', function (section) {
     envUtils.setEdgeRcSection(section);
-  })
-  .on('option:configSection', function (configSection) {
-    configUtils.setConfigSection(configSection);
   })
   .on('option:json', function (path) {
     ekvJsonOutput.setJSONOutputMode(true);
@@ -148,8 +129,6 @@ program
     items,
     options
   ) {
-    options['sandboxId'] = options.sandboxId || configUtils.searchProperty(SANDBOX_ID);
-
     try {
       await kvCliHandler.writeItemToEdgeKV(
         environment,
@@ -182,8 +161,6 @@ read
     '`sandbox-id` to use for the data operation. You can use the `akamai sandbox list` CLI command to view a list of available sandboxes.'
   )
   .action(async function (environment, namespace, groupId, itemId, options) {
-    options['sandboxId'] = options.sandboxId || configUtils.searchProperty(SANDBOX_ID);
-
     try {
       await kvCliHandler.readItemFromEdgeKV(
         environment,
@@ -213,8 +190,6 @@ del
     '`sandbox-id` to use for the data operation. You can use the `akamai sandbox list` CLI command to view a list of available sandboxes.'
   )
   .action(async function (environment, namespace, groupId, itemId, options) {
-    options['sandboxId'] = options.sandboxId || configUtils.searchProperty(SANDBOX_ID);
-
     try {
       await kvCliHandler.deleteItemFromEdgeKV(
         environment,
@@ -258,8 +233,6 @@ list
   )
   .description('List all namespaces')
   .action(async function (environment, options) {
-    options['orderBy'] = options.orderBy || configUtils.searchProperty(ORDER_BY);
-
     let sortDirection: cliUtils.sortDirections, orderBy: string;
 
     if (options.ascending && options.descending) {
@@ -337,9 +310,6 @@ list
   )
   .description('List items within a group')
   .action(async function (environment, namespace, groupId, options) {
-    options['maxItems'] = options.maxItems || configUtils.searchProperty(MAX_ITEMS);
-    options['sandboxId'] = options.sandboxId || configUtils.searchProperty(SANDBOX_ID);
-
     try {
       await kvCliHandler.listItemsFromGroup(
         environment,
@@ -383,8 +353,6 @@ list
   )
   .description('List group identifiers created when writing items to a namespace')
   .action(async function (options) {
-    options['groupId'] = options.groupdId || configUtils.searchProperty(GROUP_ID);
-
     try {
       await kvCliHandler.listAuthGroups(options);
     } catch (e) {
@@ -415,10 +383,6 @@ create
   )
   .description('Creates an EdgeKV namespace')
   .action(async function (environment, namespace, options) {
-    options['retention'] = options.retention || configUtils.searchProperty(RETENTION);
-    options['groupId'] = options.groupId || configUtils.searchProperty(GROUP_ID);
-    options['geolocation'] = options.geolocation || configUtils.searchProperty(GEO_LOCATION);
-
     try {
       await kvCliHandler.createNamespace(
         environment,
@@ -468,13 +432,6 @@ create
     'This option is used in conjunction with the --save_path option to overwrite the value of an existing token with the same name in the edgekv_tokens.js file.'
   )
   .action(async function (tokenName, options) {
-    options['staging'] = options.staging || configUtils.searchProperty(STAGING);
-    options['production'] = options.production || configUtils.searchProperty(PRODUCTION);
-    options['ewIds'] = options.ewIds || configUtils.searchProperty(EW_IDS);
-    options['expiry'] = options.expiry || configUtils.searchProperty(EXPIRY);
-    options['namespace'] = options.namespace || configUtils.searchProperty(NAMESPACE);
-    options['save_path'] = options.save_path || configUtils.searchProperty(SAVE_PATH);
-
     try {
       // implement our own option checking here since we want the help msg to appear
       // when no options are specified instead of a missing option error
@@ -533,8 +490,6 @@ modify
   )
   .description('Modify an EdgeKV namespace')
   .action(async function (environment, namespace, options) {
-    options['retention'] = options.retention || configUtils.searchProperty(RETENTION);
-
     try {
       await kvCliHandler.updateNameSpace(environment, namespace, options);
     } catch (e) {
@@ -576,8 +531,6 @@ download
     'EdgeKV token placed inside the bundle will be overwritten'
   )
   .action(async function (tokenName, options) {
-    options['save_path'] = options.save_path || configUtils.searchProperty(SAVE_PATH);
-
     try {
       await kvCliHandler.retrieveToken(tokenName, options);
     } catch (e) {
@@ -614,61 +567,6 @@ show
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
-  })
-  .on('--help', function () {
-    cliUtils.logAndExit(0, copywrite);
-  });
-
-const config = program
-  .command('config')
-  .description('Set default values to CLI in a config file.');
-
-config
-  .command('list')
-  .description('Get all values in the config file.')
-  .action(async function () {
-    configUtils.handleConfig(configUtils.Operations.List);
-  })
-  .on('--help', function () {
-    cliUtils.logAndExit(0, copywrite);
-  });
-
-config
-  .command('get <key>')
-  .description('Get a config value from a section in the config file.')
-  .action(async function (key: string) {
-    configUtils.handleConfig(configUtils.Operations.Get, key);
-  })
-  .on('--help', function () {
-    cliUtils.logAndExit(0, copywrite);
-  });
-
-config
-  .command('set <key> <value>')
-  .description('Set a config value in a section.')
-  .action(async function (key: string, value: string) {
-    configUtils.handleConfig(configUtils.Operations.Set, key, value);
-  })
-  .on('--help', function () {
-    cliUtils.logAndExit(0, copywrite);
-  });
-
-config
-  .command('save')
-  .description('Save config properties in a section.')
-  .requiredOption('-p, --properties <properties...>', 'Save config properties in bulk. Use format \'key=value\' to set a property and white space to split them.')
-  .action(async function (options) {
-    configUtils.saveConfig(options.properties);
-  })
-  .on('--help', function () {
-    cliUtils.logAndExit(0, copywrite);
-  });
-
-config
-  .command('unset <key>')
-  .description('Unset a config value in a section.')
-  .action(async function (key: string) {
-    configUtils.handleConfig(configUtils.Operations.Unset, key);
   })
   .on('--help', function () {
     cliUtils.logAndExit(0, copywrite);
