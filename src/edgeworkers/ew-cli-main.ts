@@ -24,7 +24,6 @@ import { ewJsonOutput } from './client-manager';
 import * as pkginfo from '../../package.json';
 import { Command } from 'commander';
 const program = new Command();
-import isValidDomain from 'is-valid-domain';
 const currentYear = new Date().getFullYear();
 const copywrite = '\nCopyright (c) 2019-' + currentYear + ' Akamai Technologies, Inc. Licensed under Apache 2 license.\nYour use of Akamai\'s products and services is subject to the terms and provisions outlined in Akamai\'s legal policies.\nVisit http://github.com/akamai/cli-edgeworkers for detailed documentation';
 
@@ -489,11 +488,6 @@ program
     options['format'] = options.format || configUtils.searchProperty(FORMAT);
 
     try {
-      // deprecation msg for people using older CLI. This will be removed eventually.
-      if (!isValidDomain(hostName)) {
-        cliUtils.logAndExit(1, 'ERROR: Creating auth token with secret is deprecated with version CLI 1.1.0. Please use your host name to create an authentication token.');
-      }
-
       await cliHandler.createAuthToken(hostName, options);
     } catch (e) {
       cliUtils.logAndExit(1, e);
