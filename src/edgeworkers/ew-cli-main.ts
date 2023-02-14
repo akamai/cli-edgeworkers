@@ -1,6 +1,26 @@
 #!/usr/bin/env node
 import * as envUtils from '../utils/env-utils';
 import * as cliUtils from '../utils/cli-utils';
+import * as configUtils from '../utils/config-utils';
+import { 
+  GROUP_ID, 
+  RESOURCE_TIER_ID, 
+  CONTRACT_ID, 
+  BUNDLE_PATH, 
+  WORKING_DIRECTORY, 
+  DOWNLOAD_PATH, 
+  VERSION_ID, 
+  ACTIVATION_ID, 
+  EDGEWORKER_NAME, 
+  NETWORK, 
+  ACL_PATH, 
+  URL_PATH, 
+  EXPIRY, 
+  FORMAT, 
+  REPORT_ID, 
+  END_DATE, 
+  STATUS, 
+  EVENT_HANDLERS } from './../utils/constants';
 import * as cliHandler from './ew-handler';
 import * as httpEdge from '../cli-httpRequest';
 import { ewJsonOutput } from './client-manager';
@@ -17,6 +37,7 @@ program
   .option('--debug', 'Show debug information.')
   .option('--edgerc <path>', 'Use edgerc file for authentication.')
   .option('--section <name>', 'Use this section in edgerc file that contains the credential set.')
+  .option('--configSection <configSection>', 'Use this section in ew-config file that contains the default config properties set.')
   .option('--json [path]', 'Write command output to JSON file at given path, otherwise written to CLI cache directory')
   .option('--jsonout', 'Write command output as JSON to stdout')
   .option('--accountkey <account-id>', 'internal parameter')
@@ -30,6 +51,9 @@ program
   })
   .on('option:section', function (section) {
     envUtils.setEdgeRcSection(section);
+  })
+  .on('option:configSection', function (configSection) {
+    configUtils.setConfigSection(configSection);
   })
   .on('option:json', function (path) {
     ewJsonOutput.setJSONOutputMode(true);
@@ -61,6 +85,10 @@ program
 
 const helper = program.createHelp();
 program.configureHelp({
+  argumentDescription: () => '',
+  argumentTerm: (cmd) =>
+    helper.argumentTerm(cmd) + '\n\t' + helper.argumentDescription(cmd),
+
   optionDescription: () => '',
   optionTerm: (cmd) =>
     helper.optionTerm(cmd) + '\n\t' + helper.optionDescription(cmd),
@@ -110,14 +138,17 @@ program
   });
 
 program
-  .command('list-ids [edgeworker-identifier]')
+  .command('list-ids <edgeworker-identifier>')
   .description('List EdgeWorker ids currently registered')
   .alias('li')
   .option('--groupId <groupId>', 'Filter EdgeWorker ID list by Permission Group')
   .option('-restier, --resourceTierId <resourceTierId>', 'Filter EdgeWorkers by resource tiers')
   .action(async function (ewId, options) {
+    options['groupId'] = options.groupId || configUtils.searchProperty(GROUP_ID);
+    options['resourceTierId'] = options.resourceTierId || configUtils.searchProperty(RESOURCE_TIER_ID);
+
     try {
-     cliHandler.showEdgeWorkerIdOverview(ewId, options.groupId, options.resourceTierId);
+      cliHandler.showEdgeWorkerIdOverview(ewId, options.groupId, options.resourceTierId);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
@@ -132,15 +163,17 @@ program
   .alias('create-id')
   .option('-restier, --resourceTierId <resourceTierId>', 'New resource Tier ID to associate with EdgeWorker')
   .action(async function (groupId, name, options) {
+    options['resourceTierId'] = options.resourceTierId || configUtils.searchProperty(RESOURCE_TIER_ID);
+
     try {
       // for automation resource tier id will be provided , hence no need for prompts
       let resourceTierId = options.resourceTierId;
       if (!resourceTierId) {
-      // get contract list and get resource tier info
-      resourceTierId = await cliHandler.getResourceTierInfo();
-      if (resourceTierId == undefined) {
-        cliUtils.logAndExit(1, 'ERROR: Please select a valid resource tier ID.');
-      }
+        // get contract list and get resource tier info
+        resourceTierId = await cliHandler.getResourceTierInfo();
+        if (resourceTierId == undefined) {
+          cliUtils.logAndExit(1, 'ERROR: Please select a valid resource tier ID.');
+        }
       }
       // create edgeworker for the grpid, res tier and ew name
       await cliHandler.createEdgeWorkerId(groupId, name, resourceTierId);
@@ -168,7 +201,7 @@ program
   });
 
 program
-  .command('list-properties <edgeworkerId>')
+  .command('list-properties <edgeworker-identifier>')
   .description('View the list of properties associated with an EdgeWorker ID')
   .option('--activeOnly', 'Return only active properties')
   .alias('lp')
@@ -189,6 +222,8 @@ program
   .option('--contractId <contractId>', 'Contract ID for the resource tiers')
   .alias('li-restiers')
   .action(async function (options) {
+    options['contractId'] = options.contractId || configUtils.searchProperty(CONTRACT_ID);
+
     try {
       await cliHandler.getResourceTiers(options.contractId);
     } catch (e) {
@@ -217,7 +252,7 @@ program
 program
   .command('show-restier <edgeworkerId>')
   .description('View the resource tier associated with an EdgeWorker ID')
-  .action(async function (edgeworkerId) {
+  .action(async function (edgeworkerId) {  
     try {
       await cliHandler.getResourceTierForEwid(edgeworkerId);
     } catch (e) {
@@ -234,6 +269,8 @@ program
   .option('-restier, --resourceTierId <resourceTierId>', 'New resource Tier ID to associate with EdgeWorker')
   .alias('ui')
   .action(async function (ewId, groupId, name, options) {
+    options['resourceTierId'] = options.resourceTierId || configUtils.searchProperty(RESOURCE_TIER_ID);
+
     try {
       await cliHandler.updateEdgeWorkerInfo(ewId, groupId, name, options.resourceTierId);
     } catch (e) {
@@ -281,6 +318,8 @@ program
   .option('--bundle <bundlePath>', 'Path to bundle file in tgz format')
   .option('--codeDir <workingDirectory>', 'Working directory that includes main.js and bundle.json files')
   .action(async function (ewId, options) {
+    options['bundlePath'] = options.bundlePath || configUtils.searchProperty(BUNDLE_PATH);
+    options['workingDirectory'] = options.workingDirectory || configUtils.searchProperty(WORKING_DIRECTORY);
 
     //either bundle or code working directory must be provided or fail
     if ((!options.bundle && !options.codeDir) || (options.bundle && options.codeDir))
@@ -317,6 +356,8 @@ program
   .alias('download-version')
   .option('--downloadPath <downloadPath>', 'Path to store downloaded bundle file; defaults to CLI home directory if not provided')
   .action(async function (ewId, versionId, options) {
+    options['downloadPath'] = options.downloadPath || configUtils.searchProperty(DOWNLOAD_PATH);
+
     try {
       await cliHandler.downloadTarball(ewId, versionId, options.downloadPath);
     } catch (e) {
@@ -328,12 +369,14 @@ program
   });
 
 program
-  .command('status <edgeworker-identifier>')
+  .command('status <edgeworker-identifier>')  
   .description('List Activation status of a given EdgeWorker ID')
   .alias('list-activations')
   .option('--versionId <versionId>', 'Version Identifier')
   .option('--activationId <activationId>', 'Activation Identifier')
   .action(async function (ewId, options) {
+    options['versionId'] = options.versionId || configUtils.searchProperty(VERSION_ID);
+    options['activationId'] = options.activationId || configUtils.searchProperty(ACTIVATION_ID);
 
     // Do not provide both versionId and activationId
     if (options.versionId && options.activationId)
@@ -373,6 +416,9 @@ program
   .option('--ewName <name>', 'Name of the EdgeWorker')
   .option('--groupId <groupId>', 'GroupId in which EdgeWorker will be cloned')
   .action(async function (ewId, resourceTierId, options) {
+    options['ewName'] = options.ewName || configUtils.searchProperty(EDGEWORKER_NAME);
+    options['groupId'] = options.groupId || configUtils.searchProperty(GROUP_ID);
+
     try {
       await cliHandler.cloneEdgeworker(ewId, options.groupId, options.ewName, resourceTierId);
     } catch (e) {
@@ -441,6 +487,12 @@ program
   .option('--expiry <expiry>', 'The number of minutes during which the token is valid, after which it expires. Max value is 720 minutes(12 hours); default value is 15 minutes.')
   .option('--format <format>', 'Format in which the output will be printed to console')
   .action(async function (hostName, options) {
+    options['network'] = options.network || configUtils.searchProperty(NETWORK);
+    options['acl'] = options.acl || configUtils.searchProperty(ACL_PATH);
+    options['url'] = options.url || configUtils.searchProperty(URL_PATH);
+    options['expiry'] = options.expiry || configUtils.searchProperty(EXPIRY);
+    options['format'] = options.format || configUtils.searchProperty(FORMAT);
+
     try {
       await cliHandler.createAuthToken(hostName, options);
     } catch (e) {
@@ -451,7 +503,7 @@ program
     cliUtils.logAndExit(0, copywrite);
   });
 
-  const get = program
+const get = program
   .command('get')
   .description(
     'Get an EdgeWorkers report or get available report types.'
@@ -479,9 +531,15 @@ get
   .option('--status, <status>', 'Comma-separated string to filter by EdgeWorker status. Values: success, genericError, unknownEdgeWorkerId, unimplementedEventHandler, runtimeError, executionError, timeoutError, resourceLimitHit, cpuTimeoutError, wallTimeoutError, initCpuTimeoutError, initWallTimeoutError.')
   .option('--ev, --eventHandlers <eventHandlers>', 'Comma-separated string to filter EdgeWorkers by the event that triggers them. Values: onClientRequest, onOriginRequest, onOriginResponse, onClientResponse, responseProvider.')
   .action(async function (reportId: number, edgeworkerId: string, options) {
+    reportId = reportId || configUtils.searchProperty(REPORT_ID);
     if (!reportId){
       cliUtils.logAndExit(1, 'ERROR: Please specify a reportId. To obtain the available report ID run "akamai edgeworkers get reports".');
     }
+
+    options['endDate'] = options.endDate || configUtils.searchProperty(END_DATE);
+    options['status'] = options.status || configUtils.searchProperty(STATUS);
+    options['eventHandlers'] = options.eventHandlers || configUtils.searchProperty(EVENT_HANDLERS);
+
     const {startDate, endDate, status, eventHandlers} = options;
 
     const statusArray = status ? status.split(',') : [];
@@ -497,6 +555,60 @@ get
     cliUtils.logAndExit(0, copywrite);
   });
 
+const config = program
+  .command('config')
+  .description('Set default values to CLI in a config file.');
+
+config
+  .command('list')
+  .description('Get all values in the config file.')
+  .action(async function () {
+    configUtils.handleConfig(configUtils.Operations.List);
+  })
+  .on('--help', function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+config
+  .command('get <key>')
+  .description('Get a config value from a section in the config file.')
+  .action(async function (key: string) {
+    configUtils.handleConfig(configUtils.Operations.Get, key);
+  })
+  .on('--help', function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+config
+  .command('set <key> <value>')
+  .description('Set a config value in a section.')
+  .action(async function (key: string, value: string) {
+    configUtils.handleConfig(configUtils.Operations.Set, key, value);
+  })
+  .on('--help', function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+config
+  .command('save')
+  .description('Save config properties in a section.')
+  .requiredOption('-p, --properties <properties...>', 'Save config properties in bulk. Use format \'key=value\' to set a property and white space to split them.')
+  .action(async function (options) {
+    configUtils.saveConfig(options.properties);
+  })
+  .on('--help', function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+config
+  .command('unset <key>')
+  .description('Unset a config value in a section.')
+  .action(async function (key: string) {
+    configUtils.handleConfig(configUtils.Operations.Unset, key);
+  })
+  .on('--help', function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
 
 program.parse(process.argv);
 

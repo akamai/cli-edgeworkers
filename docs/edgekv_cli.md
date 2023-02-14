@@ -26,6 +26,11 @@
     * [ Revoke access token](###revoke-access-token)
     * [ List permission groups](###list-permission-groups)
     * [ Modify permission group](###modify-permission-group)
+    * [ List Default Config Properties](###list-all-default-values-of-a-section-in-config-file)
+    * [ Get a Default Config Property](###get-a-default-value-of-a-section-in-config-file)
+    * [ Set a Default Config Property](###set/update-a-default-value-of-a-section-in-config-file)
+    * [ Unset a Default Config Property](###unset-a-default-value-of-a-section-in-config-file)
+    * [ Bulk Save Default Config Properties](###bulk-save-default-properties-of-a-section-in-config-file)
 * [ Resources](##resources)
 * [ Reporting Issues](##reporting-issues)
 
@@ -55,6 +60,24 @@ Usage:
 
 Usage:  
 `akamai update edgeworkers`
+
+
+## Provide Default Config Properties
+
+The EdgeWorkers CLI lets you set default values for the command options. There are two ways to create a config file:  
+
+1. Create a config file `~/.akamai/ew-config`, and store the properties as follows:
+```bash
+[default]
+edgeworkerName=testEW
+groupId=12345
+versionId=1-0-2
+```
+
+2. Use the `config` command to set default properties:
+`akamai edgeworkers config set <key> <value>`
+
+Available property names are displayed [here](../src/utils/constants.ts).
 
 ## Known Issues
 
@@ -96,6 +119,7 @@ Options:
 | --debug | Show debug information. |
 | --edgerc `<path>` | Use credentials in edgerc file for command. (Default file location is ~/.edgerc). Refer to [Get Started with APIs](https://techdocs.akamai.com/developer/docs/set-up-authentication-credentials) for more information. |
 | --section `<name>` | Use this section in `edgerc` file. (Default section is _[default]_)|
+| --configSection `<configSection>` | Use this section in the `ew-config` file that contains the default config properties set. (Default section is _[default]_)|
 | --timeout `<timeout>` | You can specify a timeout value for a command in seconds to override the 1 minute default. For example, if you add "--timeout 10" to a command, it will timeout if the server takes more than 10 second to respond. |
 | -h, --help | Display information on how to use this EdgeKV command. | 
 
@@ -121,7 +145,11 @@ Commands:
 | list auth-groups `[options]`| List the permission groups with EdgeKV Access. |
 | list groups `<environment> <nameSpace>` | List the data groups for a given namespace in an Akamai environment.|
 | modify auth-group `<namespaceId> <groupId>` | Modify the permission group associated with the namespace. |
-
+| config list | Get all values in the config file. |
+| config get `<key>` | Get a config value from a section in the config file. |
+| config set `<key> <value>` | Set a config value in a section. |
+| config save `-p <properties>` | Save config properties in a section. |
+| config unset `<key>` | Unset a config value in a section. |
 
 
 Return Codes:
@@ -451,6 +479,72 @@ Usage:
 | - | - | - |
 | namespaceId | required | Namespace identifier |
 | groupid | required | Group identifier |
+
+### List All Default Values of a Section in Config File
+Get all default properties in a section of the config file.
+
+Usage: `akamai config list`
+
+| Option | Existence| Description |
+| - | - | - |
+| -h, --help  | optional | output usage information |
+
+#### Key Details
+1. By default the config section is `default`. To use a different section, specify the `akamai edgeworkers` command with option `--configSection <configSeciont>`.
+2. Use the same approach with the following `config` commands.
+
+### Get a Default Value of a Section in Config File
+Get one specific default value in a section of the config file.
+
+Usage: `akamai config get <key>`
+
+| Option | Existence| Description |
+| - | - | - |
+| -h, --help  | optional | output usage information |
+
+| Argument | Existence | Description |
+| - | - | - |
+| key | required | Name of default property |
+
+### Set/Update a Default Value of a Section in Config File
+Allows customers set/update a specific default value in a section of the config file.
+
+Usage: `akamai config set <key> <value>`
+
+| Option | Existence| Description |
+| - | - | - |
+| -h, --help  | optional | output usage information |
+
+| Argument | Existence | Description |
+| - | - | - |
+| key | required | Name of default property |
+| value | required | Value of default property |
+
+### Unset a Default Value of a Section in Config File
+Allows customers unset a specific default value in a section of the config file.
+
+Usage: `akamai config unset <key>`
+
+| Option | Existence| Description |
+| - | - | - |
+| -h, --help  | optional | output usage information |
+
+| Argument | Existence | Description |
+| - | - | - |
+| key | required | Name of default property |
+
+### Bulk Save Default Properties of a Section in Config File
+Allows customers save the default values in bulk.
+
+Usage: `akamai config save [options]`
+
+| Option | Existence| Description |
+| - | - | - |
+| -h, --help  | optional | output usage information |
+| -p, --properties  | required | Config properties. Use format \'key=value\' to set a property and white space to split them. |
+
+#### Key Details
+1. If the context contain invalid item, the command will skip that item and continue.
 
 ___
 ## Resources
