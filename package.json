@@ -1,6 +1,6 @@
 {
   "name": "akamai-edgeworkers-cli",
-  "version": "1.6.2",
+  "version": "1.7.1",
   "description": "A tool that makes it easier to manage Akamai EdgeWorkers code bundles and EdgeKV databases. Call the EdgeWorkers and EdgeKV API from the command line.",
   "repository": "https://github.com/akamai/cli-edgeworkers",
   "scripts": {
@@ -37,7 +37,8 @@
     "table-layout": "^3.0.0",
     "tar": "^4.4.18",
     "tar-stream": "^2.1.4",
-    "untildify": "3.0.3"
+    "untildify": "3.0.3",
+    "ini": "^3.0.1"
   },
   "pre-commit": [
     "build",

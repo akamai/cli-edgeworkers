@@ -347,15 +347,15 @@ export function validateTarball(tarballPath: string) {
 
 export function getAuthToken(
   hostName: string,
-  acl: string,
-  url: string,
-  expiry: number,
-  network: string
+  expiry: number
 ) {
   const urlPath = `${EDGEWORKERS_API_BASE}/secure-token`;
 
-  const body = buildTokenBody(hostName, acl, url, expiry, network);
-
+//  If no hostnames are provided then token is created for all hosts
+  if (!hostName) {
+    hostName = '/*';
+  }
+  const body = buildTokenBody(hostName.split(','), expiry);
   return httpEdge
     .postJson(urlPath, body, cliUtils.getTimeout(DEFAULT_EW_TIMEOUT))
     .then((r) => r.body)
@@ -363,32 +363,18 @@ export function getAuthToken(
 }
 
 function buildTokenBody(
-  hostName: string,
-  acl: string,
-  url: string,
-  expiry: number,
-  network: string
+  hostName: string[],
+  expiry: number
 ) {
   const params = {};
 
   if (hostName != undefined && hostName != null) {
-    params['hostname'] = hostName;
+    params['hostnames'] = hostName;
   }
 
-  if (acl != undefined && acl != null) {
-    params['acl'] = acl;
-  }
   if (expiry != undefined && expiry != null) {
     params['expiry'] = expiry;
   }
-  if (url != undefined && url != null) {
-    params['url'] = url;
-  }
-
-  if (network != undefined && network != null) {
-    params['network'] = network;
-  }
-
   return params;
 }
 export function deactivateEdgeworker(

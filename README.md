@@ -30,6 +30,23 @@ Usage:
 Usage:  
 `akamai update edgeworkers`
 
+## Provide Default Config Properties
+
+The EdgeWorkers CLI lets you set default values for the command options. There are two ways to create a config file:  
+
+1. Create a config file `~/.akamai/ew-config`, and store the properties as follows:
+```bash
+[default]
+edgeworkerName=testEW
+groupId=12345
+versionId=1-0-2
+```
+
+2. Use the `config` command to set default properties:
+`akamai edgeworkers config set <key> <value>`
+
+Available property names are displayed [here](./src/utils/constants.ts).
+
 ## Overview of Commands
 EdgeWorkers CLI enables you to manage EdgeWorkers functions by calling the [EdgeWorkers API](https://developer.akamai.com/api/web_performance/edgeworkers/v1.html).
 
@@ -48,6 +65,7 @@ Options:
 | --debug | Show debug information. |
 | --edgerc `<path>` | Use credentials in `edgerc` file for command. (Default file location is _~/.edgerc_) |
 | --section `<name>` | Use this section in `edgerc` file. (Default section is _[default]_)|
+| --configSection `<configSection>` | Use this section in the `ew-config` file that contains the default config properties set. (Default section is _[default]_)|
 | --timeout `<timeout>` | You can specify a timeout value for a command in seconds to override the 2 minute default. For example, if you add "--timeout 10" to a command, it will timeout if the server takes more than 10 second to respond. |
 | --json `[path]` | Write CLI output as JSON to optionally provided path.  If not path provided, write JSON output to CLI home directory |
 | --jsonout | Write CLI output as JSON to stdout. |
@@ -81,6 +99,11 @@ Commands:
 | show-restier \| show-restier `<edgeworker-identifier>` | Customers can get Resource Tier details for a specific EdgeWorker Id. |
 | get reports | Get a list of all available EdgeWorkers reports. |
 | get report `<reportId> <edgeworker-identifier> [options]` | Get an EdgeWorkers report for a specific EdgeWorker ID. |
+| config list | Get all values in the config file. |
+| config get `<key>` | Get a config value from a section in the config file. |
+| config set `<key> <value>` | Set a config value in a section. |
+| config save `-p <properties>` | Save config properties in a section. |
+| config unset `<key>` | Unset a config value in a section. |
 
 ### List Permission Groups with EdgeWorkers Access
 Customer Developer can find their EdgeWorkers access level per Luna Access Control Group.  
@@ -363,24 +386,15 @@ Usage: `akamai edgeworkers create-auth-token [options] <hostName>`
 | Option | Description |
 | - | - |
 | -h, --help  | output usage information |
-| --acl `<aclPath>` | Path prefix of the response pages which require debugging |
-| --url `<urlPath>` | Exact path of response page which requires debugging |
 | --expiry `<expiry>` | Expiry duration of token, in minutes. |
-| --network `<network>` |  The Akamai environment on which to create this token, either “staging” or “production”
 | --format `<format>` | Format in which the output will be printed |
 
 | Argument | Existence | Description |
 | - | - | - |
-| hostName | required | HostName of the property. Eg: www.test.com |
+| hostName | opional | HostName of the property. If no hostname is provided then token is created for all hosts(`/*`) under the property. Eg: www.test.com, www.test1.com |
 
 #### Key Details
-1. The `--acl` and `--url` options are mutually exclusive to each other.
-
-2. The `--url` value is not explicitly part of the final token, but is used as a salt in the HMAC computation.
-
-3. The `--acl` value can be a pattern that matches multiple pages, and is explicitly part of the final token. The default is `/*`.
-
-4. The `--expiry` value must be between 1 and 720 minutes (12 hours). The default is `15`.
+1. The `--expiry` value must be between 1 and 720 minutes (12 hours). The default is `8 hours`.
 
 ### Generate a Random Secret Key
 Generates a random secret key that can be used to create edgeworkers authentication token and in property PMUSER_EW_DEBUG_KEY.
@@ -442,7 +456,7 @@ Usage: `akamai edgeworkers list-limits [options]`
 
 
 ### List Resource Tiers for a specific Contract ID
-Allows customers to list Resource Tiers that can be used to create or clone EdgeWorker IDs. 
+List Resource Tiers that can be used to create or clone EdgeWorker IDs. 
 
 Usage: `akamai list-restiers`
 
@@ -469,7 +483,7 @@ Usage: `akamai show-restier <edgeworkerId>`
 | edgeworkerId | required | EdgeWorker identifier.
 
 ### Get Available EdgeWorkers Report Types
-Allows customers to list the available report types that can be generated for an EdgeWorker ID.
+List the available report types that can be generated for an EdgeWorker ID.
 
 Usage: `akamai get reports`
 
@@ -481,7 +495,7 @@ Usage: `akamai get reports`
 1. The user will be given a table with reportIds and a description of each report. Use a given reportId with the `get report` command to get a report for a given EdgeWorker.
 
 ### Get EdgeWorker Report
-Allows customers to get a report for a given EdgeWorker ID.
+Get a report for a given EdgeWorker ID.
 
 Usage: `akamai get report <reportId> <edgeworker-identifier>`
 
@@ -501,6 +515,72 @@ Usage: `akamai get report <reportId> <edgeworker-identifier>`
 #### Key Details
 1. For a list of available report IDs, use the `get reports` command.
 2. The `startDate` option is a required option.
+
+### List All Default Values of a Section in Config File
+Get all default properties in a section of the config file.
+
+Usage: `akamai config list`
+
+| Option | Existence| Description |
+| - | - | - |
+| -h, --help  | optional | output usage information |
+
+#### Key Details
+1. The config section is `default` by default. To use a different seciont, users should specify the `akamai edgeworkers` command with option `--configSection <configSeciont>`.
+2. Same approach should apply to the following `config` commands.
+
+### Get a Default Value of a Section in Config File
+Get one specific default value in a section of the config file.
+
+Usage: `akamai config get <key>`
+
+| Option | Existence| Description |
+| - | - | - |
+| -h, --help  | optional | output usage information |
+
+| Argument | Existence | Description |
+| - | - | - |
+| key | required | Name of default property |
+
+### Set/Update a Default Value of a Section in Config File
+Allows customers set/update a specific default value in a section of the config file.
+
+Usage: `akamai config set <key> <value>`
+
+| Option | Existence| Description |
+| - | - | - |
+| -h, --help  | optional | output usage information |
+
+| Argument | Existence | Description |
+| - | - | - |
+| key | required | Name of default property |
+| value | required | Value of default property |
+
+### Unset a Default Value of a Section in Config File
+Allows customers unset a specific default value in a section of the config file.
+
+Usage: `akamai config unset <key>`
+
+| Option | Existence| Description |
+| - | - | - |
+| -h, --help  | optional | output usage information |
+
+| Argument | Existence | Description |
+| - | - | - |
+| key | required | Name of default property |
+
+### Bulk Save Default Property of a Section in Config File
+Allows customers save the default values in bulk.
+
+Usage: `akamai config save [options]`
+
+| Option | Existence| Description |
+| - | - | - |
+| -h, --help  | optional | output usage information |
+| -p, --properties  | required | Config properties. Use format \'key=value\' to set a property and white space to split them. |
+
+#### Key Details
+1. If the context contain invalid item, the command will skip that item and continue.
 
 ## Resources
 For more information on EdgeWorkers, refer to the following resources:
