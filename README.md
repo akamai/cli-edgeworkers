@@ -90,7 +90,6 @@ Commands:
 | deactivate \| deact `<edgeworker-identifier> <network> <versionId>` | Deactivate a Version for a given EdgeWorker Id on an Akamai Network. |
 | validate \| vv `<bundlePath>` | Validates a code bundle version without uploading the code bundle. |
 | create-auth-token \| auth `[options] <hostName>` | Generates an authentication token that can be used to get detailed EdgeWorker debug response headers. |
-| generate-secret \| secret `[options]` | Generates a secret key that can be used to generate auth token or in property variable. |
 | clone \| clone `<edgeworker-identifier> <resourceTierId> [options]` | Clones an EdgeWorker from the existing EdgeWorker Id. |
 | list-contracts \| li-contracts `[options]` | List of contract ids that user has access to. |
 | list-properties \| lp `<edgeworker-identifier> [options]` | List of properties associated with a given EdgeWorker Id. |
@@ -395,11 +394,6 @@ Usage: `akamai edgeworkers create-auth-token [options] <hostName>`
 
 #### Key Details
 1. The `--expiry` value must be between 1 and 720 minutes (12 hours). The default is `8 hours`.
-
-### Generate a Random Secret Key
-Generates a random secret key that can be used to create edgeworkers authentication token and in property PMUSER_EW_DEBUG_KEY.
-
-Usage: `akamai edgeworkers generate-secret`
 
 ### Clone an EdgeWorker Id
 Allows customer to clone an EdgeWorker from an existing EdgeWorker Id.
