@@ -9,13 +9,13 @@ const INIT_EKV_TIMEOUT = 120000;
 const DEFAULT_EKV_TIMEOUT = 60000;
 
 export function getNameSpaceList(network: string, details: boolean) {
-  let qs = '';
+  let queryString = '';
   if (details) {
-    qs += `?details=${details}`;
+    queryString += `?details=${details}`;
   }
   return httpEdge
     .getJson(
-      `${EDGEKV_API_BASE}/networks/${network}/namespaces${qs}`,
+      `${EDGEKV_API_BASE}/networks/${network}/namespaces${queryString}`,
       cliUtils.getTimeout(DEFAULT_EKV_TIMEOUT),
       ekvMetrics.listNameSpaces
     )
@@ -241,16 +241,16 @@ export function getItemsFromGroup(
   maxItems?: number,
   sandboxid?: string
 ) {
-  let qs = '';
+  let queryString = '';
   if (maxItems !== undefined) {
-    qs += `?maxItems=${maxItems}`;
+    queryString += `?maxItems=${maxItems}`;
   }
   if (sandboxid) {
-    qs += maxItems == undefined ? '?' : '&';
-    qs += `sandboxId=${sandboxid}`;
+    queryString += maxItems == undefined ? '?' : '&';
+    queryString += `sandboxId=${sandboxid}`;
   }
 
-  const listItemsPath = `${EDGEKV_API_BASE}/networks/${network}/namespaces/${namespace}/groups/${groupId}${qs}`;
+  const listItemsPath = `${EDGEKV_API_BASE}/networks/${network}/namespaces/${namespace}/groups/${groupId}${queryString}`;
   return httpEdge
     .getJson(
       listItemsPath,
@@ -300,13 +300,13 @@ export function getSingleToken(tokenName: string) {
 }
 
 export function getTokenList(incExpired: boolean) {
-  let qs = '';
+  let queryString = '';
   if (incExpired) {
-    qs += `?includeExpired=${incExpired}`;
+    queryString += `?includeExpired=${incExpired}`;
   }
   return httpEdge
     .getJson(
-      `${EDGEKV_API_BASE}/tokens${qs}`,
+      `${EDGEKV_API_BASE}/tokens${queryString}`,
       cliUtils.getTimeout(DEFAULT_EKV_TIMEOUT),
       ekvMetrics.readTokenList
     )

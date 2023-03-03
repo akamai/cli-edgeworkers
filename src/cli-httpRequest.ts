@@ -38,11 +38,11 @@ export function sendEdgeRequest(
   const edge = envUtils.getEdgeGrid();
 
   let path = pth;
-  let qs = '&';
+  let queryString = '&';
   if (accountKey) {
     // Check if query string already included in path, if not use ? otherwise use &
-    if (path.indexOf('?') == -1) qs = '?';
-    path += `${qs}accountSwitchKey=${accountKey}`;
+    if (path.indexOf('?') == -1) queryString = '?';
+    path += `${queryString}accountSwitchKey=${accountKey}`;
   }
   if (path.includes(EDGEWORKERS_API_BASE)) {
     headers[EDGEWORKERS_CLIENT_HEADER] = 'CLI';
