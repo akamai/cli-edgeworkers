@@ -239,4 +239,137 @@ describe('ew service tests', () => {
       );
     });
   });
+
+  describe('getActivations', () => {
+    const mockResponse = { activations: [ {
+      'edgeWorkerId': 558591,
+      'version': 'abc123',
+      'activationId': 30,
+      'accountId': 'B-C-BR0JK9',
+      'network': 'STAGING',
+      'createdBy': 'bmatthew',
+      'createdTime': '2022-12-22T20:36:34Z'
+    },
+    {
+      'edgeWorkerId': 558591,
+      'version': 'abc123',
+      'activationId': 31,
+      'accountId': 'B-C-BR0JK9',
+      'network': 'PRODUCTION',
+      'createdBy': 'bmatthew',
+      'createdTime': '2022-12-22T20:36:54Z'
+    }, 
+    {
+      'edgeWorkerId': 558591,
+      'version': 'abc123',
+      'activationId': 29,
+      'accountId': 'B-C-BR0JK9',
+      'network': 'PRODUCTION',
+      'createdBy': 'bmatthew',
+      'createdTime': '2022-12-20T20:36:54Z'
+    } ] };
+
+    const mockResponseActive = { activations: [ {
+      'edgeWorkerId': 558591,
+      'version': 'abc123',
+      'activationId': 30,
+      'accountId': 'B-C-BR0JK9',
+      'network': 'STAGING',
+      'createdBy': 'bmatthew',
+      'createdTime': '2022-12-22T20:36:34Z'
+    },
+    {
+      'edgeWorkerId': 558591,
+      'version': 'abc123',
+      'activationId': 31,
+      'accountId': 'B-C-BR0JK9',
+      'network': 'PRODUCTION',
+      'createdBy': 'bmatthew',
+      'createdTime': '2022-12-22T20:36:54Z'
+    }] };
+
+    const mockResponseActiveStaging = { activations: [ {
+      'edgeWorkerId': 558591,
+      'version': 'abc123',
+      'activationId': 30,
+      'accountId': 'B-C-BR0JK9',
+      'network': 'STAGING',
+      'createdBy': 'bmatthew',
+      'createdTime': '2022-12-22T20:36:34Z'
+    }] };
+
+    let getActivationsSpy;
+    beforeEach(() => {
+      getActivationsSpy = jest.spyOn(ewService, 'getActivations');
+    });
+
+    const ewId = '558591';
+
+    it('should return the list of activations', async () => {
+      getJsonSpy.mockImplementation((path, timeout) => {
+        expect(path).toEqual(`${ewService.EDGEWORKERS_API_BASE}/ids/${ewId}/activations`);
+        expect(timeout).toEqual(defaultTimeout);
+        return Promise.resolve({
+          body: mockResponse,
+        });
+      });
+
+      const res = await ewService.getActivations(ewId);
+
+      expect(getActivationsSpy).toHaveBeenCalled();
+      expect(res).toEqual(mockResponse);
+    });
+
+    it('should return the active version', async () => {
+      getJsonSpy.mockImplementation((path, timeout) => {
+        expect(path).toEqual(`${ewService.EDGEWORKERS_API_BASE}/ids/${ewId}/activations?activeOnNetwork=true`);
+        expect(timeout).toEqual(defaultTimeout);
+        return Promise.resolve({
+          body: mockResponseActive,
+        });
+      });
+
+      const res = await ewService.getActivations(ewId, undefined, undefined, true);
+
+      expect(getActivationsSpy).toHaveBeenCalled();
+      expect(res).toEqual(mockResponseActive);
+    });
+
+    it('should return the active version on staging only', async () => {
+      getJsonSpy.mockImplementation((path, timeout) => {
+        expect(path).toEqual(`${ewService.EDGEWORKERS_API_BASE}/ids/${ewId}/activations?activeOnNetwork=true&network=STAGING`);
+        expect(timeout).toEqual(defaultTimeout);
+        return Promise.resolve({
+          body: mockResponseActiveStaging,
+        });
+      });
+
+      const res = await ewService.getActivations(ewId, undefined, 'STAGING', true);
+
+      expect(getActivationsSpy).toHaveBeenCalled();
+      expect(res).toEqual(mockResponseActiveStaging);
+    });
+
+    it('should handle errors properly', async () => {
+      const mockError = {
+        status: 404,
+        detail: 'Unable to fetch EdgeWorker ID "558591"',
+      };
+      getJsonSpy.mockImplementation((path, timeout) => {
+        expect(path).toEqual(`${ewService.EDGEWORKERS_API_BASE}/ids/${ewId}/activations`);
+        expect(timeout).toEqual(defaultTimeout);
+        // The normal error object will be returned as a string
+        return Promise.reject(JSON.stringify(mockError));
+      });
+      
+      const error = await ewService.getActivations(ewId);
+
+      expect(getActivationsSpy).toHaveBeenCalled();
+      expect(error).not.toBeUndefined;
+      expect(error.isError).toEqual(true);
+      expect(error.error_reason).toEqual(
+        `${ErrorMessage['GET_ACTIVATIONS_ERROR']} ${mockError.detail}`
+      );
+    });
+  });
 });

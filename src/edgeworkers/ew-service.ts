@@ -19,12 +19,12 @@ function fetchTarball(
 ) {
   const edge = envUtils.getEdgeGrid();
   let path = pth;
-  let qs = '&';
+  let queryString = '&';
   const accountKey = httpEdge.accountKey;
   if (accountKey) {
     // Check if query string already included in path, if not use ? otherwise use &
-    if (path.indexOf('?') == -1) qs = '?';
-    path += `${qs}accountSwitchKey=${accountKey}`;
+    if (path.indexOf('?') == -1) queryString = '?';
+    path += `${queryString}accountSwitchKey=${accountKey}`;
   }
   headers[EDGEWORKERS_CLIENT_HEADER] = 'CLI';
   // headers[EDGEWORKERS_IDE_HEADER] = 'VSCODE';
@@ -110,17 +110,17 @@ export function getEdgeWorkerId(ewId: string) {
 }
 
 export function getAllEdgeWorkerIds(groupId?: string, resourceTierId?: string) {
-  let qs = '';
+  let queryString = '';
   if (groupId != undefined || groupId != null) {
-    qs += `?groupId=${groupId}`;
+    queryString += `?groupId=${groupId}`;
   }
   if (resourceTierId != undefined) {
-    qs += groupId == undefined ? '?' : '&';
-    qs += `resourceTierId=${resourceTierId}`;
+    queryString += groupId == undefined ? '?' : '&';
+    queryString += `resourceTierId=${resourceTierId}`;
   }
   return httpEdge
     .getJson(
-      `${EDGEWORKERS_API_BASE}/ids${qs}`,
+      `${EDGEWORKERS_API_BASE}/ids${queryString}`,
       cliUtils.getTimeout(DEFAULT_EW_TIMEOUT)
     )
     .then((r) => r.body)
@@ -154,13 +154,13 @@ export function getContracts() {
 }
 
 export function getProperties(ewId: string, activeOnly: boolean) {
-  let qs = '';
+  let queryString = '';
   if (activeOnly !== undefined) {
-    qs = '?activeOnly=true';
+    queryString = '?activeOnly=true';
   }
   return httpEdge
     .getJson(
-      `${EDGEWORKERS_API_BASE}/ids/${ewId}/properties${qs}`,
+      `${EDGEWORKERS_API_BASE}/ids/${ewId}/properties${queryString}`,
       cliUtils.getTimeout(DEFAULT_EW_TIMEOUT)
     )
     .then((r) => r.body)
@@ -269,33 +269,38 @@ export function deleteVersion(ewId: string, versionId: string) {
     .catch((err) => error.handleError(err, 'DELETE_VERSION'));
 }
 
-export function getAllActivations(ewId: string) {
+export function getActivations(ewId: string, versionId?: string, network?: string, active?: boolean) {
+  let queryString = '?';
+
+  if ((network ==  undefined || network == null) && (active == undefined || active == null) && (versionId === undefined || versionId === null)) {
+    queryString = '';
+  } else {
+    if (versionId) {
+      queryString += `version=${versionId}`;
+    }
+
+    if (active) {
+      queryString += `${queryString == '?' ? '' : '&'}activeOnNetwork=true`;
+    }
+
+    if (network) {
+      queryString += `${queryString == '?' ? '' : '&'}network=${network}`;
+    }
+  }
+
   return httpEdge
     .getJson(
-      `${EDGEWORKERS_API_BASE}/ids/${ewId}/activations`,
+      `${EDGEWORKERS_API_BASE}/ids/${ewId}/activations${queryString}`,
       cliUtils.getTimeout(DEFAULT_EW_TIMEOUT)
     )
-    .then((r) => r.body);
+    .then((r) => r.body)
+    .catch((err) => error.handleError(err, 'GET_ACTIVATIONS'));
 }
 
 export function getActivationID(ewId: string, activationId: string) {
   return httpEdge
     .getJson(
       `${EDGEWORKERS_API_BASE}/ids/${ewId}/activations/${activationId}`,
-      cliUtils.getTimeout(DEFAULT_EW_TIMEOUT)
-    )
-    .then((r) => r.body);
-}
-
-export function getVersionActivations(ewId: string, versionId: string) {
-  let qs = '?version=';
-  if (versionId === undefined || versionId === null) {
-    qs = '';
-    versionId = '';
-  }
-  return httpEdge
-    .getJson(
-      `${EDGEWORKERS_API_BASE}/ids/${ewId}/activations${qs}${versionId}`,
       cliUtils.getTimeout(DEFAULT_EW_TIMEOUT)
     )
     .then((r) => r.body);
@@ -420,18 +425,18 @@ export function getReport (
   eventHandlers: Array<string>,
   end?: string,
 ) {
-  let qs = `?start=${start}&edgeWorker=${ewid}`;
-  if (end) qs += `&end=${end}`;
+  let queryString = `?start=${start}&edgeWorker=${ewid}`;
+  if (end) queryString += `&end=${end}`;
   for (const status of statuses){
-    qs += `&status=${status}`;
+    queryString += `&status=${status}`;
   }
   for (const eventHandler of eventHandlers){
-    qs += `&eventHandler=${eventHandler}`;
+    queryString += `&eventHandler=${eventHandler}`;
   }
 
   return httpEdge
     .getJson(
-      `${EDGEWORKERS_API_BASE}/reports/${reportId}${qs}`,
+      `${EDGEWORKERS_API_BASE}/reports/${reportId}${queryString}`,
       cliUtils.getTimeout(DEFAULT_EW_TIMEOUT)
     )
     .then((r) => r.body)

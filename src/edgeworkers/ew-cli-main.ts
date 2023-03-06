@@ -10,9 +10,11 @@ import {
   WORKING_DIRECTORY, 
   DOWNLOAD_PATH, 
   VERSION_ID, 
-  ACTIVATION_ID, 
+  ACTIVATION_ID,
+  ACTIVE,
+  NETWORK,
   EDGEWORKER_NAME, 
-  EXPIRY, 
+  EXPIRY,
   FORMAT, 
   REPORT_ID, 
   END_DATE, 
@@ -371,13 +373,19 @@ program
   .alias('list-activations')
   .option('--versionId <versionId>', 'Version Identifier')
   .option('--activationId <activationId>', 'Activation Identifier')
+  .option('--activeOnNetwork', 'Limits results to show only currently activate versions')
+  .option('--network  <network>', 'Limits the results to versions that were activated on a specific network (STAGING or PRODUCTION)')
   .action(async function (ewId, options) {
     options['versionId'] = options.versionId || configUtils.searchProperty(VERSION_ID);
     options['activationId'] = options.activationId || configUtils.searchProperty(ACTIVATION_ID);
+    options['activeOnNetwork'] = options.activeOnNetwork || configUtils.searchProperty(ACTIVE);
+    options['network'] = options.network || configUtils.searchProperty(NETWORK);
 
     // Do not provide both versionId and activationId
-    if (options.versionId && options.activationId)
-      cliUtils.logAndExit(1, 'ERROR: You may not provide both the Version and the Activation identifiers!');
+    if (options.activationId && (options.versionId || options.active || options.network) ) {
+      cliUtils.logAndExit(1, 'ERROR: You may not provide the Activation identifier with versionId, network, or activeOnNetwork options.');
+    }
+
     try {
       await cliHandler.showEdgeWorkerActivationOverview(ewId, options);
     } catch (e) {

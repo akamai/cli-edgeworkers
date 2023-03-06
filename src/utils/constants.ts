@@ -10,6 +10,7 @@ export const RESOURCE_TIER_ID = 'resourceTierId';
 export const CONTRACT_ID = 'contractId';
 export const VERSION_ID = 'versionId';
 export const ACTIVATION_ID = 'activationId';
+export const ACTIVE = 'activeOnNetwork';
 export const REPORT_ID = 'reportId';
 export const BUNDLE_PATH = 'bundlePath';
 export const WORKING_DIRECTORY = 'workingDirectory';

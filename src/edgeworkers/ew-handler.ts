@@ -805,18 +805,20 @@ export async function downloadTarball(
 
 export async function showEdgeWorkerActivationOverview(
   ewId: string,
-  options?: { versionId?: string; activationId?: string }
+  options?: { versionId?: string; activationId?: string; activeOnNetwork?: boolean; network?: string; }
 ) {
   let activations = null;
   const activation = [];
   let accountId = '';
   let versionId = options.versionId;
   let activationId = options.activationId;
+  const active = options.activeOnNetwork;
+  const network = options.network;
 
   if (versionId) {
     activations = await cliUtils.spinner(
-      edgeWorkersSvc.getVersionActivations(ewId, versionId),
-      `Fetching all Activations for EdgeWorker Id ${ewId}, Version ${versionId}`
+      edgeWorkersSvc.getActivations(ewId, versionId, network),
+      `Fetching all Activations for EdgeWorker Id ${ewId}, Version ${versionId}${network ? ', Network ' + network : ''}`
     );
 
     if (Object.prototype.hasOwnProperty.call(activations, 'activations')){
@@ -830,8 +832,8 @@ export async function showEdgeWorkerActivationOverview(
     activations = [activations];
   } else {
     activations = await cliUtils.spinner(
-      edgeWorkersSvc.getAllActivations(ewId),
-      `Fetching all Activations for EdgeWorker Id ${ewId}`
+      edgeWorkersSvc.getActivations(ewId, undefined, network, active),
+      `Fetching ${active ? 'active version' : 'all activations' } for EdgeWorker Id ${ewId}${network ? ' on ' + network : ''}`
     );
     // remove outer envelope of JSON data
 
@@ -857,7 +859,7 @@ export async function showEdgeWorkerActivationOverview(
       );
     });
 
-    const msg = `The following EdgeWorker Activations currently exist for account: ${accountId}, ewId: ${ewId}, version: ${versionId}, activationId: ${activationId}`;
+    const msg = `The following EdgeWorker Activations currently exist for account: ${accountId}, ewId: ${ewId}, version: ${active ? 'active' : versionId}, activationId: ${activationId}, network: ${network ? network : 'any'}`;
     if (ewJsonOutput.isJSONOutputMode()) {
       ewJsonOutput.writeJSONOutput(0, msg, activation);
     } else {
