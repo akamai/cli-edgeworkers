@@ -307,6 +307,8 @@ Usage: `akamai edgeworkers status [options] <edgeworker-identifier>`
 | -h, --help  | output usage information |
 | --versionId `<versionId>` | Version identifier |
 | --activationId `<activationId>` | Activation identifier |
+| --activeOnNetwork | Limits results to show only currently activate versions
+| --network `<network>`| Limits the results to versions that were activated on a specific network (STAGING or PRODUCTION)
 
 | Argument | Existence | Description |
 | - | - | - |
