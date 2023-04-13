@@ -66,7 +66,7 @@ Usage:
 
 The EdgeWorkers CLI lets you set default values for the command options. There are two ways to create a config file:  
 
-1. Create a config file `~/.akamai/ew-config`, and store the properties as follows:
+1. Create a config file `~/.akamai-cli/ew-config`, and store the properties as follows:
 ```bash
 [default]
 edgeworkerName=testEW
