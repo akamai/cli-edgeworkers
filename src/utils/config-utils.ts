@@ -21,6 +21,7 @@ export const Operations = {
 export class Config {
   path: string;
   section: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   config: any;
 
   constructor(path: string, section: string) {
@@ -28,10 +29,16 @@ export class Config {
     this.section = section;
 
     // create a config file if it doesn't exist
-    if (!fs.existsSync(this.path)) {
-      fs.writeFileSync(this.path, '');
+    try {
+      if (!fs.existsSync(this.path)) {
+        fs.writeFileSync(this.path, '');
+      }
+      this.config = ini.parse(fs.readFileSync(this.path, 'utf8'));
+    } catch (e) {
+      // When fail to write or read the config file, treat it as an empty config file
+      console.error(`File path not found: ${this.path}`);
+      this.config = {};
     }
-    this.config = ini.parse(fs.readFileSync(this.path, 'utf8'));
 
     // initialize the section if not exist
     if (!(this.section in this.config)) {
@@ -39,6 +46,7 @@ export class Config {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   save(context: any=null) {
     try {
       if (context) {
