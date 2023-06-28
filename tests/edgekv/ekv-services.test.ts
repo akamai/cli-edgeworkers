@@ -328,7 +328,15 @@ describe('ekv-services tests', () => {
   });
 
   describe('testing initializeEdgeKV', () => {
-    const mockReqBody = '';
+    const dataAccessPolicy = {
+      dataAccessPolicy: {
+        restrictDataAccess: true,
+        allowNamespacePolicyOverride: false
+      }
+    };
+    const mockReqBody = {
+      dataAccessPolicy
+    };
     const mockResponse = {
       statusCode: 200,
       body: 'success',
@@ -349,7 +357,7 @@ describe('ekv-services tests', () => {
       });
 
       const initializeSpy = jest.spyOn(ekvService, 'initializeEdgeKV');
-      const res = await ekvService.initializeEdgeKV();
+      const res = await ekvService.initializeEdgeKV(dataAccessPolicy);
 
       expect(initializeSpy).toHaveBeenCalled();
       expect(res).toEqual(mockResponse);
@@ -364,7 +372,7 @@ describe('ekv-services tests', () => {
       });
 
       const initializeSpy = jest.spyOn(ekvService, 'initializeEdgeKV');
-      const error = await ekvService.initializeEdgeKV();
+      const error = await ekvService.initializeEdgeKV(dataAccessPolicy);
 
       expect(initializeSpy).toHaveBeenCalled();
       // Check the details of error object
