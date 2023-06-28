@@ -59,7 +59,8 @@ export function logInitialize(initializedEdgekv) {
         AccountStatus: initializedEdgekv['accountStatus'],
         ProductionStatus: initializedEdgekv['productionStatus'],
         StagingStatus: initializedEdgekv['stagingStatus'],
-        Cpcode: initializedEdgekv['cpcode']
+        Cpcode: initializedEdgekv['cpcode'],
+        DataAccessPolicy: initializedEdgekv['dataAccessPolicy'] ? 'restrictDataAccess=' + initializedEdgekv['dataAccessPolicy']['restrictDataAccess'] + ', allowNamespacePolicyOverride=' + initializedEdgekv['dataAccessPolicy']['allowNamespacePolicyOverride'] : 'N/A'
     };
     console.table([initializeStatus]);
 }
