@@ -85,7 +85,8 @@ export async function createNamespace(
   nameSpace: string,
   retention: number,
   groupId: number,
-  geoLocation: string
+  geoLocation: string,
+  dataAccessPolicy: object = undefined
 ) {
   if (!groupId) {
     cliUtils.logAndExit(
@@ -103,7 +104,8 @@ export async function createNamespace(
       nameSpace,
       retentionPeriod,
       groupId,
-      geoLocation
+      geoLocation,
+      dataAccessPolicy
     ),
     `Creating namespace for environment ${environment}`
   );

@@ -39,7 +39,8 @@ export function createNameSpace(
   namespace: string,
   retention,
   groupId,
-  geoLocation
+  geoLocation,
+  dataAccessPolicy: object = undefined
 ) {
   const body = {
     namespace: namespace,
@@ -47,6 +48,9 @@ export function createNameSpace(
     groupId: groupId,
     geoLocation: geoLocation,
   };
+  if (dataAccessPolicy !== undefined) {
+    body['dataAccessPolicy'] = dataAccessPolicy;
+  }
   return httpEdge
     .postJson(
       `${EDGEKV_API_BASE}/networks/${network}/namespaces`,

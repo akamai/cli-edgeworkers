@@ -55,11 +55,11 @@ export function validateNetwork(network: string,sandboxId?: string) {
 }
 
 /**
- * Validates a database data access policy option string
- * and returns as a formatted object for use in requests
+ * Formats a database data access policy option string
+ * and returns as an object for use in requests
  * @param dataAccessPolicyStr
  */
-export function validateDataAccessPolicy(dataAccessPolicyStr: string) {
+export function formatDataAccessPolicy(dataAccessPolicyStr: string) {
   const dataAccessPolicy = {};
   const dataAccessPolicyArr = dataAccessPolicyStr.split(',');
   dataAccessPolicyArr.filter(item => item.includes('=')).forEach(item => {
@@ -74,13 +74,37 @@ export function validateDataAccessPolicy(dataAccessPolicyStr: string) {
       }
     }
   });
+  return dataAccessPolicy;
+}
+
+/**
+ * Validates a database data access policy option string
+ * and returns as a formatted object for use in requests
+ * @param dataAccessPolicyStr
+ */
+export function validateDataAccessPolicy(dataAccessPolicyStr: string) {
+  const dataAccessPolicy = formatDataAccessPolicy(dataAccessPolicyStr);
   if (dataAccessPolicy['restrictDataAccess'] == undefined || dataAccessPolicy['allowNamespacePolicyOverride'] == undefined) {
     cliUtils.logAndExit(
       1,
       'ERROR: `dataAccessPolicy` option must be of the form `restrictDataAccess=<bool>,allowNamespacePolicyOverride=<bool>` where <bool> can be true or false.'
     );
   }
-  return dataAccessPolicy;
+}
+
+/**
+ * Validates a database data access policy option string
+ * and returns as a formatted object for use in requests
+ * @param dataAccessPolicyStr
+ */
+export function validateNamespaceDataAccessPolicy(dataAccessPolicyStr: string) {
+  const dataAccessPolicy = formatDataAccessPolicy(dataAccessPolicyStr);
+  if (dataAccessPolicy['restrictDataAccess'] == undefined) {
+    cliUtils.logAndExit(
+      1,
+      'ERROR: `dataAccessPolicy` option must be of the form `restrictDataAccess=<bool>` where <bool> can be true or false.'
+    );
+  }
 }
 
 /**

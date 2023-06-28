@@ -20,6 +20,7 @@ import { ekvJsonOutput } from './client-manager';
 import * as httpEdge from '../cli-httpRequest';
 import * as pkginfo from '../../package.json';
 import { Command } from 'commander';
+import {validateNamespaceDataAccessPolicy} from './ekv-helper';
 
 const program = new Command();
 const currentYear = new Date().getFullYear();
@@ -417,11 +418,16 @@ create
     '--geoLocation <geolocation>',
     'Specifies the persistent storage location for data when creating a namespace on the production network. This can help optimize performance by storing data where most or all of your users are located. The value defaults to `US` on the `STAGING` and `PRODUCTION` networks.'
   )
+  .option(
+    '--dataAccessPolicy <namespace_data_access_policy>',
+    '`dataAccessPolicy` option must be of the form `restrictDataAccess=<bool>` where <bool> can be true or false.'
+  )
   .description('Creates an EdgeKV namespace')
   .action(async function (environment, namespace, options) {
     options['retention'] = options.retention || configUtils.searchProperty(RETENTION);
     options['groupId'] = options.groupId || configUtils.searchProperty(GROUP_ID);
     options['geolocation'] = options.geolocation || configUtils.searchProperty(GEO_LOCATION);
+    options['dataAccessPolicy'] = options.dataAccessPolicy ? validateNamespaceDataAccessPolicy(options.dataAccessPolicy) : undefined;
 
     try {
       await kvCliHandler.createNamespace(
@@ -429,7 +435,8 @@ create
         namespace,
         options.retention,
         options.groupId,
-        options.geoLocation
+        options.geoLocation,
+        options.dataAccessPolicy
       );
     } catch (e) {
       cliUtils.logAndExit(1, e);

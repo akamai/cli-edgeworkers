@@ -148,11 +148,15 @@ describe('ekv-services tests', () => {
     const retention = 1000;
     const groupId = 'mockGroup';
     const geoLocation = 'mocklocation';
+    const dataAccessPolicy = {
+      restrictDataAccess: true
+    };
     const mockReqBody = {
       namespace: mockNamespace,
       retentionInSeconds: retention,
       groupId: groupId,
       geoLocation: geoLocation,
+      dataAccessPolicy: dataAccessPolicy
     };
     const mockResBody = { mesaage: 'success' };
 
@@ -178,7 +182,8 @@ describe('ekv-services tests', () => {
         mockNamespace,
         retention,
         groupId,
-        geoLocation
+        geoLocation,
+        dataAccessPolicy
       );
 
       expect(createNsSpy).toHaveBeenCalled();
@@ -199,7 +204,8 @@ describe('ekv-services tests', () => {
         mockNamespace,
         retention,
         groupId,
-        geoLocation
+        geoLocation,
+        dataAccessPolicy
       );
 
       expect(createNsSpy).toHaveBeenCalled();
@@ -329,13 +335,11 @@ describe('ekv-services tests', () => {
 
   describe('testing initializeEdgeKV', () => {
     const dataAccessPolicy = {
-      dataAccessPolicy: {
-        restrictDataAccess: true,
-        allowNamespacePolicyOverride: false
-      }
+      restrictDataAccess: true,
+      allowNamespacePolicyOverride: false
     };
     const mockReqBody = {
-      dataAccessPolicy
+      dataAccessPolicy: dataAccessPolicy
     };
     const mockResponse = {
       statusCode: 200,
