@@ -15,7 +15,7 @@ export function logNamespace(nameSpaceId: string, createdNameSpace) {
         RetentionPeriod: retentionPeriod,
         GeoLocation: createdNameSpace['geoLocation'],
         GroupId: groupId,
-        DataAccessPolicy: createdNameSpace['dataAccessPolicy'] ? 'restrictDataAccess=' + createdNameSpace['dataAccessPolicy']['restrictDataAccess'] + ', policyType=' + createdNameSpace['dataAccessPolicy']['policyType'] : 'N/A'
+        'Namespace dataAccessPolicy': createdNameSpace['dataAccessPolicy'] ? 'restrictDataAccess=' + createdNameSpace['dataAccessPolicy']['restrictDataAccess'] + ', policyType=' + createdNameSpace['dataAccessPolicy']['policyType'] : 'N/A'
     };
     console.table([createNameSpace]);
 }
