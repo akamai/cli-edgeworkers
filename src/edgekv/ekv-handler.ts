@@ -34,6 +34,7 @@ export async function listNameSpaces(
             RetentionPeriod: retentionPeriod,
             GeoLocation: value['geoLocation'],
             AccessGroupId: groupId,
+            'Namespace dataAccessPolicy': value['dataAccessPolicy'] ? 'restrictDataAccess=' + value['dataAccessPolicy']['restrictDataAccess'] + ', policyType=' + value['dataAccessPolicy']['policyType'] : 'N/A',
           });
         } else {
           nsListResp.push({ NamespaceId: value['namespace'] });
