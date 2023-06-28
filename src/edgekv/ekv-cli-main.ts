@@ -563,6 +563,24 @@ modify
     cliUtils.logAndExit(0, copywrite);
   });
 
+modify
+  .command('db')
+  .requiredOption(
+    '--dataAccessPolicy <database_data_access_policy>',
+    '`dataAccessPolicy` option must be of the form `restrictDataAccess=<bool>,allowNamespacePolicyOverride=<bool>` where <bool> can be true or false.'
+  )
+  .description('Modify the database data access policy')
+  .action(async function (options) {
+    try {
+      await kvCliHandler.updateDatabase(options['dataAccessPolicy']);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on('--help', function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
 const download = program
   .command('download')
   .alias('dnld')

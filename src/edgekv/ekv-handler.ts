@@ -4,6 +4,7 @@ import * as response from './ekv-response';
 import * as ekvhelper from './ekv-helper';
 import * as edgeWorkersSvc from '../edgeworkers/ew-service';
 import { ekvJsonOutput } from './client-manager';
+import {validateDataAccessPolicy} from './ekv-helper';
 
 export async function listNameSpaces(
   environment: string,
@@ -197,22 +198,7 @@ export async function updateNameSpace(
 }
 
 export async function initializeEdgeKv(dataAccessPolicyStr: string) {
-  const dataAccessPolicy = {};
-  const dataAccessPolicyArr = dataAccessPolicyStr.split(',');
-  dataAccessPolicyArr.filter(item => item.includes('=')).forEach(item => {
-    const property = item.split('=');
-    if (property.length !== 2) {
-      console.error(`Warning: cannot parse invalid item ['${item}'], skip it.`);
-    } else {
-      dataAccessPolicy[property[0].trim()] = property[1].trim() === 'true';
-    }
-  });
-  if (dataAccessPolicy['restrictDataAccess'] == undefined || dataAccessPolicy['allowNamespacePolicyOverride'] == undefined) {
-    cliUtils.logAndExit(
-      1,
-      'ERROR: `dataAccessPolicy` option must be of the form `restrictDataAccess=<bool>,allowNamespacePolicyOverride=<bool>` where <bool> can be true or false.'
-    );
-  }
+  const dataAccessPolicy= validateDataAccessPolicy(dataAccessPolicyStr);
   const initializedEdgeKv = await cliUtils.spinner(
     edgekvSvc.initializeEdgeKV(dataAccessPolicy),
     'Initializing EdgeKV...'
@@ -301,6 +287,41 @@ export async function getInitializationStatus() {
     response.logError(
       initializedEdgeKv,
       `ERROR: EdgeKV Initialization failed ${errorReason} [TraceId: ${initializedEdgeKv.traceId}]`
+    );
+  }
+}
+
+export async function updateDatabase(dataAccessPolicyStr: string) {
+  const dataAccessPolicy = validateDataAccessPolicy(dataAccessPolicyStr);
+  const updateDataAccessPolicy = await cliUtils.spinner(
+    edgekvSvc.updateDatabase(dataAccessPolicy),
+    'Updating database data access policy...'
+  );
+
+  if (updateDataAccessPolicy.data != undefined && !updateDataAccessPolicy.isError) {
+    const updateRespBody = updateDataAccessPolicy.data;
+
+    const status = updateDataAccessPolicy.status;
+    let msg;
+    if (Object.prototype.hasOwnProperty.call(updateRespBody, 'accountStatus')) {
+      const accountStatus = updateRespBody['accountStatus'];
+      if (status == 200 && accountStatus == 'INITIALIZED') {
+        msg = 'EdgeKV database data access policy successfully modified';
+      } else {
+        msg = 'EdgeKV database data access policy was not modified';
+      }
+    }
+    if (ekvJsonOutput.isJSONOutputMode()) {
+      ekvJsonOutput.writeJSONOutput(0, msg, updateRespBody);
+    } else {
+      cliUtils.logWithBorder(msg);
+      response.logInitialize(updateRespBody);
+    }
+  } else {
+    const errorReason = `${updateDataAccessPolicy.error_reason}`;
+    response.logError(
+      updateDataAccessPolicy,
+      `ERROR: EdgeKV database update failed (${errorReason}) [TraceId: ${updateDataAccessPolicy.traceId}]`
     );
   }
 }

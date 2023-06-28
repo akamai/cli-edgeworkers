@@ -14,7 +14,7 @@ const tkn_export = '\n}\nexport { edgekv_access_tokens };';
 
 /**
  * converts seconds to years, months and days
- * @param seconds 
+ * @param seconds
  */
 export function convertRetentionPeriod(seconds) {
     if (seconds == 0) {
@@ -51,13 +51,42 @@ export function validateNetwork(network: string,sandboxId?: string) {
         if (network.toUpperCase() !== cliUtils.staging && network.toUpperCase() !== cliUtils.production) {
             cliUtils.logAndExit(1, `ERROR: Environment parameter must be either staging or production - was: ${network}`);
         }
-    } 
+    }
+}
+
+/**
+ * Validates a database data access policy option string
+ * and returns as a formatted object for use in requests
+ * @param dataAccessPolicyStr
+ */
+export function validateDataAccessPolicy(dataAccessPolicyStr: string) {
+  const dataAccessPolicy = {};
+  const dataAccessPolicyArr = dataAccessPolicyStr.split(',');
+  dataAccessPolicyArr.filter(item => item.includes('=')).forEach(item => {
+    const property = item.split('=');
+    if (property.length !== 2) {
+      console.error(`Warning: cannot parse invalid item ['${item}'], skip it.`);
+    } else {
+      const boolProp = property[1].trim();
+      // Avoid setting improper string value to false
+      if (boolProp === 'true' || boolProp === 'false') {
+        dataAccessPolicy[property[0].trim()] = boolProp === 'true';
+      }
+    }
+  });
+  if (dataAccessPolicy['restrictDataAccess'] == undefined || dataAccessPolicy['allowNamespacePolicyOverride'] == undefined) {
+    cliUtils.logAndExit(
+      1,
+      'ERROR: `dataAccessPolicy` option must be of the form `restrictDataAccess=<bool>,allowNamespacePolicyOverride=<bool>` where <bool> can be true or false.'
+    );
+  }
+  return dataAccessPolicy;
 }
 
 /**
  * Validates if json file exists in the specified location
  * and validates json content of the file
- * @param items 
+ * @param items
  */
 export function validateInputFile(itemFilePath) {
 
@@ -75,7 +104,7 @@ export function validateInputFile(itemFilePath) {
 
 /**
  * Validates the json file content
- * @param itemFilePath 
+ * @param itemFilePath
  */
 function validateJson(itemFilePath) {
     try {
@@ -89,7 +118,7 @@ function validateJson(itemFilePath) {
     }
 }
 
-// converts jwt token to date format 
+// converts jwt token to date format
 export function convertTokenDate(seconds) {
     const convertedDate = new Date(seconds * 1000);
     return convertedDate;
@@ -142,11 +171,11 @@ export function isValidDate(dateString) {
  * if no token file exists, new file is created.Else the existing file is updated
  * If overwrite option is specified token content will be overwritte else token will be displayed
  * for users to copy to their file
- * @param savePath 
- * @param overWrite 
- * @param createdToken 
- * @param decodedToken 
- * @param nameSpaceList 
+ * @param savePath
+ * @param overWrite
+ * @param createdToken
+ * @param decodedToken
+ * @param nameSpaceList
  */
 export function saveTokenToBundle(savePath, overWrite, createdToken, decodedToken, nameSpaceList) {
     let tokenContent = [];
@@ -209,7 +238,7 @@ export function saveTokenToBundle(savePath, overWrite, createdToken, decodedToke
 
         const newTarBallStream = fs.createWriteStream(savePath);// create writestream at the last stage
         pack.pipe(zlib.createGzip()).pipe(newTarBallStream);// gzips and writes the contents to the new tarball
-        
+
         if (ekvJsonOutput.isJSONOutputMode()) {
             ekvJsonOutput.writeJSONOutput(
                 0,
@@ -225,7 +254,7 @@ export function saveTokenToBundle(savePath, overWrite, createdToken, decodedToke
 
 /**
  * Constructs the token file with static constants
- * @param tokenContent 
+ * @param tokenContent
  */
 function constructTokenFile(tokenContent) {
     const token = [];
@@ -240,11 +269,11 @@ function constructTokenFile(tokenContent) {
 /**
  * If only directory is specified without tgz, we create new token file and place it in the save path.
  * If token file already exists, token will be updated. Users can place this token file when they place it in th bundle
- * @param savePath 
- * @param overWrite 
- * @param createdToken 
- * @param decodedToken 
- * @param nameSpaceList 
+ * @param savePath
+ * @param overWrite
+ * @param createdToken
+ * @param decodedToken
+ * @param nameSpaceList
  */
 export function createTokenFileWithoutBundle(savePath, overWrite, createdToken, decodedToken, nameSpaceList) {
 
@@ -296,16 +325,16 @@ export function createTokenFileWithoutBundle(savePath, overWrite, createdToken, 
         cliUtils.logWithBorder(msg);
         response.logToken(createdToken['name'], createdToken['value'], decodedToken, nameSpaceList, true);
       }
-    
+
 }
 
 /**
- * Validates the static content of the token 
+ * Validates the static content of the token
  * If valid parses the content and returns it
- * @param data 
- * @param createdToken 
- * @param decodedToken 
- * @param nameSpaceList 
+ * @param data
+ * @param createdToken
+ * @param decodedToken
+ * @param nameSpaceList
  */
 function validateAndGetExistingTokenContent(data, createdToken, decodedToken, nameSpaceList) {
     const tokenList = data.split('=');
@@ -327,7 +356,7 @@ function validateAndGetExistingTokenContent(data, createdToken, decodedToken, na
     }
 
     tokenList[1] = tokenList[1].replace('export { edgekv_access_tokens };', '');
-    
+
     // Parse token content from the existing file
     try {
         tokenContent = JSON.parse(tokenList[1]);
@@ -341,11 +370,11 @@ function validateAndGetExistingTokenContent(data, createdToken, decodedToken, na
 
 /**
  * Add or update token to the existing token content
- * @param tokenContent 
- * @param nameSpaceList 
- * @param createdToken 
- * @param decodedToken 
- * @param overWrite 
+ * @param tokenContent
+ * @param nameSpaceList
+ * @param createdToken
+ * @param decodedToken
+ * @param overWrite
  * @returns updated token content value
  */
 function updateTokenContent(tokenContent, nameSpaceList, createdToken, decodedToken, overWrite) {
@@ -355,7 +384,7 @@ function updateTokenContent(tokenContent, nameSpaceList, createdToken, decodedTo
             const nameSpaceContent = { 'name': createdToken['name'], 'value': createdToken['value'] };
             tokenContent[ns] = nameSpaceContent;
         }
-        // if namespace already exists, if overwrite option is specified overwrite token value in file else display token 
+        // if namespace already exists, if overwrite option is specified overwrite token value in file else display token
         else if (Object.prototype.hasOwnProperty.call(tokenContent, ns)) {
             const tokenName = tokenContent[ns]['name'];
             if (tokenName === createdToken['name']) {
@@ -384,9 +413,9 @@ function updateTokenContent(tokenContent, nameSpaceList, createdToken, decodedTo
 
 export function getDateDifference(date) {
     const Difference_In_Time = date.getTime() - new Date().getTime();
-  
-    // To calculate the no. of days between two dates 
-    const Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24); 
+
+    // To calculate the no. of days between two dates
+    const Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
     return Difference_In_Days;
 }
 

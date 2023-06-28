@@ -119,6 +119,21 @@ export function getInitializedEdgeKV() {
     .catch((err) => error.handleError(err));
 }
 
+export function updateDatabase(dataAccessPolicy) {
+  const body = {
+    dataAccessPolicy
+  };
+  return httpEdge
+    .putJson(
+      `${EDGEKV_API_BASE}/auth/database`,
+      body,
+      cliUtils.getTimeout(INIT_EKV_TIMEOUT),
+      ekvMetrics.updateDatabase
+    )
+    .then((r) => r.response)
+    .catch((err) => error.handleError(err));
+}
+
 export function writeItems(
   network: string,
   namespace: string,
