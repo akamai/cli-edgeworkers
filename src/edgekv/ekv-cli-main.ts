@@ -2,17 +2,17 @@
 import * as envUtils from '../utils/env-utils';
 import * as cliUtils from '../utils/cli-utils';
 import * as configUtils from '../utils/config-utils';
-import { 
-  ORDER_BY, 
-  MAX_ITEMS, 
-  GROUP_ID, 
-  RETENTION, 
-  GEO_LOCATION, 
-  STAGING, 
-  PRODUCTION, 
-  EW_IDS, 
-  EXPIRY, 
-  NAMESPACE, 
+import {
+  ORDER_BY,
+  MAX_ITEMS,
+  GROUP_ID,
+  RETENTION,
+  GEO_LOCATION,
+  STAGING,
+  PRODUCTION,
+  EW_IDS,
+  EXPIRY,
+  NAMESPACE,
   SAVE_PATH } from './../utils/constants';
 import { SANDBOX_ID } from '../utils/constants';
 import * as kvCliHandler from './ekv-handler';
@@ -118,10 +118,14 @@ program
 program
   .command('initialize')
   .description('Initialize EdgeKV for the first time')
+  .requiredOption(
+    '--dataAccessPolicy <database_data_access_policy>',
+    '`dataAccessPolicy` option must be of the form `restrictDataAccess=<bool>,allowNamespacePolicyOverride=<bool>` where <bool> can be true or false.'
+  )
   .alias('init')
-  .action(async function () {
+  .action(async function (options) {
     try {
-      await kvCliHandler.initializeEdgeKv();
+      await kvCliHandler.initializeEdgeKv(options['dataAccessPolicy']);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }

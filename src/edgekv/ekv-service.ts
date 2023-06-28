@@ -93,11 +93,14 @@ export function updateNameSpace(
     .catch((err) => error.handleError(err));
 }
 
-export function initializeEdgeKV() {
+export function initializeEdgeKV(dataAccessPolicy) {
+  const body = {
+    dataAccessPolicy
+  };
   return httpEdge
     .putJson(
       `${EDGEKV_API_BASE}/initialize`,
-      '',
+      body,
       cliUtils.getTimeout(INIT_EKV_TIMEOUT),
       ekvMetrics.initialize
     )
@@ -209,7 +212,7 @@ export function readItem(
     .then((r) => {
       // manually parse body if needed
       return typeof r.body === 'string' ? r.body : cliUtils.parseIfJSON(r.body);
-    }) 
+    })
     .catch((err) => error.handleError(err));
 }
 

@@ -196,9 +196,25 @@ export async function updateNameSpace(
   }
 }
 
-export async function initializeEdgeKv() {
+export async function initializeEdgeKv(dataAccessPolicyStr: string) {
+  const dataAccessPolicy = {};
+  const dataAccessPolicyArr = dataAccessPolicyStr.split(',');
+  dataAccessPolicyArr.filter(item => item.includes('=')).forEach(item => {
+    const property = item.split('=');
+    if (property.length !== 2) {
+      console.error(`Warning: cannot parse invalid item ['${item}'], skip it.`);
+    } else {
+      dataAccessPolicy[property[0].trim()] = property[1].trim() === 'true';
+    }
+  });
+  if (dataAccessPolicy['restrictDataAccess'] == undefined || dataAccessPolicy['allowNamespacePolicyOverride'] == undefined) {
+    cliUtils.logAndExit(
+      1,
+      'ERROR: `dataAccessPolicy` option must be of the form `restrictDataAccess=<bool>,allowNamespacePolicyOverride=<bool>` where <bool> can be true or false.'
+    );
+  }
   const initializedEdgeKv = await cliUtils.spinner(
-    edgekvSvc.initializeEdgeKV(),
+    edgekvSvc.initializeEdgeKV(dataAccessPolicy),
     'Initializing EdgeKV...'
   );
 
@@ -652,7 +668,7 @@ export async function listAuthGroups(options: {
     ewGroups = await getEwGroups(options.groupIds);
   }
   const msg = `User has the following permission access for group: ${groupId}`;
-  
+
   if (ekvJsonOutput.isJSONOutputMode()) {
     const obj = {
       authGroups,
