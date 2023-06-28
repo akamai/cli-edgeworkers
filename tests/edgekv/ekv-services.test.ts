@@ -431,6 +431,63 @@ describe('ekv-services tests', () => {
     });
   });
 
+  describe('testing updateDatabase', () => {
+    const dataAccessPolicy = {
+      dataAccessPolicy: {
+        restrictDataAccess: true,
+        allowNamespacePolicyOverride: false
+      }
+    };
+    const mockReqBody = {
+      dataAccessPolicy
+    };
+    const mockResponse = {
+      statusCode: 200,
+      body: 'success',
+    };
+
+    test('response should return update success', async () => {
+      // Mock putJson() method
+      const putJsonSpy = jest.spyOn(httpEdge, 'putJson');
+      putJsonSpy.mockImplementation((path, body, timeout, metricType) => {
+        expect(path).toContain(`${ekvService.EDGEKV_API_BASE}/auth/database`);
+        expect(body).toEqual(mockReqBody);
+        expect(timeout).toEqual(initTimeout);
+        expect(metricType).toEqual(ekvMetrics.updateDatabase);
+
+        return Promise.resolve({
+          response: mockResponse,
+        });
+      });
+
+      const updateDatabaseSpy = jest.spyOn(ekvService, 'updateDatabase');
+      const res = await ekvService.updateDatabase(dataAccessPolicy);
+
+      expect(updateDatabaseSpy).toHaveBeenCalled();
+      expect(res).toEqual(mockResponse);
+    });
+
+    test('function should handle errors properly', async () => {
+      // Mock putJson() method
+      const putJsonSpy = jest.spyOn(httpEdge, 'putJson');
+      putJsonSpy.mockImplementation(() => {
+        // The normal error object will be returned as a string
+        return Promise.reject(JSON.stringify(mockError));
+      });
+
+      const updateDatabaseSpy = jest.spyOn(ekvService, 'updateDatabase');
+      const error = await ekvService.updateDatabase(dataAccessPolicy);
+
+      expect(updateDatabaseSpy).toHaveBeenCalled();
+      // Check the details of error object
+      expect(error).not.toBeUndefined;
+      expect(error.isError).toEqual(true);
+      expect(error.status).toEqual(mockError.status);
+      expect(error.error_reason).toEqual(mockError.detail);
+      expect(error.traceId).toEqual(mockError.traceId);
+    });
+  });
+
   describe('testing writeItems', () => {
     const textItem = 'mockItem';
     const jsonItems = {
