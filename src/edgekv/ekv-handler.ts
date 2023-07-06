@@ -201,7 +201,10 @@ export async function updateNameSpace(
 }
 
 export async function initializeEdgeKv(dataAccessPolicyStr: string) {
-  const dataAccessPolicy= validateDataAccessPolicy(dataAccessPolicyStr);
+  let dataAccessPolicy;
+  if (dataAccessPolicyStr) {
+    dataAccessPolicy = validateDataAccessPolicy(dataAccessPolicyStr);
+  }
   const initializedEdgeKv = await cliUtils.spinner(
     edgekvSvc.initializeEdgeKV(dataAccessPolicy),
     'Initializing EdgeKV...'

@@ -119,7 +119,7 @@ program
 program
   .command('initialize')
   .description('Initialize EdgeKV for the first time')
-  .requiredOption(
+  .option(
     '--dataAccessPolicy <database_data_access_policy>',
     '`dataAccessPolicy` option must be of the form `restrictDataAccess=<bool>,allowNamespacePolicyOverride=<bool>` where <bool> can be true or false.'
   )

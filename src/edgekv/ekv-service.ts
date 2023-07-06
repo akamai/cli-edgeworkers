@@ -98,9 +98,7 @@ export function updateNameSpace(
 }
 
 export function initializeEdgeKV(dataAccessPolicy) {
-  const body = {
-    dataAccessPolicy
-  };
+  const body = dataAccessPolicy ? { dataAccessPolicy } : undefined;
   return httpEdge
     .putJson(
       `${EDGEKV_API_BASE}/initialize`,

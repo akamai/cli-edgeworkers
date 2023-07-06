@@ -61,19 +61,21 @@ export function validateNetwork(network: string,sandboxId?: string) {
  */
 export function formatDataAccessPolicy(dataAccessPolicyStr: string) {
   const dataAccessPolicy = {};
-  const dataAccessPolicyArr = dataAccessPolicyStr.split(',');
-  dataAccessPolicyArr.filter(item => item.includes('=')).forEach(item => {
-    const property = item.split('=');
-    if (property.length !== 2) {
-      console.error(`Warning: cannot parse invalid item ['${item}'], skip it.`);
-    } else {
-      const boolProp = property[1].trim();
-      // Avoid setting improper string value to false
-      if (boolProp === 'true' || boolProp === 'false') {
-        dataAccessPolicy[property[0].trim()] = boolProp === 'true';
+  if (dataAccessPolicyStr) {
+    const dataAccessPolicyArr = dataAccessPolicyStr.split(',');
+    dataAccessPolicyArr.filter(item => item.includes('=')).forEach(item => {
+      const property = item.split('=');
+      if (property.length !== 2) {
+        console.error(`Warning: cannot parse invalid item ['${item}'], skip it.`);
+      } else {
+        const boolProp = property[1].trim();
+        // Avoid setting improper string value to false
+        if (boolProp === 'true' || boolProp === 'false') {
+          dataAccessPolicy[property[0].trim()] = boolProp === 'true';
+        }
       }
-    }
-  });
+    });
+  }
   return dataAccessPolicy;
 }
 
@@ -90,6 +92,7 @@ export function validateDataAccessPolicy(dataAccessPolicyStr: string) {
       'ERROR: `dataAccessPolicy` option must be of the form `restrictDataAccess=<bool>,allowNamespacePolicyOverride=<bool>` where <bool> can be true or false.'
     );
   }
+  return dataAccessPolicy;
 }
 
 /**
@@ -105,6 +108,7 @@ export function validateNamespaceDataAccessPolicy(dataAccessPolicyStr: string) {
       'ERROR: `dataAccessPolicy` option must be of the form `restrictDataAccess=<bool>` where <bool> can be true or false.'
     );
   }
+  return dataAccessPolicy;
 }
 
 /**
