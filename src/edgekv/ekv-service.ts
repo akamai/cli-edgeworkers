@@ -39,7 +39,8 @@ export function createNameSpace(
   namespace: string,
   retention,
   groupId,
-  geoLocation
+  geoLocation,
+  dataAccessPolicy: object = undefined
 ) {
   const body = {
     namespace: namespace,
@@ -47,6 +48,9 @@ export function createNameSpace(
     groupId: groupId,
     geoLocation: geoLocation,
   };
+  if (dataAccessPolicy !== undefined) {
+    body['dataAccessPolicy'] = dataAccessPolicy;
+  }
   return httpEdge
     .postJson(
       `${EDGEKV_API_BASE}/networks/${network}/namespaces`,
@@ -93,11 +97,12 @@ export function updateNameSpace(
     .catch((err) => error.handleError(err));
 }
 
-export function initializeEdgeKV() {
+export function initializeEdgeKV(dataAccessPolicy) {
+  const body = dataAccessPolicy ? { dataAccessPolicy } : undefined;
   return httpEdge
     .putJson(
       `${EDGEKV_API_BASE}/initialize`,
-      '',
+      body,
       cliUtils.getTimeout(INIT_EKV_TIMEOUT),
       ekvMetrics.initialize
     )
@@ -111,6 +116,21 @@ export function getInitializedEdgeKV() {
       `${EDGEKV_API_BASE}/initialize`,
       cliUtils.getTimeout(DEFAULT_EKV_TIMEOUT),
       ekvMetrics.showInitStatus
+    )
+    .then((r) => r.response)
+    .catch((err) => error.handleError(err));
+}
+
+export function updateDatabase(dataAccessPolicy) {
+  const body = {
+    dataAccessPolicy
+  };
+  return httpEdge
+    .putJson(
+      `${EDGEKV_API_BASE}/auth/database`,
+      body,
+      cliUtils.getTimeout(INIT_EKV_TIMEOUT),
+      ekvMetrics.updateDatabase
     )
     .then((r) => r.response)
     .catch((err) => error.handleError(err));
@@ -209,7 +229,7 @@ export function readItem(
     .then((r) => {
       // manually parse body if needed
       return typeof r.body === 'string' ? r.body : cliUtils.parseIfJSON(r.body);
-    }) 
+    })
     .catch((err) => error.handleError(err));
 }
 

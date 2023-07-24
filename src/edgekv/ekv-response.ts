@@ -14,7 +14,8 @@ export function logNamespace(nameSpaceId: string, createdNameSpace) {
         Namespace: nameSpaceId,
         RetentionPeriod: retentionPeriod,
         GeoLocation: createdNameSpace['geoLocation'],
-        GroupId: groupId
+        GroupId: groupId,
+        'Namespace dataAccessPolicy': createdNameSpace['dataAccessPolicy'] ? 'restrictDataAccess=' + createdNameSpace['dataAccessPolicy']['restrictDataAccess'] + ', policyType=' + createdNameSpace['dataAccessPolicy']['policyType'] : 'N/A'
     };
     console.table([createNameSpace]);
 }
@@ -59,7 +60,8 @@ export function logInitialize(initializedEdgekv) {
         AccountStatus: initializedEdgekv['accountStatus'],
         ProductionStatus: initializedEdgekv['productionStatus'],
         StagingStatus: initializedEdgekv['stagingStatus'],
-        Cpcode: initializedEdgekv['cpcode']
+        Cpcode: initializedEdgekv['cpcode'],
+        DataAccessPolicy: initializedEdgekv['dataAccessPolicy'] ? 'restrictDataAccess=' + initializedEdgekv['dataAccessPolicy']['restrictDataAccess'] + ', allowNamespacePolicyOverride=' + initializedEdgekv['dataAccessPolicy']['allowNamespacePolicyOverride'] : 'N/A'
     };
     console.table([initializeStatus]);
 }

@@ -4,6 +4,7 @@ import * as response from './ekv-response';
 import * as ekvhelper from './ekv-helper';
 import * as edgeWorkersSvc from '../edgeworkers/ew-service';
 import { ekvJsonOutput } from './client-manager';
+import {validateDataAccessPolicy} from './ekv-helper';
 
 export async function listNameSpaces(
   environment: string,
@@ -33,6 +34,7 @@ export async function listNameSpaces(
             RetentionPeriod: retentionPeriod,
             GeoLocation: value['geoLocation'],
             AccessGroupId: groupId,
+            'Namespace dataAccessPolicy': value['dataAccessPolicy'] ? 'restrictDataAccess=' + value['dataAccessPolicy']['restrictDataAccess'] + ', policyType=' + value['dataAccessPolicy']['policyType'] : 'N/A',
           });
         } else {
           nsListResp.push({ NamespaceId: value['namespace'] });
@@ -84,7 +86,8 @@ export async function createNamespace(
   nameSpace: string,
   retention: number,
   groupId: number,
-  geoLocation: string
+  geoLocation: string,
+  dataAccessPolicy: object = undefined
 ) {
   if (!groupId) {
     cliUtils.logAndExit(
@@ -102,7 +105,8 @@ export async function createNamespace(
       nameSpace,
       retentionPeriod,
       groupId,
-      geoLocation
+      geoLocation,
+      dataAccessPolicy
     ),
     `Creating namespace for environment ${environment}`
   );
@@ -196,9 +200,13 @@ export async function updateNameSpace(
   }
 }
 
-export async function initializeEdgeKv() {
+export async function initializeEdgeKv(dataAccessPolicyStr: string) {
+  let dataAccessPolicy;
+  if (dataAccessPolicyStr) {
+    dataAccessPolicy = validateDataAccessPolicy(dataAccessPolicyStr);
+  }
   const initializedEdgeKv = await cliUtils.spinner(
-    edgekvSvc.initializeEdgeKV(),
+    edgekvSvc.initializeEdgeKV(dataAccessPolicy),
     'Initializing EdgeKV...'
   );
 
@@ -285,6 +293,41 @@ export async function getInitializationStatus() {
     response.logError(
       initializedEdgeKv,
       `ERROR: EdgeKV Initialization failed ${errorReason} [TraceId: ${initializedEdgeKv.traceId}]`
+    );
+  }
+}
+
+export async function updateDatabase(dataAccessPolicyStr: string) {
+  const dataAccessPolicy = validateDataAccessPolicy(dataAccessPolicyStr);
+  const updateDataAccessPolicy = await cliUtils.spinner(
+    edgekvSvc.updateDatabase(dataAccessPolicy),
+    'Updating database data access policy...'
+  );
+
+  if (updateDataAccessPolicy.data != undefined && !updateDataAccessPolicy.isError) {
+    const updateRespBody = updateDataAccessPolicy.data;
+
+    const status = updateDataAccessPolicy.status;
+    let msg;
+    if (Object.prototype.hasOwnProperty.call(updateRespBody, 'accountStatus')) {
+      const accountStatus = updateRespBody['accountStatus'];
+      if (status == 200 && accountStatus == 'INITIALIZED') {
+        msg = 'EdgeKV database data access policy successfully modified';
+      } else {
+        msg = 'EdgeKV database data access policy was not modified';
+      }
+    }
+    if (ekvJsonOutput.isJSONOutputMode()) {
+      ekvJsonOutput.writeJSONOutput(0, msg, updateRespBody);
+    } else {
+      cliUtils.logWithBorder(msg);
+      response.logInitialize(updateRespBody);
+    }
+  } else {
+    const errorReason = `${updateDataAccessPolicy.error_reason}`;
+    response.logError(
+      updateDataAccessPolicy,
+      `ERROR: EdgeKV database update failed (${errorReason}) [TraceId: ${updateDataAccessPolicy.traceId}]`
     );
   }
 }
@@ -652,7 +695,7 @@ export async function listAuthGroups(options: {
     ewGroups = await getEwGroups(options.groupIds);
   }
   const msg = `User has the following permission access for group: ${groupId}`;
-  
+
   if (ekvJsonOutput.isJSONOutputMode()) {
     const obj = {
       authGroups,

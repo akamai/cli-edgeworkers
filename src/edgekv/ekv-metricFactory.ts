@@ -5,6 +5,7 @@ export const ekvMetrics = {
   updateNamespace: 'Update/ns',
   initialize: 'Init/ekv',
   showInitStatus: 'Show/status',
+  updateDatabase: 'Update/db',
   writeItem: 'Write/item',
   readItem: 'Read/item',
   deleteItem: 'Delete/item',
