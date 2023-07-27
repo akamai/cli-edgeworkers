@@ -12,6 +12,7 @@
 * [ Overview Of Commands ](##overview-of-commands)
     * [ Initialize EdgeKV ](###initialize-edgekv)
     * [ Get Initialization Status](###get-initialization-status)
+    * [ Modify Database Data Access Policy](###modify-database-data-acesss-policy)
     * [ Create Namespace](###create-namespace)
     * [ List Namespace](###list-namespace)
     * [ Get Namespace](###get-namespace)
@@ -130,6 +131,7 @@ Commands:
 | help `[command]` | Display information on how to use the given command. |
 | initialize \| init | Initialize an EdgeKV database. |
 | show status | Show the status of an EdgeKV database. |
+| modify db | Modify the EdgeKV database data access policy. |
 | create ns `<environment> <namespace> --retention <retention>` | Create an EdgeKV namespace in an Akamai environment. Specify the retention period of the namespace in days. |
 | show ns `<environment> <namespace>`| Retrieve an EdgeKV namespace in an Akamai environment. |
 | list ns `<environment>` | List the namespaces provisioned in an Akamai environment. |
@@ -161,13 +163,14 @@ Return Codes:
 
 ### Initialize EdgeKV
 
-Initialize the EdgeKV database. This action is only required once to initialize your EdgeKV database and provision the *default* EdgeKV namespace on Akamai's staging and production environments. It also creates a new, dedicated CP code used to track your EdgeKV usage. Before you can perform any other EdgeKV operations you must successfully complete this step.
+Initialize the EdgeKV database. This action is only required once to initialize your EdgeKV database and provision the *default* EdgeKV namespace on Akamai's staging and production environments. It also creates a new, dedicated CP code used to track your EdgeKV usage. Before you can perform any other EdgeKV operations you must successfully complete this step. Requires the `EdgeKV Database Data Access Policy - Manage` role to invoke.
 
 Usage: `akamai edgekv initialize`
 
-| Option | Description |
-| - | - |
-| -h, --help  | Display information on how to use this EdgeKV command |
+| Option | Existance | Description |
+| - | - | - |
+| -h, --help  | optional | Display information on how to use this EdgeKV command |
+| --dataAccessPolicy | optional | Allows the user to set the data access policy in the format `restrictDataAccess=<bool>,allowNamespacePolicyOverride=<bool>`.<br />`restrictDataAccess`: If set to true, this means the customer can only access data from Akamai's Enhanced Secure network (ESSL). If set to false, this means the customer can access data from both Akamai's Enhanced Secure network (ESSL) and Standard Secure network (FF). Setting this option to false requires the account to have the `EdgeDB::Standard_TLS_Support` entitlement.<br />`allowNamespacePolicyOverride`: If set to true, then the database data access policy can be overridden at namespace creation time. Otherwise, if set to false, then a data access policy override is not accepted at namespace creation time.
 
 ### Get Initialization Status
 
@@ -178,6 +181,17 @@ Usage: `akamai edgekv show status`
 | Option | Description |
 | - | - |
 | -h, --help  |  Display information on how to use this EdgeKV command |
+
+### Modify Database Data Access Policy
+
+Modify the EdgeKV database data access policy. This action does not change the data access policy that exists for any namespaces that have been already created and only reflects on that for newly created namespaces after this endpoint is successfully invoked. Requires the `EdgeKV Database Data Access Policy - Manage` role to invoke.
+
+Usage: `akamai edgekv modify db`
+
+| Option | Existance | Description |
+| - | - | - |
+| -h, --help  | optional | Display information on how to use this EdgeKV command |
+| --dataAccessPolicy | required | Allows the user to set the data access policy in the format `restrictDataAccess=<bool>,allowNamespacePolicyOverride=<bool>`.<br />`restrictDataAccess`: If set to true, this means the customer can only access data from Akamai's Enhanced Secure network (ESSL). If set to false, this means the customer can access data from both Akamai's Enhanced Secure network (ESSL) and Standard Secure network (FF). Setting this option to false requires the account to have the `EdgeDB::Standard_TLS_Support` entitlement.<br />`allowNamespacePolicyOverride`: If set to true, then the database data access policy can be overridden at namespace creation time. Otherwise, if set to false, then a data access policy override is not accepted at namespace creation time.
 
 ### Create Namespace
 
@@ -191,6 +205,7 @@ Usage: `akamai edgekv create ns <environment> <nameSpace>`
 | --retention | Required | Retention period of the namespace in days. |
 | --groupId | Required | Group identifier. Set it to 0 to allow all groups in your account to access the namespace. If you want to restrict the namespace to a specific group, enter the group id. This value MUST be the same for both the staging and production instances of a namespace. |
 | --geoLocation | optional | Specifies the persistent storage location for data when creating a namespace on the production network. This can help optimize performance by storing data where most or all of your users are located. The value defaults to `US` on the `STAGING` and `PRODUCTION` networks. For more information refer to the [EdgeKV Documenation](https://techdocs.akamai.com/edgekv/docs/edgekv-data-model#namespace).|
+| --dataAccessPolicy | optional | Allows the user to override the database data access policy in the format `restrictDataAccess=<bool>`. If set to true, this means the customer can only access data from Akamai's Enhanced Secure network (ESSL). If set to false, this means the customer can access data from both Akamai's Enhanced Secure network (ESSL) and Standard Secure network (FF). Requires the database data access policy to have `allowNamespacePolicyOverride` set to true.
 
 | Argument | Existence | Description |
 | - | - | - |
