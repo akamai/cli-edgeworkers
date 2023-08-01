@@ -163,14 +163,14 @@ Return Codes:
 
 ### Initialize EdgeKV
 
-Initialize the EdgeKV database. This action is only required once to initialize your EdgeKV database and provision the *default* EdgeKV namespace on Akamai's staging and production environments. It also creates a new, dedicated CP code used to track your EdgeKV usage. Before you can perform any other EdgeKV operations you must successfully complete this step. Requires the `EdgeKV Database Data Access Policy - Manage` role to invoke.
+Initialize the EdgeKV database. This action is only required once to initialize your EdgeKV database and provision the *default* EdgeKV namespace on Akamai's staging and production environments. It also creates a new, dedicated CP code used to track your EdgeKV usage. Before you can perform any other EdgeKV operations you must successfully complete this step. The `EdgeKV Database Data Access Policy - Manage` role is required to initialize an EdgeKV database.
 
 Usage: `akamai edgekv initialize`
 
 | Option | Existance | Description |
 | - | - | - |
 | -h, --help  | optional | Display information on how to use this EdgeKV command |
-| --dataAccessPolicy | optional | Allows the user to set the data access policy in the format `restrictDataAccess=<bool>,allowNamespacePolicyOverride=<bool>`.<br />`restrictDataAccess`: If set to true, this means the customer can only access data from Akamai's Enhanced Secure network (ESSL). If set to false, this means the customer can access data from both Akamai's Enhanced Secure network (ESSL) and Standard Secure network (FF). Setting this option to false requires the account to have the `EdgeDB::Standard_TLS_Support` entitlement.<br />`allowNamespacePolicyOverride`: If set to true, then the database data access policy can be overridden at namespace creation time. Otherwise, if set to false, then a data access policy override is not accepted at namespace creation time.
+| --dataAccessPolicy | optional | Set the data access policy.<br />`restrictDataAccess`: If set to true, the database can only access data from Akamai's Enhanced TLS network. If set to false, the database can access data from both Akamai's Enhanced TLS and Standard TLS networks. If you set this option to false your account needs to have `EdgeDB::Standard_TLS_Support` entitlement.<br />`allowNamespacePolicyOverride`: If set to true, the database data access policy can be overridden when the namespace is created. If set to false, data access policy overrides are not accepted.
 
 ### Get Initialization Status
 
@@ -184,14 +184,14 @@ Usage: `akamai edgekv show status`
 
 ### Modify Database Data Access Policy
 
-Modify the EdgeKV database data access policy. This action does not change the data access policy that exists for any namespaces that have been already created and only reflects on that for newly created namespaces after this endpoint is successfully invoked. Requires the `EdgeKV Database Data Access Policy - Manage` role to invoke.
+Modify the EdgeKV database data access policy. This option does not change the data access policy for existing namespaces. It only applies to namespaces created after you successfully apply this option. The `EdgeKV Database Data Access Policy - Manage` role is required to modify the database data access policy.
 
 Usage: `akamai edgekv modify db`
 
 | Option | Existance | Description |
 | - | - | - |
 | -h, --help  | optional | Display information on how to use this EdgeKV command |
-| --dataAccessPolicy | required | Allows the user to set the data access policy in the format `restrictDataAccess=<bool>,allowNamespacePolicyOverride=<bool>`.<br />`restrictDataAccess`: If set to true, this means the customer can only access data from Akamai's Enhanced Secure network (ESSL). If set to false, this means the customer can access data from both Akamai's Enhanced Secure network (ESSL) and Standard Secure network (FF). Setting this option to false requires the account to have the `EdgeDB::Standard_TLS_Support` entitlement.<br />`allowNamespacePolicyOverride`: If set to true, then the database data access policy can be overridden at namespace creation time. Otherwise, if set to false, then a data access policy override is not accepted at namespace creation time.
+| --dataAccessPolicy | optional | Set the data access policy.<br />`restrictDataAccess`: If set to true, the database can only access data from Akamai's Enhanced TLS network. If set to false, the database can access data from both Akamai's Enhanced TLS and Standard TLS networks. If you set this option to false your account needs to have `EdgeDB::Standard_TLS_Support` entitlement.<br />`allowNamespacePolicyOverride`: If set to true, the database data access policy can be overridden when the namespace is created. If set to false, data access policy overrides are not accepted.
 
 ### Create Namespace
 
@@ -205,7 +205,7 @@ Usage: `akamai edgekv create ns <environment> <nameSpace>`
 | --retention | Required | Retention period of the namespace in days. |
 | --groupId | Required | Group identifier. Set it to 0 to allow all groups in your account to access the namespace. If you want to restrict the namespace to a specific group, enter the group id. This value MUST be the same for both the staging and production instances of a namespace. |
 | --geoLocation | optional | Specifies the persistent storage location for data when creating a namespace on the production network. This can help optimize performance by storing data where most or all of your users are located. The value defaults to `US` on the `STAGING` and `PRODUCTION` networks. For more information refer to the [EdgeKV Documenation](https://techdocs.akamai.com/edgekv/docs/edgekv-data-model#namespace).|
-| --dataAccessPolicy | optional | Allows the user to override the database data access policy in the format `restrictDataAccess=<bool>`. If set to true, this means the customer can only access data from Akamai's Enhanced Secure network (ESSL). If set to false, this means the customer can access data from both Akamai's Enhanced Secure network (ESSL) and Standard Secure network (FF). Requires the database data access policy to have `allowNamespacePolicyOverride` set to true.
+| --dataAccessPolicy | optional | Override the database data access policy.<br />`restrictDataAccess`: If set to true, the database can only  access data from Akamai's Enhanced TLS network. If set to false, the database can access data from both Akamai's Enhanced TLS and Standard TLS networks. The database data access policy `allowNamespacePolicyOverride` needs to be set to true to override the data access policy.
 
 | Argument | Existence | Description |
 | - | - | - |
