@@ -131,7 +131,7 @@ Commands:
 | help `[command]` | Display information on how to use the given command. |
 | initialize \| init | Initialize an EdgeKV database. |
 | show status | Show the status of an EdgeKV database. |
-| modify db | Modify the EdgeKV database data access policy. |
+| modify db `--dataAccessPolicy <databaseDataAccessPolicy>` | Modify the EdgeKV database data access policy. |
 | create ns `<environment> <namespace> --retention <retention>` | Create an EdgeKV namespace in an Akamai environment. Specify the retention period of the namespace in days. |
 | show ns `<environment> <namespace>`| Retrieve an EdgeKV namespace in an Akamai environment. |
 | list ns `<environment>` | List the namespaces provisioned in an Akamai environment. |
@@ -186,12 +186,14 @@ Usage: `akamai edgekv show status`
 
 Modify the EdgeKV database data access policy. This option does not change the data access policy for existing namespaces. It only applies to namespaces created after you successfully apply this option. The `EdgeKV Database Data Access Policy - Manage` role is required to modify the database data access policy.
 
-Usage: `akamai edgekv modify db`
+Usage: `akamai edgekv modify db --dataAccessPolicy <databaseDataAccessPolicy>`
+
+Example: `akamai edgekv modify db --dataAccessPolicy='restrictDataAccess=true,allowNamespacePolicyOverride=false'`
 
 | Option | Existance | Description |
 | - | - | - |
 | -h, --help  | optional | Display information on how to use this EdgeKV command |
-| --dataAccessPolicy | optional | Set the data access policy.<br />`restrictDataAccess`: If set to true, the database can only access data from Akamai's Enhanced TLS network. If set to false, the database can access data from both Akamai's Enhanced TLS and Standard TLS networks. If you set this option to false your account needs to have `EdgeDB::Standard_TLS_Support` entitlement.<br />`allowNamespacePolicyOverride`: If set to true, the database data access policy can be overridden when the namespace is created. If set to false, data access policy overrides are not accepted.
+| --dataAccessPolicy | required | Set the data access policy.<br />`restrictDataAccess`: If set to true, the database can only access data from Akamai's Enhanced TLS network. If set to false, the database can access data from both Akamai's Enhanced TLS and Standard TLS networks. If you set this option to false your account needs to have `EdgeDB::Standard_TLS_Support` entitlement.<br />`allowNamespacePolicyOverride`: If set to true, the database data access policy can be overridden when the namespace is created. If set to false, data access policy overrides are not accepted.
 
 ### Create Namespace
 
