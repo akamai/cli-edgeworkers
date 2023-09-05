@@ -286,15 +286,13 @@ export function createEdgeKVToken(
   permissionList,
   allowOnStg: boolean,
   allowOnProd: boolean,
-  ewids: string[],
-  expiry
+  ewids: string[]
 ) {
   const body = {
     name: tokenName,
     allowOnProduction: allowOnProd,
     allowOnStaging: allowOnStg,
     restrictToEwids: ewids,
-    expiry: expiry,
     namespacePermissions: permissionList,
   };
   return httpEdge

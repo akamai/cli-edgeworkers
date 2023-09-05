@@ -537,13 +537,9 @@ export async function createToken(
     production?: string;
     ewids?: string;
     namespace?: string;
-    expiry?: string;
     overwrite?;
   }
 ) {
-  // convert string to ISO date
-  const expiry = getExpiryDate(options.expiry);
-
   // parse input permissions
   const permissionList = parseNameSpacePermissions(options.namespace);
   const envAccess = { allow: true, deny: false };
@@ -556,8 +552,7 @@ export async function createToken(
       permissionList,
       envAccess[options.staging],
       envAccess[options.production],
-      options.ewids.split(','),
-      expiry
+      options.ewids.split(',')
     ),
     'Creating edgekv token ...'
   );
@@ -735,24 +730,6 @@ async function getEwGroups(groupId: string) {
     }
   }
   return ewGrpCapabilitiesMap;
-}
-/**
- * Checks if date is in format yyyy-mm-dd
- * Converts date to iso format to be consumed by API
- * @param expiry
- */
-function getExpiryDate(expiry: string) {
-  const errorMsg =
-    'Expiration time specified is invalid. Please specify in format yyyy-mm-dd.';
-  try {
-    if (!ekvhelper.isValidDate(expiry)) {
-      cliUtils.logAndExit(1, errorMsg);
-    }
-    expiry = new Date(expiry).toISOString().split('.').shift() + 'Z';
-    return expiry;
-  } catch (ex) {
-    cliUtils.logAndExit(1, errorMsg);
-  }
 }
 
 function parseNameSpacePermissions(namespace: string) {

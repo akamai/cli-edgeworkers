@@ -20,7 +20,6 @@ describe('ekv-services tests', () => {
   const mockTokenName = 'mockTokenName';
   const mockPermissionList = ['abc', 'efg', 'hij'];
   const mockEwids = ['123', '456', '789'];
-  const mockExpiry = 3600;
 
   describe('testing getNameSpaceList', () => {
     const mockResBody = ['space1', 'space2', 'space3'];
@@ -1128,7 +1127,6 @@ describe('ekv-services tests', () => {
       allowOnStaging: true,
       allowOnProduction: false,
       restrictToEwids: mockEwids,
-      expiry: mockExpiry,
       namespacePermissions: mockPermissionList,
     };
     const mockResponse = {
@@ -1156,8 +1154,7 @@ describe('ekv-services tests', () => {
         mockPermissionList,
         true,
         false,
-        mockEwids,
-        mockExpiry
+        mockEwids
       );
 
       expect(creationSpy).toHaveBeenCalled();
@@ -1178,8 +1175,7 @@ describe('ekv-services tests', () => {
         mockPermissionList,
         true,
         false,
-        mockEwids,
-        mockExpiry
+        mockEwids
       );
 
       expect(createEdgeKVTokenSpy).toHaveBeenCalled();
