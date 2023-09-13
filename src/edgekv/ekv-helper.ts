@@ -226,7 +226,7 @@ export function saveTokenToBundle(savePath, overWrite, createdToken, decodedToke
             );
         } else {
             cliUtils.logWithBorder(errMsg);
-            response.logToken(createdToken['name'], createdToken['value'], decodedToken, nameSpaceList, false);
+            response.logToken(createdToken['name'], createdToken['uuid'], decodedToken, nameSpaceList, false);
         }
         process.exit(1);
     });
@@ -257,7 +257,7 @@ export function saveTokenToBundle(savePath, overWrite, createdToken, decodedToke
         let tokenFileContent = '';
         if (!updateFile) {
             for (const ns of nameSpaceList) {
-                tokenContent[ns] = { 'name': createdToken['name'], 'value': createdToken['value'] };
+                tokenContent[ns] = { 'name': createdToken['name'], 'uuid': createdToken['uuid'] };
             }
         }
         tokenFileContent = constructTokenFile(tokenContent);
@@ -275,7 +275,7 @@ export function saveTokenToBundle(savePath, overWrite, createdToken, decodedToke
             );
         } else {
             cliUtils.logWithBorder(msg);
-            response.logToken(createdToken['name'], createdToken['value'], decodedToken, nameSpaceList, true);
+            response.logToken(createdToken['name'], createdToken['uuid'], decodedToken, nameSpaceList, true);
         }
     });
 }
@@ -288,7 +288,7 @@ function constructTokenFile(tokenContent) {
     const token = [];
     Object.keys(tokenContent).forEach(function (key) {
         const tokenData = tokenContent[key];
-        const nameSpaceContent = `\n"${key}" : { \n"name": "${tokenData['name']}",\n"value" : "${tokenData['value']}"\n}`;
+        const nameSpaceContent = `\n"${key}" : { \n"name": "${tokenData['name']}",\n"uuid" : "${tokenData['uuid']}"\n}`;
         token.push(nameSpaceContent);
     });
     return tkn_var + token.toString() + tkn_export;
@@ -315,7 +315,7 @@ export function createTokenFileWithoutBundle(savePath, overWrite, createdToken, 
     let tokenContent = [];
     if (!checkIfFileExists(tokenFilePath)) {
         for (const ns of nameSpaceList) {
-            tokenContent[ns] = { 'name': createdToken['name'], 'value': createdToken['value'] };
+            tokenContent[ns] = { 'name': createdToken['name'], 'uuid': createdToken['uuid'] };
         }
     }
     // update existing token file
@@ -338,7 +338,7 @@ export function createTokenFileWithoutBundle(savePath, overWrite, createdToken, 
                 );
               } else {
                 cliUtils.logWithBorder(errMsg);
-                response.logToken(createdToken['name'], createdToken['value'], decodedToken, nameSpaceList, false);
+                response.logToken(createdToken['name'], createdToken['uuid'], decodedToken, nameSpaceList, false);
               }
             process.exit(1);
         }
@@ -351,7 +351,7 @@ export function createTokenFileWithoutBundle(savePath, overWrite, createdToken, 
         );
       } else {
         cliUtils.logWithBorder(msg);
-        response.logToken(createdToken['name'], createdToken['value'], decodedToken, nameSpaceList, true);
+        response.logToken(createdToken['name'], createdToken['uuid'], decodedToken, nameSpaceList, true);
       }
 
 }
@@ -370,7 +370,7 @@ function validateAndGetExistingTokenContent(data, createdToken, decodedToken, na
 
     if (tokenList.length == 0 || tokenList[0].indexOf('var edgekv_access_tokens') == -1) {
         cliUtils.logWithBorder('ERROR : Not a valid EdgeKV Access Token file (missing \'edgekv_access_tokens\' var assignment)!');
-        response.logToken(createdToken['name'], createdToken['value'], decodedToken, nameSpaceList, false);
+        response.logToken(createdToken['name'], createdToken['uuid'], decodedToken, nameSpaceList, false);
         process.exit(1);
     }
 
@@ -379,7 +379,7 @@ function validateAndGetExistingTokenContent(data, createdToken, decodedToken, na
 
     if (tokenList[1].indexOf('export { edgekv_access_tokens };') == -1) {
         cliUtils.logWithBorder('ERROR : Not a valid EdgeKV Access Token file (missing \'edgekv_access_tokens\' export assignment)!');
-        response.logToken(createdToken['name'], createdToken['value'], decodedToken, nameSpaceList, false);
+        response.logToken(createdToken['name'], createdToken['uuid'], decodedToken, nameSpaceList, false);
         process.exit(1);
     }
 
@@ -390,7 +390,7 @@ function validateAndGetExistingTokenContent(data, createdToken, decodedToken, na
         tokenContent = JSON.parse(tokenList[1]);
     } catch (ex) {
         cliUtils.logWithBorder(`ERROR: Not a valid EdgeKV access token file. Delete or re-create the edgekv token file. ${ex}`);
-        response.logToken(createdToken['name'], createdToken['value'], decodedToken, nameSpaceList, false);
+        response.logToken(createdToken['name'], createdToken['uuid'], decodedToken, nameSpaceList, false);
         process.exit(1);
     }
     return tokenContent;
@@ -409,7 +409,7 @@ function updateTokenContent(tokenContent, nameSpaceList, createdToken, decodedTo
     for (const ns of nameSpaceList) {
         // if the namespace/token value does not exist in file add it
         if (!Object.prototype.hasOwnProperty.call(tokenContent, ns)) {
-            const nameSpaceContent = { 'name': createdToken['name'], 'value': createdToken['value'] };
+            const nameSpaceContent = { 'name': createdToken['name'], 'uuid': createdToken['uuid'] };
             tokenContent[ns] = nameSpaceContent;
         }
         // if namespace already exists, if overwrite option is specified overwrite token value in file else display token
@@ -417,7 +417,7 @@ function updateTokenContent(tokenContent, nameSpaceList, createdToken, decodedTo
             const tokenName = tokenContent[ns]['name'];
             if (tokenName === createdToken['name']) {
                 if (overWrite) {
-                    const nameSpaceContent = { 'name': createdToken['name'], 'value': createdToken['value'] };
+                    const nameSpaceContent = { 'name': createdToken['name'], 'uuid': createdToken['uuid'] };
                     tokenContent[ns] = nameSpaceContent;
                 } else {
                     const tokenValue = tokenContent[ns]['value'];
@@ -426,12 +426,12 @@ function updateTokenContent(tokenContent, nameSpaceList, createdToken, decodedTo
                     } else {
                         cliUtils.logWithBorder(`Token value matches for token ${tokenName}. Not updating token value. Use '-o' to overwrite token value.`);
                     }
-                    response.logToken(createdToken['name'], createdToken['value'], decodedToken, nameSpaceList, false);
+                    response.logToken(createdToken['name'], createdToken['uuid'], decodedToken, nameSpaceList, false);
                     process.exit(1);
                 }
             } else {
                 cliUtils.logWithBorder(`ERROR: Token ${createdToken['name']} for namespace ${ns} not found in the file`);
-                response.logToken(createdToken['name'], createdToken['value'], decodedToken, nameSpaceList, false);
+                response.logToken(createdToken['name'], createdToken['uuid'], decodedToken, nameSpaceList, false);
                 process.exit(1);
             }
         }

@@ -100,7 +100,7 @@ export function logError(errorObj, message) {
     }
 }
 
-export function logToken(tokenName: string, tokenValue, decodedToken, nameSpaceList, savePath: boolean) {
+export function logToken(tokenName: string, tokenUuid, decodedToken, nameSpaceList, savePath: boolean) {
     const expiryDate = ekvhelper.convertTokenDate(decodedToken['exp']);
     const issueDate = ekvhelper.convertTokenDate(decodedToken['iat']);
     const env = decodedToken['env'];
@@ -116,6 +116,7 @@ export function logToken(tokenName: string, tokenValue, decodedToken, nameSpaceL
 
     console.log(
         'Token Name:          ', tokenName + '\n'
+    + 'Token UUID:          ', tokenUuid + '\n'
     + 'CpCode used:         ', decodedToken['cpc'] + '\n'
     + 'Valid for EWIDs:     ', decodedToken['ewids'] + '\n'
     + 'Valid on Production: ', production + '\n'
@@ -132,7 +133,7 @@ export function logToken(tokenName: string, tokenValue, decodedToken, nameSpaceL
 
     // if save path is not provided print the token value
     if (!savePath) {
-        console.log('value:                ' + tokenValue);
+        console.log('value:                ' + tokenUuid);
     }
 
     console.log('Namespace Permissions:');

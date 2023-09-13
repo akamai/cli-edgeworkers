@@ -818,7 +818,7 @@ function processToken(token, savePath, overwrite) {
       cliUtils.logWithBorder(msg);
       response.logToken(
         token['name'],
-        token['value'],
+        token['uuid'],
         decodedToken,
         nameSpaceList,
         false
