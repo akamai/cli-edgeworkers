@@ -100,7 +100,7 @@ export function logError(errorObj, message) {
     }
 }
 
-export function logToken(token, nameSpaceList, savePath: boolean) {
+export function logToken(token, nameSpaceList) {
     const tokenName = token['name'];
     const tokenUuid = token['uuid'];
     const issueDate = ekvhelper.convertTokenDate(token['issueDate']);

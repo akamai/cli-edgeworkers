@@ -786,7 +786,7 @@ function validateSavePath(savePath) {
 function processToken(token, savePath, overwrite) {
   const nameSpaceList = ekvhelper.getNameSpaceListFromJWT(token);
   const msg =
-    'Add the token value in edgekv_tokens.js file and place it in your bundle. Use --save_path option to save the token file to your bundle';
+    'Add the token reference in edgekv_tokens.js file and place it in your bundle. Use --save_path option to save the token file to your bundle';
   if (savePath) {
     if (ekvhelper.getFileExtension(savePath) != '.tgz') {
       ekvhelper.createTokenFileWithoutBundle(
@@ -799,7 +799,6 @@ function processToken(token, savePath, overwrite) {
       ekvhelper.saveTokenToBundle(
         savePath,
         overwrite,
-        token,
         token,
         nameSpaceList
       );
@@ -815,8 +814,7 @@ function processToken(token, savePath, overwrite) {
       cliUtils.logWithBorder(msg);
       response.logToken(
         token,
-        nameSpaceList,
-        false
+        nameSpaceList
       );
     }
   }
