@@ -784,9 +784,7 @@ function validateSavePath(savePath) {
 }
 
 function processToken(token, savePath, overwrite) {
-  // decodes the jwt token
-  const decodedToken = ekvhelper.decodeJWTToken(token['value']);
-  const nameSpaceList = ekvhelper.getNameSpaceListFromJWT(decodedToken);
+  const nameSpaceList = ekvhelper.getNameSpaceListFromJWT(token);
   const msg =
     'Add the token value in edgekv_tokens.js file and place it in your bundle. Use --save_path option to save the token file to your bundle';
   if (savePath) {
@@ -795,7 +793,6 @@ function processToken(token, savePath, overwrite) {
         savePath,
         overwrite,
         token,
-        decodedToken,
         nameSpaceList
       );
     } else {
@@ -803,7 +800,7 @@ function processToken(token, savePath, overwrite) {
         savePath,
         overwrite,
         token,
-        decodedToken,
+        token,
         nameSpaceList
       );
     }
@@ -812,14 +809,12 @@ function processToken(token, savePath, overwrite) {
       ekvJsonOutput.writeJSONOutput(
         0,
         msg,
-        response.logTokenToJson(token, decodedToken, nameSpaceList)
+        response.logTokenToJson(token, nameSpaceList)
       );
     } else {
       cliUtils.logWithBorder(msg);
       response.logToken(
-        token['name'],
-        token['uuid'],
-        decodedToken,
+        token,
         nameSpaceList,
         false
       );

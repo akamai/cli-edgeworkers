@@ -100,10 +100,15 @@ export function logError(errorObj, message) {
     }
 }
 
-export function logToken(tokenName: string, tokenUuid, decodedToken, nameSpaceList, savePath: boolean) {
-    const expiryDate = ekvhelper.convertTokenDate(decodedToken['exp']);
-    const issueDate = ekvhelper.convertTokenDate(decodedToken['iat']);
-    const env = decodedToken['env'];
+export function logToken(token, nameSpaceList, savePath: boolean) {
+    const tokenName = token['name'];
+    const tokenUuid = token['uuid'];
+    const issueDate = ekvhelper.convertTokenDate(token['issueDate']);
+    const expiryDate = ekvhelper.convertTokenDate(token['expiry']);
+    const nextRefresh = token['nextScheduledRefreshDate'];
+    const tokenCpcode = token['cpcode'];
+    const tokenEwids = token['ewids'];
+    const env = token['env'];
     let staging = false;
     let production = false;
     env.forEach(function (value) {
@@ -117,29 +122,20 @@ export function logToken(tokenName: string, tokenUuid, decodedToken, nameSpaceLi
     console.log(
         'Token Name:          ', tokenName + '\n'
     + 'Token UUID:          ', tokenUuid + '\n'
-    + 'CpCode used:         ', decodedToken['cpc'] + '\n'
-    + 'Valid for EWIDs:     ', decodedToken['ewids'] + '\n'
-    + 'Valid on Production: ', production + '\n'
-    + 'Valid on Staging:    ', staging + '\n'
     + `Issue date:           ${weekday[issueDate.getDay()]},${issueDate.getDate()} ${shortMnthNames[issueDate.getMonth()]} ${issueDate.getFullYear()} \n`
-    + `Expiry date:          ${weekday[expiryDate.getDay()]},${expiryDate.getDate()} ${shortMnthNames[expiryDate.getMonth()]} ${expiryDate.getFullYear()}`);
-
-    const difference = Math.floor(ekvhelper.getDateDifference(expiryDate));
-    if(difference >=0 && difference <= 30) {
-        console.log(`       *** WARNING: Access Token will EXPIRE in less than ${difference} days! ***`);
-    } else if (difference <= -1) {
-        console.log('       *** Token already expired ***');
-    }
-
-    // if save path is not provided print the token value
-    if (!savePath) {
-        console.log('value:                ' + tokenUuid);
-    }
+    + `Expiry date:          ${weekday[expiryDate.getDay()]},${expiryDate.getDate()} ${shortMnthNames[expiryDate.getMonth()]} ${expiryDate.getFullYear()}`
+    + 'Activation status:   ', tokenUuid + '\n'
+    + 'Latest refresh date: ', tokenUuid + '\n'
+    + 'Next scheduled refresh date: ', nextRefresh + '\n'
+    + 'CpCode used:         ', tokenCpcode + '\n'
+    + 'Valid for EWIDs:     ', tokenEwids + '\n'
+    + 'Valid on Production: ', production + '\n'
+    + 'Valid on Staging:    ', staging + '\n');
 
     console.log('Namespace Permissions:');
 
     for (const ns of nameSpaceList) {
-        const permission = decodedToken[ns];
+        const permission = token[ns];
         const permissionList = [];
         permission.forEach(function (value) {
             permissionList.push(permissions[value]);
@@ -148,7 +144,7 @@ export function logToken(tokenName: string, tokenUuid, decodedToken, nameSpaceLi
     }
 }
 
-export const logTokenToJson = (token, decodedToken, nameSpaceList) => ({ token, decodedToken, nameSpaceList });
+export const logTokenToJson = (token, nameSpaceList) => ({ token, nameSpaceList });
 
 export function getNameSpaceFromToken(decodedToken) {
     const nameSpaceList = [];
