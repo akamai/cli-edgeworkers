@@ -101,36 +101,30 @@ export function logError(errorObj, message) {
 }
 
 export function logToken(token, nameSpaceList) {
-    const tokenName = token['name'];
-    const tokenUuid = token['uuid'];
+    const tokenName = token['name'] ?? 'N/A';
+    const tokenUuid = token['uuid'] ?? 'N/A';
     const issueDate = ekvhelper.convertTokenDate(token['issueDate']);
     const expiryDate = ekvhelper.convertTokenDate(token['expiry']);
-    const nextRefresh = token['nextScheduledRefreshDate'];
-    const tokenCpcode = token['cpcode'];
-    const tokenEwids = token['ewids'];
-    const env = token['env'];
-    let staging = false;
-    let production = false;
-    env.forEach(function (value) {
-        if (value === 's') {
-            staging = true;
-        } else if (value === 'p') {
-            production = true;
-        }
-    });
+    const tokenActivationStatus = token['tokenActivationStatus']  ?? 'N/A';
+    const latestRefrestDate = ekvhelper.convertTokenDate(token['latestRefreshDate']);
+    const nextRefresh = token['nextScheduledRefreshDate']  ?? 'N/A';
+    const tokenCpcode = token['cpcode'] ?? 'N/A';
+    const tokenEwids = token['ewids'] ?? 'N/A';
+    const staging = token['allowOnStaging'] ?? 'N/A';
+    const production = token['allowOnProduction'] ?? 'N/A';
 
     console.log(
         'Token Name:          ', tokenName + '\n'
     + 'Token UUID:          ', tokenUuid + '\n'
     + `Issue date:           ${weekday[issueDate.getDay()]},${issueDate.getDate()} ${shortMnthNames[issueDate.getMonth()]} ${issueDate.getFullYear()} \n`
-    + `Expiry date:          ${weekday[expiryDate.getDay()]},${expiryDate.getDate()} ${shortMnthNames[expiryDate.getMonth()]} ${expiryDate.getFullYear()}`
-    + 'Activation status:   ', tokenUuid + '\n'
-    + 'Latest refresh date: ', tokenUuid + '\n'
+    + `Expiry date:          ${weekday[expiryDate.getDay()]},${expiryDate.getDate()} ${shortMnthNames[expiryDate.getMonth()]} ${expiryDate.getFullYear()} \n`
+    + 'Activation status:   ', tokenActivationStatus + '\n'
+    + `Latest refresh date:  ${weekday[latestRefrestDate.getDay()]},${latestRefrestDate.getDate()} ${shortMnthNames[latestRefrestDate.getMonth()]} ${latestRefrestDate.getFullYear()} \n`
     + 'Next scheduled refresh date: ', nextRefresh + '\n'
     + 'CpCode used:         ', tokenCpcode + '\n'
     + 'Valid for EWIDs:     ', tokenEwids + '\n'
     + 'Valid on Production: ', production + '\n'
-    + 'Valid on Staging:    ', staging + '\n');
+    + 'Valid on Staging:    ', staging);
 
     console.log('Namespace Permissions:');
 
