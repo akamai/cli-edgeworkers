@@ -317,14 +317,10 @@ export function getSingleToken(tokenName: string) {
     .catch((err) => error.handleError(err));
 }
 
-export function getTokenList(incExpired: boolean) {
-  let queryString = '';
-  if (incExpired) {
-    queryString += `?includeExpired=${incExpired}`;
-  }
+export function getTokenList() {
   return httpEdge
     .getJson(
-      `${EDGEKV_API_BASE}/tokens${queryString}`,
+      `${EDGEKV_API_BASE}/tokens`,
       cliUtils.getTimeout(DEFAULT_EKV_TIMEOUT),
       ekvMetrics.readTokenList
     )

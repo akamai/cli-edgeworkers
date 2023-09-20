@@ -69,19 +69,15 @@ export function logInitialize(initializedEdgekv) {
 export function logTokenList(tokenList) {
     const tokens = [];
     tokenList['tokens'].forEach(token => {
-        const expiry = new Date(new Date(token['expiry']).setUTCHours(23, 59, 59));
-        const difference = Math.floor(ekvhelper.getDateDifference(expiry));
-        let warning = '-';
-
-        if (difference >=0 && difference <= 30) {
-            warning = `Will EXPIRE in less than ${difference} days`;
-        } else if (difference <= -1) {
-            warning = 'Token already expired';
-        }
+        const issueDate = new Date(new Date(token['issueDate']).setUTCHours(23, 59, 59));
+        const latestRefreshDate = new Date(new Date(token['latestRefreshDate']).setUTCHours(23, 59, 59));
+        const nextScheduledRefreshDate = new Date(new Date(token['nextScheduledRefreshDate']).setUTCHours(23, 59, 59));
         const tokenContent = {
             TokenName: token['name'],
-            ExpiryDate: `${weekday[expiry.getDay()]},${expiry.getDate()} ${shortMnthNames[expiry.getMonth()]} ${expiry.getFullYear()}`,
-            Warning: warning
+            TokenActivationStatus: token['tokenActivationStatus'],
+            IssueDate: `${weekday[issueDate.getDay()]},${issueDate.getDate()} ${shortMnthNames[issueDate.getMonth()]} ${issueDate.getFullYear()}`,
+            LatestRefreshDate: `${weekday[latestRefreshDate.getDay()]},${latestRefreshDate.getDate()} ${shortMnthNames[latestRefreshDate.getMonth()]} ${latestRefreshDate.getFullYear()}`,
+            NextScheduledRefreshDate: `${weekday[nextScheduledRefreshDate.getDay()]},${nextScheduledRefreshDate.getDate()} ${shortMnthNames[nextScheduledRefreshDate.getMonth()]} ${nextScheduledRefreshDate.getFullYear()}`,
         };
         tokens.push(tokenContent);
     });

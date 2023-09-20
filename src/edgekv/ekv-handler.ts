@@ -505,9 +505,9 @@ export async function listItemsFromGroup(
   }
 }
 
-export async function listTokens(incExpired) {
+export async function listTokens() {
   const tokenList = await cliUtils.spinner(
-    edgekvSvc.getTokenList(incExpired),
+    edgekvSvc.getTokenList(),
     'Fetching token list...'
   );
   const msg = 'The following tokens are available for you to download';
