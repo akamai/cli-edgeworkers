@@ -609,6 +609,24 @@ download
     cliUtils.logAndExit(0, copywrite);
   });
 
+const refresh = program
+  .command('refresh')
+  .description('Refresh an EdgeKV token');
+
+refresh
+  .command('token <tokenName>')
+  .description('Refresh an EdgeKV token')
+  .action(async function (tokenName) {
+    try {
+      await kvCliHandler.refreshToken(tokenName);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on('--help', function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
 const show = program
   .command('show')
   .description('Check the initialization status of the EdgeKV or Retrieve an EdgeKV namespace');

@@ -589,6 +589,24 @@ export async function retrieveToken(
   }
 }
 
+export async function refreshToken(
+  tokenName: string
+) {
+  const refreshedToken = await cliUtils.spinner(
+    edgekvSvc.refreshToken(tokenName),
+    'Refreshing EdgeKV token...'
+  );
+
+  if (refreshedToken != undefined && !refreshedToken.isError) {
+    processToken(refreshedToken, null, null);
+  } else {
+    response.logError(
+      refreshedToken,
+      `ERROR: Unable to retrieve edgekv token. ${refreshedToken.error_reason} [TraceId: ${refreshedToken.traceId}]`
+    );
+  }
+}
+
 export async function revokeToken(tokenName: string) {
   const revokedToken = await cliUtils.spinner(
     edgekvSvc.revokeToken(tokenName),
