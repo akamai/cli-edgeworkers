@@ -382,7 +382,6 @@ Usage: `akamai edgeworkers deactivate [options] <edgeworker-identifier> <network
 ### Create an EdgeWorkers Authentication Token
 Generates an authentication token that can be used to get detailed EdgeWorker debug response headers. You need at least version 1.7.1 of the EdgeWorkers CLI to run this command. Use the -V, --version command to display the current version number of the EdgeWorkers CLI.
 
-
 Usage: `akamai edgeworkers create-auth-token [options] <hostName>`
 
 | Option | Description |
