@@ -380,7 +380,7 @@ Usage: `akamai edgeworkers deactivate [options] <edgeworker-identifier> <network
 3. EdgeWorker activation details response body (JSON) will be provided with 201 response code.
 
 ### Create an EdgeWorkers Authentication Token
-Generates an authentication token that can be used to get detailed EdgeWorker debug response headers. You need at least version 1.7.1 of the EdgeWorkers CLI to run this command. Use the -V, --version command to display the current version number of the EdgeWorkers CLI.
+Generates an authentication token that can be used to get detailed EdgeWorker debug response headers. You need at least version 1.7.1 of the EdgeWorkers CLI to run this command. Use the -V, --version option to display the current version number of the EdgeWorkers CLI.
 
 Usage: `akamai edgeworkers create-auth-token [options] <hostName>`
 
