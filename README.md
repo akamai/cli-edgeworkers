@@ -89,7 +89,7 @@ Commands:
 | activate \| av `<edgeworker-identifier> <network> <versionId>` | Activate a Version for a given EdgeWorker Id on an Akamai Network. |
 | deactivate \| deact `<edgeworker-identifier> <network> <versionId>` | Deactivate a Version for a given EdgeWorker Id on an Akamai Network. |
 | validate \| vv `<bundlePath>` | Validates a code bundle version without uploading the code bundle. |
-| create-auth-token \| auth `[options] <hostName>` | Generates an authentication token that can be used to get detailed EdgeWorker debug response headers. |
+| create-auth-token \| auth `[options] <hostName>` | Generates an authentication token that can be used to get detailed EdgeWorker debug response headers. You need at least version 1.7.1 of the EdgeWorkers CLI to run this command. |
 | clone \| clone `<edgeworker-identifier> <resourceTierId> [options]` | Clones an EdgeWorker from the existing EdgeWorker Id. |
 | list-contracts \| li-contracts `[options]` | List of contract ids that user has access to. |
 | list-properties \| lp `<edgeworker-identifier> [options]` | List of properties associated with a given EdgeWorker Id. |
@@ -380,7 +380,7 @@ Usage: `akamai edgeworkers deactivate [options] <edgeworker-identifier> <network
 3. EdgeWorker activation details response body (JSON) will be provided with 201 response code.
 
 ### Create an EdgeWorkers Authentication Token
-Generates an authentication token that can be used to get detailed EdgeWorker debug response headers.
+Generates an authentication token that can be used to get detailed EdgeWorker debug response headers. You need at least version 1.7.1 of the EdgeWorkers CLI to run this command. Use the -V, --version option to display the current version number of the EdgeWorkers CLI.
 
 Usage: `akamai edgeworkers create-auth-token [options] <hostName>`
 
