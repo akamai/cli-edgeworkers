@@ -35,7 +35,7 @@
     "readline-sync": "^1.4.10",
     "sha256-file": "^1.0.0",
     "table-layout": "^3.0.0",
-    "tar": "^4.4.18",
+    "tar": "^6.2.1",
     "tar-stream": "^2.1.4",
     "untildify": "3.0.3",
     "ini": "^3.0.1"
