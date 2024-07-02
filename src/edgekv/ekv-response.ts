@@ -67,21 +67,35 @@ export function logInitialize(initializedEdgekv) {
 }
 
 export function logTokenList(tokenList) {
-    const tokens = [];
-    tokenList['tokens'].forEach(token => {
-        const issueDate = new Date(new Date(token['issueDate']).setUTCHours(23, 59, 59));
-        const latestRefreshDate = new Date(new Date(token['latestRefreshDate']).setUTCHours(23, 59, 59));
-        const nextScheduledRefreshDate = new Date(new Date(token['nextScheduledRefreshDate']).setUTCHours(23, 59, 59));
-        const tokenContent = {
-            TokenName: token['name'],
-            TokenActivationStatus: token['tokenActivationStatus'],
-            IssueDate: `${weekday[issueDate.getDay()]},${issueDate.getDate()} ${shortMnthNames[issueDate.getMonth()]} ${issueDate.getFullYear()}`,
-            LatestRefreshDate: `${weekday[latestRefreshDate.getDay()]},${latestRefreshDate.getDate()} ${shortMnthNames[latestRefreshDate.getMonth()]} ${latestRefreshDate.getFullYear()}`,
-            NextScheduledRefreshDate: `${weekday[nextScheduledRefreshDate.getDay()]},${nextScheduledRefreshDate.getDate()} ${shortMnthNames[nextScheduledRefreshDate.getMonth()]} ${nextScheduledRefreshDate.getFullYear()}`,
-        };
-        tokens.push(tokenContent);
-    });
-    console.table(tokens);
+  const tokens = [];
+  tokenList['tokens'].forEach(token => {
+    const tokenName = token['name'] ?? 'N/A';
+    const tokenActivationStatus = token['tokenActivationStatus'] ?? 'N/A';
+    let formattedIssueDate= 'N/A';
+    let formattedLatestRefreshDate = 'N/A';
+    let formattedNextScheduledRefreshDate = 'N/A';
+    if (token['issueDate']) {
+      const issueDate = new Date(new Date(token['issueDate']).setUTCHours(23, 59, 59));
+      formattedIssueDate = `${weekday[issueDate.getDay()]}, ${issueDate.getDate()} ${shortMnthNames[issueDate.getMonth()]} ${issueDate.getFullYear()}`;
+    }
+    if (token['latestRefreshDate']) {
+      const latestRefreshDate = new Date(new Date(token['latestRefreshDate']).setUTCHours(23, 59, 59));
+      formattedLatestRefreshDate = `${weekday[latestRefreshDate.getDay()]}, ${latestRefreshDate.getDate()} ${shortMnthNames[latestRefreshDate.getMonth()]} ${latestRefreshDate.getFullYear()}`;
+    }
+    if (token['nextScheduledRefreshDate']) {
+      const nextScheduledRefreshDate = new Date(new Date(token['nextScheduledRefreshDate']).setUTCHours(23, 59, 59));
+      formattedNextScheduledRefreshDate = `${weekday[nextScheduledRefreshDate.getDay()]}, ${nextScheduledRefreshDate.getDate()} ${shortMnthNames[nextScheduledRefreshDate.getMonth()]} ${nextScheduledRefreshDate.getFullYear()}`;
+    }
+    const tokenContent = {
+        TokenName: tokenName,
+        TokenActivationStatus: tokenActivationStatus,
+        IssueDate: formattedIssueDate,
+        LatestRefreshDate: formattedLatestRefreshDate,
+        NextScheduledRefreshDate: formattedNextScheduledRefreshDate,
+    };
+    tokens.push(tokenContent);
+  });
+  console.table(tokens);
 }
 
 /**
@@ -96,54 +110,60 @@ export function logError(errorObj, message) {
     }
 }
 
-export function logToken(token, nameSpaceList) {
-    const tokenName = token['name'] ?? 'N/A';
-    const tokenUuid = token['uuid'] ?? 'N/A';
-    const issueDate = ekvhelper.convertTokenDate(token['issueDate']);
-    const expiryDate = ekvhelper.convertTokenDate(token['expiry']);
-    const tokenActivationStatus = token['tokenActivationStatus']  ?? 'N/A';
-    const latestRefrestDate = ekvhelper.convertTokenDate(token['latestRefreshDate']);
-    const nextRefresh = token['nextScheduledRefreshDate']  ?? 'N/A';
-    const tokenCpcode = token['cpcode'] ?? 'N/A';
-    const tokenEwids = token['ewids'] ?? 'N/A';
-    const staging = token['allowOnStaging'] ?? 'N/A';
-    const production = token['allowOnProduction'] ?? 'N/A';
+export function logToken(token) {
+  const tokenName = token['name'] ?? 'N/A';
+  const tokenUuid = token['uuid'] ?? 'N/A';
+  let formattedIssueDate= 'N/A';
+  let formattedExpiryDate = 'N/A';
+  let formattedLatestRefreshDate = 'N/A';
+  let formattedNextScheduledRefreshDate = 'N/A';
+  if (token['issueDate']) {
+    const issueDate = new Date(new Date(token['issueDate']).setUTCHours(23, 59, 59));
+    formattedIssueDate = `${weekday[issueDate.getDay()]}, ${issueDate.getDate()} ${shortMnthNames[issueDate.getMonth()]} ${issueDate.getFullYear()}`;
+  }
+  if (token['expiry']) {
+    const expiryDate = new Date(new Date(token['expiry']).setUTCHours(23, 59, 59));
+    formattedExpiryDate = (expiryDate.getFullYear() >= 9999) ? 'INDEFINITE' : `${weekday[expiryDate.getDay()]}, ${expiryDate.getDate()} ${shortMnthNames[expiryDate.getMonth()]} ${expiryDate.getFullYear()}`;
+  }
+  if (token['latestRefreshDate']) {
+    const latestRefreshDate = new Date(new Date(token['latestRefreshDate']).setUTCHours(23, 59, 59));
+    formattedLatestRefreshDate = `${weekday[latestRefreshDate.getDay()]}, ${latestRefreshDate.getDate()} ${shortMnthNames[latestRefreshDate.getMonth()]} ${latestRefreshDate.getFullYear()}`;
+  }
+  if (token['nextScheduledRefreshDate']) {
+    const nextScheduledRefreshDate = new Date(new Date(token['nextScheduledRefreshDate']).setUTCHours(23, 59, 59));
+    formattedNextScheduledRefreshDate = `${weekday[nextScheduledRefreshDate.getDay()]}, ${nextScheduledRefreshDate.getDate()} ${shortMnthNames[nextScheduledRefreshDate.getMonth()]} ${nextScheduledRefreshDate.getFullYear()}`;
+  }
+  const tokenActivationStatus = token['tokenActivationStatus']  ?? 'N/A';
+  const tokenCpcode = token['cpcode'] ?? 'N/A';
+  const tokenEwids = token['ewids'] ? token['ewids'].join(', ') : 'N/A';
+  const staging = token['allowOnStaging'] ?? 'N/A';
+  const production = token['allowOnProduction'] ?? 'N/A';
 
-    console.log(
-        'Token Name:          ', tokenName + '\n'
-    + 'Token UUID:          ', tokenUuid + '\n'
-    + `Issue date:           ${weekday[issueDate.getDay()]},${issueDate.getDate()} ${shortMnthNames[issueDate.getMonth()]} ${issueDate.getFullYear()} \n`
-    + `Expiry date:          ${weekday[expiryDate.getDay()]},${expiryDate.getDate()} ${shortMnthNames[expiryDate.getMonth()]} ${expiryDate.getFullYear()} \n`
-    + 'Activation status:   ', tokenActivationStatus + '\n'
-    + `Latest refresh date:  ${weekday[latestRefrestDate.getDay()]},${latestRefrestDate.getDate()} ${shortMnthNames[latestRefrestDate.getMonth()]} ${latestRefrestDate.getFullYear()} \n`
-    + 'Next scheduled refresh date: ', nextRefresh + '\n'
-    + 'CpCode used:         ', tokenCpcode + '\n'
-    + 'Valid for EWIDs:     ', tokenEwids + '\n'
-    + 'Valid on Production: ', production + '\n'
-    + 'Valid on Staging:    ', staging);
+  console.log(
+    'Token Name:          ', tokenName + '\n'
+  + 'Token UUID:          ', tokenUuid + '\n'
+  + 'Issue date:          ', formattedIssueDate + '\n'
+  + 'Expiry date:         ', formattedExpiryDate + '\n'
+  + 'Activation status:   ', tokenActivationStatus + '\n'
+  + 'Latest refresh date: ', formattedLatestRefreshDate + '\n'
+  + 'Next scheduled refresh date: ', formattedNextScheduledRefreshDate + '\n'
+  + 'CpCode used:         ', tokenCpcode + '\n'
+  + 'Valid for EWIDs:     ', tokenEwids + '\n'
+  + 'Valid on Production: ', production + '\n'
+  + 'Valid on Staging:    ', staging + '\n'
+  + 'Namespace Permissions:');
 
-    console.log('Namespace Permissions:');
-
-    for (const ns of nameSpaceList) {
-        const permission = token[ns];
-        const permissionList = [];
-        permission.forEach(function (value) {
-            permissionList.push(permissions[value]);
-        });
-        console.log('  ' + ns.substring(ns.indexOf('-') + 1) + ':  [' + permissionList + ']');
-    }
+  for (const ns in token['namespacePermissions']) {
+      const permission = token['namespacePermissions'][ns];
+      const permissionList = [];
+      permission.forEach((value) => {
+          permissionList.push(permissions[value]);
+      });
+      console.log('  ' + ns + ':  [' + permissionList + ']');
+  }
 }
 
 export const logTokenToJson = (token, nameSpaceList) => ({ token, nameSpaceList });
-
-export function getNameSpaceFromToken(decodedToken) {
-    const nameSpaceList = [];
-    Object.keys(decodedToken).forEach(function (key) {
-        if (key.includes('namespace-')) {
-            nameSpaceList.push(key);
-        }
-    });
-}
 
 enum permissions {
     r = 'READ',

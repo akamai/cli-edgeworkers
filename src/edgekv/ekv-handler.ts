@@ -576,7 +576,7 @@ export async function retrieveToken(
 
   const retrievedToken = await cliUtils.spinner(
     edgekvSvc.getSingleToken(tokenName),
-    'Downloading egdekv token...'
+    'Downloading edgekv token...'
   );
 
   if (retrievedToken != undefined && !retrievedToken.isError) {
@@ -802,7 +802,7 @@ function validateSavePath(savePath) {
 }
 
 function processToken(token, savePath, overwrite) {
-  const nameSpaceList = ekvhelper.getNameSpaceListFromJWT(token);
+  const nameSpaceList = Object.keys(token['namespacePermissions']);
   const msg =
     'Add the token reference in edgekv_tokens.js file and place it in your bundle. Use --save_path option to save the token file to your bundle';
   if (savePath) {
@@ -830,10 +830,7 @@ function processToken(token, savePath, overwrite) {
       );
     } else {
       cliUtils.logWithBorder(msg);
-      response.logToken(
-        token,
-        nameSpaceList
-      );
+      response.logToken(token);
     }
   }
 }

@@ -1,5 +1,4 @@
 import * as cliUtils from '../utils/cli-utils';
-import jwt_decode from 'jwt-decode';
 import * as response from './ekv-response';
 import { fromSeconds } from 'from-seconds';
 
@@ -152,26 +151,6 @@ export function convertTokenDate(seconds) {
     return convertedDate;
 }
 
-// decode JWT token returned by API
-export function decodeJWTToken(token) {
-    try {
-        const decodedToken = jwt_decode(token);
-        return decodedToken;
-    } catch (ex) {
-        cliUtils.logAndExit(1, 'Error while trying to decode the JWT token');
-    }
-}
-
-export function getNameSpaceListFromJWT(decodedToken) {
-    const nameSpaceList = [];
-    Object.keys(decodedToken).forEach(function (key) {
-        if (key.includes('namespace-')) {
-            nameSpaceList.push(key);
-        }
-    });
-    return nameSpaceList;
-}
-
 // check if file exisits and file has read / write permissions
 export function checkIfFileExists(filePath) {
     try {
@@ -225,7 +204,7 @@ export function saveTokenToBundle(savePath, overWrite, createdToken, nameSpaceLi
             );
         } else {
             cliUtils.logWithBorder(errMsg);
-            response.logToken(createdToken, nameSpaceList);
+            response.logToken(createdToken);
         }
         process.exit(1);
     });
@@ -242,7 +221,7 @@ export function saveTokenToBundle(savePath, overWrite, createdToken, nameSpaceLi
             updateFile = true;
             stream.on('data', function (chunk) {
                 data += chunk;
-                const existingTokenContent = validateAndGetExistingTokenContent(data, createdToken, nameSpaceList);
+                const existingTokenContent = validateAndGetExistingTokenContent(data, createdToken);
                 // updated content
                 tokenContent = updateTokenContent(existingTokenContent, nameSpaceList, createdToken, overWrite);
 
@@ -274,7 +253,7 @@ export function saveTokenToBundle(savePath, overWrite, createdToken, nameSpaceLi
             );
         } else {
             cliUtils.logWithBorder(msg);
-            response.logToken(createdToken, nameSpaceList);
+            response.logToken(createdToken);
         }
     });
 }
@@ -320,7 +299,7 @@ export function createTokenFileWithoutBundle(savePath, overWrite, createdToken, 
     else {
         const text = fs.readFileSync(tokenFilePath, 'utf8');
         // get existing token content from file
-        const existingTokenContent = validateAndGetExistingTokenContent(text, createdToken, nameSpaceList);
+        const existingTokenContent = validateAndGetExistingTokenContent(text, createdToken);
         // updated content
         tokenContent = updateTokenContent(existingTokenContent, nameSpaceList, createdToken, overWrite);
     }
@@ -336,7 +315,7 @@ export function createTokenFileWithoutBundle(savePath, overWrite, createdToken, 
                 );
               } else {
                 cliUtils.logWithBorder(errMsg);
-                response.logToken(createdToken, nameSpaceList);
+                response.logToken(createdToken);
               }
             process.exit(1);
         }
@@ -349,7 +328,7 @@ export function createTokenFileWithoutBundle(savePath, overWrite, createdToken, 
         );
       } else {
         cliUtils.logWithBorder(msg);
-        response.logToken(createdToken, nameSpaceList);
+        response.logToken(createdToken);
       }
 
 }
@@ -359,15 +338,14 @@ export function createTokenFileWithoutBundle(savePath, overWrite, createdToken, 
  * If valid parses the content and returns it
  * @param data
  * @param createdToken
- * @param nameSpaceList
  */
-function validateAndGetExistingTokenContent(data, createdToken, nameSpaceList) {
+function validateAndGetExistingTokenContent(data, createdToken) {
     const tokenList = data.split('=');
     let tokenContent = [];
 
     if (tokenList.length == 0 || tokenList[0].indexOf('var edgekv_access_tokens') == -1) {
         cliUtils.logWithBorder('ERROR : Not a valid EdgeKV Access Token file (missing \'edgekv_access_tokens\' var assignment)!');
-        response.logToken(createdToken, nameSpaceList);
+        response.logToken(createdToken);
         process.exit(1);
     }
 
@@ -376,7 +354,7 @@ function validateAndGetExistingTokenContent(data, createdToken, nameSpaceList) {
 
     if (tokenList[1].indexOf('export { edgekv_access_tokens };') == -1) {
         cliUtils.logWithBorder('ERROR : Not a valid EdgeKV Access Token file (missing \'edgekv_access_tokens\' export assignment)!');
-        response.logToken(createdToken, nameSpaceList);
+        response.logToken(createdToken);
         process.exit(1);
     }
 
@@ -387,7 +365,7 @@ function validateAndGetExistingTokenContent(data, createdToken, nameSpaceList) {
         tokenContent = JSON.parse(tokenList[1]);
     } catch (ex) {
         cliUtils.logWithBorder(`ERROR: Not a valid EdgeKV access token file. Delete or re-create the edgekv token file. ${ex}`);
-        response.logToken(createdToken, nameSpaceList);
+        response.logToken(createdToken);
         process.exit(1);
     }
     return tokenContent;
@@ -422,12 +400,12 @@ function updateTokenContent(tokenContent, nameSpaceList, createdToken, overWrite
                     } else {
                         cliUtils.logWithBorder(`Token reference matches for token ${tokenName}. Not updating token reference. Use '-o' to overwrite token value.`);
                     }
-                    response.logToken(createdToken, nameSpaceList);
+                    response.logToken(createdToken);
                     process.exit(1);
                 }
             } else {
                 cliUtils.logWithBorder(`ERROR: Token ${createdToken['name']} for namespace ${ns} not found in the file`);
-                response.logToken(createdToken, nameSpaceList);
+                response.logToken(createdToken);
                 process.exit(1);
             }
         }
