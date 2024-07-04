@@ -343,8 +343,8 @@ export function revokeToken(tokenName: string) {
 export function refreshToken(tokenName: string) {
   const body = undefined;
   return httpEdge
-    .putJson(
-      `${EDGEKV_API_BASE}/tokens/${tokenName}`,
+    .postJson(
+      `${EDGEKV_API_BASE}/tokens/${tokenName}/refresh`,
       body,
       cliUtils.getTimeout(DEFAULT_EKV_TIMEOUT),
       ekvMetrics.refreshToken
