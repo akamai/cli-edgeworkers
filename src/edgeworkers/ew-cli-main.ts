@@ -2,29 +2,29 @@
 import * as envUtils from '../utils/env-utils';
 import * as cliUtils from '../utils/cli-utils';
 import * as configUtils from '../utils/config-utils';
-import { 
-  GROUP_ID, 
-  RESOURCE_TIER_ID, 
-  CONTRACT_ID, 
-  BUNDLE_PATH, 
-  WORKING_DIRECTORY, 
-  DOWNLOAD_PATH, 
-  VERSION_ID, 
+import {
+  GROUP_ID,
+  RESOURCE_TIER_ID,
+  CONTRACT_ID,
+  BUNDLE_PATH,
+  WORKING_DIRECTORY,
+  DOWNLOAD_PATH,
+  VERSION_ID,
   ACTIVATION_ID,
   ACTIVE,
   NETWORK,
-  EDGEWORKER_NAME, 
+  EDGEWORKER_NAME,
   EXPIRY,
-  FORMAT, 
-  REPORT_ID, 
-  END_DATE, 
-  STATUS, 
+  FORMAT,
+  REPORT_ID,
+  END_DATE,
+  STATUS,
   EVENT_HANDLERS } from './../utils/constants';
 import * as cliHandler from './ew-handler';
 import * as httpEdge from '../cli-httpRequest';
 import { ewJsonOutput } from './client-manager';
 import * as pkginfo from '../../package.json';
-import { Command } from 'commander';
+import { Command, Argument } from 'commander';
 const program = new Command();
 const currentYear = new Date().getFullYear();
 const copywrite = '\nCopyright (c) 2019-' + currentYear + ' Akamai Technologies, Inc. Licensed under Apache 2 license.\nYour use of Akamai\'s products and services is subject to the terms and provisions outlined in Akamai\'s legal policies.\nVisit http://github.com/akamai/cli-edgeworkers for detailed documentation';
@@ -251,7 +251,7 @@ program
 program
   .command('show-restier <edgeworkerId>')
   .description('View the resource tier associated with an EdgeWorker ID')
-  .action(async function (edgeworkerId) {  
+  .action(async function (edgeworkerId) {
     try {
       await cliHandler.getResourceTierForEwid(edgeworkerId);
     } catch (e) {
@@ -368,7 +368,7 @@ program
   });
 
 program
-  .command('status <edgeworker-identifier>')  
+  .command('status <edgeworker-identifier>')
   .description('List Activation status of a given EdgeWorker ID')
   .alias('list-activations')
   .option('--versionId <versionId>', 'Version Identifier')
@@ -611,6 +611,48 @@ config
   .on('--help', function () {
     cliUtils.logAndExit(0, copywrite);
   });
+
+const log_level = program
+  .command('log-level')
+  .description('Manage Edgeworker logging level.');
+
+log_level
+  .command('set')
+  .argument('<edgeworker-identifier>')
+  .addArgument(new Argument('<network>').choices(['production', 'staging']))
+  .addArgument(new Argument('<level>').choices(cliUtils.LOG_LEVELS.map((level: string) => level.toLowerCase())))
+  .option('--expires <time>', `Expire time for logging level change. Supports natural language input
+       like: '+1h', 'Next Saturday', as well as ISO Timestamps. Use '${cliUtils.LL_NEVER_EXPIRE_STR}'
+       for the change to never expire.`, cliUtils.LL_NEVER_EXPIRE_STR)
+  .option('--ds2Id <id>', 'Datastream 2 ID to use alongside the default specified in bundle.json')
+  .description('Set logging level for an Edgeworker.')
+  .action(async function (ewId: number, network: string, level: string, options) {
+    try {
+      await cliHandler.setLogLevel(ewId, network, level, options);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on('--help', function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+log_level
+  .command('get')
+  .argument('<edgeworker-identifier>')
+  .argument('[logging-identifier]')
+  .description('Get logging level for an Edgeworker.')
+  .action(async function (ewId: number, loggingId: null | string) {
+    try {
+      await cliHandler.getLogLevel(ewId, loggingId);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on('--help', function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
 
 program.parse(process.argv);
 

@@ -2,8 +2,9 @@ import * as path from 'path';
 import * as envUtils from '../utils/env-utils';
 import * as cliUtils from '../utils/cli-utils';
 import * as edgeWorkersSvc from './ew-service';
-import { ewJsonOutput, validateTarballLocally, buildTarball, determineTarballDownloadDir } from './client-manager';
+import {ewJsonOutput, validateTarballLocally, buildTarball, determineTarballDownloadDir} from './client-manager';
 import * as readline from 'readline-sync';
+import * as chrono from 'chrono-node';
 
 import CryptoJS from 'crypto-js';
 const groupColumnsToKeep = ['groupId', 'groupName', 'capabilities'];
@@ -111,7 +112,7 @@ export async function showEdgeWorkerIdOverview(
       'Fetching EdgeWorker Ids...'
     );
     // remove outer envelope of JSON data
-    if (Object.prototype.hasOwnProperty.call(ids, 'edgeWorkerIds')){
+    if (Object.prototype.hasOwnProperty.call(ids, 'edgeWorkerIds')) {
       ids = ids['edgeWorkerIds'];
     }
   } else {
@@ -254,12 +255,12 @@ export async function getResourceTierInfo() {
   resourceTierList.forEach(function (resTier, index) {
     console.log(
       index +
-        1 +
-        '. Resource Tier ' +
-        resTier['resourceTierId'] +
-        ' ' +
-        resTier['resourceTierName'] +
-        '\n'
+      1 +
+      '. Resource Tier ' +
+      resTier['resourceTierId'] +
+      ' ' +
+      resTier['resourceTierName'] +
+      '\n'
     );
     resourceIds.push(resTier['resourceTierId']);
     const ewLimit = resTier['edgeWorkerLimits'];
@@ -304,7 +305,7 @@ export async function getContracts() {
     const msg = 'List of contract id\'s associated with this account';
     const contractList = [];
     contractIdList.forEach(function (value) {
-      contractList.push({ ContractIds: value });
+      contractList.push({ContractIds: value});
     });
     if (ewJsonOutput.isJSONOutputMode()) {
       ewJsonOutput.writeJSONOutput(0, msg, contractList);
@@ -384,11 +385,11 @@ export async function getResourceTiers(contractId?: string) {
       resourceTierList.forEach(function (resTier, index) {
         console.log(
           index +
-            1 +
-            '. ResourceTier ' +
-            resTier['resourceTierId'] +
-            ' - ' +
-            resTier['resourceTierName']
+          1 +
+          '. ResourceTier ' +
+          resTier['resourceTierId'] +
+          ' - ' +
+          resTier['resourceTierName']
         );
         const ewLimit = resTier['edgeWorkerLimits'];
         ewLimit.forEach(function (limit) {
@@ -479,7 +480,7 @@ export async function createEdgeWorkerId(
 
 export async function showEdgeWorkerIdVersionOverview(
   ewId: string,
-  options?: { versionId?: string; showResult?: boolean }
+  options?: {versionId?: string; showResult?: boolean}
 ) {
   let versions = null;
   const version = [];
@@ -555,7 +556,7 @@ export async function showEdgeWorkerIdVersionOverview(
 
 export async function createNewVersion(
   ewId: string,
-  options: { bundle?: string; codeDir?: string }
+  options: {bundle?: string; codeDir?: string}
 ) {
   let bundle = null;
   let versions = null;
@@ -679,7 +680,7 @@ export async function uploadEdgeWorkerVersion(
   } catch (error) {
     const errorObj = JSON.parse(error);
 
-    if (errorObj.type === '/edgeworkers/error-types/edgeworkers-invalid-argument'){
+    if (errorObj.type === '/edgeworkers/error-types/edgeworkers-invalid-argument') {
       return validateEdgeWorkerVersion(tarballPath);
     } else {
       cliUtils.logAndExit(
@@ -805,7 +806,7 @@ export async function downloadTarball(
 
 export async function showEdgeWorkerActivationOverview(
   ewId: string,
-  options?: { versionId?: string; activationId?: string; activeOnNetwork?: boolean; network?: string; }
+  options?: {versionId?: string; activationId?: string; activeOnNetwork?: boolean; network?: string;}
 ) {
   let activations = null;
   const activation = [];
@@ -821,7 +822,7 @@ export async function showEdgeWorkerActivationOverview(
       `Fetching all Activations for EdgeWorker Id ${ewId}, Version ${versionId}${network ? ', Network ' + network : ''}`
     );
 
-    if (Object.prototype.hasOwnProperty.call(activations, 'activations')){
+    if (Object.prototype.hasOwnProperty.call(activations, 'activations')) {
       activations = activations['activations'];
     }
   } else if (activationId) {
@@ -833,11 +834,11 @@ export async function showEdgeWorkerActivationOverview(
   } else {
     activations = await cliUtils.spinner(
       edgeWorkersSvc.getActivations(ewId, undefined, network, active),
-      `Fetching ${active ? 'active version' : 'all activations' } for EdgeWorker Id ${ewId}${network ? ' on ' + network : ''}`
+      `Fetching ${active ? 'active version' : 'all activations'} for EdgeWorker Id ${ewId}${network ? ' on ' + network : ''}`
     );
     // remove outer envelope of JSON data
 
-    if (Object.prototype.hasOwnProperty.call(activations, 'activations')){
+    if (Object.prototype.hasOwnProperty.call(activations, 'activations')) {
       activations = activations['activations'];
     }
   }
@@ -996,7 +997,7 @@ export async function createAuthToken(
       cliUtils.log(`-H '${token}'`);
     } else {
       cliUtils.logWithBorder('Add the following request header to your requests to get additional trace information.');
-      cliUtils.log(token+'\n');
+      cliUtils.log(token + '\n');
     }
   } else {
     cliUtils.logAndExit(1, authToken.error_reason);
@@ -1045,7 +1046,7 @@ export async function getAvailableReports() {
 
   if (availableReports && !availableReports.isError) {
     const msg = 'The following reports are available:';
-    const reportList = availableReports.reports.map((report)=>{
+    const reportList = availableReports.reports.map((report) => {
       return {ReportId: report.reportId, ReportType: report.name};
     });
 
@@ -1069,9 +1070,9 @@ interface Execution {
 }
 
 const getExecutionAverages = (executionArray: Array<Execution>, executionKey: string) => {
-  if (executionArray){
+  if (executionArray) {
     let totalAvg = 0, totalInvocations = 0, eventMax = -1, eventMin = Number.MAX_SAFE_INTEGER;
-    for (const execution of executionArray){
+    for (const execution of executionArray) {
       const {avg, min, max} = execution[executionKey];
 
       totalAvg += avg * execution.invocations;
@@ -1096,11 +1097,11 @@ const getExecutionAverages = (executionArray: Array<Execution>, executionKey: st
 export async function getReport(
   reportId: number,
   start: string,
-  end:string,
+  end: string,
   ewid: string,
   statuses: Array<string>,
   eventHandlers: Array<string>,
-  ) {
+) {
   const report = await cliUtils.spinner(
     edgeWorkersSvc.getReport(reportId, ewid, start, statuses, eventHandlers, end),
     'Getting report...'
@@ -1126,7 +1127,7 @@ export async function getReport(
       cliUtils.logWithBorder(msg);
       let reportOutput;
 
-      switch (report.reportId){
+      switch (report.reportId) {
         case 1: {
           // summary
           const {
@@ -1192,7 +1193,7 @@ export async function getReport(
             }
           }
 
-          if (!reportOutput['success']){
+          if (!reportOutput['success']) {
             // add success count if no successful executions
             reportOutput['success'] = 0;
           }
@@ -1217,9 +1218,9 @@ export async function getReport(
       if (ewJsonOutput.isJSONOutputMode()) {
         ewJsonOutput.writeJSONOutput(0, msg, reportOutput);
       } else {
-        if (Array.isArray(reportOutput)){
+        if (Array.isArray(reportOutput)) {
           // report 1 (summary) will return an array of table objects
-          reportOutput.forEach( (table) => console.table(table));
+          reportOutput.forEach((table) => console.table(table));
         } else {
           console.table(reportOutput);
         }
@@ -1229,6 +1230,72 @@ export async function getReport(
     cliUtils.logAndExit(1, report.error_reason);
   }
 }
+
+/* ========== Log-level related functionality ========== */
+
+export async function setLogLevel(ewId: number, network: string, level: string, options: object) {
+  let expireTime = null;
+  if (options['expires'] !== cliUtils.LL_NEVER_EXPIRE_STR) {
+    expireTime = chrono.parseDate(options['expires'], null, {forwardDate: true});
+    if (expireTime === null) {
+      cliUtils.logAndExit(1, `ERROR: cannot parse given date: ${options['until']}`);
+    }
+
+    validateLogLevelExpireTime(expireTime);
+    expireTime = expireTime.toISOString();
+  }
+
+  network = network.toUpperCase();
+  level = level.toUpperCase();
+
+  const ds2Id = options['ds2Id'];
+  if (ds2Id != null && Number.isNaN(parseInt(ds2Id))) {
+    cliUtils.logAndExit(1, `ERROR: Specified Datastream 2 ID '${ds2Id}' is invalid`);
+  }
+
+  const logLevel = await cliUtils.spinner(
+    edgeWorkersSvc.setLogLevel(ewId, level, network, expireTime, ds2Id),
+    `Setting new logging level for edgeworker ${ewId}...`
+  );
+
+  if (logLevel && !logLevel.isError) {
+    const msg = `Setting new logging level '${level}' successful`;
+    if (ewJsonOutput.isJSONOutputMode()) {
+      ewJsonOutput.writeJSONOutput(0, msg, logLevel);
+    } else {
+      cliUtils.logWithBorder(msg);
+      console.table(logLevel);
+    }
+  } else {
+    cliUtils.logAndExit(1, logLevel.error_reason);
+  }
+}
+
+export async function getLogLevel(ewId: number, loggingId: null | string = null) {
+  const logLevel = await cliUtils.spinner(
+    edgeWorkersSvc.getLogLevel(ewId, loggingId),
+    `Fetching current logging level for edgeworker ${ewId}...`
+  );
+
+  if (logLevel && !logLevel.isError) {
+    const msg = 'Fetching logging level successful';
+    if (ewJsonOutput.isJSONOutputMode()) {
+      ewJsonOutput.writeJSONOutput(0, msg, logLevel);
+    } else {
+      cliUtils.logWithBorder(msg);
+      if (logLevel['loggings'] === undefined) {
+        console.table(logLevel);
+      } else {
+        console.table(logLevel['loggings']);
+      }
+    }
+
+  } else {
+    cliUtils.logAndExit(1, logLevel.error_reason);
+  }
+
+}
+
 
 /* ========== Local Helpers ========== */
 function filterJsonData(data, columnsToKeep: string[]) {
@@ -1253,5 +1320,12 @@ function validateExpiry(expiry) {
       1,
       'ERROR: The expiry is invalid. It must be an integer value (in minutes) between 1 and 720 minutes (12 hours).'
     );
+  }
+}
+
+function validateLogLevelExpireTime(expireTime: Date) {
+  const now = new Date();
+  if ((now.getTime() - expireTime.getTime()) >= 0) {
+    cliUtils.logAndExit(1, 'ERROR: Logging level expiry time in the past');
   }
 }
