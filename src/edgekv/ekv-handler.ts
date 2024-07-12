@@ -598,7 +598,18 @@ export async function refreshToken(
   );
 
   if (refreshedToken != undefined && !refreshedToken.isError) {
-    processToken(refreshedToken, null, null);
+    const nameSpaceList = Object.keys(refreshedToken['namespacePermissions']);
+    const msg = `Token "${refreshedToken['name']}" has been refreshed`;
+    if (ekvJsonOutput.isJSONOutputMode()) {
+      ekvJsonOutput.writeJSONOutput(
+        0,
+        msg,
+        response.logTokenToJson(refreshedToken, nameSpaceList)
+      );
+    } else {
+      cliUtils.logWithBorder(msg);
+      response.logToken(refreshedToken);
+    }
   } else {
     response.logError(
       refreshedToken,
