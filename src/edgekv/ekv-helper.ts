@@ -235,7 +235,7 @@ export function saveTokenToBundle(savePath, overWrite, createdToken, nameSpaceLi
         let tokenFileContent = '';
         if (!updateFile) {
             for (const ns of nameSpaceList) {
-                tokenContent[ns] = { 'name': createdToken['name'], 'reference': createdToken['uuid'] };
+                tokenContent[ns] = { 'name': createdToken['name'], 'uuid': createdToken['uuid'] };
             }
         }
         tokenFileContent = constructTokenFile(tokenContent);
@@ -281,7 +281,7 @@ function constructTokenFile(tokenContent) {
  * @param nameSpaceList
  */
 export function createTokenFileWithoutBundle(savePath, overWrite, createdToken, nameSpaceList) {
-
+    console.log(JSON.stringify(createdToken));
     const msg = `Token in ${savePath}/edgekv_tokens.js was successfully updated.`;
     let tokenFilePath = savePath;
     // if token file does not exist, create new file
@@ -292,7 +292,7 @@ export function createTokenFileWithoutBundle(savePath, overWrite, createdToken, 
     let tokenContent = [];
     if (!checkIfFileExists(tokenFilePath)) {
         for (const ns of nameSpaceList) {
-            tokenContent[ns] = { 'name': createdToken['name'], 'reference': createdToken['uuid'] };
+            tokenContent[ns] = { 'name': createdToken['name'], 'uuid': createdToken['uuid'] };
         }
     }
     // update existing token file
