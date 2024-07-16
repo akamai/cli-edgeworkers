@@ -235,7 +235,7 @@ export function saveTokenToBundle(savePath, overWrite, createdToken, nameSpaceLi
         let tokenFileContent = '';
         if (!updateFile) {
             for (const ns of nameSpaceList) {
-                tokenContent[ns] = { 'name': createdToken['name'], 'uuid': createdToken['uuid'] };
+                tokenContent[ns] = { 'name': createdToken['name'], 'reference': createdToken['uuid'] };
             }
         }
         tokenFileContent = constructTokenFile(tokenContent);
@@ -266,7 +266,7 @@ function constructTokenFile(tokenContent) {
     const token = [];
     Object.keys(tokenContent).forEach(function (key) {
         const tokenData = tokenContent[key];
-        const nameSpaceContent = `\n"${key}" : { \n"name": "${tokenData['name']}",\n"reference" : "${tokenData['uuid']}"\n}`;
+        const nameSpaceContent = `\n"${key}" : { \n"name": "${tokenData['name']}",\n"reference" : "${tokenData['reference']}"\n}`;
         token.push(nameSpaceContent);
     });
     return tkn_var + token.toString() + tkn_export;
@@ -281,7 +281,7 @@ function constructTokenFile(tokenContent) {
  * @param nameSpaceList
  */
 export function createTokenFileWithoutBundle(savePath, overWrite, createdToken, nameSpaceList) {
-    console.log(JSON.stringify(createdToken));
+
     const msg = `Token in ${savePath}/edgekv_tokens.js was successfully updated.`;
     let tokenFilePath = savePath;
     // if token file does not exist, create new file
@@ -292,7 +292,7 @@ export function createTokenFileWithoutBundle(savePath, overWrite, createdToken, 
     let tokenContent = [];
     if (!checkIfFileExists(tokenFilePath)) {
         for (const ns of nameSpaceList) {
-            tokenContent[ns] = { 'name': createdToken['name'], 'uuid': createdToken['uuid'] };
+            tokenContent[ns] = { 'name': createdToken['name'], 'reference': createdToken['uuid'] };
         }
     }
     // update existing token file
@@ -389,13 +389,14 @@ function updateTokenContent(tokenContent, nameSpaceList, createdToken, overWrite
         // if namespace already exists, if overwrite option is specified overwrite token value in file else display token
         else if (Object.prototype.hasOwnProperty.call(tokenContent, ns)) {
             const tokenName = tokenContent[ns]['name'];
+            const createdTokenRef = createdToken['uuid'];
             if (tokenName === createdToken['name']) {
                 if (overWrite) {
                     const nameSpaceContent = { 'name': createdToken['name'], 'reference': createdToken['uuid'] };
                     tokenContent[ns] = nameSpaceContent;
                 } else {
                     const tokenRef = tokenContent[ns]['reference'];
-                    if (tokenRef != createdToken['reference']) {
+                    if (tokenRef != createdTokenRef) {
                         cliUtils.logWithBorder(`Token reference mismatch for token ${tokenName}! Not updating token reference. Use '-o' to overwrite token value. Place the below token in edgekv_tokens.js manually`);
                     } else {
                         cliUtils.logWithBorder(`Token reference matches for token ${tokenName}. Not updating token reference. Use '-o' to overwrite token value.`);
