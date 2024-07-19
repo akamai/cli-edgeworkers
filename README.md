@@ -575,8 +575,46 @@ Usage: `akamai config save [options]`
 | -h, --help  | optional | output usage information |
 | -p, --properties  | required | Config properties. Use format \'key=value\' to set a property and white space to split them. |
 
+
 #### Key Details
 1. If the context contain invalid item, the command will skip that item and continue.
+
+### View current logging level for the EdgeWorker
+Allows customers to view currently set logging level for the edgeworker.
+
+Usage: `akamai edgeworkers log-level get [options] <edgeworker-identifier> [logging-identifier]`
+
+| Option | Existence| Description |
+| - | - | - |
+| -h, --help  | optional | output usage information |
+
+| Argument | Existence | Description |
+| - | - | - |
+| edgeworker-identifier | required | EdgeWorker identifier for which to display logging level override information. |
+| logging-identifier | optional | The logging ID of the logging level override to display. |
+
+#### Key Details
+1. If the `logging-identifier` is not specified, all logging level overrides will be displayed.
+
+### Set current logging level for the EdgeWorker
+Allows customers to set logging level for the EdgeWorker.
+
+Usage: `akamai edgeworkers log-level set [options] <edgeworker-identifier> <network> <level> `
+
+| Option | Existence| Description |
+| - | - | - |
+| -h, --help  | optional | output usage information |
+| --expires  | optional | Specifies for how long the user's logging level override will be applied. After it has passed, the logging level reverts back to the default specified in the bundle. |
+| --ds2Id | optional | Datastream ID to use alongside the one specified in EdgeWorker's `bundle.json` file. |
+
+| Argument | Existence | Description |
+| - | - | - |
+| edgeworker-identifier | required | EdgeWorker identifier for which to change logging level. |
+| network | required | Network for which to apply the new logging level. Either "production" or "staging". |
+| level | required | New logging level to apply for the EdgeWorker. For possible values consult customer logging documentation. |
+
+#### Key Details
+1. If `--expires` option is not specified, the default is for the override to never expire.
 
 ## Resources
 For more information on EdgeWorkers, refer to the following resources:
