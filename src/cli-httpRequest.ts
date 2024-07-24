@@ -6,7 +6,7 @@ import {
   EDGEWORKERS_CLIENT_HEADER,
   EDGEWORKERS_IDE_HEADER,
 } from './edgeworkers/ew-service';
-import {EDGEKV_API_BASE, EDGEKV_FEATURES_HEADER} from './edgekv/ekv-service';
+import { EDGEKV_API_BASE } from './edgekv/ekv-service';
 
 export let accountKey = null;
 export let ideExtensionType = null;
@@ -33,7 +33,7 @@ export function sendEdgeRequest(
   headers,
   timeout: number,
   metricType?: string,
-  requestConfig? : Record<string, unknown>
+  requestConfig? : Record<string, unknown> 
 ) {
   const edge = envUtils.getEdgeGrid();
 
@@ -54,8 +54,6 @@ export function sendEdgeRequest(
   if (path.includes(EDGEKV_API_BASE)) {
     headers[versionHeader] = pjson.version;
     headers[ekvcliHeader] = metricType;
-    // Token Workflow beta
-    headers[EDGEKV_FEATURES_HEADER] = 'TOKEN_WORKFLOW_ENHANCEMENT';
   }
 
   const servicePromise = function () {
@@ -172,7 +170,7 @@ export function getJson(
 export function deleteReq(path: string,
   timeout: number,
   metricType?: string,
-  requestConfig? : Record<string, unknown>
+  requestConfig? : Record<string, unknown> 
   ) {
   return sendEdgeRequest(path, 'DELETE', '', {}, timeout, metricType, requestConfig);
 }

@@ -5,7 +5,6 @@ import * as cliUtils from '../utils/cli-utils';
 import * as fs from 'fs';
 
 export const EDGEKV_API_BASE = '/edgekv/v1';
-export const EDGEKV_FEATURES_HEADER = 'X-EdgeKV-Features';
 const INIT_EKV_TIMEOUT = 120000;
 const DEFAULT_EKV_TIMEOUT = 60000;
 
