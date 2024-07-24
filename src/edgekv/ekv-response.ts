@@ -67,25 +67,35 @@ export function logInitialize(initializedEdgekv) {
 }
 
 export function logTokenList(tokenList) {
-    const tokens = [];
-    tokenList['tokens'].forEach(token => {
-        const expiry = new Date(new Date(token['expiry']).setUTCHours(23, 59, 59));
-        const difference = Math.floor(ekvhelper.getDateDifference(expiry));
-        let warning = '-';
-
-        if (difference >=0 && difference <= 30) {
-            warning = `Will EXPIRE in less than ${difference} days`;
-        } else if (difference <= -1) {
-            warning = 'Token already expired';
-        }
-        const tokenContent = {
-            TokenName: token['name'],
-            ExpiryDate: `${weekday[expiry.getDay()]},${expiry.getDate()} ${shortMnthNames[expiry.getMonth()]} ${expiry.getFullYear()}`,
-            Warning: warning
-        };
-        tokens.push(tokenContent);
-    });
-    console.table(tokens);
+  const tokens = [];
+  tokenList['tokens'].forEach(token => {
+    const tokenName = token['name'] ?? 'N/A';
+    const tokenActivationStatus = token['tokenActivationStatus'] ?? 'N/A';
+    let formattedIssueDate= 'N/A';
+    let formattedLatestRefreshDate = 'N/A';
+    let formattedNextScheduledRefreshDate = 'N/A';
+    if (token['issueDate']) {
+      const issueDate = new Date(new Date(token['issueDate']).setUTCHours(23, 59, 59));
+      formattedIssueDate = `${weekday[issueDate.getDay()]}, ${issueDate.getDate()} ${shortMnthNames[issueDate.getMonth()]} ${issueDate.getFullYear()}`;
+    }
+    if (token['latestRefreshDate']) {
+      const latestRefreshDate = new Date(new Date(token['latestRefreshDate']).setUTCHours(23, 59, 59));
+      formattedLatestRefreshDate = `${weekday[latestRefreshDate.getDay()]}, ${latestRefreshDate.getDate()} ${shortMnthNames[latestRefreshDate.getMonth()]} ${latestRefreshDate.getFullYear()}`;
+    }
+    if (token['nextScheduledRefreshDate']) {
+      const nextScheduledRefreshDate = new Date(new Date(token['nextScheduledRefreshDate']).setUTCHours(23, 59, 59));
+      formattedNextScheduledRefreshDate = `${weekday[nextScheduledRefreshDate.getDay()]}, ${nextScheduledRefreshDate.getDate()} ${shortMnthNames[nextScheduledRefreshDate.getMonth()]} ${nextScheduledRefreshDate.getFullYear()}`;
+    }
+    const tokenContent = {
+        TokenName: tokenName,
+        TokenActivationStatus: tokenActivationStatus,
+        IssueDate: formattedIssueDate,
+        LatestRefreshDate: formattedLatestRefreshDate,
+        NextScheduledRefreshDate: formattedNextScheduledRefreshDate,
+    };
+    tokens.push(tokenContent);
+  });
+  console.table(tokens);
 }
 
 /**
@@ -100,63 +110,60 @@ export function logError(errorObj, message) {
     }
 }
 
-export function logToken(tokenName: string, tokenValue, decodedToken, nameSpaceList, savePath: boolean) {
-    const expiryDate = ekvhelper.convertTokenDate(decodedToken['exp']);
-    const issueDate = ekvhelper.convertTokenDate(decodedToken['iat']);
-    const env = decodedToken['env'];
-    let staging = false;
-    let production = false;
-    env.forEach(function (value) {
-        if (value === 's') {
-            staging = true;
-        } else if (value === 'p') {
-            production = true;
-        }
-    });
+export function logToken(token) {
+  const tokenName = token['name'] ?? 'N/A';
+  const tokenUuid = token['uuid'] ?? 'N/A';
+  let formattedIssueDate= 'N/A';
+  let formattedExpiryDate = 'N/A';
+  let formattedLatestRefreshDate = 'N/A';
+  let formattedNextScheduledRefreshDate = 'N/A';
+  if (token['issueDate']) {
+    const issueDate = new Date(new Date(token['issueDate']).setUTCHours(23, 59, 59));
+    formattedIssueDate = `${weekday[issueDate.getDay()]}, ${issueDate.getDate()} ${shortMnthNames[issueDate.getMonth()]} ${issueDate.getFullYear()}`;
+  }
+  if (token['expiry']) {
+    const expiryDate = new Date(new Date(token['expiry']).setUTCHours(23, 59, 59));
+    formattedExpiryDate = (expiryDate.getFullYear() >= 9999) ? 'INDEFINITE' : `${weekday[expiryDate.getDay()]}, ${expiryDate.getDate()} ${shortMnthNames[expiryDate.getMonth()]} ${expiryDate.getFullYear()}`;
+  }
+  if (token['latestRefreshDate']) {
+    const latestRefreshDate = new Date(new Date(token['latestRefreshDate']).setUTCHours(23, 59, 59));
+    formattedLatestRefreshDate = `${weekday[latestRefreshDate.getDay()]}, ${latestRefreshDate.getDate()} ${shortMnthNames[latestRefreshDate.getMonth()]} ${latestRefreshDate.getFullYear()}`;
+  }
+  if (token['nextScheduledRefreshDate']) {
+    const nextScheduledRefreshDate = new Date(new Date(token['nextScheduledRefreshDate']).setUTCHours(23, 59, 59));
+    formattedNextScheduledRefreshDate = `${weekday[nextScheduledRefreshDate.getDay()]}, ${nextScheduledRefreshDate.getDate()} ${shortMnthNames[nextScheduledRefreshDate.getMonth()]} ${nextScheduledRefreshDate.getFullYear()}`;
+  }
+  const tokenActivationStatus = token['tokenActivationStatus']  ?? 'N/A';
+  const tokenCpcode = token['cpcode'] ?? 'N/A';
+  const tokenEwids = token['ewids'] ? token['ewids'].join(', ') : 'N/A';
+  const staging = token['allowOnStaging'] ?? 'N/A';
+  const production = token['allowOnProduction'] ?? 'N/A';
 
-    console.log(
-        'Token Name:          ', tokenName + '\n'
-    + 'CpCode used:         ', decodedToken['cpc'] + '\n'
-    + 'Valid for EWIDs:     ', decodedToken['ewids'] + '\n'
-    + 'Valid on Production: ', production + '\n'
-    + 'Valid on Staging:    ', staging + '\n'
-    + `Issue date:           ${weekday[issueDate.getDay()]},${issueDate.getDate()} ${shortMnthNames[issueDate.getMonth()]} ${issueDate.getFullYear()} \n`
-    + `Expiry date:          ${weekday[expiryDate.getDay()]},${expiryDate.getDate()} ${shortMnthNames[expiryDate.getMonth()]} ${expiryDate.getFullYear()}`);
+  console.log(
+    'Token Name:          ', tokenName + '\n'
+  + 'Token UUID:          ', tokenUuid + '\n'
+  + 'Issue date:          ', formattedIssueDate + '\n'
+  + 'Expiry date:         ', formattedExpiryDate + '\n'
+  + 'Activation status:   ', tokenActivationStatus + '\n'
+  + 'Latest refresh date: ', formattedLatestRefreshDate + '\n'
+  + 'Next scheduled refresh date: ', formattedNextScheduledRefreshDate + '\n'
+  + 'CpCode used:         ', tokenCpcode + '\n'
+  + 'Valid for EWIDs:     ', tokenEwids + '\n'
+  + 'Valid on Production: ', production + '\n'
+  + 'Valid on Staging:    ', staging + '\n'
+  + 'Namespace Permissions:');
 
-    const difference = Math.floor(ekvhelper.getDateDifference(expiryDate));
-    if(difference >=0 && difference <= 30) {
-        console.log(`       *** WARNING: Access Token will EXPIRE in less than ${difference} days! ***`);
-    } else if (difference <= -1) {
-        console.log('       *** Token already expired ***');
-    }
-
-    // if save path is not provided print the token value
-    if (!savePath) {
-        console.log('value:                ' + tokenValue);
-    }
-
-    console.log('Namespace Permissions:');
-
-    for (const ns of nameSpaceList) {
-        const permission = decodedToken[ns];
-        const permissionList = [];
-        permission.forEach(function (value) {
-            permissionList.push(permissions[value]);
-        });
-        console.log('  ' + ns.substring(ns.indexOf('-') + 1) + ':  [' + permissionList + ']');
-    }
+  for (const ns in token['namespacePermissions']) {
+      const permission = token['namespacePermissions'][ns];
+      const permissionList = [];
+      permission.forEach((value) => {
+          permissionList.push(permissions[value]);
+      });
+      console.log('  ' + ns + ':  [' + permissionList + ']');
+  }
 }
 
-export const logTokenToJson = (token, decodedToken, nameSpaceList) => ({ token, decodedToken, nameSpaceList });
-
-export function getNameSpaceFromToken(decodedToken) {
-    const nameSpaceList = [];
-    Object.keys(decodedToken).forEach(function (key) {
-        if (key.includes('namespace-')) {
-            nameSpaceList.push(key);
-        }
-    });
-}
+export const logTokenToJson = (token, nameSpaceList) => ({ token, nameSpaceList });
 
 enum permissions {
     r = 'READ',

@@ -505,9 +505,9 @@ export async function listItemsFromGroup(
   }
 }
 
-export async function listTokens(incExpired) {
+export async function listTokens() {
   const tokenList = await cliUtils.spinner(
-    edgekvSvc.getTokenList(incExpired),
+    edgekvSvc.getTokenList(),
     'Fetching token list...'
   );
   const msg = 'The following tokens are available for you to download';
@@ -537,13 +537,9 @@ export async function createToken(
     production?: string;
     ewids?: string;
     namespace?: string;
-    expiry?: string;
     overwrite?;
   }
 ) {
-  // convert string to ISO date
-  const expiry = getExpiryDate(options.expiry);
-
   // parse input permissions
   const permissionList = parseNameSpacePermissions(options.namespace);
   const envAccess = { allow: true, deny: false };
@@ -556,8 +552,7 @@ export async function createToken(
       permissionList,
       envAccess[options.staging],
       envAccess[options.production],
-      options.ewids.split(','),
-      expiry
+      options.ewids.split(',')
     ),
     'Creating edgekv token ...'
   );
@@ -581,7 +576,7 @@ export async function retrieveToken(
 
   const retrievedToken = await cliUtils.spinner(
     edgekvSvc.getSingleToken(tokenName),
-    'Downloading egdekv token...'
+    'Downloading edgekv token...'
   );
 
   if (retrievedToken != undefined && !retrievedToken.isError) {
@@ -590,6 +585,35 @@ export async function retrieveToken(
     response.logError(
       retrievedToken,
       `ERROR: Unable to retrieve edgekv token. ${retrievedToken.error_reason} [TraceId: ${retrievedToken.traceId}]`
+    );
+  }
+}
+
+export async function refreshToken(
+  tokenName: string
+) {
+  const refreshedToken = await cliUtils.spinner(
+    edgekvSvc.refreshToken(tokenName),
+    'Refreshing EdgeKV token...'
+  );
+
+  if (refreshedToken != undefined && !refreshedToken.isError) {
+    const nameSpaceList = Object.keys(refreshedToken['namespacePermissions']);
+    const msg = `Token "${refreshedToken['name']}" has been refreshed`;
+    if (ekvJsonOutput.isJSONOutputMode()) {
+      ekvJsonOutput.writeJSONOutput(
+        0,
+        msg,
+        response.logTokenToJson(refreshedToken, nameSpaceList)
+      );
+    } else {
+      cliUtils.logWithBorder(msg);
+      response.logToken(refreshedToken);
+    }
+  } else {
+    response.logError(
+      refreshedToken,
+      `ERROR: Unable to retrieve edgekv token. ${refreshedToken.error_reason} [TraceId: ${refreshedToken.traceId}]`
     );
   }
 }
@@ -736,24 +760,6 @@ async function getEwGroups(groupId: string) {
   }
   return ewGrpCapabilitiesMap;
 }
-/**
- * Checks if date is in format yyyy-mm-dd
- * Converts date to iso format to be consumed by API
- * @param expiry
- */
-function getExpiryDate(expiry: string) {
-  const errorMsg =
-    'Expiration time specified is invalid. Please specify in format yyyy-mm-dd.';
-  try {
-    if (!ekvhelper.isValidDate(expiry)) {
-      cliUtils.logAndExit(1, errorMsg);
-    }
-    expiry = new Date(expiry).toISOString().split('.').shift() + 'Z';
-    return expiry;
-  } catch (ex) {
-    cliUtils.logAndExit(1, errorMsg);
-  }
-}
 
 function parseNameSpacePermissions(namespace: string) {
   // list to which all the permissions mapped to namespace will be added
@@ -807,18 +813,15 @@ function validateSavePath(savePath) {
 }
 
 function processToken(token, savePath, overwrite) {
-  // decodes the jwt token
-  const decodedToken = ekvhelper.decodeJWTToken(token['value']);
-  const nameSpaceList = ekvhelper.getNameSpaceListFromJWT(decodedToken);
+  const nameSpaceList = Object.keys(token['namespacePermissions']);
   const msg =
-    'Add the token value in edgekv_tokens.js file and place it in your bundle. Use --save_path option to save the token file to your bundle';
+    'Add the token reference in edgekv_tokens.js file and place it in your bundle. Use --save_path option to save the token file to your bundle';
   if (savePath) {
     if (ekvhelper.getFileExtension(savePath) != '.tgz') {
       ekvhelper.createTokenFileWithoutBundle(
         savePath,
         overwrite,
         token,
-        decodedToken,
         nameSpaceList
       );
     } else {
@@ -826,7 +829,6 @@ function processToken(token, savePath, overwrite) {
         savePath,
         overwrite,
         token,
-        decodedToken,
         nameSpaceList
       );
     }
@@ -835,17 +837,11 @@ function processToken(token, savePath, overwrite) {
       ekvJsonOutput.writeJSONOutput(
         0,
         msg,
-        response.logTokenToJson(token, decodedToken, nameSpaceList)
+        response.logTokenToJson(token, nameSpaceList)
       );
     } else {
       cliUtils.logWithBorder(msg);
-      response.logToken(
-        token['name'],
-        token['value'],
-        decodedToken,
-        nameSpaceList,
-        false
-      );
+      response.logToken(token);
     }
   }
 }

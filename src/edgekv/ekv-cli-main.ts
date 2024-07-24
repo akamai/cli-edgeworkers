@@ -11,7 +11,6 @@ import {
   STAGING,
   PRODUCTION,
   EW_IDS,
-  EXPIRY,
   NAMESPACE,
   SAVE_PATH } from './../utils/constants';
 import { SANDBOX_ID } from '../utils/constants';
@@ -363,11 +362,10 @@ list
 
 list
   .command('tokens')
-  .option('--include-expired', 'Returns expired tokens in the response')
   .description('List all tokens for which the user has permission to download')
-  .action(async function (options) {
+  .action(async function () {
     try {
-      await kvCliHandler.listTokens(options.includeExpired);
+      await kvCliHandler.listTokens();
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
@@ -463,10 +461,6 @@ create
     'A comma separated list of up to a maximum of 8 EdgeWorker IDs. Use "all" to allow all EdgeWorkers. (REQUIRED)'
   )
   .option(
-    '--expiry <expiry>',
-    'Expiration date of the token. Format of the expiry date is ISO 8601 format: yyyy-mm-dd. (REQUIRED)'
-  )
-  .option(
     '--namespace <namespace>',
     'A comma separated list of up to a maximum of 20 namespace identifier and permission combinations. Use the namespace name combined with "+rwd" (read, write, delete) to set permissions. Ex: "namespace1+rwd,namespace2+rw" (REQUIRED)'
   )
@@ -482,7 +476,6 @@ create
     options['staging'] = options.staging || configUtils.searchProperty(STAGING);
     options['production'] = options.production || configUtils.searchProperty(PRODUCTION);
     options['ewIds'] = options.ewIds || configUtils.searchProperty(EW_IDS);
-    options['expiry'] = options.expiry || configUtils.searchProperty(EXPIRY);
     options['namespace'] = options.namespace || configUtils.searchProperty(NAMESPACE);
     options['save_path'] = options.save_path || configUtils.searchProperty(SAVE_PATH);
 
@@ -497,7 +490,6 @@ create
           'staging',
           'production',
           'ewids',
-          'expiry',
           'namespace',
         ];
         cliUtils.checkOptions(options, requiredOptions);
@@ -609,6 +601,24 @@ download
 
     try {
       await kvCliHandler.retrieveToken(tokenName, options);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on('--help', function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+const refresh = program
+  .command('refresh')
+  .description('Refresh an EdgeKV token');
+
+refresh
+  .command('token <tokenName>')
+  .description('Refresh an EdgeKV token')
+  .action(async function (tokenName) {
+    try {
+      await kvCliHandler.refreshToken(tokenName);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
