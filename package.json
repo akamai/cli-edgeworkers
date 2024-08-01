@@ -1,13 +1,13 @@
 {
   "name": "akamai-edgeworkers-cli",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "description": "A tool that makes it easier to manage Akamai EdgeWorkers code bundles and EdgeKV databases. Call the EdgeWorkers and EdgeKV API from the command line.",
   "repository": "https://github.com/akamai/cli-edgeworkers",
   "scripts": {
     "build": "npm run build-ts",
     "clean": "rm -rf node_modules",
     "build-ts": "tsc",
-    "postinstall": "npm run build",
+    "postinstall": "if test \"$NODE_ENV\" != \"production\" ; then npm run build ; fi",
     "lint": "eslint . --ext .ts",
     "lint:fix": "npm run lint -- --fix",
     "test": "npm run lint; npm run test:run",
