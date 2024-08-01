@@ -20,6 +20,7 @@ describe('ekv-services tests', () => {
   const mockTokenName = 'mockTokenName';
   const mockPermissionList = ['abc', 'efg', 'hij'];
   const mockEwids = ['123', '456', '789'];
+  const mockExpiry = 3600;
 
   describe('testing getNameSpaceList', () => {
     const mockResBody = ['space1', 'space2', 'space3'];
@@ -1127,6 +1128,7 @@ describe('ekv-services tests', () => {
       allowOnStaging: true,
       allowOnProduction: false,
       restrictToEwids: mockEwids,
+      expiry: mockExpiry,
       namespacePermissions: mockPermissionList,
     };
     const mockResponse = {
@@ -1154,7 +1156,8 @@ describe('ekv-services tests', () => {
         mockPermissionList,
         true,
         false,
-        mockEwids
+        mockEwids,
+        mockExpiry
       );
 
       expect(creationSpy).toHaveBeenCalled();
@@ -1175,7 +1178,8 @@ describe('ekv-services tests', () => {
         mockPermissionList,
         true,
         false,
-        mockEwids
+        mockEwids,
+        mockExpiry
       );
 
       expect(createEdgeKVTokenSpy).toHaveBeenCalled();
@@ -1238,6 +1242,53 @@ describe('ekv-services tests', () => {
   });
 
   describe('testing getTokenList', () => {
+    const mockResponse = {
+      statusCode: 200,
+      mockTokens: ['token1', 'token2', 'token3'],
+    };
+
+    test('URL path should not include includeExpired query parameter if passing false', async () => {
+      // Mock getJson() method
+      const getJsonSpy = jest.spyOn(httpEdge, 'getJson');
+      getJsonSpy.mockImplementation((path, timeout, metricType) => {
+        expect(path).not.toContain('?includeExpired');
+        expect(path).toContain(`${ekvService.EDGEKV_API_BASE}/tokens`);
+        expect(timeout).toEqual(defaultTimeout);
+        expect(metricType).toEqual(ekvMetrics.readTokenList);
+
+        return Promise.resolve({
+          body: mockResponse,
+        });
+      });
+
+      const getTokenListSpy = jest.spyOn(ekvService, 'getTokenList');
+      const res = await ekvService.getTokenList(false);
+
+      expect(getTokenListSpy).toHaveBeenCalled();
+      expect(res).toEqual(mockResponse);
+    });
+
+    test('URL path should include includeExpired query parameter if passing true', async () => {
+      // Mock getJson() method
+      const getJsonSpy = jest.spyOn(httpEdge, 'getJson');
+      getJsonSpy.mockImplementation((path, timeout, metricType) => {
+        expect(path).toContain(
+          `${ekvService.EDGEKV_API_BASE}/tokens?includeExpired=true`
+        );
+        expect(timeout).toEqual(defaultTimeout);
+        expect(metricType).toEqual(ekvMetrics.readTokenList);
+
+        return Promise.resolve({
+          body: mockResponse,
+        });
+      });
+
+      const getTokenListSpy = jest.spyOn(ekvService, 'getTokenList');
+      const res = await ekvService.getTokenList(true);
+
+      expect(getTokenListSpy).toHaveBeenCalled();
+      expect(res).toEqual(mockResponse);
+    });
 
     test('function should handle errors properly', async () => {
       // Mock getJson() method
@@ -1248,7 +1299,7 @@ describe('ekv-services tests', () => {
       });
 
       const getTokenListSpy = jest.spyOn(ekvService, 'getTokenList');
-      const error = await ekvService.getTokenList();
+      const error = await ekvService.getTokenList(false);
 
       expect(getTokenListSpy).toHaveBeenCalled();
       // Check the details of error object
