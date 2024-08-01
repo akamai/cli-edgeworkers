@@ -286,13 +286,15 @@ export function createEdgeKVToken(
   permissionList,
   allowOnStg: boolean,
   allowOnProd: boolean,
-  ewids: string[]
+  ewids: string[],
+  expiry
 ) {
   const body = {
     name: tokenName,
     allowOnProduction: allowOnProd,
     allowOnStaging: allowOnStg,
     restrictToEwids: ewids,
+    expiry: expiry,
     namespacePermissions: permissionList,
   };
   return httpEdge
@@ -317,10 +319,14 @@ export function getSingleToken(tokenName: string) {
     .catch((err) => error.handleError(err));
 }
 
-export function getTokenList() {
+export function getTokenList(incExpired: boolean) {
+  let queryString = '';
+  if (incExpired) {
+    queryString += `?includeExpired=${incExpired}`;
+  }
   return httpEdge
     .getJson(
-      `${EDGEKV_API_BASE}/tokens`,
+      `${EDGEKV_API_BASE}/tokens${queryString}`,
       cliUtils.getTimeout(DEFAULT_EKV_TIMEOUT),
       ekvMetrics.readTokenList
     )
@@ -334,19 +340,6 @@ export function revokeToken(tokenName: string) {
       `${EDGEKV_API_BASE}/tokens/${tokenName}`,
       cliUtils.getTimeout(DEFAULT_EKV_TIMEOUT),
       ekvMetrics.deleteToken
-    )
-    .then((r) => r.body)
-    .catch((err) => error.handleError(err));
-}
-
-export function refreshToken(tokenName: string) {
-  const body = undefined;
-  return httpEdge
-    .postJson(
-      `${EDGEKV_API_BASE}/tokens/${tokenName}/refresh`,
-      body,
-      cliUtils.getTimeout(DEFAULT_EKV_TIMEOUT),
-      ekvMetrics.refreshToken
     )
     .then((r) => r.body)
     .catch((err) => error.handleError(err));

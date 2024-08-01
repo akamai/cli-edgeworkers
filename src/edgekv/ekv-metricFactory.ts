@@ -13,7 +13,6 @@ export const ekvMetrics = {
   createToken: 'Create/token',
   readToken: 'Download/token',
   readTokenList: 'List/tokens',
-  refreshToken: 'Refresh/token',
   deleteToken: 'Delete/token',
   listAuthGroup: 'List/authgroup',
   modifyAuthGroup: 'Modify/authgroup',
