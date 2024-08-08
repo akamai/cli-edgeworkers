@@ -811,16 +811,20 @@ const log_level = program
 log_level
   .command('set')
   .argument('<edgeworker-identifier>')
-  .addArgument(new Argument('<network>').choices(['production', 'staging']))
-  .addArgument(new Argument('<level>').choices(cliUtils.LOG_LEVELS.map((level: string) => level.toLowerCase())))
+  .addArgument(new Argument('<network>', `(choices: ${cliUtils.staging}, ${cliUtils.production})`))
+  .addArgument(new Argument('<level>', `(choices: ${cliUtils.LOG_LEVELS.join(', ')})`))
   .option('--expires <time>', `Expire time for logging level change. Supports natural language input
        like: '+1h', 'Next Saturday', as well as ISO Timestamps. Use '${cliUtils.LL_NEVER_EXPIRE_STR}'
        for the change to never expire.`, cliUtils.LL_NEVER_EXPIRE_STR)
   .option('--ds2Id <id>', 'Datastream 2 ID to use alongside the default specified in bundle.json')
   .description('Set logging level for an Edgeworker.')
   .action(async function (ewId: number, network: string, level: string, options) {
+    if (network.toUpperCase() !== cliUtils.staging && network.toUpperCase() !== cliUtils.production)
+      cliUtils.logAndExit(1, `ERROR: Network parameter must be either ${cliUtils.staging} or ${cliUtils.production} - was: ${network}`);
+    if (!cliUtils.LOG_LEVELS.includes(level.toUpperCase()))
+      cliUtils.logAndExit(1, `ERROR: Level parameter must be one of: ${cliUtils.LOG_LEVELS.join(', ')} - was: ${level}`);
     try {
-      await cliHandler.setLogLevel(ewId, network, level, options);
+      await cliHandler.setLogLevel(ewId, network.toUpperCase(), level.toUpperCase(), options);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }

@@ -1762,9 +1762,6 @@ export async function setLogLevel(ewId: number, network: string, level: string, 
     expireTime = expireTime.toISOString();
   }
 
-  network = network.toUpperCase();
-  level = level.toUpperCase();
-
   const ds2Id = options['ds2Id'];
   if (ds2Id != null && Number.isNaN(parseInt(ds2Id))) {
     cliUtils.logAndExit(1, `ERROR: Specified Datastream 2 ID '${ds2Id}' is invalid`);
