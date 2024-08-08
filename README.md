@@ -5,52 +5,63 @@
 -->
 
 # EdgeWorkers CLI
-EdgeWorkers CLI
-The EdgeWorkers command line interface (CLI) expedites the process of registering, uploading, activating and testing EdgeWorkers functions on the Akamai Edge network.
 
-Go to [Akamai CLI for EdgeKV](docs/edgekv_cli.md) for information on how to manage EdgeKV databases and call the EdgeKV API from the command line.
+EdgeWorkers CLI
+The EdgeWorkers command line interface (CLI) expedites the process of registering, uploading, activating and testing
+EdgeWorkers functions on the Akamai Edge network.
+
+Go to [Akamai CLI for EdgeKV](docs/edgekv_cli.md) for information on how to manage EdgeKV databases and call the EdgeKV
+API from the command line.
 
 ## Technical Setup Requirements
+
 To use this tool you need:
-* [Akamai CLI](https://github.com/akamai/cli) installed. 
-    * If you do not have the CLI and are using [Homebrew](https://brew.sh/) on a Mac, run this command: `brew install akamai`
-    * You may also [download](https://github.com/akamai/cli) OS-specific CLI binaries or a Docker image
-* Valid EdgeGrid credentials configured via Akamai Control Center (see [Get Started with APIs](https://developer.akamai.com/api/getting-started))
+
+* [Akamai CLI](https://github.com/akamai/cli) installed.
+  * If you do not have the CLI and are using [Homebrew](https://brew.sh/) on a Mac, run this
+    command: `brew install akamai`
+  * You may also [download](https://github.com/akamai/cli) OS-specific CLI binaries or a Docker image
+* Valid EdgeGrid credentials configured via Akamai Control Center (
+  see [Get Started with APIs](https://developer.akamai.com/api/getting-started))
 * Node version 14 or higher
 
-
 ## Install or Update the EdgeWorkers
-* If you do not have the EdgeWorkers CLI package installed, use the following Akamai CLI command to install the latest EdgeWorkers CLI package:
+
+* If you do not have the EdgeWorkers CLI package installed, use the following Akamai CLI command to install the latest
+  EdgeWorkers CLI package:
 
 Usage:  
 `akamai install edgeworkers`
 
-* If you already have the CLI installed, use the following Akamai CLI command to install the latest EdgeWorkers CLI package that includes EdgeKV functionality:
+* If you already have the CLI installed, use the following Akamai CLI command to install the latest EdgeWorkers CLI
+  package that includes EdgeKV functionality:
 
 Usage:  
 `akamai update edgeworkers`
 
 ## Provide Default Config Properties
 
-The EdgeWorkers CLI lets you set default values for the command options. There are two ways to create a config file:  
+The EdgeWorkers CLI lets you set default values for the command options. There are two ways to create a config file:
 
 1. Create a config file `~/.akamai-cli/ew-config`, and store the properties as follows:
-```bash
-[default]
-edgeworkerName=testEW
-groupId=12345
-versionId=1-0-2
-```
-
+  ```bash
+  [default]
+  edgeworkerName=testEW
+  groupId=12345
+  versionId=1-0-2
+  ```
 2. Use the `config` command to set default properties:
-`akamai edgeworkers config set <key> <value>`
+   `akamai edgeworkers config set <key> <value>`
 
 Available property names are displayed [here](./src/utils/constants.ts).
 
 ## Overview of Commands
-EdgeWorkers CLI enables you to manage EdgeWorkers functions by calling the [EdgeWorkers API](https://developer.akamai.com/api/web_performance/edgeworkers/v1.html).
+
+EdgeWorkers CLI enables you to manage EdgeWorkers functions by calling
+the [EdgeWorkers API](https://developer.akamai.com/api/web_performance/edgeworkers/v1.html).
 
 Conventions:
+
 * optional args `[]`
 * required args `<>`
 
@@ -58,101 +69,115 @@ Usage:
 `akamai edgeworkers [options] [command]`
 
 Options:
- 
-| Syntax | Description |
-| - | - |
-| -V, --version | Display the version number for the EdgeWorkers CLI program. |
-| --debug | Show debug information. |
-| --edgerc `<path>` | Use credentials in `edgerc` file for command. (Default file location is _~/.edgerc_) |
-| --section `<name>` | Use this section in `edgerc` file. (Default section is _[default]_)|
-| --configSection `<configSection>` | Use this section in the `ew-config` file that contains the default config properties set. (Default section is _[default]_)|
-| --timeout `<timeout>` | You can specify a timeout value for a command in seconds to override the 2 minute default. For example, if you add "--timeout 10" to a command, it will timeout if the server takes more than 10 second to respond. |
-| --json `[path]` | Write CLI output as JSON to optionally provided path.  If not path provided, write JSON output to CLI home directory |
-| --jsonout | Write CLI output as JSON to stdout. |
-| -h, --help | Display usage information for EdgeWorkers CLI. |
- 
+
+| Syntax                            | Description                                                                                                                                                                                                         |
+|-----------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -V, --version                     | Display the version number for the EdgeWorkers CLI program.                                                                                                                                                         |
+| --debug                           | Show debug information.                                                                                                                                                                                             |
+| --edgerc `<path>`                 | Use credentials in `edgerc` file for command. (Default file location is _~/.edgerc_)                                                                                                                                |
+| --section `<name>`                | Use this section in `edgerc` file. (Default section is _[default]_)                                                                                                                                                 |
+| --configSection `<configSection>` | Use this section in the `ew-config` file that contains the default config properties set. (Default section is _[default]_)                                                                                          |
+| --timeout `<timeout>`             | You can specify a timeout value for a command in seconds to override the 2 minute default. For example, if you add "--timeout 10" to a command, it will timeout if the server takes more than 10 second to respond. |
+| --json `[path]`                   | Write CLI output as JSON to optionally provided path.  If not path provided, write JSON output to CLI home directory                                                                                                |
+| --jsonout                         | Write CLI output as JSON to stdout.                                                                                                                                                                                 |
+| -h, --help                        | Display usage information for EdgeWorkers CLI.                                                                                                                                                                      |
+
 Commands:
 
-| Command \| Alias | Description |
-| - | - |
-| help `[command]` | Display usage information for the given command. |
-| list-groups \| lg `[group-identifier]` | Customer Developer can find their EdgeWorkers access level per Luna Access Control Group. |
-| list-ids \| li `[options] [edgeworker-identifier]` | List EdgeWorker ids currently registered. |
-| register \| create-id `<group-identifier> <edgeworker-name>` | Register a new EdgeWorker id to reference in Property Manager behavior. |
-| update-id \| ui `<edgeworker-identifier> <group-identifier> <edgeworker-name> [options]` | Allows Customer Developer to update an existing EdgeWorker Identifier's Luna ACG or Name attributes. |
-| delete-id \| delete-id `[options] <edgeworker-identifier>` | Permanently delete an existing EdgeWorker Id. |
-| list-versions \| lv `<edgeworker-identifier> [version-identifier]` | List Version information of a given EdgeWorker Id. |
-| upload \| create-version `[options] <edgeworker-identifier>` | Creates a new version of a given EdgeWorker Id which includes the code bundle. |
-| delete-version \| delete-version `[options] <edgeworker-identifier> <version-identifier>` | Permanently delete an existing version of a given EdgeWorker Id. |
-| download \| download-version `[options] <edgeworker-identifier> <version-identifier>` | Download the code bundle of an EdgeWorker version. |
-| status \| list-activations `[options] <edgeworker-identifier>` | List Activation status of a given EdgeWorker Id. |
-| activate \| av `<edgeworker-identifier> <network> <versionId>` | Activate a Version for a given EdgeWorker Id on an Akamai Network. |
-| deactivate \| deact `<edgeworker-identifier> <network> <versionId>` | Deactivate a Version for a given EdgeWorker Id on an Akamai Network. |
-| validate \| vv `<bundlePath>` | Validates a code bundle version without uploading the code bundle. |
-| create-auth-token \| auth `[options] <hostName>` | Generates an authentication token that can be used to get detailed EdgeWorker debug response headers. You need at least version 1.7.1 of the EdgeWorkers CLI to run this command. |
-| clone \| clone `<edgeworker-identifier> <resourceTierId> [options]` | Clones an EdgeWorker from the existing EdgeWorker Id. |
-| list-contracts \| li-contracts `[options]` | List of contract ids that user has access to. |
-| list-properties \| lp `<edgeworker-identifier> [options]` | List of properties associated with a given EdgeWorker Id. |
-| list-limits \| li-limits | View the various limits EdgeWorkers imposes on the number of activations, EdgeWorkers IDs, and versions you can deploy. |
-| list-restiers \| li-restiers `[options]` | List Resource Tiers that can be used to create or clone EdgeWorker Id. |
-| show-restier \| show-restier `<edgeworker-identifier>` | Customers can get Resource Tier details for a specific EdgeWorker Id. |
-| get reports | Get a list of all available EdgeWorkers reports. |
-| get report `<reportId> <edgeworker-identifier> [options]` | Get an EdgeWorkers report for a specific EdgeWorker ID. |
-| config list | Get all values in the config file. |
-| config get `<key>` | Get a config value from a section in the config file. |
-| config set `<key> <value>` | Set a config value in a section. |
-| config save `-p <properties>` | Save config properties in a section. |
-| config unset `<key>` | Unset a config value in a section. |
+| Command \| Alias                                                                              | Description                                                                                                                                                                       |
+|-----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| help `[command]`                                                                              | Display usage information for the given command.                                                                                                                                  |
+| list-groups \| lg `[group-identifier]`                                                        | Customer Developer can find their EdgeWorkers access level per Luna Access Control Group.                                                                                         |
+| list-ids \| li `[options] [edgeworker-identifier]`                                            | List EdgeWorker ids currently registered.                                                                                                                                         |
+| register \| create-id `<group-identifier> <edgeworker-name>`                                  | Register a new EdgeWorker id to reference in Property Manager behavior.                                                                                                           |
+| update-id \| ui `<edgeworker-identifier> <group-identifier> <edgeworker-name> [options]`      | Allows Customer Developer to update an existing EdgeWorker Identifier's Luna ACG or Name attributes.                                                                              |
+| delete-id \| delete-id `[options] <edgeworker-identifier>`                                    | Permanently delete an existing EdgeWorker Id.                                                                                                                                     |
+| list-versions \| lv `<edgeworker-identifier> [version-identifier]`                            | List Version information of a given EdgeWorker Id.                                                                                                                                |
+| upload \| create-version `[options] <edgeworker-identifier>`                                  | Creates a new version of a given EdgeWorker Id which includes the code bundle.                                                                                                    |
+| delete-version \| delete-version `[options] <edgeworker-identifier> <version-identifier>`     | Permanently delete an existing version of a given EdgeWorker Id.                                                                                                                  |
+| download \| download-version `[options] <edgeworker-identifier> <version-identifier>`         | Download the code bundle of an EdgeWorker version.                                                                                                                                |
+| download-revision \| dr `[options] <edgeworker-identifier> <revision-identifier>`             | Download the combined code bundle that contains the code and the dependencies that the EdgeWorker executes.                                                                       |
+| status \| list-activations `[options] <edgeworker-identifier>`                                | List Activation status of a given EdgeWorker Id.                                                                                                                                  |
+| list-revisions \| lr `[options] <edgeworker-identifier>`                                      | List the revision history for a given EdgeWorker ID.                                                                                                                              |
+| get-revision \| gr `<edgeworker-identifier> <revision-identifier>`                            | Get details for a specific revision.                                                                                                                                              |
+| compare-revisions \| cr `<edgeworker-identifier> <revision-identifier> <revision-identifier>` | View dependency differences between two revisions of the same EdgeWorker.                                                                                                         |
+| activate-revision \| ar `[options] <edgeworker-identifier> <revision-identifier>`             | Activate a revision for a given EdgeWorker Id on Akamai Network.                                                                                                                  |
+| pin-revision `[options] <edgeworker-identifier> <revision-identifier>`                        | Pin an active revision for a given EdgeWorker ID.                                                                                                                                 |
+| unpin-revision `[options] <edgeworker-identifier> <revision-identifier>`                      | Unpin an active pinned revision for a given EdgeWorker ID.                                                                                                                        |
+| get-revision-bom \| gb `[options] <edgeworker-identifier> <revision-identifier>`              | View details for a specific revision of a composite bundle.                                                                                                                       |
+| list-revision-activations \| lra `[options] <edgeworker-identifier>`                          | List Revision Activation status of a given EdgeWorker ID.                                                                                                                         |
+| activate \| av `<edgeworker-identifier> <network> <versionId>`                                | Activate a Version for a given EdgeWorker Id on an Akamai Network.                                                                                                                |
+| deactivate \| deact `<edgeworker-identifier> <network> <versionId>`                           | Deactivate a Version for a given EdgeWorker Id on an Akamai Network.                                                                                                              |
+| validate \| vv `<bundlePath>`                                                                 | Validates a code bundle version without uploading the code bundle.                                                                                                                |
+| create-auth-token \| auth `[options] <hostName>`                                              | Generates an authentication token that can be used to get detailed EdgeWorker debug response headers. You need at least version 1.7.1 of the EdgeWorkers CLI to run this command. |
+| clone \| clone `<edgeworker-identifier> <resourceTierId> [options]`                           | Clones an EdgeWorker from the existing EdgeWorker Id.                                                                                                                             |
+| list-contracts \| li-contracts `[options]`                                                    | List of contract ids that user has access to.                                                                                                                                     |
+| list-properties \| lp `<edgeworker-identifier> [options]`                                     | List of properties associated with a given EdgeWorker Id.                                                                                                                         |
+| list-limits \| li-limits                                                                      | View the various limits EdgeWorkers imposes on the number of activations, EdgeWorkers IDs, and versions you can deploy.                                                           |
+| list-restiers \| li-restiers `[options]`                                                      | List Resource Tiers that can be used to create or clone EdgeWorker Id.                                                                                                            |
+| show-restier \| show-restier `<edgeworker-identifier>`                                        | Customers can get Resource Tier details for a specific EdgeWorker Id.                                                                                                             |
+| get reports                                                                                   | Get a list of all available EdgeWorkers reports.                                                                                                                                  |
+| get report `<reportId> <edgeworker-identifier> [options]`                                     | Get an EdgeWorkers report for a specific EdgeWorker ID.                                                                                                                           |
+| config list                                                                                   | Get all values in the config file.                                                                                                                                                |
+| config get `<key>`                                                                            | Get a config value from a section in the config file.                                                                                                                             |
+| config set `<key> <value>`                                                                    | Set a config value in a section.                                                                                                                                                  |
+| config save `-p <properties>`                                                                 | Save config properties in a section.                                                                                                                                              |
+| config unset `<key>`                                                                          | Unset a config value in a section.                                                                                                                                                |
 
 ### List Permission Groups with EdgeWorkers Access
-Customer Developer can find their EdgeWorkers access level per Luna Access Control Group.  
+
+Customer Developer can find their EdgeWorkers access level per Luna Access Control Group.
 
 Usage: `akamai edgeworkers list-groups [options] [group-identifier]`
 
-| Option | Description |
-| - | - |
-| -h, --help  | output usage information |
+| Option     | Description              |
+|------------|--------------------------|
+| -h, --help | output usage information |
 
-| Argument | Existence | Description |
-| - | - | - |
-| group-identifier | optional | Luna Access Group value (usually number) to check for EdgeWorkers permissions |
+| Argument         | Existence | Description                                                                   |
+|------------------|-----------|-------------------------------------------------------------------------------|
+| group-identifier | optional  | Luna Access Group value (usually number) to check for EdgeWorkers permissions |
 
 #### Key Details
+
 1. Output is filtered to only those Luna Access Control Groups that have at least one EdgeWorkers capability.
 
 2. Capabilities can be: VIEW,VIEW_VERSION,EDIT,VIEW_ACTIVATION,CREATE_VERSION,ACTIVATE
 
 ### List Existing EdgeWorker Identifiers
+
 List EdgeWorker ids currently registered.
 
 Usage: `akamai edgeworkers list-ids [options] [edgeworker-identifier]`
 
-| Option | Description |
-| - | - |
-| -h, --help  | output usage information |
-| --groupId `<groupId>` | Filter EdgeWorker Id list by Permission Group |
-| --resourceTierId `<resourceTierId>` | Filter EdgeWorker Id by Resource Tier |
+| Option                              | Description                                   |
+|-------------------------------------|-----------------------------------------------|
+| -h, --help                          | output usage information                      |
+| --groupId `<groupId>`               | Filter EdgeWorker Id list by Permission Group |
+| --resourceTierId `<resourceTierId>` | Filter EdgeWorker Id by Resource Tier         |
 
-| Argument | Existence | Description |
-| - | - | - |
-| edgeworker-identifier | optional | A unique integer handle to an EdgeWorkers instance |
+| Argument              | Existence | Description                                        |
+|-----------------------|-----------|----------------------------------------------------|
+| edgeworker-identifier | optional  | A unique integer handle to an EdgeWorkers instance |
 
 ### Register New EdgeWorker Identifier
+
 Register a new EdgeWorker id to reference in Property Manager behavior.
 
 Usage: `akamai edgeworkers register [options] <group-identifier> <edgeworker-name>`
 
-| Option | Description |
-| - | - |
+| Option           | Description                                                      |
+|------------------|------------------------------------------------------------------|
 | --resourceTierId | New Resource tier id to which the EdgeWorker will be associated. |
-| -h, --help  | output usage information |
+| -h, --help       | output usage information                                         |
 
-| Argument | Existence | Description |
-| - | - | - |
-| group-identifier | required | Luna Access Group value (usually number) to check for EdgeWorkers permissions |
-| edgeworker-name | required | Human readable short label describing an EdgeWorkers instance |
+| Argument         | Existence | Description                                                                   |
+|------------------|-----------|-------------------------------------------------------------------------------|
+| group-identifier | required  | Luna Access Group value (usually number) to check for EdgeWorkers permissions |
+| edgeworker-name  | required  | Human readable short label describing an EdgeWorkers instance                 |
 
 #### Key Details
+
 1. Location response header will be provided with new EdgeWorker Id.
 
 2. EdgeWorker id details response body (JSON) will be provided with 201 response code.
@@ -160,82 +185,92 @@ Usage: `akamai edgeworkers register [options] <group-identifier> <edgeworker-nam
 3. To disable prompts for automation purpose "resourceTierId" can be provided as input.
 
 ### Update EdgeWorker Identifier's Information
+
 Allows Customer Developer to update an existing EdgeWorker Identifier's Luna ACG or Name attributes.
 
 Usage: `akamai edgeworkers update-id [options] <edgeworker-identifier> <group-identifier> <edgeworker-name>`
 
-| Option | Description |
-| - | - |
+| Option           | Description                                                     |
+|------------------|-----------------------------------------------------------------|
 | --resourceTierId | New Resource tier id to which the EdgeWorker will be associated |
-| -h, --help  | output usage information |
+| -h, --help       | output usage information                                        |
 
-| Argument | Existence | Description |
-| - | - | - |
-| edgeworker-identifier | required | A unique integer handle to an EdgeWorkers instance |
-| group-identifier | required | Luna Access Group value (usually number) to check for EdgeWorkers permissions |
-| edgeworker-name | required | Human readable short label describing an EdgeWorkers instance |
+| Argument              | Existence | Description                                                                   |
+|-----------------------|-----------|-------------------------------------------------------------------------------|
+| edgeworker-identifier | required  | A unique integer handle to an EdgeWorkers instance                            |
+| group-identifier      | required  | Luna Access Group value (usually number) to check for EdgeWorkers permissions |
+| edgeworker-name       | required  | Human readable short label describing an EdgeWorkers instance                 |
 
 #### Key Details
+
 1. API requires that both groupId and name be provided even if only changing one of these attributes.
 
 2. EdgeWorker id details response body (JSON) will be provided with 200 response code.
 
-3. Resource Tier ID provided should be same as the one the EdgeWorker ID already has. In order to provide a different resource tier id, please use the clone operation.
+3. Resource Tier ID provided should be same as the one the EdgeWorker ID already has. In order to provide a different
+   resource tier id, please use the clone operation.
 
 ### Delete Existing EdgeWorker Identifier
+
 Permanently delete an existing EdgeWorker Identifier.
 
 Usage: `akamai edgeworkers delete-id [options] <edgeworker-identifier>`
 
-| Option | Description |
-| - | - |
-| -h, --help  | output usage information |
+| Option     | Description                           |
+|------------|---------------------------------------|
+| -h, --help | output usage information              |
 | --noPrompt | Skip the deletion confirmation prompt |
 
-| Argument | Existence | Description |
-| - | - | - |
-| edgeworker-identifier | required | A unique integer handle to an EdgeWorkers instance |
+| Argument              | Existence | Description                                        |
+|-----------------------|-----------|----------------------------------------------------|
+| edgeworker-identifier | required  | A unique integer handle to an EdgeWorkers instance |
 
 #### Key Details
-1. Deleting an EdgeWorker ID is only possible if it doesn't have any version currently active or being activated on the Akamai network.
+
+1. Deleting an EdgeWorker ID is only possible if it doesn't have any version currently active or being activated on the
+   Akamai network.
 
 2. Ensure that there are no active properties associated with an EdgeWorker before deletion.
 
 ### List EdgeWorker Versions
+
 List Version information of a given EdgeWorker Id.
 
 Usage: `akamai edgeworkers list-versions [options] <edgeworker-identifier> [version-identifier]`
 
-| Option | Description |
-| - | - |
-| -h, --help  | output usage information |
+| Option     | Description              |
+|------------|--------------------------|
+| -h, --help | output usage information |
 
-| Argument | Existence | Description |
-| - | - | - |
-| edgeworker-identifier | required | A unique integer handle to an EdgeWorkers instance |
-| version-identifier | optional | A unique integer handle to version of an EdgeWorkers instance |
+| Argument              | Existence | Description                                                   |
+|-----------------------|-----------|---------------------------------------------------------------|
+| edgeworker-identifier | required  | A unique integer handle to an EdgeWorkers instance            |
+| version-identifier    | optional  | A unique integer handle to version of an EdgeWorkers instance |
 
 #### Key Details
+
 1. Result set is sorted by an upload sequence value that is not displayed (an internal incremented integer).
 
 2. EdgeWorker versions are customer defined strings.
 
 ### Upload New EdgeWorker Version
+
 Creates a new version of a given EdgeWorker Id which includes the code bundle.
 
 Usage: `akamai edgeworkers upload [options] <edgeworker-identifier>`
 
-| Option | Description |
-| - | - |
-| -h, --help  | output usage information |
-| --bundle `<bundlePath>` | Path to bundle file in tgz format |
+| Option                         | Description                                                   |
+|--------------------------------|---------------------------------------------------------------|
+| -h, --help                     | output usage information                                      |
+| --bundle `<bundlePath>`        | Path to bundle file in tgz format                             |
 | --codeDir `<workingDirectory>` | Working directory that includes main.js and bundle.json files |
 
-| Argument | Existence | Description |
-| - | - | - |
-| edgeworker-identifier | required | A unique integer handle to an EdgeWorkers instance |
+| Argument              | Existence | Description                                        |
+|-----------------------|-----------|----------------------------------------------------|
+| edgeworker-identifier | required  | A unique integer handle to an EdgeWorkers instance |
 
 #### Key Details
+
 1. One of either `--bundle` or `--codeDir` (but not both) must be provided.
 
 2. Code bundles paths and files must be found on the local filesystem.
@@ -250,7 +285,8 @@ Usage: `akamai edgeworkers upload [options] <edgeworker-identifier>`
 
 7. `--codeDir` will build the tarball (tgz) file if file validation succeeds.
 
-8. Service will compare new tarball's checksum with previously uploaded tarballs for the same EdgeWorker id (`ewId`). If a match is found, the new version creation is disallowed.
+8. Service will compare new tarball's checksum with previously uploaded tarballs for the same EdgeWorker id (`ewId`). If
+   a match is found, the new version creation is disallowed.
 
 9. `versionId` is customer generated and will be pulled from bundle.json.
 
@@ -259,80 +295,268 @@ Usage: `akamai edgeworkers upload [options] <edgeworker-identifier>`
 11. EdgeWorker version details response body (JSON) will be provided with 201 response code.
 
 ### Delete Existing EdgeWorker Version
+
 Permanently delete an existing version of a given EdgeWorker Id.
 
 Usage: `akamai edgeworkers delete-version [options] <edgeworker-identifier> <version-identifier>`
 
-| Option | Description |
-| - | - |
-| -h, --help  | output usage information |
+| Option     | Description                           |
+|------------|---------------------------------------|
+| -h, --help | output usage information              |
 | --noPrompt | Skip the deletion confirmation prompt |
 
-| Argument | Existence | Description |
-| - | - | - |
-| edgeworker-identifier | required | A unique integer handle to an EdgeWorkers instance |
-| version-identifier | required | A unique integer handle to version of an EdgeWorkers instance |
+| Argument              | Existence | Description                                                   |
+|-----------------------|-----------|---------------------------------------------------------------|
+| edgeworker-identifier | required  | A unique integer handle to an EdgeWorkers instance            |
+| version-identifier    | required  | A unique integer handle to version of an EdgeWorkers instance |
 
 #### Key Details
+
 1. Deleting a version is only possible if it is not currently active or being activated on the Akamai network.
 
 2. If the version is currently active, it will have to be deactivated before it can be deleted.
 
 ### Download an EdgeWorkers Code Bundle
+
 Download the code bundle of an EdgeWorker version.
 
 Usage: `akamai edgeworkers download [options] <edgeworker-identifier> <version-identifier>`
 
-| Option | Description |
-| - | - |
-| -h, --help  | output usage information |
+| Option                          | Description                                                                           |
+|---------------------------------|---------------------------------------------------------------------------------------|
+| -h, --help                      | output usage information                                                              |
 | --downloadPath `<downloadPath>` | Path to store downloaded bundle file; defaults to CLI home directory if not provided. |
 
-| Argument | Existence | Description |
-| - | - | - |
-| edgeworker-identifier | required | A unique integer handle to an EdgeWorkers instance |
-| version-identifier | required | A unique integer handle to version of an EdgeWorkers instance |
+| Argument              | Existence | Description                                                   |
+|-----------------------|-----------|---------------------------------------------------------------|
+| edgeworker-identifier | required  | A unique integer handle to an EdgeWorkers instance            |
+| version-identifier    | required  | A unique integer handle to version of an EdgeWorkers instance |
 
 #### Key Details
-1. If `--downloadPath` is not provided or is not found on local filesystem, an AkamaiCLI cache sub-directory will be used:
-_`<CLI_CACHE_PATH>/edgeworkers-cli/edgeworkers/<ewid>/`_
+
+1. If `--downloadPath` is not provided or is not found on local filesystem, an AkamaiCLI cache sub-directory will be
+   used:
+   _`<CLI_CACHE_PATH>/edgeworkers-cli/edgeworkers/<ewid>/`_
+
+### Download an EdgeWorkers Combined Code Bundle
+
+Download the combined code bundle that contains the code and the dependencies that the EdgeWorker executes.
+
+Usage: `akamai edgeworkers download-revision [options] <edgeworker-identifier> <revision-identifier>`
+
+| Option                          | Description                                                                                    |
+|---------------------------------|------------------------------------------------------------------------------------------------|
+| -h, --help                      | output usage information                                                                       |
+| --downloadPath `<downloadPath>` | Path to store downloaded combined bundle file; defaults to CLI home directory if not provided. |
+
+| Argument              | Existence | Description                                                           |
+|-----------------------|-----------|-----------------------------------------------------------------------|
+| edgeworker-identifier | required  | A unique integer handle to an EdgeWorkers instance                    |
+| revision-identifier   | required  | A unique revision identifier to a specific of an EdgeWorkers instance |
+
+#### Key Details
+
+1. If `--downloadPath` is not provided or is not found on local filesystem, an AkamaiCLI cache sub-directory will be
+   used:
+   _`<CLI_CACHE_PATH>/edgeworkers-cli/edgeworkers/<revid>/`_
 
 ### List EdgeWorker Version Activation Status
+
 List Activation status of a given EdgeWorker Id.
 
 Usage: `akamai edgeworkers status [options] <edgeworker-identifier>`
 
-| Option | Description |
-| - | - |
-| -h, --help  | output usage information |
-| --versionId `<versionId>` | Version identifier |
-| --activationId `<activationId>` | Activation identifier |
-| --activeOnNetwork | Limits results to show only currently activate versions
-| --network `<network>`| Limits the results to versions that were activated on a specific network (STAGING or PRODUCTION)
+| Option                          | Description                                                                                      |
+|---------------------------------|--------------------------------------------------------------------------------------------------|
+| -h, --help                      | output usage information                                                                         |
+| --versionId `<versionId>`       | Version identifier                                                                               |
+| --activationId `<activationId>` | Activation identifier                                                                            |
+| --activeOnNetwork               | Limits results to show only currently activate versions                                          |
+| --network `<network>`           | Limits the results to versions that were activated on a specific network (STAGING or PRODUCTION) |
 
-| Argument | Existence | Description |
-| - | - | - |
-| edgeworker-identifier | required | A unique integer handle to an EdgeWorkers instance |
+| Argument              | Existence | Description                                        |
+|-----------------------|-----------|----------------------------------------------------|
+| edgeworker-identifier | required  | A unique integer handle to an EdgeWorkers instance |
 
 #### Key Details
+
 1. You may not provide both the Version and the Activation identifiers.
 
+### List EdgeWorker Revision History
+
+List the revision history for a given EdgeWorker ID.
+
+Usage: `akamai edgeworkers list-revisions [options] <edgeworker-identifier>`
+
+| Option                          | Description                                                                                      |
+|---------------------------------|--------------------------------------------------------------------------------------------------|
+| -h, --help                      | output usage information                                                                         |
+| --versionId `<versionId>`       | Version identifier                                                                               |
+| --activationId `<activationId>` | Activation identifier                                                                            |
+| --pinnedOnly                    | Limits results to show only currently or previously pinned revisions                             |
+| --currentlyPinned               | Limits results to show only revisions that are currently pinned                                  |
+| --network `<network>`           | Limits the results to versions that were activated on a specific network (STAGING or PRODUCTION) |
+
+| Argument              | Existence | Description                                        |
+|-----------------------|-----------|----------------------------------------------------|
+| edgeworker-identifier | required  | A unique integer handle to an EdgeWorkers instance |
+
+#### Key Details
+
+1. Network must be either STAGING or PRODUCTION. Capitalization will be normalized to uppercase.
+
+### Get Revision details of an EdgeWorker
+
+Get details for a specific revision.
+
+Usage: `akamai edgeworkers get-revision [options] <edgeworker-identifier> <revision-identifier>`
+
+| Option     | Description              |
+|------------|--------------------------|
+| -h, --help | output usage information |
+
+| Argument              | Existence | Description                                        |
+|-----------------------|-----------|----------------------------------------------------|
+| edgeworker-identifier | required  | A unique integer handle to an EdgeWorkers instance |
+| revision-identifier   | required  | Revision identifier                                |
+
+### Compare two Revisions details of an EdgeWorker
+
+View dependency differences between two revisions of the same EdgeWorker.
+
+Usage: `akamai edgeworkers compare-revisions [options] <edgeworker-identifier> <revision-identifier> <revision-identifier>`
+
+| Option     | Description              |
+|------------|--------------------------|
+| -h, --help | output usage information |
+
+| Argument              | Existence | Description                                        |
+|-----------------------|-----------|----------------------------------------------------|
+| edgeworker-identifier | required  | A unique integer handle to an EdgeWorkers instance |
+| revision-identifier   | required  | First Revision identifier                          |
+| revision-identifier   | required  | Second Revision identifier                         |
+
+#### Key Details
+
+1. Both the revision identifiers must be different.
+
+### Activate a Revision of an EdgeWorker
+
+Activate a revision for a given EdgeWorker ID on an Akamai Network.
+
+Usage: `akamai edgeworkers activate-revision [options] <edgeworker-identifier> <revision-identifier>`
+
+| Option     | Description                                           |
+|------------|-------------------------------------------------------|
+| -h, --help | output usage information                              |
+| --note     | Note to specify why the revision is being reactivated |
+
+| Argument              | Existence | Description                                        |
+|-----------------------|-----------|----------------------------------------------------|
+| edgeworker-identifier | required  | A unique integer handle to an EdgeWorkers instance |
+| revision-identifier   | required  | Revision identifier                                |
+
+#### Key Details
+
+1. The revision will be reactivated on the same network (PRODUCTION or STAGING) that it was previously active on.
+
+### Pin Revision of an EdgeWorker
+
+Pin an active revision for a given EdgeWorker ID.
+
+Usage: `akamai edgeworkers pin-revision [options] <edgeworker-identifier> <revision-identifier>`
+
+| Option     | Description                                      |
+|------------|--------------------------------------------------|
+| -h, --help | output usage information                         |
+| --note     | Note to specify why the revision is being pinned |
+
+| Argument              | Existence | Description                                        |
+|-----------------------|-----------|----------------------------------------------------|
+| edgeworker-identifier | required  | A unique integer handle to an EdgeWorkers instance |
+| revision-identifier   | required  | Revision identifier                                |
+
+#### Key Details
+
+1. The revision must be activated before pinning.
+
+### Unpin Revision of an EdgeWorker
+
+Unpin an active pinned revision for a given EdgeWorker ID.
+
+Usage: `akamai edgeworkers unpin-revision [options] <edgeworker-identifier> <revision-identifier>`
+
+| Option     | Description                                        |
+|------------|----------------------------------------------------|
+| -h, --help | output usage information                           |
+| --note     | Note to specify why the revision is being unpinned |
+
+| Argument              | Existence | Description                                        |
+|-----------------------|-----------|----------------------------------------------------|
+| edgeworker-identifier | required  | A unique integer handle to an EdgeWorkers instance |
+| revision-identifier   | required  | Revision identifier                                |
+
+#### Key Details
+
+1. The revision must be pinned before unpinning.
+
+### Get Revision details of an EdgeWorker
+
+View details for a specific revision of a composite bundle.
+
+Usage: `akamai edgeworkers get-revision-bom [options] <edgeworker-identifier> <revision-identifier>`
+
+| Option                     | Description                                                             |
+|----------------------------|-------------------------------------------------------------------------|
+| -h, --help                 | output usage information                                                |
+| --activeVersions           | Limit results to show only active versions                              |
+| --currentlyPinnedRevisions | Shows additional information about the revision that's currently pinned |
+
+| Argument              | Existence | Description                                        |
+|-----------------------|-----------|----------------------------------------------------|
+| edgeworker-identifier | required  | A unique integer handle to an EdgeWorkers instance |
+| revision-identifier   | required  | Revision identifier                                |
+
+### List Revision activations of an EdgeWorker
+
+List Revision Activation status of a given EdgeWorker ID.
+
+Usage: `akamai edgeworkers list-revision-activations [options] <edgeworker-identifier>`
+
+| Option         | Description                                                                                      |
+|----------------|--------------------------------------------------------------------------------------------------|
+| -h, --help     | output usage information                                                                         |
+| --versionId    | Version Identifier                                                                               |
+| --activationId | Activation Identifier                                                                            |
+| --network      | Limits the results to versions that were activated on a specific network (STAGING or PRODUCTION) |
+
+| Argument              | Existence | Description                                        |
+|-----------------------|-----------|----------------------------------------------------|
+| edgeworker-identifier | required  | A unique integer handle to an EdgeWorkers instance |
+
+#### Key Details
+
+1. You may not provide both the Version and the Activation identifiers.
+2. Network must be either STAGING or PRODUCTION. Capitalization will be normalized to uppercase.
+
 ### Activate an EdgeWorker
+
 Activate a Version for a given EdgeWorker Id on an Akamai Network.
 
 Usage: `akamai edgeworkers activate [options] <edgeworker-identifier> <network> <version-identifier>`
 
-| Option | Description |
-| - | - |
-| -h, --help  | output usage information |
+| Option     | Description              |
+|------------|--------------------------|
+| -h, --help | output usage information |
 
-| Argument | Existence | Description |
-| - | - | - |
-| edgeworker-identifier | required | A unique integer handle to an EdgeWorkers instance |
-| network | required | Label for which Akamai Network (STAGING or PRODUCTION) activation should be sent to
-| version-identifier | required | A unique integer handle to version of an EdgeWorkers instance |
+| Argument              | Existence | Description                                                                         |
+|-----------------------|-----------|-------------------------------------------------------------------------------------|
+| edgeworker-identifier | required  | A unique integer handle to an EdgeWorkers instance                                  |
+| network               | required  | Label for which Akamai Network (STAGING or PRODUCTION) activation should be sent to |
+| version-identifier    | required  | A unique integer handle to version of an EdgeWorkers instance                       |
 
 #### Key Details
+
 1. Network must be either STAGING or PRODUCTION. Capitalization will be normalized to uppercase.
 
 2. Location response header will be provided with new EdgeWorker Activation id.
@@ -340,39 +564,43 @@ Usage: `akamai edgeworkers activate [options] <edgeworker-identifier> <network> 
 3. EdgeWorker activation details response body (JSON) will be provided with 201 response code.
 
 ### Validate an EdgeWorkers Code Bundle
+
 Validates a code bundle version without uploading the code bundle
 
 Usage: `akamai edgeworkers validate [options] <bundlePath>`
 
-| Option | Description |
-| - | - |
-| -h, --help  | output usage information |
+| Option     | Description              |
+|------------|--------------------------|
+| -h, --help | output usage information |
 
-| Argument | Existence | Description |
-| - | - | - |
-| bundlePath | required | Path to bundle file in tgz format |
+| Argument   | Existence | Description                       |
+|------------|-----------|-----------------------------------|
+| bundlePath | required  | Path to bundle file in tgz format |
 
 #### Key Details
+
 1. Code bundle path must be found on the local filesystem.
 
 2. Code bundle expects a tgz file already built per EdgeWorkers specification.
 
 ### Deactivate an EdgeWorker
+
 Deactivate a Version for a given EdgeWorker Id on an Akamai Network.
 
 Usage: `akamai edgeworkers deactivate [options] <edgeworker-identifier> <network> <version-identifier>`
 
-| Option | Description |
-| - | - |
-| -h, --help  | output usage information |
+| Option     | Description              |
+|------------|--------------------------|
+| -h, --help | output usage information |
 
-| Argument | Existence | Description |
-| - | - | - |
-| edgeworker-identifier | required | A unique integer handle to an EdgeWorkers instance |
-| network | required | Label for which Akamai Network (STAGING or PRODUCTION) activation should be sent to
-| version-identifier | required | A unique integer handle to version of an EdgeWorkers instance |
+| Argument              | Existence | Description                                                                         |
+|-----------------------|-----------|-------------------------------------------------------------------------------------|
+| edgeworker-identifier | required  | A unique integer handle to an EdgeWorkers instance                                  |
+| network               | required  | Label for which Akamai Network (STAGING or PRODUCTION) activation should be sent to |
+| version-identifier    | required  | A unique integer handle to version of an EdgeWorkers instance                       |
 
 #### Key Details
+
 1. Network must be either STAGING or PRODUCTION. Capitalization will be normalized to uppercase.
 
 2. Location response header will be provided with new EdgeWorker Activation id.
@@ -380,203 +608,230 @@ Usage: `akamai edgeworkers deactivate [options] <edgeworker-identifier> <network
 3. EdgeWorker activation details response body (JSON) will be provided with 201 response code.
 
 ### Create an EdgeWorkers Authentication Token
-Generates an authentication token that can be used to get detailed EdgeWorker debug response headers. You need at least version 1.7.1 of the EdgeWorkers CLI to run this command. Use the -V, --version option to display the current version number of the EdgeWorkers CLI.
+
+Generates an authentication token that can be used to get detailed EdgeWorker debug response headers. You need at least
+version 1.7.1 of the EdgeWorkers CLI to run this command. Use the -V, --version option to display the current version
+number of the EdgeWorkers CLI.
 
 Usage: `akamai edgeworkers create-auth-token [options] <hostName>`
 
-| Option | Description |
-| - | - |
-| -h, --help  | output usage information |
-| --expiry `<expiry>` | Expiry duration of token, in minutes. |
+| Option              | Description                                |
+|---------------------|--------------------------------------------|
+| -h, --help          | output usage information                   |
+| --expiry `<expiry>` | Expiry duration of token, in minutes.      |
 | --format `<format>` | Format in which the output will be printed |
 
-| Argument | Existence | Description |
-| - | - | - |
-| hostName | opional | HostName of the property. If no hostname is provided then token is created for all hosts(`/*`) under the property. Eg: www.test.com, www.test1.com |
+| Argument | Existence | Description                                                                                                                                        |
+|----------|-----------|----------------------------------------------------------------------------------------------------------------------------------------------------|
+| hostName | opional   | HostName of the property. If no hostname is provided then token is created for all hosts(`/*`) under the property. Eg: www.test.com, www.test1.com |
 
 #### Key Details
+
 1. The `--expiry` value must be between 1 and 720 minutes (12 hours). The default is `8 hours`.
 
 ### Clone an EdgeWorker Id
+
 Allows customer to clone an EdgeWorker from an existing EdgeWorker Id.
 
 Usage: `akamai edgeworkers clone <edgeworker-identifier> <resourceTierId> [options]`
 
-| Option | Description |
-| - | - |
-| -h, --help  | output usage information |
-| --ewName | Name of the EdgeWorker |
-| --groupId | Group identifier |
+| Option     | Description              |
+|------------|--------------------------|
+| -h, --help | output usage information |
+| --ewName   | Name of the EdgeWorker   |
+| --groupId  | Group identifier         |
 
-| Argument | Existence | Description |
-| - | - | - |
-| resourceTierId | required | Resource tier id to which the EdgeWorker will be cloned.
+| Argument       | Existence | Description                                              |
+|----------------|-----------|----------------------------------------------------------|
+| resourceTierId | required  | Resource tier id to which the EdgeWorker will be cloned. |
 
 #### Key Details
-1. This endpoint allows user to select a different Resource Tier ID for a specific EdgeWorker id by cloning it. Cloning to the same resource tier will fail.
+
+1. This endpoint allows user to select a different Resource Tier ID for a specific EdgeWorker id by cloning it. Cloning
+   to the same resource tier will fail.
 
 ### List Contracts
+
 List of contract ids that user has access to.
 
 Usage: `akamai list-contracts`
 
-| Option | Description |
-| - | - |
-| -h, --help  | output usage information |
+| Option     | Description              |
+|------------|--------------------------|
+| -h, --help | output usage information |
 
 ### List Properties
+
 List of properties associated to a specific EdgeWorker Id.
 
 Usage: `akamai edgeworkers list-properties <edgeworker-identifier> [options]`
 
-| Option | Description |
-| - | - |
-| -h, --help  | output usage information |
+| Option       | Description                    |
+|--------------|--------------------------------|
+| -h, --help   | output usage information       |
 | --activeOnly | Returns only active properties |
 
-| Argument | Existence | Description |
-| - | - | - |
-| edgeworker-identifier | required | EdgeWorker identifier.
+| Argument              | Existence | Description            |
+|-----------------------|-----------|------------------------|
+| edgeworker-identifier | required  | EdgeWorker identifier. |
 
 #### Key Details
-1. Note that the returned boolean limitedAccessToProperties is true if the user doesn't have access to the top level group under the account, or if they don't have the admin role for this group.
+
+1. Note that the returned boolean limitedAccessToProperties is true if the user doesn't have access to the top level
+   group under the account, or if they don't have the admin role for this group.
 
 ### List Limits
+
 List the various limits EdgeWorkers imposes on the number of activations, EdgeWorkers IDs, and versions you can deploy.
 
 Usage: `akamai edgeworkers list-limits [options]`
 
-| Option | Description |
-| - | - |
-| -h, --help  | output usage information |
-
+| Option     | Description              |
+|------------|--------------------------|
+| -h, --help | output usage information |
 
 ### List Resource Tiers for a specific Contract ID
-List Resource Tiers that can be used to create or clone EdgeWorker IDs. 
+
+List Resource Tiers that can be used to create or clone EdgeWorker IDs.
 
 Usage: `akamai list-restiers`
 
-| Option | Description |
-| - | - |
+| Option       | Description                                   |
+|--------------|-----------------------------------------------|
 | --contractId | Resource tiers for the specified contract id. |
-| -h, --help  | output usage information |
+| -h, --help   | output usage information                      |
 
 #### Key Details
-1. User will be prompted with list of contract ids that user has access to. The selected contract id will be used to fetch resource tier.
+
+1. User will be prompted with list of contract ids that user has access to. The selected contract id will be used to
+   fetch resource tier.
 2. To disable prompt for automation purpose, contract id can be provided as input.
 
 ### Fetch the Resource Tier for a specific EdgeWorker Id
+
 Customers can get Resource Tier details for a specific EdgeWorker Id.
 
 Usage: `akamai show-restier <edgeworkerId>`
 
-| Option | Description |
-| - | - |
-| -h, --help  | output usage information |
+| Option     | Description              |
+|------------|--------------------------|
+| -h, --help | output usage information |
 
-| Argument | Existence | Description |
-| - | - | - |
-| edgeworkerId | required | EdgeWorker identifier.
+| Argument     | Existence | Description           |
+|--------------|-----------|-----------------------|
+| edgeworkerId | required  | EdgeWorker identifier |
 
 ### Get Available EdgeWorkers Report Types
+
 List the available report types that can be generated for an EdgeWorker ID.
 
 Usage: `akamai get reports`
 
-| Option | Description |
-| - | - |
-| -h, --help  | output usage information |
+| Option     | Description              |
+|------------|--------------------------|
+| -h, --help | output usage information |
 
 #### Key Details
-1. The user will be given a table with reportIds and a description of each report. Use a given reportId with the `get report` command to get a report for a given EdgeWorker.
+
+1. The user will be given a table with reportIds and a description of each report. Use a given reportId with
+   the `get report` command to get a report for a given EdgeWorker.
 
 ### Get EdgeWorker Report
+
 Get a report for a given EdgeWorker ID.
 
 Usage: `akamai get report <reportId> <edgeworker-identifier>`
 
-| Option | Existence| Description |
-| - | - | - |
-| -h, --help  | optional | output usage information |
-| -s, --startDate `<startDate>` | required | ISO 8601 timestamp indicating the start time of the EdgeWorkers report. |
-| -e, --endDate `<startDate>` | optional | ISO 8601 timestamp indicating the end time of the EdgeWorkers report. If not specified, the end time defaults to the current time. |
-| --status `<status>` | optional | Comma-separated string to filter by EdgeWorkers status. Values: `success`, `genericError`, `unknownEdgeWorkerId`, `unimplementedEventHandler`, `runtimeError`, `executionError`, `timeoutError`, `resourceLimitHit`, `cpuTimeoutError`, `wallTimeoutError`, `initCpuTimeoutError`, `initWallTimeoutError`. |
-| --ev, --eventHandlers `<eventHandlers>` | optional | Comma-separated string to filter EdgeWorkers by the event that triggers them. Values: `onClientRequest`, `onOriginRequest`, `onOriginResponse`, `onClientResponse`, `responseProvider`. |
+| Option                                  | Existence | Description                                                                                                                                                                                                                                                                                                |
+|-----------------------------------------|-----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -h, --help                              | optional  | output usage information                                                                                                                                                                                                                                                                                   |
+| -s, --startDate `<startDate>`           | required  | ISO 8601 timestamp indicating the start time of the EdgeWorkers report.                                                                                                                                                                                                                                    |
+| -e, --endDate `<startDate>`             | optional  | ISO 8601 timestamp indicating the end time of the EdgeWorkers report. If not specified, the end time defaults to the current time.                                                                                                                                                                         |
+| --status `<status>`                     | optional  | Comma-separated string to filter by EdgeWorkers status. Values: `success`, `genericError`, `unknownEdgeWorkerId`, `unimplementedEventHandler`, `runtimeError`, `executionError`, `timeoutError`, `resourceLimitHit`, `cpuTimeoutError`, `wallTimeoutError`, `initCpuTimeoutError`, `initWallTimeoutError`. |
+| --ev, --eventHandlers `<eventHandlers>` | optional  | Comma-separated string to filter EdgeWorkers by the event that triggers them. Values: `onClientRequest`, `onOriginRequest`, `onOriginResponse`, `onClientResponse`, `responseProvider`.                                                                                                                    |
 
-| Argument | Existence | Description |
-| - | - | - |
-| reportId | required | Report Type. |
-| edgeworker-identifier | required | EdgeWorker identifier. |
+| Argument              | Existence | Description            |
+|-----------------------|-----------|------------------------|
+| reportId              | required  | Report Type.           |
+| edgeworker-identifier | required  | EdgeWorker identifier. |
 
 #### Key Details
+
 1. For a list of available report IDs, use the `get reports` command.
 2. The `startDate` option is a required option.
 
 ### List All Default Values of a Section in Config File
+
 Get all default properties in a section of the config file.
 
 Usage: `akamai config list`
 
-| Option | Existence| Description |
-| - | - | - |
-| -h, --help  | optional | output usage information |
+| Option     | Existence | Description              |
+|------------|-----------|--------------------------|
+| -h, --help | optional  | output usage information |
 
 #### Key Details
-1. The config section is `default` by default. To use a different seciont, users should specify the `akamai edgeworkers` command with option `--configSection <configSeciont>`.
+
+1. The config section is `default` by default. To use a different seciont, users should specify the `akamai edgeworkers`
+   command with option `--configSection <configSeciont>`.
 2. Same approach should apply to the following `config` commands.
 
 ### Get a Default Value of a Section in Config File
+
 Get one specific default value in a section of the config file.
 
 Usage: `akamai config get <key>`
 
-| Option | Existence| Description |
-| - | - | - |
-| -h, --help  | optional | output usage information |
+| Option     | Existence | Description              |
+|------------|-----------|--------------------------|
+| -h, --help | optional  | output usage information |
 
-| Argument | Existence | Description |
-| - | - | - |
-| key | required | Name of default property |
+| Argument | Existence | Description              |
+|----------|-----------|--------------------------|
+| key      | required  | Name of default property |
 
 ### Set/Update a Default Value of a Section in Config File
+
 Allows customers set/update a specific default value in a section of the config file.
 
 Usage: `akamai config set <key> <value>`
 
-| Option | Existence| Description |
-| - | - | - |
-| -h, --help  | optional | output usage information |
+| Option     | Existence | Description              |
+|------------|-----------|--------------------------|
+| -h, --help | optional  | output usage information |
 
-| Argument | Existence | Description |
-| - | - | - |
-| key | required | Name of default property |
-| value | required | Value of default property |
+| Argument | Existence | Description               |
+|----------|-----------|---------------------------|
+| key      | required  | Name of default property  |
+| value    | required  | Value of default property |
 
 ### Unset a Default Value of a Section in Config File
+
 Allows customers unset a specific default value in a section of the config file.
 
 Usage: `akamai config unset <key>`
 
-| Option | Existence| Description |
-| - | - | - |
-| -h, --help  | optional | output usage information |
+| Option     | Existence | Description              |
+|------------|-----------|--------------------------|
+| -h, --help | optional  | output usage information |
 
-| Argument | Existence | Description |
-| - | - | - |
-| key | required | Name of default property |
+| Argument | Existence | Description              |
+|----------|-----------|--------------------------|
+| key      | required  | Name of default property |
 
 ### Bulk Save Default Property of a Section in Config File
+
 Allows customers save the default values in bulk.
 
 Usage: `akamai config save [options]`
 
-| Option | Existence| Description |
-| - | - | - |
-| -h, --help  | optional | output usage information |
-| -p, --properties  | required | Config properties. Use format \'key=value\' to set a property and white space to split them. |
-
+| Option           | Existence | Description                                                                                  |
+|------------------|-----------|----------------------------------------------------------------------------------------------|
+| -h, --help       | optional  | output usage information                                                                     |
+| -p, --properties | required  | Config properties. Use format \'key=value\' to set a property and white space to split them. |
 
 #### Key Details
+
 1. If the context contain invalid item, the command will skip that item and continue.
 
 ### View current logging level for the EdgeWorker
@@ -584,14 +839,14 @@ Allows customers to view currently set logging level for the edgeworker.
 
 Usage: `akamai edgeworkers log-level get [options] <edgeworker-identifier> [logging-identifier]`
 
-| Option | Existence| Description |
-| - | - | - |
-| -h, --help  | optional | output usage information |
+| Option     | Existence | Description              |
+|------------|-----------|--------------------------|
+| -h, --help | optional  | output usage information |
 
-| Argument | Existence | Description |
-| - | - | - |
-| edgeworker-identifier | required | EdgeWorker identifier for which to display logging level override information. |
-| logging-identifier | optional | The logging ID of the logging level override to display. |
+| Argument              | Existence | Description                                                                    |
+|-----------------------|-----------|--------------------------------------------------------------------------------|
+| edgeworker-identifier | required  | EdgeWorker identifier for which to display logging level override information. |
+| logging-identifier    | optional  | The logging ID of the logging level override to display.                       |
 
 #### Key Details
 1. If the `logging-identifier` is not specified, all logging level overrides will be displayed.
@@ -601,34 +856,44 @@ Allows customers to set logging level for the EdgeWorker.
 
 Usage: `akamai edgeworkers log-level set [options] <edgeworker-identifier> <network> <level> `
 
-| Option | Existence| Description |
-| - | - | - |
-| -h, --help  | optional | output usage information |
-| --expires  | optional | Specifies for how long the user's logging level override will be applied. After it has passed, the logging level reverts back to the default specified in the bundle. |
-| --ds2Id | optional | Datastream ID to use alongside the one specified in EdgeWorker's `bundle.json` file. |
+| Option     | Existence | Description                                                                                                                                                           |
+|------------|-----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -h, --help | optional  | output usage information                                                                                                                                              |
+| --expires  | optional  | Specifies for how long the user's logging level override will be applied. After it has passed, the logging level reverts back to the default specified in the bundle. |
+| --ds2Id    | optional  | Datastream ID to use alongside the one specified in EdgeWorker's `bundle.json` file.                                                                                  |
 
-| Argument | Existence | Description |
-| - | - | - |
-| edgeworker-identifier | required | EdgeWorker identifier for which to change logging level. |
-| network | required | Network for which to apply the new logging level. Either "production" or "staging". |
-| level | required | New logging level to apply for the EdgeWorker. For possible values consult customer logging documentation. |
+| Argument              | Existence | Description                                                                                                |
+|-----------------------|-----------|------------------------------------------------------------------------------------------------------------|
+| edgeworker-identifier | required  | EdgeWorker identifier for which to change logging level.                                                   |
+| network               | required  | Network for which to apply the new logging level. Either "production" or "staging".                        |
+| level                 | required  | New logging level to apply for the EdgeWorker. For possible values consult customer logging documentation. |
 
 #### Key Details
 1. If `--expires` option is not specified, the default is for the override to never expire.
 
 ## Resources
+
 For more information on EdgeWorkers, refer to the following resources:
+
 * [EdgeWorkers Developer Page](https://developer.akamai.com/edgeworkers)
 * [EdgeWorkers User Guide](https://learn.akamai.com/en-us/webhelp/edgeworkers/edgeworkers-user-guide/GUID-4CC14D7E-D92D-4F2D-9292-17F8BE6E2DAE.html)
 * [EdgeWorkers API Guide](https://developer.akamai.com/api/web_performance/edgeworkers/v1.html)
 
 ## Reporting Issues
-You are all set, happy coding! If you experience any issues with the EdgeWorkers CLI, raise them as a [github issue](https://github.com/akamai/cli-edgeworkers/issues). Feel free to create a pull request with the fix or suggestion.
+
+You are all set, happy coding! If you experience any issues with the EdgeWorkers CLI, raise them as
+a [github issue](https://github.com/akamai/cli-edgeworkers/issues). Feel free to create a pull request with the fix or
+suggestion.
 
 ## Contributing
-We welcome contributions from Akamai staff, customers, or others. Before opening up a PR please double check the following:
-1. Please add some test cases to accompany your PR. This verifies the functionality added or modified in the PR and proves to others that your code works :)
-2. Please make sure that your code passes all pre-commit checks. Your code should build successfully, pass all unit tests, and have no linting issues.
+
+We welcome contributions from Akamai staff, customers, or others. Before opening up a PR please double check the
+following:
+
+1. Please add some test cases to accompany your PR. This verifies the functionality added or modified in the PR and
+   proves to others that your code works :)
+2. Please make sure that your code passes all pre-commit checks. Your code should build successfully, pass all unit
+   tests, and have no linting issues.
 3. All PR's should be targeting develop, not master. Merges to master will immediately release to all customers.
 
 <!--esi

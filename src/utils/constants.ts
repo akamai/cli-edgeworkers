@@ -23,6 +23,11 @@ export const START_DATE = 'startDate';
 export const END_DATE = 'endDate';
 export const STATUS = 'status';
 export const EVENT_HANDLERS = 'eventHandlers';
+export const PINNED_ONLY = 'pinnedOnly';
+export const CURRENTLY_PINNED = 'currentlyPinned';
+export const NOTE = 'note';
+export const ACTIVE_VERSIONS = 'activeVersions';
+export const CURRENTLY_PINNED_REVISIONS = 'currentlyPinnedRevisions';
 
 // Config properties for EdgeKV
 export const ENVIRONMENT = 'environment';

@@ -379,6 +379,144 @@ describe('ew service tests', () => {
     });
   });
 
+  describe('listRevisions', () => {
+    const mockResponse = {
+      'revisions': [
+        {
+          'accountId': 'A-CCT5678',
+          'activationId': 1,
+          'checksum': 'db3697e7eb03c8fb4822fd763b840e1b915693ab03e02a583fecfcd55d07857d',
+          'createdTime': '2023-08-10T15:32:22Z',
+          'edgeWorkerId': 42,
+          'lastModifiedTime': '2023-08-10T15:41:20Z',
+          'network': 'PRODUCTION',
+          'revisionActivationStatus': 'COMPLETE',
+          'revisionId': '1-2',
+          'version': '0.7'
+        },
+        {
+          'accountId': 'A-CCT7890',
+          'activationId': 1,
+          'checksum': 'a89dfc162fa3d81d36f40805620cb21be6de5d869374e71feda1afff17dae2a7',
+          'createdTime': '2023-08-10T15:22:45Z',
+          'edgeWorkerId': 42,
+          'lastModifiedTime': '2023-08-10T15:27:01Z',
+          'network': 'PRODUCTION',
+          'revisionActivationStatus': 'COMPLETE',
+          'revisionId': '1-1',
+          'version': '0.7'
+        }
+      ]
+    };
+
+    let listRevisionsSpy;
+    beforeEach(() => {
+      listRevisionsSpy = jest.spyOn(ewService, 'listRevisions');
+    });
+
+    const ewId = '42';
+
+    it('should return the list of revisions', async () => {
+      getJsonSpy.mockImplementation((path, timeout) => {
+        expect(path).toEqual(`${ewService.EDGEWORKERS_API_BASE}/ids/${ewId}/revisions`);
+        expect(timeout).toEqual(defaultTimeout);
+        return Promise.resolve({
+          body: mockResponse,
+        });
+      });
+
+      const res = await ewService.listRevisions(ewId);
+
+      expect(listRevisionsSpy).toHaveBeenCalled();
+      expect(res).toEqual(mockResponse);
+    });
+  });
+
+  describe('getRevision', () => {
+    const mockResponse = {
+      'accountId': 'A-CCT9012',
+      'activationId': 1,
+      'checksum': 'db3697e7eb03c8fb4822fd763b840e1b915693ab03e02a583fecfcd55d07857d',
+      'createdTime': '2023-08-10T15:32:22Z',
+      'edgeWorkerId': 42,
+      'lastModifiedTime': '2023-08-10T15:41:20Z',
+      'network': 'PRODUCTION',
+      'revisionActivationStatus': 'COMPLETE',
+      'revisionId': '1-2',
+      'version': '0.7'
+    };
+
+    let getRevisionSpy;
+    beforeEach(() => {
+      getRevisionSpy = jest.spyOn(ewService, 'getRevision');
+    });
+
+    const ewId = '42';
+    const revId = '3-1';
+
+    it('should return the revision', async () => {
+      getJsonSpy.mockImplementation((path, timeout) => {
+        expect(path).toEqual(`${ewService.EDGEWORKERS_API_BASE}/ids/${ewId}/revisions/${revId}`);
+        expect(timeout).toEqual(defaultTimeout);
+        return Promise.resolve({
+          body: mockResponse,
+        });
+      });
+
+      const res = await ewService.getRevision(ewId, revId);
+
+      expect(getRevisionSpy).toHaveBeenCalled();
+      expect(res).toEqual(mockResponse);
+    });
+  });
+
+  describe('getRevisionBOM', () => {
+    const mockResponse = {
+      'dependencies': {
+        'redirect-geo-query': {
+          'activeVersion': '4.0',
+          'dependencies': {
+            'common-lib': {
+              'activeVersion': '3.1',
+              'currentRevisionPinNote': 'Disable dynamic reactivation during moratorium',
+              'currentRevisionPinnedTime': '2023-01-01T00:00:00Z',
+              'currentlyPinnedRevisionId': '2-2',
+              'dependencies': {},
+              'edgeWorkerId': 16,
+              'version': '3.1'
+            }
+          },
+          'edgeWorkerId': 23,
+          'version': '4.0'
+        }
+      },
+      'edgeWorkerId': 42,
+      'version': '0.7'
+    };
+
+    let getRevisionSpy;
+    beforeEach(() => {
+      getRevisionSpy = jest.spyOn(ewService, 'getRevisionBOM');
+    });
+
+    const ewId = '42';
+    const revId = '3-1';
+
+    it('should return the revision', async () => {
+      getJsonSpy.mockImplementation(async (path, timeout) => {
+        expect(path).toEqual(`${ewService.EDGEWORKERS_API_BASE}/ids/${ewId}/revisions/${revId}/bom`);
+        expect(timeout).toEqual(defaultTimeout);
+        return Promise.resolve({
+          body: mockResponse,
+        });
+      });
+
+      const res = await ewService.getRevisionBOM(ewId, revId);
+      expect(getRevisionSpy).toHaveBeenCalled();
+      expect(res).toEqual(mockResponse);
+    });
+  });
+
   describe('getLoglevel', () => {
     const ewId = 558591;
     const loggingId = '1';

@@ -282,3 +282,15 @@ export function isValidEwId(edgeworkerId: string) {
   const ewIdFormat = new RegExp('^[1-9][0-9]+');
   return ewIdFormat.test(edgeworkerId);
 }
+
+export function isValidRevId(revisionId: string) {
+  const revIdFormat = new RegExp('^[1-9]\\d*-[0-9]\\d*$');
+  return revIdFormat.test(revisionId);
+}
+
+export function changeObjectName(array: any, newObjName: string, oldObjName: string) {
+  array.forEach(i => {
+    i[newObjName] = i[oldObjName];
+    delete i[oldObjName];
+  });
+}
