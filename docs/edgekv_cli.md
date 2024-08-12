@@ -132,7 +132,7 @@ Commands:
 | initialize \| init | Initialize an EdgeKV database. |
 | show status | Show the status of an EdgeKV database. |
 | modify db `--dataAccessPolicy <databaseDataAccessPolicy>` | Modify the EdgeKV database data access policy. |
-| create ns `<environment> <namespace> --retention <retention>` | Create an EdgeKV namespace in an Akamai environment. Specify the retention period of the namespace in days. |
+| create ns `<environment> <namespace> --retention <retention>` | Create an EdgeKV namespace in an Akamai environment. Specify the retention period for the data within the namespace in days. |
 | show ns `<environment> <namespace>`| Retrieve an EdgeKV namespace in an Akamai environment. |
 | list ns `<environment>` | List the namespaces provisioned in an Akamai environment. |
 | modify ns `<environment> <nameSpace>` | Modify an EdgeKV namespace in an Akamai environment. |
@@ -204,7 +204,7 @@ Usage: `akamai edgekv create ns <environment> <nameSpace>`
 | Option | Existence | Description |
 | - | - | - |
 | -h, --help  | optional | Display information on how to use this EdgeKV command. |
-| --retention | Required | Retention period of the namespace in days. |
+| --retention | Required | Retention period of the data within the namespace in days. |
 | --groupId | Required | Group identifier. Set it to 0 to allow all groups in your account to access the namespace. If you want to restrict the namespace to a specific group, enter the group id. This value MUST be the same for both the staging and production instances of a namespace. |
 | --geoLocation | optional | Specifies the persistent storage location for data when creating a namespace on the production network. This can help optimize performance by storing data where most or all of your users are located. The value defaults to `US` on the `STAGING` and `PRODUCTION` networks. For more information refer to the [EdgeKV Documenation](https://techdocs.akamai.com/edgekv/docs/edgekv-data-model#namespace).|
 | --dataAccessPolicy | optional | Override the database data access policy.<br />`restrictDataAccess`: If set to true, the database can only  access data from Akamai's Enhanced TLS network. If set to false, the database can access data from both Akamai's Enhanced TLS and Standard TLS networks. The database data access policy `allowNamespacePolicyOverride` needs to be set to true to override the data access policy.
