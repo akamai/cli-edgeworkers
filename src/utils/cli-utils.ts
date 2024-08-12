@@ -288,6 +288,7 @@ export function isValidRevId(revisionId: string) {
   return revIdFormat.test(revisionId);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function changeObjectName(array: any, newObjName: string, oldObjName: string) {
   array.forEach(i => {
     i[newObjName] = i[oldObjName];
