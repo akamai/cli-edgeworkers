@@ -835,7 +835,7 @@ Usage: `akamai config save [options]`
 1. If the context contain invalid item, the command will skip that item and continue.
 
 ### View current logging level for the EdgeWorker
-Allows customers to view currently set logging level for the edgeworker.
+Allows customers to view the details of logging level overrides for the edgeworker.
 
 Usage: `akamai edgeworkers log-level get [options] <edgeworker-identifier> [logging-identifier]`
 
@@ -850,6 +850,7 @@ Usage: `akamai edgeworkers log-level get [options] <edgeworker-identifier> [logg
 
 #### Key Details
 1. If the `logging-identifier` is not specified, all logging level overrides will be displayed.
+2. The `logging-identifier` is a numeric constant, identifying a log level override. It can be obtained during the override creation, or by listing all overrides without supplying the optional argument and looking up specific override's `loggingId` field.
 
 ### Set current logging level for the EdgeWorker
 Allows customers to set logging level for the EdgeWorker.
@@ -869,7 +870,22 @@ Usage: `akamai edgeworkers log-level set [options] <edgeworker-identifier> <netw
 | level                 | required  | New logging level to apply for the EdgeWorker. For possible values consult customer logging documentation. |
 
 #### Key Details
-1. If `--expires` option is not specified, the default is for the override to never expire.
+1. Only the most recently created log level override is in effect. 
+2. When the override expires, the logging level is reset to the one specified in Edgeworker's `bundle.json` file.
+3. If the command is successful, the log level override details are printed, which include `loggingId` of the override. The `loggingId` can be used to obtain these details anytime by using `log-level get` subcommand and passing it to a `logging-identifier` optional argument. 
+4. If `--expires` option is not specified, the default is for the override to never expire.
+5. The `--expires` option supports both natural language input and standard timestamps. Please refer to [`chrono`](https://github.com/wanasit/chrono) package documentation for full specification.
+
+#### Examples
+
+1. Set log level override on production network to info level, which will expire in 1 hour.
+```
+./akamai-edgeworkers log-level set 654321 production info --expires 1h 
+```
+2. Set log level override on staging network to trace level, which will expire at 3 PM CEST (Central European Summer Time) on August 13th 2024.
+```
+./akamai-edgeworkers log-level set 654321 staging trace --expires "2024-08-13T15:00+02:00"
+```
 
 ## Resources
 
