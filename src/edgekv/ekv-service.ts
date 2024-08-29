@@ -345,6 +345,19 @@ export function revokeToken(tokenName: string) {
     .catch((err) => error.handleError(err));
 }
 
+export function refreshToken(tokenName: string) {
+  const body = undefined;
+  return httpEdge
+    .postJson(
+      `${EDGEKV_API_BASE}/tokens/${tokenName}/refresh`,
+      body,
+      cliUtils.getTimeout(DEFAULT_EKV_TIMEOUT),
+      ekvMetrics.refreshToken
+    )
+    .then((r) => r.body)
+    .catch((err) => error.handleError(err));
+}
+
 export function modifyAuthGroupPermission(namespace: string, groupId: number) {
   const body = { groupId: groupId };
   return httpEdge
