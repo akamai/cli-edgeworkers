@@ -23,6 +23,7 @@
     * [ List Items](###list-items)
     * [ Create an Access Token](###create-an-access-token)
     * [ List Access Tokens](###list-access-tokens)
+    * [ Refresh Access Token](###refresh-access-token)
     * [ Retrieve Access Token](###retrieve-access-token)
     * [ Revoke access token](###revoke-access-token)
     * [ List permission groups](###list-permission-groups)
@@ -393,7 +394,7 @@ Example:
 | -- production | Required | Acceptable value: 'allow', 'deny'. <br />Specifies whether the token will be allowed or denied in the production environment. |
 | -- ewids | Required | Acceptable value: <br /> - 'all', <br /> - A comma separated list of up to a maximum of 8 EdgeWorker IDs. This  restricts token usage to the specified  EdgeWorker IDs. |
 | --namespace | Required | Value: A comma separated list of up to a maximum of 20 namespace identifier and permission combinations. This list specifies where the token can be used. The permissions format is any combination of the following letters: <br /> - 'r' to authorize the token for read operations <br /> - 'w' to authorize the token for write operations <br /> - 'd' to authorize the token for delete operations.  <br /> Example: "myNamespace1+rwd,myNamespace2+rw" |
-| --expiry | Required | Expiration date of the token. Format of the expiry date is ISO 8601 format: yyyy-mm-dd. |
+| --expiry | Optional  | Expiration date of the token. Format of the expiry date is ISO 8601 format: yyyy-mm-dd. Optional for Enhanced Token Workflow. | 
 | -h, --help  | Optional | Display information on how to use this EdgeKV command. |
 
 | Argument | Existence | Description |
@@ -418,7 +419,18 @@ Usage: `akamai edgekv list tokens`
 
 #### Important Notes
 1. Note that --include-expired returns all the tokens that count towards your account's token limit. For more details, See [Akamai EdgeKV getting started guide](https://techdocs.akamai.com/edgekv/docs/limits)
- 
+
+### Refresh Access Token
+
+Refreshes an EdgeKV Enhanced Token Workflow access token. 
+
+Usage:
+`akamai edgekv refresh token <tokenName>`
+
+| Argument | Existence | Description |
+| - | - | - |
+| tokenName | required | token name |
+
 ### Retrieve Access Token
  
 Retrieve an EdgeKV access token.
@@ -438,7 +450,7 @@ Usage:
 
 ### Revoke Access Token
 
-Revoke an EdgKV access token.
+Revoke an EdgeKV access token.
 
 Usage:
 `akamai edgekv revoke token <tokenName>`
