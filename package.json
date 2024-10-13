@@ -22,7 +22,7 @@
     "edgekv": "./akamai-edgekv"
   },
   "dependencies": {
-    "akamai-edgegrid": "^3.1.4",
+    "akamai-edgegrid": "^3.5.1",
     "chrono-node": "^2.7.0",
     "cli-spinner": "0.2.10",
     "commander": "^9.4.1",
