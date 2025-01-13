@@ -1287,11 +1287,14 @@ export async function showEdgeWorkerActivationOverview(
 export async function createNewActivation(
   ewId: string,
   network: string,
-  versionId: string
+  versionId: string,
+  autoPin?: boolean
 ) {
+  // autoPin is set to true by default
+  const autoPinParam = autoPin != undefined ? autoPin : true;
   let activations = await cliUtils.spinner(
-    edgeWorkersSvc.createActivationId(ewId, network, versionId),
-    `Creating Activation record for EdgeWorker Id ${ewId}, version: ${versionId} on network: ${network}`
+    edgeWorkersSvc.createActivationId(ewId, network, versionId, autoPin),
+    `Creating Activation record with auto pin status [${autoPinParam}] for EdgeWorker Id ${ewId}, version: ${versionId} on network: ${network}`
   );
 
   if (activations) {
@@ -1302,7 +1305,7 @@ export async function createNewActivation(
         filterJsonData(activations[key], activationColumnsToKeep)
       );
     });
-    const msg = `New Activation record created for EdgeWorker Id: ${ewId}, version: ${versionId}, on network: ${network}`;
+    const msg = `New Activation record with auto pin status [${autoPinParam}] created for EdgeWorker Id: ${ewId}, version: ${versionId}, on network: ${network}`;
     if (ewJsonOutput.isJSONOutputMode()) {
       ewJsonOutput.writeJSONOutput(0, msg, activation);
     } else {
@@ -1312,7 +1315,7 @@ export async function createNewActivation(
   } else {
     cliUtils.logAndExit(
       1,
-      `ERROR: Activation record was not able to be created for EdgeWorker Id ${ewId}, version: ${versionId} on network: ${network}!`
+      `ERROR: Activation record with auto pin status [${autoPinParam}] was not able to be created for EdgeWorker Id ${ewId}, version: ${versionId} on network: ${network}!`
     );
   }
 }
