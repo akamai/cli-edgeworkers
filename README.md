@@ -545,9 +545,10 @@ Activate a Version for a given EdgeWorker Id on an Akamai Network.
 
 Usage: `akamai edgeworkers activate [options] <edgeworker-identifier> <network> <version-identifier>`
 
-| Option     | Description              |
-|------------|--------------------------|
-| -h, --help | output usage information |
+| Option     | Description                                                                                     |
+|------------|-------------------------------------------------------------------------------------------------|
+| -h, --help | output usage  information                                                                       |
+| --auto-pin | An option that pins the initial revision when activating the parent EdgeWorker, true by default |
 
 | Argument              | Existence | Description                                                                         |
 |-----------------------|-----------|-------------------------------------------------------------------------------------|

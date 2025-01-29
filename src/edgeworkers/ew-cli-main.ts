@@ -398,7 +398,7 @@ program
   .option('--versionId <versionId>', 'Version Identifier')
   .option('--activationId <activationId>', 'Activation Identifier')
   .option('--activeOnNetwork', 'Limits results to show only currently activate versions')
-  .option('--network  <network>', 'Limits the results to versions that were activated on a specific network (STAGING or PRODUCTION)')
+  .option('--network <network>', 'Limits the results to versions that were activated on a specific network (STAGING or PRODUCTION)')
   .action(async function (ewId, options) {
     options['versionId'] = options.versionId || configUtils.searchProperty(VERSION_ID);
     options['activationId'] = options.activationId || configUtils.searchProperty(ACTIVATION_ID);
@@ -424,13 +424,17 @@ program
   .command('activate <edgeworker-identifier> <network> <version-identifier>')
   .description('Activate a Version for a given EdgeWorker ID on an Akamai Network')
   .alias('av')
-  .action(async function (ewId, network, versionId) {
+  .option('--auto-pin <autoPin>', 'Indicator to tell initial revision is pinned or not, true by default.')
+  .action(async function (ewId, network, versionId, options) {
+    if (options.autoPin != undefined) {
+      options.autoPin = (options.autoPin.toLowerCase() === 'true' ? true : false);
+    }
 
     // Network must use correct keyword STAGING|PRODUCTION
     if (network.toUpperCase() !== cliUtils.staging && network.toUpperCase() !== cliUtils.production)
       cliUtils.logAndExit(1, `ERROR: Network parameter must be either staging or production - was: ${network}`);
     try {
-      await cliHandler.createNewActivation(ewId, network.toUpperCase(), versionId);
+      await cliHandler.createNewActivation(ewId, network.toUpperCase(), versionId, options.autoPin);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }

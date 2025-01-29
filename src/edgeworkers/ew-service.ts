@@ -322,9 +322,14 @@ export function getActivationID(ewId: string, activationId: string) {
 export function createActivationId(
   ewId: string,
   network: string,
-  versionId: string
+  versionId: string,
+  autoPin?: boolean
 ) {
   const body = {network: network, version: versionId};
+  if (autoPin != undefined) {
+    body['autoPin'] = autoPin;
+  }
+
   return httpEdge
     .postJson(
       `${EDGEWORKERS_API_BASE}/ids/${ewId}/activations`,
