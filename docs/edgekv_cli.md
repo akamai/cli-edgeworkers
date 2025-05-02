@@ -12,6 +12,7 @@
 * [ Overview Of Commands ](##overview-of-commands)
     * [ Initialize EdgeKV ](###initialize-edgekv)
     * [ Get Initialization Status](###get-initialization-status)
+    * [ Modify Database Data Access Policy](###modify-database-data-acesss-policy)
     * [ Create Namespace](###create-namespace)
     * [ List Namespace](###list-namespace)
     * [ Get Namespace](###get-namespace)
@@ -22,6 +23,7 @@
     * [ List Items](###list-items)
     * [ Create an Access Token](###create-an-access-token)
     * [ List Access Tokens](###list-access-tokens)
+    * [ Refresh Access Token](###refresh-access-token)
     * [ Retrieve Access Token](###retrieve-access-token)
     * [ Revoke access token](###revoke-access-token)
     * [ List permission groups](###list-permission-groups)
@@ -130,6 +132,7 @@ Commands:
 | help `[command]` | Display information on how to use the given command. |
 | initialize \| init | Initialize an EdgeKV database. |
 | show status | Show the status of an EdgeKV database. |
+| modify db `--dataAccessPolicy <databaseDataAccessPolicy>` | Modify the EdgeKV database data access policy. |
 | create ns `<environment> <namespace> --retention <retention>` | Create an EdgeKV namespace in an Akamai environment. Specify the retention period of the namespace in days. |
 | show ns `<environment> <namespace>`| Retrieve an EdgeKV namespace in an Akamai environment. |
 | list ns `<environment>` | List the namespaces provisioned in an Akamai environment. |
@@ -161,13 +164,14 @@ Return Codes:
 
 ### Initialize EdgeKV
 
-Initialize the EdgeKV database. This action is only required once to initialize your EdgeKV database and provision the *default* EdgeKV namespace on Akamai's staging and production environments. It also creates a new, dedicated CP code used to track your EdgeKV usage. Before you can perform any other EdgeKV operations you must successfully complete this step.
+Initialize the EdgeKV database. This action is only required once to initialize your EdgeKV database and provision the *default* EdgeKV namespace on Akamai's staging and production environments. It also creates a new, dedicated CP code used to track your EdgeKV usage. Before you can perform any other EdgeKV operations you must successfully complete this step. The `EdgeKV Database Data Access Policy - Manage` role is required to initialize an EdgeKV database.
 
 Usage: `akamai edgekv initialize`
 
-| Option | Description |
-| - | - |
-| -h, --help  | Display information on how to use this EdgeKV command |
+| Option | Existance | Description |
+| - | - | - |
+| -h, --help  | optional | Display information on how to use this EdgeKV command |
+| --dataAccessPolicy | optional | Set the data access policy.<br />`restrictDataAccess`: If set to true, the database can only access data from Akamai's Enhanced TLS network. If set to false, the database can access data from both Akamai's Enhanced TLS and Standard TLS networks. If you set this option to false your account needs to have `EdgeDB::Standard_TLS_Support` entitlement.<br />`allowNamespacePolicyOverride`: If set to true, the database data access policy can be overridden when the namespace is created. If set to false, data access policy overrides are not accepted.
 
 ### Get Initialization Status
 
@@ -178,6 +182,19 @@ Usage: `akamai edgekv show status`
 | Option | Description |
 | - | - |
 | -h, --help  |  Display information on how to use this EdgeKV command |
+
+### Modify Database Data Access Policy
+
+Modify the EdgeKV database data access policy. This option does not change the data access policy for existing namespaces. It only applies to namespaces created after you successfully apply this option. The `EdgeKV Database Data Access Policy - Manage` role is required to modify the database data access policy.
+
+Usage: `akamai edgekv modify db --dataAccessPolicy <databaseDataAccessPolicy>`
+
+Example: `akamai edgekv modify db --dataAccessPolicy='restrictDataAccess=true,allowNamespacePolicyOverride=false'`
+
+| Option | Existance | Description |
+| - | - | - |
+| -h, --help  | optional | Display information on how to use this EdgeKV command |
+| --dataAccessPolicy | required | Set the data access policy.<br />`restrictDataAccess`: If set to true, the database can only access data from Akamai's Enhanced TLS network. If set to false, the database can access data from both Akamai's Enhanced TLS and Standard TLS networks. If you set this option to false your account needs to have `EdgeDB::Standard_TLS_Support` entitlement.<br />`allowNamespacePolicyOverride`: If set to true, the database data access policy can be overridden when the namespace is created. If set to false, data access policy overrides are not accepted.
 
 ### Create Namespace
 
@@ -191,6 +208,7 @@ Usage: `akamai edgekv create ns <environment> <nameSpace>`
 | --retention | Required | Retention period of the namespace in days. |
 | --groupId | Required | Group identifier. Set it to 0 to allow all groups in your account to access the namespace. If you want to restrict the namespace to a specific group, enter the group id. This value MUST be the same for both the staging and production instances of a namespace. |
 | --geoLocation | optional | Specifies the persistent storage location for data when creating a namespace on the production network. This can help optimize performance by storing data where most or all of your users are located. The value defaults to `US` on the `STAGING` and `PRODUCTION` networks. For more information refer to the [EdgeKV Documenation](https://techdocs.akamai.com/edgekv/docs/edgekv-data-model#namespace).|
+| --dataAccessPolicy | optional | Override the database data access policy.<br />`restrictDataAccess`: If set to true, the database can only  access data from Akamai's Enhanced TLS network. If set to false, the database can access data from both Akamai's Enhanced TLS and Standard TLS networks. The database data access policy `allowNamespacePolicyOverride` needs to be set to true to override the data access policy.
 
 | Argument | Existence | Description |
 | - | - | - |
@@ -376,7 +394,7 @@ Example:
 | -- production | Required | Acceptable value: 'allow', 'deny'. <br />Specifies whether the token will be allowed or denied in the production environment. |
 | -- ewids | Required | Acceptable value: <br /> - 'all', <br /> - A comma separated list of up to a maximum of 8 EdgeWorker IDs. This  restricts token usage to the specified  EdgeWorker IDs. |
 | --namespace | Required | Value: A comma separated list of up to a maximum of 20 namespace identifier and permission combinations. This list specifies where the token can be used. The permissions format is any combination of the following letters: <br /> - 'r' to authorize the token for read operations <br /> - 'w' to authorize the token for write operations <br /> - 'd' to authorize the token for delete operations.  <br /> Example: "myNamespace1+rwd,myNamespace2+rw" |
-| --expiry | Required | Expiration date of the token. Format of the expiry date is ISO 8601 format: yyyy-mm-dd. |
+| --expiry | Optional  | Expiration date of the token. Format of the expiry date is ISO 8601 format: yyyy-mm-dd. Optional for Enhanced Token Workflow. | 
 | -h, --help  | Optional | Display information on how to use this EdgeKV command. |
 
 | Argument | Existence | Description |
@@ -401,7 +419,18 @@ Usage: `akamai edgekv list tokens`
 
 #### Important Notes
 1. Note that --include-expired returns all the tokens that count towards your account's token limit. For more details, See [Akamai EdgeKV getting started guide](https://techdocs.akamai.com/edgekv/docs/limits)
- 
+
+### Refresh Access Token
+
+Refreshes an EdgeKV Enhanced Token Workflow access token. 
+
+Usage:
+`akamai edgekv refresh token <tokenName>`
+
+| Argument | Existence | Description |
+| - | - | - |
+| tokenName | required | token name |
+
 ### Retrieve Access Token
  
 Retrieve an EdgeKV access token.
@@ -421,7 +450,7 @@ Usage:
 
 ### Revoke Access Token
 
-Revoke an EdgKV access token.
+Revoke an EdgeKV access token.
 
 Usage:
 `akamai edgekv revoke token <tokenName>`

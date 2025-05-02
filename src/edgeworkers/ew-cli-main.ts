@@ -2,29 +2,35 @@
 import * as envUtils from '../utils/env-utils';
 import * as cliUtils from '../utils/cli-utils';
 import * as configUtils from '../utils/config-utils';
-import { 
-  GROUP_ID, 
-  RESOURCE_TIER_ID, 
-  CONTRACT_ID, 
-  BUNDLE_PATH, 
-  WORKING_DIRECTORY, 
-  DOWNLOAD_PATH, 
-  VERSION_ID, 
+import {
+  GROUP_ID,
+  RESOURCE_TIER_ID,
+  CONTRACT_ID,
+  BUNDLE_PATH,
+  WORKING_DIRECTORY,
+  DOWNLOAD_PATH,
+  VERSION_ID,
   ACTIVATION_ID,
   ACTIVE,
   NETWORK,
-  EDGEWORKER_NAME, 
+  EDGEWORKER_NAME,
   EXPIRY,
-  FORMAT, 
-  REPORT_ID, 
-  END_DATE, 
-  STATUS, 
-  EVENT_HANDLERS } from './../utils/constants';
+  FORMAT,
+  REPORT_ID,
+  END_DATE,
+  STATUS,
+  EVENT_HANDLERS,
+  PINNED_ONLY,
+  CURRENTLY_PINNED,
+  NOTE,
+  ACTIVE_VERSIONS,
+  CURRENTLY_PINNED_REVISIONS
+} from './../utils/constants';
 import * as cliHandler from './ew-handler';
 import * as httpEdge from '../cli-httpRequest';
 import { ewJsonOutput } from './client-manager';
 import * as pkginfo from '../../package.json';
-import { Command } from 'commander';
+import { Command, Argument } from 'commander';
 const program = new Command();
 const currentYear = new Date().getFullYear();
 const copywrite = '\nCopyright (c) 2019-' + currentYear + ' Akamai Technologies, Inc. Licensed under Apache 2 license.\nYour use of Akamai\'s products and services is subject to the terms and provisions outlined in Akamai\'s legal policies.\nVisit http://github.com/akamai/cli-edgeworkers for detailed documentation';
@@ -251,7 +257,7 @@ program
 program
   .command('show-restier <edgeworkerId>')
   .description('View the resource tier associated with an EdgeWorker ID')
-  .action(async function (edgeworkerId) {  
+  .action(async function (edgeworkerId) {
     try {
       await cliHandler.getResourceTierForEwid(edgeworkerId);
     } catch (e) {
@@ -368,13 +374,31 @@ program
   });
 
 program
-  .command('status <edgeworker-identifier>')  
+  .command('download-revision <edgeworker-identifier> <revision-identifier>')
+  .description('Download the combined code bundle that contains the code and the dependencies that the EdgeWorker executes')
+  .alias('dr')
+  .option('--downloadPath <downloadPath>', 'Path to store downloaded combined bundle file; defaults to CLI home directory if not provided')
+  .action(async function (ewId, revisionId, options) {
+    options['downloadPath'] = options.downloadPath || configUtils.searchProperty(DOWNLOAD_PATH);
+
+    try {
+      await cliHandler.downloadRevisionTarball(ewId, revisionId, options.downloadPath);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on('--help', function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+program
+  .command('status <edgeworker-identifier>')
   .description('List Activation status of a given EdgeWorker ID')
   .alias('list-activations')
   .option('--versionId <versionId>', 'Version Identifier')
   .option('--activationId <activationId>', 'Activation Identifier')
   .option('--activeOnNetwork', 'Limits results to show only currently activate versions')
-  .option('--network  <network>', 'Limits the results to versions that were activated on a specific network (STAGING or PRODUCTION)')
+  .option('--network <network>', 'Limits the results to versions that were activated on a specific network (STAGING or PRODUCTION)')
   .action(async function (ewId, options) {
     options['versionId'] = options.versionId || configUtils.searchProperty(VERSION_ID);
     options['activationId'] = options.activationId || configUtils.searchProperty(ACTIVATION_ID);
@@ -400,13 +424,185 @@ program
   .command('activate <edgeworker-identifier> <network> <version-identifier>')
   .description('Activate a Version for a given EdgeWorker ID on an Akamai Network')
   .alias('av')
-  .action(async function (ewId, network, versionId) {
+  .option('--auto-pin <autoPin>', 'Indicator to tell initial revision is pinned or not, true by default.')
+  .action(async function (ewId, network, versionId, options) {
+    if (options.autoPin != undefined) {
+      options.autoPin = (options.autoPin.toLowerCase() === 'true' ? true : false);
+    }
 
     // Network must use correct keyword STAGING|PRODUCTION
     if (network.toUpperCase() !== cliUtils.staging && network.toUpperCase() !== cliUtils.production)
       cliUtils.logAndExit(1, `ERROR: Network parameter must be either staging or production - was: ${network}`);
     try {
-      await cliHandler.createNewActivation(ewId, network.toUpperCase(), versionId);
+      await cliHandler.createNewActivation(ewId, network.toUpperCase(), versionId, options.autoPin);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on('--help', function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+program
+  .command('list-revisions <edgeworker-identifier>')
+  .description('List the revision history for a given EdgeWorker ID')
+  .option('--versionId <versionId>', 'Version Identifier')
+  .option('--activationId <activationId>', 'Activation Identifier')
+  .option(
+    '--network <network>',
+    'Limits the results to versions that were activated on a specific network (STAGING or PRODUCTION)',
+  )
+  .option(
+    '--pinnedOnly',
+    'Limits results to show only currently or previously pinned revisions',
+  )
+  .option(
+    '--currentlyPinned',
+    'Limits results to show only revisions that are currently pinned',
+  )
+  .alias('lr')
+  .action(async function (ewId, options) {
+    options['versionId'] =
+      options.versionId || configUtils.searchProperty(VERSION_ID);
+    options['activationId'] =
+      options.activationId || configUtils.searchProperty(ACTIVATION_ID);
+    options['network'] = options.network || configUtils.searchProperty(NETWORK);
+    options['pinnedOnly'] =
+      options.pinnedOnly || configUtils.searchProperty(PINNED_ONLY);
+    options['currentlyPinned'] =
+      options.currentlyPinned || configUtils.searchProperty(CURRENTLY_PINNED);
+
+    try {
+      await cliHandler.showEdgeWorkerRevisionOverview(ewId, options);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on('--help', function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+program
+  .command('get-revision <edgeworker-identifier> <revision-identifier>')
+  .description('Get details for a specific revision')
+  .alias('gr')
+  .action(async function (ewId, revId) {
+    try {
+      await cliHandler.getRevision(ewId, revId);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on('--help', function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+program
+  .command('compare-revisions <edgeworker-identifier> <revision-identifier> <revision-identifier>')
+  .description('View dependency differences between two revisions of the same EdgeWorker.')
+  .alias('cr')
+  .action(async function (ewId, revId1, revId2) {
+    try {
+      await cliHandler.compareRevisions(ewId, revId1, revId2);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on('--help', function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+program
+  .command('activate-revision <edgeworker-identifier> <revision-identifier>')
+  .description('Activate a revision for a given EdgeWorker Id on Akamai Network')
+  .option('--note <note>', 'Note to specify why the revision is being reactivated')
+  .alias('ar')
+  .action(async function (ewId, revId, options) {
+    options['note'] = options.note || configUtils.searchProperty(NOTE);
+
+    try {
+      await cliHandler.activateRevision(ewId, revId, options.note);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on('--help', function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+program
+  .command('pin-revision <edgeworker-identifier> <revision-identifier>')
+  .description('Pin an active revision for a given EdgeWorker ID')
+  .option('--note <note>', 'Note to specify why the revision is being pinned')
+  .action(async function (ewId, revId, options) {
+    options['note'] = options.note || configUtils.searchProperty(NOTE);
+
+    try {
+      await cliHandler.pinRevision(ewId, revId, options.note);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on('--help', function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+program
+  .command('unpin-revision <edgeworker-identifier> <revision-identifier>')
+  .description('Unpin an active pinned revision for a given EdgeWorker ID')
+  .option('--note <note>', 'Note to specify why the revision is being unpinned')
+  .action(async function (ewId, revId, options) {
+    options['note'] = options.note || configUtils.searchProperty(NOTE);
+
+    try {
+      await cliHandler.unpinRevision(ewId, revId, options.note);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on('--help', function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+program
+  .command('get-revision-bom <edgeworker-identifier> <revision-identifier>')
+  .description('View details for a specific revision of a composite bundle')
+  .alias('gb')
+  .option('--activeVersions', 'Limit results to show only active versions')
+  .option('--currentlyPinnedRevisions', 'Shows additional information about the revision that\'s currently pinned')
+  .action(async function  (ewId, revisionId, options) {
+    options['activeVersions'] = options.activeVersions || configUtils.searchProperty(ACTIVE_VERSIONS);
+    options['currentlyPinnedRevisions'] = options.currentlyPinnedRevisions || configUtils.searchProperty(CURRENTLY_PINNED_REVISIONS);
+
+    try {
+      await cliHandler.showRevisionBOM(ewId, revisionId, options);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on('--help', function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+program
+  .command('list-revision-activations <edgeworker-identifier>')
+  .description('List Revision Activation status of a given EdgeWorker ID')
+  .alias('lra')
+  .option('--versionId <versionId>', 'Version Identifier')
+  .option('--activationId <activationId>', 'Activation Identifier')
+  .option('--network  <network>', 'Limits the results to versions that were activated on a specific network (STAGING or PRODUCTION)')
+  .action(async function (ewId, options) {
+    options['versionId'] = options.versionId || configUtils.searchProperty(VERSION_ID);
+    options['activationId'] = options.activationId || configUtils.searchProperty(ACTIVATION_ID);
+    options['network'] = options.network || configUtils.searchProperty(NETWORK);
+
+    // Do not provide both versionId and activationId
+    if (options.activationId && (options.versionId || options.network) ) {
+      cliUtils.logAndExit(1, 'ERROR: You may not provide the Activation identifier with versionId or network options.');
+    }
+
+    try {
+      await cliHandler.showEdgeWorkerRevisionActivationOverview(ewId, options);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
@@ -611,6 +807,52 @@ config
   .on('--help', function () {
     cliUtils.logAndExit(0, copywrite);
   });
+
+const log_level = program
+  .command('log-level')
+  .description('Manage Edgeworker logging level.');
+
+log_level
+  .command('set')
+  .argument('<edgeworker-identifier>')
+  .addArgument(new Argument('<network>', `(choices: ${cliUtils.staging}, ${cliUtils.production})`))
+  .addArgument(new Argument('<level>', `(choices: ${cliUtils.LOG_LEVELS.join(', ')})`))
+  .option('--expires <time>', `Expire time for logging level change. Supports natural language input
+       like: '+1h', 'Next Saturday', as well as ISO Timestamps. Use '${cliUtils.LL_NEVER_EXPIRE_STR}'
+       for the change to never expire.`, cliUtils.LL_NEVER_EXPIRE_STR)
+  .option('--ds2Id <id>', 'Datastream 2 ID to use alongside the default specified in bundle.json')
+  .description('Set logging level for an Edgeworker.')
+  .action(async function (ewId: number, network: string, level: string, options) {
+    if (network.toUpperCase() !== cliUtils.staging && network.toUpperCase() !== cliUtils.production)
+      cliUtils.logAndExit(1, `ERROR: Network parameter must be either ${cliUtils.staging} or ${cliUtils.production} - was: ${network}`);
+    if (!cliUtils.LOG_LEVELS.includes(level.toUpperCase()))
+      cliUtils.logAndExit(1, `ERROR: Level parameter must be one of: ${cliUtils.LOG_LEVELS.join(', ')} - was: ${level}`);
+    try {
+      await cliHandler.setLogLevel(ewId, network.toUpperCase(), level.toUpperCase(), options);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on('--help', function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+log_level
+  .command('get')
+  .argument('<edgeworker-identifier>')
+  .argument('[logging-identifier]')
+  .description('Get logging level for an Edgeworker.')
+  .action(async function (ewId: number, loggingId: null | string) {
+    try {
+      await cliHandler.getLogLevel(ewId, loggingId);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on('--help', function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
 
 program.parse(process.argv);
 

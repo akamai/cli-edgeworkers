@@ -1,6 +1,6 @@
 import * as httpEdge from '../../src/cli-httpRequest';
 import * as ewService from '../../src/edgeworkers/ew-service';
-import { ErrorMessage } from '../../src/utils/http-error-message';
+import {ErrorMessage} from '../../src/utils/http-error-message';
 
 describe('ew service tests', () => {
   // Test variables
@@ -14,9 +14,9 @@ describe('ew service tests', () => {
   });
 
   describe('getLimits', () => {
-    const mockResponse = [{ limitId: 1 }, { limitId: 2 }];
+    const mockResponse = [{limitId: 1}, {limitId: 2}];
     let getLimitsSpy;
-    
+
     beforeEach(() => {
       getLimitsSpy = jest.spyOn(ewService, 'getLimits');
     });
@@ -60,7 +60,7 @@ describe('ew service tests', () => {
   });
 
   describe('getAvailableReports', () => {
-    const mockResponse = [{ reportId: 1 }, { reportId: 2 }];
+    const mockResponse = [{reportId: 1}, {reportId: 2}];
     let getAvailableReportsSpy;
     beforeEach(() => {
       getAvailableReportsSpy = jest.spyOn(ewService, 'getAvailableReports');
@@ -109,7 +109,7 @@ describe('ew service tests', () => {
     const start = 'startDate';
     const end = 'endDate';
     const ewid = '123';
-    const mockResponse = { report: 'someData' };
+    const mockResponse = {report: 'someData'};
 
     let getReportSpy;
     beforeEach(() => {
@@ -241,62 +241,68 @@ describe('ew service tests', () => {
   });
 
   describe('getActivations', () => {
-    const mockResponse = { activations: [ {
-      'edgeWorkerId': 558591,
-      'version': 'abc123',
-      'activationId': 30,
-      'accountId': 'B-C-BR0JK9',
-      'network': 'STAGING',
-      'createdBy': 'bmatthew',
-      'createdTime': '2022-12-22T20:36:34Z'
-    },
-    {
-      'edgeWorkerId': 558591,
-      'version': 'abc123',
-      'activationId': 31,
-      'accountId': 'B-C-BR0JK9',
-      'network': 'PRODUCTION',
-      'createdBy': 'bmatthew',
-      'createdTime': '2022-12-22T20:36:54Z'
-    }, 
-    {
-      'edgeWorkerId': 558591,
-      'version': 'abc123',
-      'activationId': 29,
-      'accountId': 'B-C-BR0JK9',
-      'network': 'PRODUCTION',
-      'createdBy': 'bmatthew',
-      'createdTime': '2022-12-20T20:36:54Z'
-    } ] };
+    const mockResponse = {
+      activations: [{
+        'edgeWorkerId': 558591,
+        'version': 'abc123',
+        'activationId': 30,
+        'accountId': 'B-C-BR0JK9',
+        'network': 'STAGING',
+        'createdBy': 'bmatthew',
+        'createdTime': '2022-12-22T20:36:34Z'
+      },
+      {
+        'edgeWorkerId': 558591,
+        'version': 'abc123',
+        'activationId': 31,
+        'accountId': 'B-C-BR0JK9',
+        'network': 'PRODUCTION',
+        'createdBy': 'bmatthew',
+        'createdTime': '2022-12-22T20:36:54Z'
+      },
+      {
+        'edgeWorkerId': 558591,
+        'version': 'abc123',
+        'activationId': 29,
+        'accountId': 'B-C-BR0JK9',
+        'network': 'PRODUCTION',
+        'createdBy': 'bmatthew',
+        'createdTime': '2022-12-20T20:36:54Z'
+      }]
+    };
 
-    const mockResponseActive = { activations: [ {
-      'edgeWorkerId': 558591,
-      'version': 'abc123',
-      'activationId': 30,
-      'accountId': 'B-C-BR0JK9',
-      'network': 'STAGING',
-      'createdBy': 'bmatthew',
-      'createdTime': '2022-12-22T20:36:34Z'
-    },
-    {
-      'edgeWorkerId': 558591,
-      'version': 'abc123',
-      'activationId': 31,
-      'accountId': 'B-C-BR0JK9',
-      'network': 'PRODUCTION',
-      'createdBy': 'bmatthew',
-      'createdTime': '2022-12-22T20:36:54Z'
-    }] };
+    const mockResponseActive = {
+      activations: [{
+        'edgeWorkerId': 558591,
+        'version': 'abc123',
+        'activationId': 30,
+        'accountId': 'B-C-BR0JK9',
+        'network': 'STAGING',
+        'createdBy': 'bmatthew',
+        'createdTime': '2022-12-22T20:36:34Z'
+      },
+      {
+        'edgeWorkerId': 558591,
+        'version': 'abc123',
+        'activationId': 31,
+        'accountId': 'B-C-BR0JK9',
+        'network': 'PRODUCTION',
+        'createdBy': 'bmatthew',
+        'createdTime': '2022-12-22T20:36:54Z'
+      }]
+    };
 
-    const mockResponseActiveStaging = { activations: [ {
-      'edgeWorkerId': 558591,
-      'version': 'abc123',
-      'activationId': 30,
-      'accountId': 'B-C-BR0JK9',
-      'network': 'STAGING',
-      'createdBy': 'bmatthew',
-      'createdTime': '2022-12-22T20:36:34Z'
-    }] };
+    const mockResponseActiveStaging = {
+      activations: [{
+        'edgeWorkerId': 558591,
+        'version': 'abc123',
+        'activationId': 30,
+        'accountId': 'B-C-BR0JK9',
+        'network': 'STAGING',
+        'createdBy': 'bmatthew',
+        'createdTime': '2022-12-22T20:36:34Z'
+      }]
+    };
 
     let getActivationsSpy;
     beforeEach(() => {
@@ -361,7 +367,7 @@ describe('ew service tests', () => {
         // The normal error object will be returned as a string
         return Promise.reject(JSON.stringify(mockError));
       });
-      
+
       const error = await ewService.getActivations(ewId);
 
       expect(getActivationsSpy).toHaveBeenCalled();
@@ -369,6 +375,247 @@ describe('ew service tests', () => {
       expect(error.isError).toEqual(true);
       expect(error.error_reason).toEqual(
         `${ErrorMessage['GET_ACTIVATIONS_ERROR']} ${mockError.detail}`
+      );
+    });
+  });
+
+  describe('listRevisions', () => {
+    const mockResponse = {
+      'revisions': [
+        {
+          'accountId': 'A-CCT5678',
+          'activationId': 1,
+          'checksum': 'db3697e7eb03c8fb4822fd763b840e1b915693ab03e02a583fecfcd55d07857d',
+          'createdTime': '2023-08-10T15:32:22Z',
+          'edgeWorkerId': 42,
+          'lastModifiedTime': '2023-08-10T15:41:20Z',
+          'network': 'PRODUCTION',
+          'revisionActivationStatus': 'COMPLETE',
+          'revisionId': '1-2',
+          'version': '0.7'
+        },
+        {
+          'accountId': 'A-CCT7890',
+          'activationId': 1,
+          'checksum': 'a89dfc162fa3d81d36f40805620cb21be6de5d869374e71feda1afff17dae2a7',
+          'createdTime': '2023-08-10T15:22:45Z',
+          'edgeWorkerId': 42,
+          'lastModifiedTime': '2023-08-10T15:27:01Z',
+          'network': 'PRODUCTION',
+          'revisionActivationStatus': 'COMPLETE',
+          'revisionId': '1-1',
+          'version': '0.7'
+        }
+      ]
+    };
+
+    let listRevisionsSpy;
+    beforeEach(() => {
+      listRevisionsSpy = jest.spyOn(ewService, 'listRevisions');
+    });
+
+    const ewId = '42';
+
+    it('should return the list of revisions', async () => {
+      getJsonSpy.mockImplementation((path, timeout) => {
+        expect(path).toEqual(`${ewService.EDGEWORKERS_API_BASE}/ids/${ewId}/revisions`);
+        expect(timeout).toEqual(defaultTimeout);
+        return Promise.resolve({
+          body: mockResponse,
+        });
+      });
+
+      const res = await ewService.listRevisions(ewId);
+
+      expect(listRevisionsSpy).toHaveBeenCalled();
+      expect(res).toEqual(mockResponse);
+    });
+  });
+
+  describe('getRevision', () => {
+    const mockResponse = {
+      'accountId': 'A-CCT9012',
+      'activationId': 1,
+      'checksum': 'db3697e7eb03c8fb4822fd763b840e1b915693ab03e02a583fecfcd55d07857d',
+      'createdTime': '2023-08-10T15:32:22Z',
+      'edgeWorkerId': 42,
+      'lastModifiedTime': '2023-08-10T15:41:20Z',
+      'network': 'PRODUCTION',
+      'revisionActivationStatus': 'COMPLETE',
+      'revisionId': '1-2',
+      'version': '0.7'
+    };
+
+    let getRevisionSpy;
+    beforeEach(() => {
+      getRevisionSpy = jest.spyOn(ewService, 'getRevision');
+    });
+
+    const ewId = '42';
+    const revId = '3-1';
+
+    it('should return the revision', async () => {
+      getJsonSpy.mockImplementation((path, timeout) => {
+        expect(path).toEqual(`${ewService.EDGEWORKERS_API_BASE}/ids/${ewId}/revisions/${revId}`);
+        expect(timeout).toEqual(defaultTimeout);
+        return Promise.resolve({
+          body: mockResponse,
+        });
+      });
+
+      const res = await ewService.getRevision(ewId, revId);
+
+      expect(getRevisionSpy).toHaveBeenCalled();
+      expect(res).toEqual(mockResponse);
+    });
+  });
+
+  describe('getRevisionBOM', () => {
+    const mockResponse = {
+      'dependencies': {
+        'redirect-geo-query': {
+          'activeVersion': '4.0',
+          'dependencies': {
+            'common-lib': {
+              'activeVersion': '3.1',
+              'currentRevisionPinNote': 'Disable dynamic reactivation during moratorium',
+              'currentRevisionPinnedTime': '2023-01-01T00:00:00Z',
+              'currentlyPinnedRevisionId': '2-2',
+              'dependencies': {},
+              'edgeWorkerId': 16,
+              'version': '3.1'
+            }
+          },
+          'edgeWorkerId': 23,
+          'version': '4.0'
+        }
+      },
+      'edgeWorkerId': 42,
+      'version': '0.7'
+    };
+
+    let getRevisionSpy;
+    beforeEach(() => {
+      getRevisionSpy = jest.spyOn(ewService, 'getRevisionBOM');
+    });
+
+    const ewId = '42';
+    const revId = '3-1';
+
+    it('should return the revision', async () => {
+      getJsonSpy.mockImplementation(async (path, timeout) => {
+        expect(path).toEqual(`${ewService.EDGEWORKERS_API_BASE}/ids/${ewId}/revisions/${revId}/bom`);
+        expect(timeout).toEqual(defaultTimeout);
+        return Promise.resolve({
+          body: mockResponse,
+        });
+      });
+
+      const res = await ewService.getRevisionBOM(ewId, revId);
+      expect(getRevisionSpy).toHaveBeenCalled();
+      expect(res).toEqual(mockResponse);
+    });
+  });
+
+  describe('getLoglevel', () => {
+    const ewId = 558591;
+    const loggingId = '1';
+    const mockResponseAll = [
+      {
+        'edgeWorkerId': ewId,
+        'level': 'DEBUG',
+        'schema': 'v2',
+        'network': 'PRODUCTION',
+        'loggingId': '1',
+        'createdTime': '2024-01-31T20:30:00Z',
+        'timeout': '2024-01-31T22:37:32Z',
+        'lastModifiedBy': 'user2',
+        'lastModifiedTime': '2024-01-31T20:30:00Z',
+        'status': 'PRESUBMIT'
+      },
+      {
+        'edgeWorkerId': ewId,
+        'level': 'DEBUG',
+        'schema': 'v2',
+        'network': 'STAGING',
+        'loggingId': '34',
+        'createdTime': '2024-01-31T20:30:00Z',
+        'timeout': '2024-01-31T22:37:32Z',
+        'lastModifiedBy': 'user2',
+        'lastModifiedTime': '2024-01-31T20:30:00Z',
+        'status': 'PRESUBMIT'
+
+      }];
+
+    const mockResponseId1 = {
+      'edgeWorkerId': ewId,
+      'level': 'TRACE',
+      'schema': 'v2',
+      'network': 'STAGING',
+      'loggingId': '1',
+      'createdTime': '2024-01-31T20:30:00Z',
+      'timeout': '2024-01-31T22:37:32Z',
+      'lastModifiedBy': 'user2',
+      'lastModifiedTime': '2024-01-31T20:30:00Z',
+      'status': 'PRESUBMIT'
+    };
+
+    let getLogLevelSpy;
+    beforeEach(() => {
+      getLogLevelSpy = jest.spyOn(ewService, 'getLogLevel');
+    });
+
+
+    it('should return all logging level overrides for Edgeworker ID 558591', async () => {
+      getJsonSpy.mockImplementation((path, timeout) => {
+        expect(path).toEqual(`${ewService.EDGEWORKERS_API_BASE}/ids/${ewId}/loggings`);
+        expect(timeout).toEqual(defaultTimeout);
+        return Promise.resolve({
+          body: mockResponseAll,
+        });
+      });
+
+      const res = await ewService.getLogLevel(ewId);
+
+      expect(getLogLevelSpy).toHaveBeenCalled();
+      expect(res).toEqual(mockResponseAll);
+    });
+
+    it('should return the logging level for Edgeworker ID 558591 for loggingId 1', async () => {
+      getJsonSpy.mockImplementation((path, timeout) => {
+        expect(path).toEqual(`${ewService.EDGEWORKERS_API_BASE}/ids/${ewId}/loggings`);
+        expect(timeout).toEqual(defaultTimeout);
+        return Promise.resolve({
+          body: mockResponseId1,
+        });
+      });
+
+      const res = await ewService.getLogLevel(ewId);
+
+      expect(getLogLevelSpy).toHaveBeenCalled();
+      expect(res).toEqual(mockResponseId1);
+    });
+
+
+    it('should properly handle fetching logging level error', async () => {
+      const mockError = {
+        status: 404,
+        detail: `Unable to fetch logging level for EdgeWorker ID "${ewId}"`,
+      };
+      getJsonSpy.mockImplementation((path, timeout) => {
+        expect(path).toEqual(`${ewService.EDGEWORKERS_API_BASE}/ids/${ewId}/loggings/${loggingId}`);
+        expect(timeout).toEqual(defaultTimeout);
+        // The normal error object will be returned as a string
+        return Promise.reject(JSON.stringify(mockError));
+      });
+
+      const error = await ewService.getLogLevel(ewId, loggingId);
+
+      expect(getLogLevelSpy).toHaveBeenCalled();
+      expect(error).not.toBeUndefined;
+      expect(error.isError).toEqual(true);
+      expect(error.error_reason).toEqual(
+        `${ErrorMessage['GET_LOG_LEVEL_ERROR']} ${mockError.detail}`
       );
     });
   });

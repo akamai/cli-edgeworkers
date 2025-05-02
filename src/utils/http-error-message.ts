@@ -22,6 +22,17 @@ export enum ErrorMessage {
     AUTH_TOKEN_ERROR = 'ERROR: Unable to create authentication token.',
     EKV_TIMEOUT_ERROR = 'The EdgeKV service was unable to respond in time. Please retry the request later.',
     EW_TIMEOUT_ERROR = 'The EdgeWorkers service was unable to respond in time. Please retry the request later.',
-    DOWNLOAD_TARBALL_ERROR = 'Failed to download tarball.'
-
+    DOWNLOAD_TARBALL_ERROR = 'Failed to download tarball.',
+    GET_LOG_LEVEL_ERROR = 'ERROR: Unable to fetch current logging level.',
+    SET_LOG_LEVEL_ERROR = 'ERROR: Unable to set new logging level.',
+    GET_REVISION_ACTIVATION_ERROR = 'Failed to list revision activation.',
+    DOWNLOAD_REVISION_TARBALL_ERROR = 'Failed to download the revision tarball.',
+    GET_REVISION_BOM_ERROR = 'Failed to get the revision bom.',
+    GET_REVISION_ACTIVATIONS_ERROR = 'Failed to list the revision activations.',
+    LIST_REVISIONS_ERROR = 'Failed to list the revisions.',
+    GET_REVISION_ERROR = 'Failed to get the revision.',
+    COMPARE_REVISIONS_ERROR = 'Failed to compare the revisions.',
+    ACTIVATE_REVISION_ERROR = 'Failed to activate the revision.',
+    PIN_REVISION_ERROR = 'Failed to pin the revision.',
+    UNPIN_REVISION_ERROR = 'Failed to unpin the revision.',
 }

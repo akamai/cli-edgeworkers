@@ -4,7 +4,7 @@ import * as response from './ekv-response';
 import * as ekvhelper from './ekv-helper';
 import * as edgeWorkersSvc from '../edgeworkers/ew-service';
 import { ekvJsonOutput } from './client-manager';
-import {validateDataAccessPolicy} from './ekv-helper';
+import {isJWTToken, validateDataAccessPolicy} from './ekv-helper';
 
 export async function listNameSpaces(
   environment: string,
@@ -541,8 +541,8 @@ export async function createToken(
     overwrite?;
   }
 ) {
-  // convert string to ISO date
-  const expiry = getExpiryDate(options.expiry);
+  // convert string to ISO date if exists
+  const expiry = (options['expiry']) ? getExpiryDate(options.expiry) : '';
 
   // parse input permissions
   const permissionList = parseNameSpacePermissions(options.namespace);
@@ -581,7 +581,7 @@ export async function retrieveToken(
 
   const retrievedToken = await cliUtils.spinner(
     edgekvSvc.getSingleToken(tokenName),
-    'Downloading egdekv token...'
+    'Downloading edgekv token...'
   );
 
   if (retrievedToken != undefined && !retrievedToken.isError) {
@@ -590,6 +590,35 @@ export async function retrieveToken(
     response.logError(
       retrievedToken,
       `ERROR: Unable to retrieve edgekv token. ${retrievedToken.error_reason} [TraceId: ${retrievedToken.traceId}]`
+    );
+  }
+}
+
+export async function refreshToken(
+  tokenName: string
+) {
+  const refreshedToken = await cliUtils.spinner(
+    edgekvSvc.refreshToken(tokenName),
+    'Refreshing EdgeKV token...'
+  );
+
+  if (refreshedToken != undefined && !refreshedToken.isError) {
+    const nameSpaceList = Object.keys(refreshedToken['namespacePermissions']);
+    const msg = `Token "${refreshedToken['name']}" has been refreshed`;
+    if (ekvJsonOutput.isJSONOutputMode()) {
+      ekvJsonOutput.writeJSONOutput(
+        0,
+        msg,
+        response.logTokenToJson(refreshedToken, nameSpaceList)
+      );
+    } else {
+      cliUtils.logWithBorder(msg);
+      response.logToken(refreshedToken);
+    }
+  } else {
+    response.logError(
+      refreshedToken,
+      `ERROR: Unable to retrieve edgekv token. ${refreshedToken.error_reason} [TraceId: ${refreshedToken.traceId}]`
     );
   }
 }
@@ -807,18 +836,26 @@ function validateSavePath(savePath) {
 }
 
 function processToken(token, savePath, overwrite) {
-  // decodes the jwt token
-  const decodedToken = ekvhelper.decodeJWTToken(token['value']);
-  const nameSpaceList = ekvhelper.getNameSpaceListFromJWT(decodedToken);
-  const msg =
-    'Add the token value in edgekv_tokens.js file and place it in your bundle. Use --save_path option to save the token file to your bundle';
+  let nameSpaceList = [];
+  let msg = '';
+  if (isJWTToken(token)) {
+    // decode the jwt token and combine
+    const decodedToken = ekvhelper.decodeJWTToken(token['value']);
+    token = {...token, ...decodedToken};
+    nameSpaceList = ekvhelper.getNameSpaceListFromJWT(token);
+    msg =
+      'Add the token value in edgekv_tokens.js file and place it in your bundle. Use --save_path option to save the token file to your bundle';
+  } else {
+    nameSpaceList = Object.keys(token['namespacePermissions']);
+    msg =
+      'Add the token reference in edgekv_tokens.js file and place it in your bundle. Use --save_path option to save the token file to your bundle';
+  }
   if (savePath) {
     if (ekvhelper.getFileExtension(savePath) != '.tgz') {
       ekvhelper.createTokenFileWithoutBundle(
         savePath,
         overwrite,
         token,
-        decodedToken,
         nameSpaceList
       );
     } else {
@@ -826,7 +863,6 @@ function processToken(token, savePath, overwrite) {
         savePath,
         overwrite,
         token,
-        decodedToken,
         nameSpaceList
       );
     }
@@ -835,17 +871,11 @@ function processToken(token, savePath, overwrite) {
       ekvJsonOutput.writeJSONOutput(
         0,
         msg,
-        response.logTokenToJson(token, decodedToken, nameSpaceList)
+        response.logTokenToJson(token, nameSpaceList)
       );
     } else {
       cliUtils.logWithBorder(msg);
-      response.logToken(
-        token['name'],
-        token['value'],
-        decodedToken,
-        nameSpaceList,
-        false
-      );
+      response.logToken(token);
     }
   }
 }

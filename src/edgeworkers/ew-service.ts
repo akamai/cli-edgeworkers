@@ -46,14 +46,14 @@ function fetchTarball(
         if (contentType.indexOf('gzip') > -1) {
           const buffer = Buffer.from(response.data, 'utf8');
           fs.writeFileSync(downloadPath, buffer);
-          resolve({ state: true });
+          resolve({state: true});
         } else {
           // this shouldn't happen unless Version API changes content-types to non-tarball format
           throw new Error(`ERROR: Unexpected content-type: ${contentType}`);
         }
       } else {
         try {
-          const errorObj = Buffer.from(error.response.data, 'utf8');
+          const errorObj = Buffer.from(error.response.data as string, 'utf8');
           reject(errorObj.toString());
         } catch (ex) {
           console.error(
@@ -70,7 +70,7 @@ function postTarball(path: string, edgeworkerTarballPath) {
   return httpEdge.sendEdgeRequest(
     path,
     'POST',
-    new Uint8Array(fs.readFileSync(edgeworkerTarballPath, { encoding: null })),
+    new Uint8Array(fs.readFileSync(edgeworkerTarballPath, {encoding: null})),
     {
       'Content-Type': 'application/gzip',
     },
@@ -132,7 +132,7 @@ export function createEdgeWorkerId(
   name: string,
   resourceTierId: string
 ) {
-  const body = { groupId: groupId, name: name, resourceTierId: resourceTierId };
+  const body = {groupId: groupId, name: name, resourceTierId: resourceTierId};
   return httpEdge
     .postJson(
       `${EDGEWORKERS_API_BASE}/ids`,
@@ -193,11 +193,11 @@ export function updateEdgeWorkerId(
   name: string,
   resourceTierId: string
 ) {
-  if(!cliUtils.isValidEwId(ewId)) {
+  if (!cliUtils.isValidEwId(ewId)) {
     return error.invalidParameterError('UPDATE_EW');
   }
 
-  const body = { groupId: groupId, name: name };
+  const body = {groupId: groupId, name: name};
   if (resourceTierId != undefined && resourceTierId != null) {
     body['resourceTierId'] = resourceTierId;
   }
@@ -259,6 +259,19 @@ export function downloadTarball(
     .catch((err) => error.handleError(err, 'DOWNLOAD_TARBALL'));
 }
 
+export function downloadRevisionTarball(
+  ewId: string,
+  revisionId: string,
+  downloadPath: string
+) {
+  return getTarball(
+    `${EDGEWORKERS_API_BASE}/ids/${ewId}/revisions/${revisionId}/content`,
+    downloadPath
+  )
+    .then((r) => r.state)
+    .catch((err) => error.handleError(err, 'DOWNLOAD_REVISION_TARBALL'));
+}
+
 export function deleteVersion(ewId: string, versionId: string) {
   return httpEdge
     .deleteReq(
@@ -272,7 +285,7 @@ export function deleteVersion(ewId: string, versionId: string) {
 export function getActivations(ewId: string, versionId?: string, network?: string, active?: boolean) {
   let queryString = '?';
 
-  if ((network ==  undefined || network == null) && (active == undefined || active == null) && (versionId === undefined || versionId === null)) {
+  if ((network == undefined || network == null) && (active == undefined || active == null) && (versionId === undefined || versionId === null)) {
     queryString = '';
   } else {
     if (versionId) {
@@ -309,9 +322,14 @@ export function getActivationID(ewId: string, activationId: string) {
 export function createActivationId(
   ewId: string,
   network: string,
-  versionId: string
+  versionId: string,
+  autoPin?: boolean
 ) {
-  const body = { network: network, version: versionId };
+  const body = {network: network, version: versionId};
+  if (autoPin != undefined) {
+    body['autoPin'] = autoPin;
+  }
+
   return httpEdge
     .postJson(
       `${EDGEWORKERS_API_BASE}/ids/${ewId}/activations`,
@@ -321,13 +339,185 @@ export function createActivationId(
     .then((r) => r.body);
 }
 
+export function listRevisions(
+  ewId: string,
+  versionId?: string,
+  activationId?: string,
+  network?: string,
+  pinnedOnly?: boolean,
+  currentlyPinned?: boolean,
+) {
+  let queryString = '?';
+
+  if (
+    (versionId === undefined || versionId === null) &&
+    (activationId === undefined || activationId === null) &&
+    (network === undefined || network === null) &&
+    (pinnedOnly === undefined || pinnedOnly === null) &&
+    (currentlyPinned === undefined || currentlyPinned === null)
+  ) {
+    queryString = '';
+  } else {
+    if (versionId) {
+      queryString += `version=${versionId}`;
+    }
+    if (activationId) {
+      queryString += `${
+        queryString == '?' ? '' : '&'
+      }activationId=${activationId}`;
+    }
+    if (network) {
+      queryString += `${queryString == '?' ? '' : '&'}network=${network}`;
+    }
+    if (pinnedOnly) {
+      queryString += `${queryString == '?' ? '' : '&'}pinnedOnly=true`;
+    }
+    if (currentlyPinned) {
+      queryString += `${queryString == '?' ? '' : '&'}currentlyPinned=true`;
+    }
+  }
+
+  return httpEdge
+    .getJson(
+      `${EDGEWORKERS_API_BASE}/ids/${ewId}/revisions${queryString}`,
+      cliUtils.getTimeout(DEFAULT_EW_TIMEOUT),
+    )
+    .then((r) => r.body)
+    .catch((err) => error.handleError(err, 'LIST_REVISIONS'));
+}
+
+export function getRevision(ewId: string, revId: string) {
+  return httpEdge
+    .getJson(
+      `${EDGEWORKERS_API_BASE}/ids/${ewId}/revisions/${revId}`,
+      cliUtils.getTimeout(DEFAULT_EW_TIMEOUT),
+    )
+    .then((r) => r.body)
+    .catch((err) => error.handleError(err, 'GET_REVISION'));
+}
+
+export function compareRevisions(ewId: string, revId1: string, revId2: string) {
+  const body = {revisionId: revId2};
+  return httpEdge
+    .postJson(
+      `${EDGEWORKERS_API_BASE}/ids/${ewId}/revisions/${revId1}/compare`,
+      body,
+      cliUtils.getTimeout(DEFAULT_EW_TIMEOUT)
+    )
+    .then((r) => r.body)
+    .catch((err) => error.handleError(err, 'COMPARE_REVISIONS'));
+}
+
+export function activateRevision(
+  ewId: string,
+  revId: string,
+  note?: string
+) {
+  if (!cliUtils.isValidRevId(revId)) {
+    return error.invalidParameterError('ACTIVATE_REVISION', 'Invalid revision ID');
+  }
+  const body = {revisionId: revId, note: note};
+  return httpEdge
+    .postJson(
+      `${EDGEWORKERS_API_BASE}/ids/${ewId}/revisions/activations`,
+      body,
+      cliUtils.getTimeout(DEFAULT_EW_TIMEOUT)
+    )
+    .then((r) => r.body)
+    .catch((err) => error.handleError(err, 'ACTIVATE_REVISION'));
+}
+
+export function pinRevision(
+  ewId: string,
+  revId: string,
+  note?: string
+) {
+  const body = {pinNote: note};
+  return httpEdge
+    .postJson(
+      `${EDGEWORKERS_API_BASE}/ids/${ewId}/revisions/${revId}/pin`,
+      body,
+      cliUtils.getTimeout(DEFAULT_EW_TIMEOUT)
+    )
+    .then((r) => r.body)
+    .catch((err) => error.handleError(err, 'PIN_REVISION'));
+}
+
+export function unpinRevision(
+  ewId: string,
+  revId: string,
+  note?: string
+) {
+  const body = {unpinNote: note};
+  return httpEdge
+    .postJson(
+      `${EDGEWORKERS_API_BASE}/ids/${ewId}/revisions/${revId}/unpin`,
+      body,
+      cliUtils.getTimeout(DEFAULT_EW_TIMEOUT)
+    )
+    .then((r) => r.body)
+    .catch((err) => error.handleError(err, 'UNPIN_REVISION'));
+}
+
+export function getRevisionBOM(ewId: string, revisionId: string, activeVersions?: boolean, currentlyPinned?: boolean) {
+  let queryString = '?';
+
+  if ((activeVersions ==  undefined || activeVersions == null) &&
+    (currentlyPinned === undefined || currentlyPinned === null)) {
+    queryString = '';
+  } else {
+    if (activeVersions) {
+      queryString += 'includeActiveVersions=true';
+    }
+
+    if (currentlyPinned) {
+      queryString += `${queryString == '?' ? '' : '&'}includeCurrentlyPinnedRevisions=true`;
+    }
+  }
+  return httpEdge
+    .getJson(
+      `${EDGEWORKERS_API_BASE}/ids/${ewId}/revisions/${revisionId}/bom${queryString}`,
+      cliUtils.getTimeout(DEFAULT_EW_TIMEOUT)
+    )
+    .then((r) => r.body)
+    .catch((err) => error.handleError(err, 'GET_REVISION_BOM'));
+}
+
+export function getRevisionActivations(ewId: string, versionId?: string, network?: string, activationId?: string) {
+  let queryString = '?';
+
+  if ((network ==  undefined || network == null) && (versionId === undefined || versionId === null)) {
+    queryString = '';
+  } else {
+    if (activationId) {
+      queryString += `=${activationId}`;
+    }
+
+    if (versionId) {
+      queryString += `${queryString == '?' ? '' : '&'}version=${versionId}`;
+    }
+
+    if (network) {
+      queryString += `${queryString == '?' ? '' : '&'}network=${network}`;
+    }
+  }
+
+  return httpEdge
+    .getJson(
+      `${EDGEWORKERS_API_BASE}/ids/${ewId}/revisions/activations${queryString}`,
+      cliUtils.getTimeout(DEFAULT_EW_TIMEOUT)
+    )
+    .then((r) => r.body)
+    .catch((err) => error.handleError(err, 'GET_REVISION_ACTIVATIONS'));
+}
+
 export function cloneEdgeworker(
   ewId: string,
   name: string,
   groupId: string,
   resourceTierId: string
 ) {
-  const body = { resourceTierId: resourceTierId };
+  const body = {resourceTierId: resourceTierId};
   if (groupId != undefined) {
     body['groupId'] = groupId;
   }
@@ -356,7 +546,7 @@ export function getAuthToken(
 ) {
   const urlPath = `${EDGEWORKERS_API_BASE}/secure-token`;
 
-//  If no hostnames are provided then token is created for all hosts
+  //  If no hostnames are provided then token is created for all hosts
   if (!hostName) {
     hostName = '/*';
   }
@@ -387,7 +577,7 @@ export function deactivateEdgeworker(
   network: string,
   versionId: string
 ) {
-  const body = { network: network, version: versionId };
+  const body = {network: network, version: versionId};
   return httpEdge
     .postJson(
       `${EDGEWORKERS_API_BASE}/ids/${ewId}/deactivations`,
@@ -397,7 +587,7 @@ export function deactivateEdgeworker(
     .then((r) => r.body);
 }
 
-export function getLimits () {
+export function getLimits() {
   return httpEdge
     .getJson(
       `${EDGEWORKERS_API_BASE}/limits`,
@@ -407,7 +597,7 @@ export function getLimits () {
     .catch((err) => error.handleError(err, 'GET_LIMITS'));
 }
 
-export function getAvailableReports () {
+export function getAvailableReports() {
   return httpEdge
     .getJson(
       `${EDGEWORKERS_API_BASE}/reports`,
@@ -417,7 +607,7 @@ export function getAvailableReports () {
     .catch((err) => error.handleError(err, 'GET_AVAILABLE_REPORTS'));
 }
 
-export function getReport (
+export function getReport(
   reportId: number,
   ewid: string,
   start: string,
@@ -427,10 +617,10 @@ export function getReport (
 ) {
   let queryString = `?start=${start}&edgeWorker=${ewid}`;
   if (end) queryString += `&end=${end}`;
-  for (const status of statuses){
+  for (const status of statuses) {
     queryString += `&status=${status}`;
   }
-  for (const eventHandler of eventHandlers){
+  for (const eventHandler of eventHandlers) {
     queryString += `&eventHandler=${eventHandler}`;
   }
 
@@ -441,4 +631,50 @@ export function getReport (
     )
     .then((r) => r.body)
     .catch((err) => error.handleError(err, 'GET_REPORT'));
+}
+
+export function getLogLevel(ewId: number, loggingId: null | string = null) {
+  let url = `${EDGEWORKERS_API_BASE}/ids/${ewId}/loggings`;
+  if (loggingId) {
+    url += `/${loggingId}`;
+  }
+
+  return httpEdge
+    .getJson(
+      url,
+      cliUtils.getTimeout(DEFAULT_EW_TIMEOUT)
+    )
+    .then((r) => r.body)
+    .catch((err) => error.handleError(err, 'GET_LOG_LEVEL'));
+}
+
+export function setLogLevel(
+  ewId: number,
+  level: string,
+  network: string,
+  timeout: string | null,
+  ds2Id: string | null,
+) {
+
+  const jsonBody = {
+    'level': level,
+    'network': network,
+  };
+
+  if (timeout != null) {
+    jsonBody['timeout'] = timeout;
+  }
+
+  if (ds2Id != null) {
+    jsonBody['ds2Id'] = ds2Id;
+  }
+
+  return httpEdge
+    .postJson(
+      `${EDGEWORKERS_API_BASE}/ids/${ewId}/loggings`,
+      jsonBody,
+      cliUtils.getTimeout(DEFAULT_EW_TIMEOUT)
+    )
+    .then((r) => r.body)
+    .catch((err) => error.handleError(err, 'SET_LOG_LEVEL'));
 }

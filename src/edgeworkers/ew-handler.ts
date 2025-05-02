@@ -2,8 +2,9 @@ import * as path from 'path';
 import * as envUtils from '../utils/env-utils';
 import * as cliUtils from '../utils/cli-utils';
 import * as edgeWorkersSvc from './ew-service';
-import { ewJsonOutput, validateTarballLocally, buildTarball, determineTarballDownloadDir } from './client-manager';
+import {ewJsonOutput, validateTarballLocally, buildTarball, determineTarballDownloadDir} from './client-manager';
 import * as readline from 'readline-sync';
+import * as chrono from 'chrono-node';
 
 import CryptoJS from 'crypto-js';
 const groupColumnsToKeep = ['groupId', 'groupName', 'capabilities'];
@@ -34,6 +35,50 @@ const activationColumnsToKeep = [
   'createdBy',
   'createdTime',
 ];
+const revisionColumnsToKeep = [
+  'edgeWorkerId',
+  'version',
+  'activationId',
+  'revisionId',
+  'network',
+  'status',
+  'createdTime',
+  'revisionActivatedBy',
+];
+const compareRevisionsColumnsToKeep = [
+  'edgeWorkerId',
+  'library',
+  'previousVersion',
+  'version',
+];
+const pinColumnsToKeep = [
+  'edgeWorkerId',
+  'version',
+  'activationId',
+  'revisionId',
+  'network',
+  'pinnedBy',
+  'pinnedTime',
+];
+const unpinColumnsToKeep = [
+  'edgeWorkerId',
+  'version',
+  'activationId',
+  'revisionId',
+  'network',
+  'unpinnedBy',
+  'unpinnedTime',
+];
+const activationColumnsToKeepForLRA = [
+  'edgeWorkerId',
+  'version',
+  'activationId',
+  'revisionId',
+  'status',
+  'network',
+  'createdBy',
+  'createdTime',
+];
 const deactivationColumnsToKeep = [
   'edgeWorkerId',
   'version',
@@ -50,6 +95,62 @@ const resourceTierColumnsToKeep = [
   'edgeWorkerLimits',
 ];
 const errorColumnsToKeep = ['type', 'message'];
+const GetRevBOMColumnsToKeep = ['library', 'edgeWorkerId', 'version'];
+
+class CompareRevisions {
+  dependencies?: RevisionDependencies[] = [];
+  diff?: string;
+  edgeWorkerId?: number;
+  previousVersion?: string;
+  version?: string;
+
+  constructor(rev) {
+    this.diff = rev['diff'];
+    this.edgeWorkerId = rev['edgeWorkerId'];
+    this.previousVersion = rev['previousVersion'];
+    this.version = rev['version'];
+  }
+}
+
+class RevisionDependencies {
+  edgeWorkerId: string;
+  library: string;
+  previousVersion: string;
+  version: string;
+
+  constructor(library: string, revision) {
+    this.edgeWorkerId = revision['edgeWorkerId'];
+    this.library = library;
+    this.previousVersion = revision['previousVersion'];
+    this.version = revision['version'];
+  }
+}
+
+class BOMEntry {
+  edgeWorkerId: string;
+  version: string;
+  activeVersion: string;
+  dependencies: BOMDependency[] = [];
+
+  constructor(bom) {
+    this.edgeWorkerId = bom['edgeWorkerId'];
+    this.version = bom['version'];
+    this.activeVersion = bom['activeVersion'];
+  }
+}
+
+class BOMDependency {
+  library: string;
+  edgeWorkerId: string;
+  version: string;
+  activeVersion: string;
+  constructor(library: string, entry) {
+    this.library = library;
+    this.edgeWorkerId = entry['edgeWorkerId'];
+    this.version = entry['version'];
+    this.activeVersion = entry['activeVersion'];
+  }
+}
 
 export async function showGroupOverview(groupId: string) {
   let groups = null;
@@ -111,7 +212,7 @@ export async function showEdgeWorkerIdOverview(
       'Fetching EdgeWorker Ids...'
     );
     // remove outer envelope of JSON data
-    if (Object.prototype.hasOwnProperty.call(ids, 'edgeWorkerIds')){
+    if (Object.prototype.hasOwnProperty.call(ids, 'edgeWorkerIds')) {
       ids = ids['edgeWorkerIds'];
     }
   } else {
@@ -254,12 +355,12 @@ export async function getResourceTierInfo() {
   resourceTierList.forEach(function (resTier, index) {
     console.log(
       index +
-        1 +
-        '. Resource Tier ' +
-        resTier['resourceTierId'] +
-        ' ' +
-        resTier['resourceTierName'] +
-        '\n'
+      1 +
+      '. Resource Tier ' +
+      resTier['resourceTierId'] +
+      ' ' +
+      resTier['resourceTierName'] +
+      '\n'
     );
     resourceIds.push(resTier['resourceTierId']);
     const ewLimit = resTier['edgeWorkerLimits'];
@@ -304,7 +405,7 @@ export async function getContracts() {
     const msg = 'List of contract id\'s associated with this account';
     const contractList = [];
     contractIdList.forEach(function (value) {
-      contractList.push({ ContractIds: value });
+      contractList.push({ContractIds: value});
     });
     if (ewJsonOutput.isJSONOutputMode()) {
       ewJsonOutput.writeJSONOutput(0, msg, contractList);
@@ -384,11 +485,11 @@ export async function getResourceTiers(contractId?: string) {
       resourceTierList.forEach(function (resTier, index) {
         console.log(
           index +
-            1 +
-            '. ResourceTier ' +
-            resTier['resourceTierId'] +
-            ' - ' +
-            resTier['resourceTierName']
+          1 +
+          '. ResourceTier ' +
+          resTier['resourceTierId'] +
+          ' - ' +
+          resTier['resourceTierName']
         );
         const ewLimit = resTier['edgeWorkerLimits'];
         ewLimit.forEach(function (limit) {
@@ -479,7 +580,7 @@ export async function createEdgeWorkerId(
 
 export async function showEdgeWorkerIdVersionOverview(
   ewId: string,
-  options?: { versionId?: string; showResult?: boolean }
+  options?: {versionId?: string; showResult?: boolean}
 ) {
   let versions = null;
   const version = [];
@@ -555,7 +656,7 @@ export async function showEdgeWorkerIdVersionOverview(
 
 export async function createNewVersion(
   ewId: string,
-  options: { bundle?: string; codeDir?: string }
+  options: {bundle?: string; codeDir?: string}
 ) {
   let bundle = null;
   let versions = null;
@@ -679,7 +780,7 @@ export async function uploadEdgeWorkerVersion(
   } catch (error) {
     const errorObj = JSON.parse(error);
 
-    if (errorObj.type === '/edgeworkers/error-types/edgeworkers-invalid-argument'){
+    if (errorObj.type === '/edgeworkers/error-types/edgeworkers-invalid-argument') {
       return validateEdgeWorkerVersion(tarballPath);
     } else {
       cliUtils.logAndExit(
@@ -803,9 +904,318 @@ export async function downloadTarball(
   }
 }
 
+export async function downloadRevisionTarball(
+  ewId: string,
+  revisionId: string,
+  rawDownloadPath?: string
+) {
+  // Determine where the tarball should be store
+  const downloadPath = determineTarballDownloadDir(
+    ewId,
+    rawDownloadPath
+  );
+  // Build tarball file name as ew_<revision>_<now-as-epoch>.tgz
+  const tarballFileName = `ew_${revisionId}_${Date.now()}.tgz`;
+  const pathToStore = path.join(downloadPath, tarballFileName);
+
+  // First try to fetch tarball
+  const wasDownloaded = await cliUtils.spinner(
+    edgeWorkersSvc.downloadRevisionTarball(ewId, revisionId, pathToStore),
+    `Downloading code bundle for EdgeWorker Id ${ewId} and Revision id ${revisionId}`
+  );
+
+  if (wasDownloaded.isError) {
+    cliUtils.logAndExit(
+      1,
+      wasDownloaded.error_reason
+    );
+  }
+
+  // if tarball found, then figure out where to store it
+  if (!wasDownloaded.isError) {
+    cliUtils.logAndExit(0, `INFO: File saved @ ${pathToStore}`);
+  } else {
+    cliUtils.logAndExit(
+      1,
+      `ERROR: Code bundle for EdgeWorker Id ${ewId} and Revision id ${revisionId} was not saved. (${wasDownloaded.error_reason})`
+    );
+  }
+}
+
+export async function compareRevisions(ewId: string, revId1: string, revId2: string) {
+  const revisions = await cliUtils.spinner(
+    edgeWorkersSvc.compareRevisions(ewId, revId1, revId2),
+    `Comparing revisions ${revId1} and ${revId2} for EdgeWorker Id ${ewId}`
+  );
+  if (revisions.isError) {
+    cliUtils.logAndExit(
+      1,
+      revisions.error_reason
+    );
+  }
+  if (ewJsonOutput.isJSONOutputMode()) {
+    const msg = `Revisions ${revId1} and ${revId2} for EdgeWorker Id ${ewId}`;
+    ewJsonOutput.writeJSONOutput(0, msg, revisions);
+  } else {
+    const entries = [revisions];
+    const results: CompareRevisions[] = [];
+    for (let i = 0; i < entries.length; i++) {
+      const entry = entries[i];
+      const revisionEntry = new CompareRevisions(entry);
+      const deps = entry['dependencies'];
+      if (deps !== undefined) {
+        Object.keys(deps).forEach(function (key) {
+          const dependency = deps[key];
+          revisionEntry.dependencies.push(new RevisionDependencies(key, dependency));
+          entries.push(dependency);
+        });
+        if (revisionEntry.dependencies.length > 0) {
+          results.push(revisionEntry);
+        }
+      }
+    }
+    results.forEach(entry => {
+      const output = [];
+      Object.keys(entry.dependencies).forEach(function (key) {
+        output.push(filterJsonData(entry.dependencies[key], compareRevisionsColumnsToKeep));
+      });
+      console.table(output);
+    });
+  }
+}
+
+export async function activateRevision(
+  ewId: string,
+  revId: string,
+  note?: string
+) {
+  let activations = await cliUtils.spinner(
+    edgeWorkersSvc.activateRevision(ewId, revId, note),
+    `Activating revision: ${revId} for EdgeWorker Id: ${ewId}${note ? ' with note: ' + note : ''}`
+  );
+  if (activations.isError) {
+    cliUtils.logAndExit(
+      1,
+      activations.error_reason
+    );
+  }
+
+  if (activations) {
+    activations = [activations];
+    const activation = [];
+    Object.keys(activations).forEach(function (key) {
+      activation.push(
+        filterJsonData(activations[key], activationColumnsToKeep)
+      );
+    });
+    const msg = `Revision: ${revId} activated for EdgeWorker Id: ${ewId}${note ? ' with note: ' + note : ''}`;
+    if (ewJsonOutput.isJSONOutputMode()) {
+      ewJsonOutput.writeJSONOutput(0, msg, activation);
+    } else {
+      console.table(activation);
+    }
+  } else {
+    cliUtils.logAndExit(
+      1,
+      `ERROR: Revision: ${revId} cannot be activated for EdgeWorker Id: ${ewId}${note ? ' with note: ' + note : ''}`
+    );
+  }
+}
+
+export async function pinRevision(
+  ewId: string,
+  revId: string,
+  note?: string
+) {
+  let revision = await cliUtils.spinner(
+    edgeWorkersSvc.pinRevision(ewId, revId, note),
+    `Pinning revision: ${revId} for EdgeWorker Id: ${ewId}${note ? ' with note: ' + note : ''}`
+  );
+  if (revision.isError) {
+    cliUtils.logAndExit(
+      1,
+      revision.error_reason
+    );
+  }
+  if (revision) {
+    revision = [revision];
+    const revisionList = [];
+    Object.keys(revision).forEach(function (key) {
+      revisionList.push(
+        filterJsonData(revision[key], pinColumnsToKeep)
+      );
+    });
+    const msg = `Revision: ${revId} pinned for EdgeWorker Id: ${ewId}${note ? ' with note: ' + note : ''}`;
+    if (ewJsonOutput.isJSONOutputMode()) {
+      ewJsonOutput.writeJSONOutput(0, msg, revision);
+    } else {
+      console.table(revisionList);
+    }
+  } else {
+    cliUtils.logAndExit(
+      1,
+      `ERROR: Revision: ${revId} cannot be pinned for EdgeWorker Id: ${ewId}${note ? ' with note: ' + note : ''}`
+    );
+  }
+}
+
+export async function unpinRevision(
+  ewId: string,
+  revId: string,
+  note?: string
+) {
+  let revision = await cliUtils.spinner(
+    edgeWorkersSvc.unpinRevision(ewId, revId, note),
+    `Unpinning revision: ${revId} for EdgeWorker Id: ${ewId}${note ? ' with note: ' + note : ''}`
+  );
+  if (revision.isError) {
+    cliUtils.logAndExit(
+      1,
+      revision.error_reason
+    );
+  }
+  if (revision) {
+    revision = [revision];
+    const revisionList = [];
+    Object.keys(revision).forEach(function (key) {
+      revisionList.push(
+        filterJsonData(revision[key], unpinColumnsToKeep)
+      );
+    });
+    const msg = `Revision: ${revId} unpinned for EdgeWorker Id: ${ewId}${note ? ' with note: ' + note : ''}`;
+    if (ewJsonOutput.isJSONOutputMode()) {
+      ewJsonOutput.writeJSONOutput(0, msg, revision);
+    } else {
+      console.table(revisionList);
+    }
+  } else {
+    cliUtils.logAndExit(
+      1,
+      `ERROR: Revision: ${revId} cannot be unpinned for EdgeWorker Id: ${ewId}${note ? ' with note: ' + note : ''}`
+    );
+  }
+}
+
+export async function showRevisionBOM(ewId: string, revisionId: string, options?: { activeVersions?: boolean; currentlyPinnedRevisions?: boolean; }) {
+  const activeVersions = options.activeVersions;
+  const currentlyPinned = options.currentlyPinnedRevisions;
+
+  const bom = await cliUtils.spinner(
+    edgeWorkersSvc.getRevisionBOM(ewId, revisionId, activeVersions, currentlyPinned),
+    `Fetching BOM for EdgeWorkerId ${ewId} and Revision ${revisionId}`
+  );
+
+  if (bom.isError) {
+    cliUtils.logAndExit(
+      1,
+      bom.error_reason
+    );
+  }
+
+  if (ewJsonOutput.isJSONOutputMode()) {
+    const msg = `EdgeWorker Id: ${ewId} and revision: ${revisionId}`;
+    ewJsonOutput.writeJSONOutput(0, msg, bom);
+  } else {
+
+    const results: BOMEntry[] = [];
+
+    const entries = [bom];
+    for (let i = 0; i < entries.length; i++) {
+      const entry = entries[i];
+
+      const bomEntry = new BOMEntry(entry);
+      const deps = entry['dependencies'];
+
+      try {
+        Object.keys(deps).forEach(function (key) {
+          const dependency = deps[key];
+          bomEntry.dependencies.push(new BOMDependency(key, dependency));
+          entries.push(dependency);
+        });
+      } catch {
+        console.error('An error occurred:', bom);
+      }
+
+      if (bomEntry.dependencies.length > 0) {
+        results.push(bomEntry);
+      }
+    }
+
+    if (activeVersions) {
+      GetRevBOMColumnsToKeep.push('activeVersion');
+    }
+    results.forEach(bomEntry => {
+      const output = [];
+      Object.keys(bomEntry.dependencies).forEach(function (key) {
+        output.push(filterJsonData(bomEntry.dependencies[key], GetRevBOMColumnsToKeep));
+      });
+      console.table(output);
+    });
+  }
+}
+
+export async function showEdgeWorkerRevisionActivationOverview(
+  ewId: string,
+  options?: { versionId?: string; activationId?: string; network?: string}
+) {
+  let activations = null;
+  const activation = [];
+  let accountId = '';
+  let versionId = options.versionId;
+  let activationId = options.activationId;
+  const network = options.network;
+
+  activations = await cliUtils.spinner(
+    edgeWorkersSvc.getRevisionActivations(ewId, versionId, network),
+    `Fetching all Revision Activations for EdgeWorker Id ${ewId}, Version ${versionId}${network ? ', Network ' + network : ''}`
+  );
+
+  if (activations.isError) {
+    cliUtils.logAndExit(
+      1,
+      activations.error_reason
+    );
+  }
+
+  if (Object.prototype.hasOwnProperty.call(activations, 'revisionActivations')){
+    activations = activations['revisionActivations'];
+  }
+
+  // check if versionId was empty for messaging
+  if (versionId === undefined || versionId === null) versionId = 'any';
+
+  // check if activationId was empty for messaging
+  if (activationId === undefined || activationId === null) activationId = 'any';
+
+  // If data was provided format it, otherwise submit an INFO statement that no data was provided
+  if (activations.length > 0) {
+    // accountid should be consistent across returned data set so grab value for messaging from first array element
+    accountId = activations[0]['accountId'];
+
+    Object.keys(activations).forEach(function (key) {
+      activation.push(
+        filterJsonData(activations[key], activationColumnsToKeepForLRA)
+      );
+    });
+
+    const msg = `The following EdgeWorker Revision Activations currently exist for account: ${accountId}, EdgeWorker Id: ${ewId}, version: ${versionId}, activationId: ${activationId}, network: ${network ? network : 'any'}`;
+    if (ewJsonOutput.isJSONOutputMode()) {
+      ewJsonOutput.writeJSONOutput(0, msg, activation);
+    } else {
+      cliUtils.logWithBorder(msg);
+      console.table(activation);
+    }
+  } else {
+    cliUtils.logAndExit(
+      1,
+      activations.error_reason
+    );
+  }
+}
+
 export async function showEdgeWorkerActivationOverview(
   ewId: string,
-  options?: { versionId?: string; activationId?: string; activeOnNetwork?: boolean; network?: string; }
+  options?: {versionId?: string; activationId?: string; activeOnNetwork?: boolean; network?: string;}
 ) {
   let activations = null;
   const activation = [];
@@ -821,7 +1231,7 @@ export async function showEdgeWorkerActivationOverview(
       `Fetching all Activations for EdgeWorker Id ${ewId}, Version ${versionId}${network ? ', Network ' + network : ''}`
     );
 
-    if (Object.prototype.hasOwnProperty.call(activations, 'activations')){
+    if (Object.prototype.hasOwnProperty.call(activations, 'activations')) {
       activations = activations['activations'];
     }
   } else if (activationId) {
@@ -833,11 +1243,11 @@ export async function showEdgeWorkerActivationOverview(
   } else {
     activations = await cliUtils.spinner(
       edgeWorkersSvc.getActivations(ewId, undefined, network, active),
-      `Fetching ${active ? 'active version' : 'all activations' } for EdgeWorker Id ${ewId}${network ? ' on ' + network : ''}`
+      `Fetching ${active ? 'active version' : 'all activations'} for EdgeWorker Id ${ewId}${network ? ' on ' + network : ''}`
     );
     // remove outer envelope of JSON data
 
-    if (Object.prototype.hasOwnProperty.call(activations, 'activations')){
+    if (Object.prototype.hasOwnProperty.call(activations, 'activations')) {
       activations = activations['activations'];
     }
   }
@@ -859,7 +1269,7 @@ export async function showEdgeWorkerActivationOverview(
       );
     });
 
-    const msg = `The following EdgeWorker Activations currently exist for account: ${accountId}, ewId: ${ewId}, version: ${active ? 'active' : versionId}, activationId: ${activationId}, network: ${network ? network : 'any'}`;
+    const msg = `The following EdgeWorker Activations currently exist for account: ${accountId}, EdgeWorker Id: ${ewId}, version: ${active ? 'active' : versionId}, activationId: ${activationId}, network: ${network ? network : 'any'}`;
     if (ewJsonOutput.isJSONOutputMode()) {
       ewJsonOutput.writeJSONOutput(0, msg, activation);
     } else {
@@ -869,7 +1279,7 @@ export async function showEdgeWorkerActivationOverview(
   } else {
     cliUtils.logAndExit(
       0,
-      `INFO: There are currently no Activations for ewId: ${ewId}, version: ${versionId}, activationId: ${activationId}`
+      `INFO: There are currently no Activations for EdgeWorker Id: ${ewId}, version: ${versionId}, activationId: ${activationId}`
     );
   }
 }
@@ -877,11 +1287,14 @@ export async function showEdgeWorkerActivationOverview(
 export async function createNewActivation(
   ewId: string,
   network: string,
-  versionId: string
+  versionId: string,
+  autoPin?: boolean
 ) {
+  // autoPin is set to true by default
+  const autoPinParam = autoPin != undefined ? autoPin : true;
   let activations = await cliUtils.spinner(
-    edgeWorkersSvc.createActivationId(ewId, network, versionId),
-    `Creating Activation record for EdgeWorker Id ${ewId}, version: ${versionId} on network: ${network}`
+    edgeWorkersSvc.createActivationId(ewId, network, versionId, autoPin),
+    `Creating Activation record with auto pin status [${autoPinParam}] for EdgeWorker Id ${ewId}, version: ${versionId} on network: ${network}`
   );
 
   if (activations) {
@@ -892,7 +1305,7 @@ export async function createNewActivation(
         filterJsonData(activations[key], activationColumnsToKeep)
       );
     });
-    const msg = `New Activation record created for EdgeWorker Id: ${ewId}, version: ${versionId}, on network: ${network}`;
+    const msg = `New Activation record with auto pin status [${autoPinParam}] created for EdgeWorker Id: ${ewId}, version: ${versionId}, on network: ${network}`;
     if (ewJsonOutput.isJSONOutputMode()) {
       ewJsonOutput.writeJSONOutput(0, msg, activation);
     } else {
@@ -902,7 +1315,115 @@ export async function createNewActivation(
   } else {
     cliUtils.logAndExit(
       1,
-      `ERROR: Activation record was not able to be created for EdgeWorker Id ${ewId}, version: ${versionId} on network: ${network}!`
+      `ERROR: Activation record with auto pin status [${autoPinParam}] was not able to be created for EdgeWorker Id ${ewId}, version: ${versionId} on network: ${network}!`
+    );
+  }
+}
+
+export async function showEdgeWorkerRevisionOverview(
+  ewId: string,
+  options?: {
+    versionId?: string;
+    activationId?: string;
+    network?: string;
+    pinnedOnly?: boolean;
+    currentlyPinned?: boolean;
+  },
+) {
+  let revisions = null;
+  const versionId = options.versionId;
+  const activationId = options.activationId;
+  const network = options.network;
+  const pinnedOnly = options.pinnedOnly;
+  const currentlyPinned = options.currentlyPinned;
+
+  const optionalParamsMsg =
+    `${versionId ? ', versionId: ' + versionId : ''}` +
+    `${activationId ? ', activationId: ' + activationId : ''}` +
+    `${network ? ', network: ' + network : ''}` +
+    `${pinnedOnly ? ', pinnedOnly: ' + pinnedOnly : ''}` +
+    `${currentlyPinned ? ', currentlyPinned: ' + currentlyPinned : ''}`;
+
+  revisions = await cliUtils.spinner(
+    edgeWorkersSvc.listRevisions(
+      ewId,
+      versionId,
+      activationId,
+      network,
+      pinnedOnly,
+      currentlyPinned,
+    ),
+    `Fetching all revisions for EdgeWorker Id: ${ewId}${optionalParamsMsg}`,
+  );
+
+  if (revisions.isError) {
+    cliUtils.logAndExit(
+      1,
+      revisions.error_reason
+    );
+  }
+
+  const msg = `The following EdgeWorker revisions currently exists for EdgeWorker Id: ${ewId}${optionalParamsMsg}`;
+
+  if (
+    Object.prototype.hasOwnProperty.call(revisions, 'revisions') &&
+    revisions['revisions'].length > 0
+  ) {
+    if (ewJsonOutput.isJSONOutputMode()) {
+      ewJsonOutput.writeJSONOutput(0, msg, revisions);
+    } else {
+      revisions = revisions['revisions'];
+      cliUtils.changeObjectName(revisions, 'status', 'revisionActivationStatus');
+      const output = [];
+      Object.keys(revisions).forEach(function (key) {
+        output.push(filterJsonData(revisions[key], revisionColumnsToKeep));
+      });
+      cliUtils.logWithBorder(msg);
+      console.table(output);
+    }
+  } else {
+    cliUtils.logAndExit(
+      1,
+      revisions.error_reason,
+    );
+  }
+}
+
+export async function getRevision(ewId: string, revId: string) {
+  let revisions = null;
+  const paramsMsg = `for EdgeWorker Id: ${ewId} and Revision Id: ${revId}`;
+
+  revisions = await cliUtils.spinner(
+    edgeWorkersSvc.getRevision(ewId, revId),
+    `Fetching revision ${paramsMsg}`,
+  );
+
+  if (revisions.isError) {
+    cliUtils.logAndExit(
+      1,
+      revisions.error_reason
+    );
+  }
+
+  const msg = `The following EdgeWorker revision currently exists ${paramsMsg}`;
+
+  if (revisions !== null) {
+    if (ewJsonOutput.isJSONOutputMode()) {
+      ewJsonOutput.writeJSONOutput(0, msg, revisions);
+    } else {
+      revisions = [revisions];
+      cliUtils.changeObjectName(revisions, 'status', 'revisionActivationStatus');
+      const output = [];
+      Object.keys(revisions).forEach(function (key) {
+        output.push(filterJsonData(revisions[key], revisionColumnsToKeep));
+      });
+      cliUtils.logWithBorder(msg);
+      console.table(output);
+    }
+  } else {
+    cliUtils.logAndExit(
+      0,
+      `INFO: There are currently no revisions ${paramsMsg}`,
     );
   }
 }
@@ -996,7 +1517,7 @@ export async function createAuthToken(
       cliUtils.log(`-H '${token}'`);
     } else {
       cliUtils.logWithBorder('Add the following request header to your requests to get additional trace information.');
-      cliUtils.log(token+'\n');
+      cliUtils.log(token + '\n');
     }
   } else {
     cliUtils.logAndExit(1, authToken.error_reason);
@@ -1045,7 +1566,7 @@ export async function getAvailableReports() {
 
   if (availableReports && !availableReports.isError) {
     const msg = 'The following reports are available:';
-    const reportList = availableReports.reports.map((report)=>{
+    const reportList = availableReports.reports.map((report) => {
       return {ReportId: report.reportId, ReportType: report.name};
     });
 
@@ -1069,9 +1590,9 @@ interface Execution {
 }
 
 const getExecutionAverages = (executionArray: Array<Execution>, executionKey: string) => {
-  if (executionArray){
+  if (executionArray) {
     let totalAvg = 0, totalInvocations = 0, eventMax = -1, eventMin = Number.MAX_SAFE_INTEGER;
-    for (const execution of executionArray){
+    for (const execution of executionArray) {
       const {avg, min, max} = execution[executionKey];
 
       totalAvg += avg * execution.invocations;
@@ -1096,11 +1617,11 @@ const getExecutionAverages = (executionArray: Array<Execution>, executionKey: st
 export async function getReport(
   reportId: number,
   start: string,
-  end:string,
+  end: string,
   ewid: string,
   statuses: Array<string>,
   eventHandlers: Array<string>,
-  ) {
+) {
   const report = await cliUtils.spinner(
     edgeWorkersSvc.getReport(reportId, ewid, start, statuses, eventHandlers, end),
     'Getting report...'
@@ -1126,7 +1647,7 @@ export async function getReport(
       cliUtils.logWithBorder(msg);
       let reportOutput;
 
-      switch (report.reportId){
+      switch (report.reportId) {
         case 1: {
           // summary
           const {
@@ -1192,7 +1713,7 @@ export async function getReport(
             }
           }
 
-          if (!reportOutput['success']){
+          if (!reportOutput['success']) {
             // add success count if no successful executions
             reportOutput['success'] = 0;
           }
@@ -1217,9 +1738,9 @@ export async function getReport(
       if (ewJsonOutput.isJSONOutputMode()) {
         ewJsonOutput.writeJSONOutput(0, msg, reportOutput);
       } else {
-        if (Array.isArray(reportOutput)){
+        if (Array.isArray(reportOutput)) {
           // report 1 (summary) will return an array of table objects
-          reportOutput.forEach( (table) => console.table(table));
+          reportOutput.forEach((table) => console.table(table));
         } else {
           console.table(reportOutput);
         }
@@ -1229,6 +1750,69 @@ export async function getReport(
     cliUtils.logAndExit(1, report.error_reason);
   }
 }
+
+/* ========== Log-level related functionality ========== */
+
+export async function setLogLevel(ewId: number, network: string, level: string, options: object) {
+  let expireTime = null;
+  if (options['expires'] !== cliUtils.LL_NEVER_EXPIRE_STR) {
+    expireTime = chrono.parseDate(options['expires'], null, {forwardDate: true});
+    if (expireTime === null) {
+      cliUtils.logAndExit(1, `ERROR: cannot parse given date: ${options['until']}`);
+    }
+
+    validateLogLevelExpireTime(expireTime);
+    expireTime = expireTime.toISOString();
+  }
+
+  const ds2Id = options['ds2Id'];
+  if (ds2Id != null && Number.isNaN(parseInt(ds2Id))) {
+    cliUtils.logAndExit(1, `ERROR: Specified Datastream 2 ID '${ds2Id}' is invalid`);
+  }
+
+  const logLevel = await cliUtils.spinner(
+    edgeWorkersSvc.setLogLevel(ewId, level, network, expireTime, ds2Id),
+    `Setting new logging level for edgeworker ${ewId}...`
+  );
+
+  if (logLevel && !logLevel.isError) {
+    const msg = `Setting new logging level '${level}' successful`;
+    if (ewJsonOutput.isJSONOutputMode()) {
+      ewJsonOutput.writeJSONOutput(0, msg, logLevel);
+    } else {
+      cliUtils.logWithBorder(msg);
+      console.table(logLevel);
+    }
+  } else {
+    cliUtils.logAndExit(1, logLevel.error_reason);
+  }
+}
+
+export async function getLogLevel(ewId: number, loggingId: null | string = null) {
+  const logLevel = await cliUtils.spinner(
+    edgeWorkersSvc.getLogLevel(ewId, loggingId),
+    `Fetching current logging level for edgeworker ${ewId}...`
+  );
+
+  if (logLevel && !logLevel.isError) {
+    const msg = 'Fetching logging level successful';
+    if (ewJsonOutput.isJSONOutputMode()) {
+      ewJsonOutput.writeJSONOutput(0, msg, logLevel);
+    } else {
+      cliUtils.logWithBorder(msg);
+      if (logLevel['loggings'] === undefined) {
+        console.table(logLevel);
+      } else {
+        console.table(logLevel['loggings']);
+      }
+    }
+
+  } else {
+    cliUtils.logAndExit(1, logLevel.error_reason);
+  }
+
+}
+
 
 /* ========== Local Helpers ========== */
 function filterJsonData(data, columnsToKeep: string[]) {
@@ -1253,5 +1837,12 @@ function validateExpiry(expiry) {
       1,
       'ERROR: The expiry is invalid. It must be an integer value (in minutes) between 1 and 720 minutes (12 hours).'
     );
+  }
+}
+
+function validateLogLevelExpireTime(expireTime: Date) {
+  const now = new Date();
+  if ((now.getTime() - expireTime.getTime()) >= 0) {
+    cliUtils.logAndExit(1, 'ERROR: Logging level expiry time in the past');
   }
 }
