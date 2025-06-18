@@ -29,7 +29,7 @@
     "console.table": "0.10.0",
     "crypto-js": "^4.2.0",
     "from-seconds": "^1.0.2",
-    "glob": "^8.1.0",
+    "glob": "^11.0.3",
     "ini": "^3.0.1",
     "inquirer": "7.3.3",
     "is-valid-domain": "^0.1.5",
