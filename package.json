@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "akamai-edgegrid": "^3.5.2",
-    "chrono-node": "^2.7.8",
+    "chrono-node": "^2.8.4",
     "cli-spinner": "0.2.10",
     "commander": "^9.5.0",
     "console.table": "0.10.0",
