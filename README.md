@@ -893,7 +893,7 @@ Usage: `akamai edgeworkers log-level set [options] <edgeworker-identifier> <netw
 For more information on EdgeWorkers, refer to the following resources:
 
 * [EdgeWorkers Developer Page](https://developer.akamai.com/edgeworkers)
-* [EdgeWorkers User Guide](https://learn.akamai.com/en-us/webhelp/edgeworkers/edgeworkers-user-guide/GUID-4CC14D7E-D92D-4F2D-9292-17F8BE6E2DAE.html)
+* [EdgeWorkers User Guide](https://techdocs.akamai.com/edgeworkers/docs/welcome-to-edgeworkers)
 * [EdgeWorkers API Guide](https://developer.akamai.com/api/web_performance/edgeworkers/v1.html)
 
 ## Reporting Issues
