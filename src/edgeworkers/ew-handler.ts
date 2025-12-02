@@ -1627,7 +1627,7 @@ export async function getReport(
     'Getting report...'
   );
 
-  const EVENT_HANDLERS = ['onClientRequest', 'onOriginRequest', 'onOriginResponse', 'onClientResponse', 'responseProvider'];
+  const EVENT_HANDLERS = ['onClientRequest', 'onOriginRequest', 'onOriginResponse', 'onClientResponse', 'onBotSegmentAvailable', 'responseProvider'];
   let executionEventHandlers: Array<string>;
   if (eventHandlers.length !== 0) {
     // remove unwanted event handlers

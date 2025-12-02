@@ -727,7 +727,7 @@ get
   .requiredOption('-s, --startDate <startDate>', 'ISO 8601 timestamp indicating the start time of the EdgeWorkers report (REQUIRED).')
   .option('-e, --endDate <endDate>', 'ISO 8601 timestamp indicating the end time of the EdgeWorkers report. If not specified, the end time defaults to the current time.')
   .option('--status, <status>', 'Comma-separated string to filter by EdgeWorker status. Values: success, genericError, unknownEdgeWorkerId, unimplementedEventHandler, runtimeError, executionError, timeoutError, resourceLimitHit, cpuTimeoutError, wallTimeoutError, initCpuTimeoutError, initWallTimeoutError.')
-  .option('--ev, --eventHandlers <eventHandlers>', 'Comma-separated string to filter EdgeWorkers by the event that triggers them. Values: onClientRequest, onOriginRequest, onOriginResponse, onClientResponse, responseProvider.')
+  .option('--ev, --eventHandlers <eventHandlers>', 'Comma-separated string to filter EdgeWorkers by the event that triggers them. Values: onClientRequest, onOriginRequest, onOriginResponse, onClientResponse, onBotSegmentAvailable, responseProvider.')
   .action(async function (reportId: number, edgeworkerId: string, options) {
     reportId = reportId || configUtils.searchProperty(REPORT_ID);
     if (!reportId){
