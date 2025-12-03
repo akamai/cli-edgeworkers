@@ -109,7 +109,7 @@ export function getEdgeWorkerId(ewId: string) {
     .then((r) => r.body);
 }
 
-export function getAllEdgeWorkerIds(groupId?: string, resourceTierId?: string) {
+export function getAllEdgeWorkerIds(groupId?: string, resourceTierId?: string, isPartner?: boolean) {
   let queryString = '';
   if (groupId != undefined || groupId != null) {
     queryString += `?groupId=${groupId}`;
@@ -117,6 +117,10 @@ export function getAllEdgeWorkerIds(groupId?: string, resourceTierId?: string) {
   if (resourceTierId != undefined) {
     queryString += groupId == undefined ? '?' : '&';
     queryString += `resourceTierId=${resourceTierId}`;
+  }
+  if (isPartner != undefined) {
+    queryString += groupId == undefined && resourceTierId == undefined ? '?' : '&';
+    queryString += `isPartner=${isPartner}`;
   }
   return httpEdge
     .getJson(
