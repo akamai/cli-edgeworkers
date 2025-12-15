@@ -1,6 +1,8 @@
 import * as httpEdge from '../../src/cli-httpRequest';
 import * as ewService from '../../src/edgeworkers/ew-service';
 import {ErrorMessage} from '../../src/utils/http-error-message';
+import * as error from '../../src/edgeworkers/ew-error';
+import * as cliUtils from '../../src/utils/cli-utils';
 
 describe('ew service tests', () => {
   // Test variables
@@ -616,6 +618,73 @@ describe('ew service tests', () => {
       expect(error.isError).toEqual(true);
       expect(error.error_reason).toEqual(
         `${ErrorMessage['GET_LOG_LEVEL_ERROR']} ${mockError.detail}`
+      );
+    });
+  });
+
+  describe('getAllEdgeWorkerIds', () => {
+    const mockGetJson = httpEdge.getJson as jest.Mock;
+    let mockHandleError;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      jest.spyOn(cliUtils, 'getTimeout').mockReturnValue(1000);
+      getJsonSpy = jest.spyOn(httpEdge, 'getJson');
+      mockHandleError = jest.spyOn(error, 'handleError');
+    });
+
+    it('returns body on success', async () => {
+      getJsonSpy.mockResolvedValue({ body: [{ id: 1 }] });
+      const result = await ewService.getAllEdgeWorkerIds('g1', 'r1', true);
+      expect(result).toEqual([{ id: 1 }]);
+      expect(getJsonSpy).toHaveBeenCalledWith(
+        expect.stringContaining('/edgeworkers/v1/ids?groupId=g1&resourceTierId=r1&isPartner=true'),
+        1000
+      );
+    });
+
+    it('handles error and calls handleError', async () => {
+      const err = new Error('fail');
+      getJsonSpy.mockRejectedValue(err);
+      mockHandleError.mockReturnValue('handled');
+      const result = await ewService.getAllEdgeWorkerIds('g1');
+      expect(mockHandleError).toHaveBeenCalledWith(err, 'LISTALL_EW');
+      expect(result).toBe('handled');
+    });
+
+    it('builds query string with only groupId', async () => {
+      getJsonSpy.mockResolvedValue({ body: [] });
+      await ewService.getAllEdgeWorkerIds('g1');
+      expect(getJsonSpy).toHaveBeenCalledWith(
+        '/edgeworkers/v1/ids?groupId=g1',
+        1000
+      );
+    });
+
+    it('builds query string with only resourceTierId', async () => {
+      getJsonSpy.mockResolvedValue({ body: [] });
+      await ewService.getAllEdgeWorkerIds(undefined, 'r1');
+      expect(getJsonSpy).toHaveBeenCalledWith(
+        '/edgeworkers/v1/ids?resourceTierId=r1',
+        1000
+      );
+    });
+
+    it('builds query string with only isPartner', async () => {
+      getJsonSpy.mockResolvedValue({ body: [] });
+      await ewService.getAllEdgeWorkerIds(undefined, undefined, true);
+      expect(getJsonSpy).toHaveBeenCalledWith(
+        '/edgeworkers/v1/ids?isPartner=true',
+        1000
+      );
+    });
+
+    it('builds query string with no params', async () => {
+      getJsonSpy.mockResolvedValue({ body: [] });
+      await ewService.getAllEdgeWorkerIds();
+      expect(getJsonSpy).toHaveBeenCalledWith(
+        '/edgeworkers/v1/ids',
+        1000
       );
     });
   });
