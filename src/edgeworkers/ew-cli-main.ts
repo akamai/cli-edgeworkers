@@ -148,12 +148,16 @@ program
   .alias('li')
   .option('--groupId <groupId>', 'Filter EdgeWorker ID list by Permission Group')
   .option('-restier, --resourceTierId <resourceTierId>', 'Filter EdgeWorkers by resource tiers')
+  .option('--isPartner <boolean>', 'Filter EdgeWorker IDs by partner identifier')
   .action(async function (ewId, options) {
     options['groupId'] = options.groupId || configUtils.searchProperty(GROUP_ID);
     options['resourceTierId'] = options.resourceTierId || configUtils.searchProperty(RESOURCE_TIER_ID);
+    if (options.isPartner != undefined) {
+      options['isPartner'] = (options.isPartner.toLowerCase() === 'true' ? true : false);
+    }
 
     try {
-      await cliHandler.showEdgeWorkerIdOverview(ewId, options.groupId, options.resourceTierId);
+      await cliHandler.showEdgeWorkerIdOverview(ewId, options.groupId, options.resourceTierId, options.isPartner);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }
