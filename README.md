@@ -761,6 +761,7 @@ Usage: `akamai get report <reportId> <edgeworker-identifier>`
 
 1. For a list of available report IDs, use the `get reports` command.
 2. The `startDate` option is a required option.
+3. For detailed reports view, the API and the UI should be used
 
 ### List All Default Values of a Section in Config File
 

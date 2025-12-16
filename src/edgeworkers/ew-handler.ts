@@ -1735,6 +1735,41 @@ export async function getReport(
 
           break;
         }
+
+        case 5: {
+          // execution time
+          reportOutput = {};
+          const executionCategories: Record<string, Array<Execution>> = report.data[0].data;
+
+          for (const event of executionEventHandlers) {
+            reportOutput[event] = getExecutionAverages(executionCategories[event], 'execDuration');
+          }
+
+          // execution time has an additional property for init times
+          reportOutput['init'] = getExecutionAverages(executionCategories['init'], 'initDuration');
+
+          break;
+        }
+
+        case 6: {
+          // memory usage
+          reportOutput = {};
+          const executionCategories: Record<string, Array<Execution>> = report.data[0].data;
+
+          for (const event of executionEventHandlers) {
+            reportOutput[event] = getExecutionAverages(executionCategories[event], 'memory');
+          }
+
+          break;
+        }
+
+        case 7: {
+          // subrequests total
+          reportOutput = {};
+          reportOutput['subRequests'] = {'total' : report.data['subRequests']['total']};
+          break;
+        }
+
       }
       if (ewJsonOutput.isJSONOutputMode()) {
         ewJsonOutput.writeJSONOutput(0, msg, reportOutput);
