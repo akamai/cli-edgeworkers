@@ -75,7 +75,8 @@
   "overrides": {
     "pre-commit": {
       "cross-spawn": "^6.0.6"
-    }
+    },
+    "form-data": "^4.0.4"
   },
   "license": "Apache-2.0"
 }
