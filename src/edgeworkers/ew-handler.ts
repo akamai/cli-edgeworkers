@@ -422,9 +422,9 @@ export async function getContracts() {
   }
 }
 
-export async function getProperties(ewId: string, activeOnly: boolean) {
+export async function getProperties(ewId: string, activeOnly: boolean, details: boolean) {
   const propList = await cliUtils.spinner(
-    edgeWorkersSvc.getProperties(ewId, activeOnly),
+    edgeWorkersSvc.getProperties(ewId, activeOnly, details),
     `Retrieving properties for EdgeWorker Id ${ewId}...`
   );
   if (propList && !propList.isError) {
@@ -437,7 +437,48 @@ export async function getProperties(ewId: string, activeOnly: boolean) {
         ewJsonOutput.writeJSONOutput(0, msg, propList);
       } else {
         cliUtils.logWithBorder(msg);
-        console.table(properties);
+        if (details) {
+          let stagingEdgeWorkersBehaviorLocations = [];
+          let productionEdgeWorkersBehaviorLocations = [];
+          properties.forEach(prop => {
+            prop.stagingEdgeWorkersBehaviorLocations.forEach(behaviorLocation => {
+              stagingEdgeWorkersBehaviorLocations.push({
+                propertyId: prop.propertyId,
+                location: behaviorLocation.location,
+                continueOnError: behaviorLocation.continueOnError,
+                versionLink: prop.stagingVersionLink
+              });
+            });
+
+            prop.productionEdgeWorkersBehaviorLocations.forEach(behaviorLocation => {
+              productionEdgeWorkersBehaviorLocations.push({
+                propertyId: prop.propertyId,
+                location: behaviorLocation.location,
+                continueOnError: behaviorLocation.continueOnError,
+                versionLink: prop.productionVersionLink
+              });
+            });
+          });
+
+          stagingEdgeWorkersBehaviorLocations = stagingEdgeWorkersBehaviorLocations.sort((a, b) => a.propertyId - b.propertyId);
+          productionEdgeWorkersBehaviorLocations = productionEdgeWorkersBehaviorLocations.sort((a, b) => a.propertyId - b.propertyId);
+
+          const propertiesWithoutBehaviorLocations = properties.map(prop => {
+            delete prop['stagingVersionLink'];
+            delete prop['productionVersionLink'];
+            const {stagingEdgeWorkersBehaviorLocations, productionEdgeWorkersBehaviorLocations, ...rest} = prop;
+            return rest;
+          }).sort((a, b) => a.propertyId - b.propertyId);
+          console.table(propertiesWithoutBehaviorLocations);
+
+          cliUtils.logWithBorder('Staging EdgeWorkers Behavior Locations');
+          console.table(stagingEdgeWorkersBehaviorLocations);
+          cliUtils.logWithBorder('Production EdgeWorkers Behavior Locations');
+          console.table(productionEdgeWorkersBehaviorLocations);
+        } else {
+          console.table(properties);
+        }
+
         console.log(
           `limitedAccessToProperties: ${propList.limitedAccessToProperties}`
         );
@@ -1590,6 +1631,15 @@ interface Execution {
   memory?: Record<string, number>,
 }
 
+interface ExecutionForReport3 {
+  startDateTime: string,
+  edgeWorkerVersion: string,
+  invocations: number,
+  status?: string,
+  continueOnErrorApplied?: number,
+  continueOnErrorNotApplied?: number
+}
+
 const getExecutionAverages = (executionArray: Array<Execution>, executionKey: string) => {
   if (executionArray) {
     let totalAvg = 0, totalInvocations = 0, eventMax = -1, eventMin = Number.MAX_SAFE_INTEGER;
@@ -1622,9 +1672,10 @@ export async function getReport(
   ewid: string,
   statuses: Array<string>,
   eventHandlers: Array<string>,
+  continueOnErrorOnly: boolean
 ) {
   const report = await cliUtils.spinner(
-    edgeWorkersSvc.getReport(reportId, ewid, start, statuses, eventHandlers, end),
+    edgeWorkersSvc.getReport(reportId, ewid, start, statuses, eventHandlers, end, continueOnErrorOnly),
     'Getting report...'
   );
 
@@ -1659,7 +1710,10 @@ export async function getReport(
             errors,
             invocations
           } = report.data;
+
           let initDurationMapped = {}; // init duration might be undefined
+          let execDurationMapped = {};
+          let memoryMapped = {};
 
           if (initDuration) {
             Object.keys(initDuration).forEach((key) => {
@@ -1669,18 +1723,39 @@ export async function getReport(
             initDurationMapped = {avg: 'N/A', max: 'N/A', min: 'N/A'};
           }
 
-          Object.keys(execDuration).forEach((key) => {
-            execDuration[key] = execDuration[key].toFixed(4);
-          });
-          Object.keys(memory).forEach((key) => {
-            memory[key] = memory[key].toFixed(4);
-          });
+          if (execDuration) {
+            Object.keys(execDuration).forEach((key) => {
+              execDurationMapped[key] = execDuration[key].toFixed(4);
+            });
+          }
+          else {
+            execDurationMapped = {avg: 'N/A', max: 'N/A', min: 'N/A'};
+          }
 
-          reportOutput = [
-            {successes, errors, invocations},
-            {initDuration: initDurationMapped, execDuration},
-            {memory}
-          ];
+          if (memory) {
+            Object.keys(memory).forEach((key) => {
+              memoryMapped[key] = memory[key].toFixed(4);
+            });
+          }
+          else {
+            memoryMapped = {avg: 'N/A', max: 'N/A', min: 'N/A'};
+          }
+
+          if (errors?.continueOnErrorApplied || errors?.continueOnErrorNotApplied) {
+            reportOutput = [
+              {successes: {total: successes?.total}, invocations: {total: invocations?.total}},
+              {errors},
+              {initDuration: initDurationMapped, execDuration: execDurationMapped},
+              {memory : memoryMapped},
+            ];
+          } else {
+            reportOutput = [
+              {successes: {total: successes?.total}, errors: {total: errors?.total}, invocations: {total: invocations?.total}},
+              {initDuration: initDurationMapped, execDuration: execDurationMapped},
+              {memory: memoryMapped},
+            ];
+          }
+
           break;
         }
 
@@ -1701,15 +1776,21 @@ export async function getReport(
         case 3: {
           // execution status
           reportOutput = {};
-          const executionCategories: Record<string, Array<Execution>> = report.data[0].data;
-          let errors = 0;
+          const executionCategories: Record<string, Array<ExecutionForReport3>> = report.data[0].data;
+          const errors = {invocations: 0, continueOnErrorApplied: 0, continueOnErrorNotApplied: 0};
 
           for (const executionArray of Object.values(executionCategories)) {
             for (const execution of executionArray) {
               const {status, invocations} = execution;
               reportOutput[status] = reportOutput[status] + invocations || invocations;
               if (status !== 'success' && status !== 'unimplementedEventHandler') {
-                errors += invocations;
+                errors.invocations += invocations;
+                if (execution.continueOnErrorApplied) {
+                  errors['continueOnErrorApplied'] = (errors['continueOnErrorApplied'] || 0) + execution.continueOnErrorApplied;
+                }
+                if (execution.continueOnErrorNotApplied) {
+                  errors['continueOnErrorNotApplied'] = (errors['continueOnErrorNotApplied'] || 0) + execution.continueOnErrorNotApplied;
+                }
               }
             }
           }
@@ -1718,8 +1799,13 @@ export async function getReport(
             // add success count if no successful executions
             reportOutput['success'] = 0;
           }
-          //add property for total errors
-          reportOutput['errors'] = errors;
+
+          if (errors?.continueOnErrorApplied || errors?.continueOnErrorNotApplied) {
+            reportOutput = [ {...reportOutput}, {errors}];
+          } else {
+            //add property for total errors
+            reportOutput['errors'] = errors.invocations;
+          }
 
           break;
         }

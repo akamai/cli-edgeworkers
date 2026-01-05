@@ -157,10 +157,14 @@ export function getContracts() {
     .catch((err) => error.handleError(err, 'GET_CONTRACT'));
 }
 
-export function getProperties(ewId: string, activeOnly: boolean) {
+export function getProperties(ewId: string, activeOnly: boolean, details: boolean) {
   let queryString = '';
   if (activeOnly !== undefined) {
     queryString = '?activeOnly=true';
+  }
+  if (details !== undefined) {
+    queryString += queryString === '' ? '?' : '&';
+    queryString += 'details=true';
   }
   return httpEdge
     .getJson(
@@ -618,9 +622,11 @@ export function getReport(
   statuses: Array<string>,
   eventHandlers: Array<string>,
   end?: string,
+  continueOnErrorOnly?: boolean
 ) {
   let queryString = `?start=${start}&edgeWorker=${ewid}`;
   if (end) queryString += `&end=${end}`;
+  if (continueOnErrorOnly) queryString += `&continueOnErrorOnly=${continueOnErrorOnly}`;
   for (const status of statuses) {
     queryString += `&status=${status}`;
   }

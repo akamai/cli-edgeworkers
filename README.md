@@ -668,10 +668,11 @@ List of properties associated to a specific EdgeWorker Id.
 
 Usage: `akamai edgeworkers list-properties <edgeworker-identifier> [options]`
 
-| Option       | Description                    |
-|--------------|--------------------------------|
-| -h, --help   | output usage information       |
-| --activeOnly | Returns only active properties |
+| Option        | Description                    |
+|---------------|--------------------------------|
+| -h, --help    | output usage information       |
+| --activeOnly  | Returns only active properties |
+| -d, --details | Specifies whether details about EW Behaviors (property locations and continue on error details) are added to the returned properties |
 
 | Argument              | Existence | Description            |
 |-----------------------|-----------|------------------------|
@@ -751,6 +752,7 @@ Usage: `akamai get report <reportId> <edgeworker-identifier>`
 | -e, --endDate `<startDate>`             | optional  | ISO 8601 timestamp indicating the end time of the EdgeWorkers report. If not specified, the end time defaults to the current time.                                                                                                                                                                         |
 | --status `<status>`                     | optional  | Comma-separated string to filter by EdgeWorkers status. Values: `success`, `genericError`, `unknownEdgeWorkerId`, `unimplementedEventHandler`, `runtimeError`, `executionError`, `timeoutError`, `resourceLimitHit`, `cpuTimeoutError`, `wallTimeoutError`, `initCpuTimeoutError`, `initWallTimeoutError`. |
 | --ev, --eventHandlers `<eventHandlers>` | optional  | Comma-separated string to filter EdgeWorkers by the event that triggers them. Values: `onClientRequest`, `onOriginRequest`, `onOriginResponse`, `onClientResponse`, `onBotSegmentAvailable`, `responseProvider`.                                                                                           |
+| --coe, --continueOnErrorOnly `<continueOnErrorOnly>` | optional  | Boolean flag to include only executions where "continue on error" was applied OR attempted to be applied, defaults to false. Values: `true`, `false`.                                                                                           |
 
 | Argument              | Existence | Description            |
 |-----------------------|-----------|------------------------|

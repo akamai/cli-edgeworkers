@@ -23,6 +23,7 @@ export const START_DATE = 'startDate';
 export const END_DATE = 'endDate';
 export const STATUS = 'status';
 export const EVENT_HANDLERS = 'eventHandlers';
+export const CONTINUE_ON_ERROR_ONLY = 'continueOnErrorOnly';
 export const PINNED_ONLY = 'pinnedOnly';
 export const CURRENTLY_PINNED = 'currentlyPinned';
 export const NOTE = 'note';
