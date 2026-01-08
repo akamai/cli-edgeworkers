@@ -195,6 +195,16 @@ export function getResourceTierForEwid(ewId: string) {
     .catch((err) => error.handleError(err, 'GET_RESTR_FOR_EW'));
 }
 
+export function getActiveCustomers(ewId: string) {
+  return httpEdge
+    .getJson(
+      `${EDGEWORKERS_API_BASE}/ids/${ewId}/active-customers`,
+      cliUtils.getTimeout(DEFAULT_EW_TIMEOUT)
+    )
+    .then((r) => r.body)
+    .catch((err) => error.handleError(err, 'GET_ACT_CUST_FOR_EW'));
+}
+
 export function updateEdgeWorkerId(
   ewId: string,
   groupId: string,
@@ -622,7 +632,8 @@ export function getReport(
   statuses: Array<string>,
   eventHandlers: Array<string>,
   end?: string,
-  continueOnErrorOnly?: boolean
+  continueOnErrorOnly?: boolean,
+  vcds?: Array<number>
 ) {
   let queryString = `?start=${start}&edgeWorker=${ewid}`;
   if (end) queryString += `&end=${end}`;
@@ -632,6 +643,9 @@ export function getReport(
   }
   for (const eventHandler of eventHandlers) {
     queryString += `&eventHandler=${eventHandler}`;
+  }
+  for (const vcd of vcds) {
+    queryString += `&vcd=${vcd}`;
   }
 
   return httpEdge

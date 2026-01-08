@@ -25,7 +25,8 @@ import {
   NOTE,
   ACTIVE_VERSIONS,
   CURRENTLY_PINNED_REVISIONS,
-  CONTINUE_ON_ERROR_ONLY
+  CONTINUE_ON_ERROR_ONLY,
+  VCD
 } from './../utils/constants';
 import * as cliHandler from './ew-handler';
 import * as httpEdge from '../cli-httpRequest';
@@ -728,6 +729,20 @@ get
   });
 
 get
+  .command('active-customers [edgeworker-identifier]')
+  .description('List active customers for a partner EdgeWorker ID')
+  .action(async function (edgeworkerId: string) {
+    try {
+      await cliHandler.getActiveCustomersForEwId(edgeworkerId);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on('--help', function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+get
   .command('report [reportId] [edgeworker-identifier]')
   .description('Get an EdgeWorkers report')
   .requiredOption('-s, --startDate <startDate>', 'ISO 8601 timestamp indicating the start time of the EdgeWorkers report (REQUIRED).')
@@ -735,6 +750,7 @@ get
   .option('--status, <status>', 'Comma-separated string to filter by EdgeWorker status. Values: success, genericError, unknownEdgeWorkerId, unimplementedEventHandler, runtimeError, executionError, timeoutError, resourceLimitHit, cpuTimeoutError, wallTimeoutError, initCpuTimeoutError, initWallTimeoutError.')
   .option('--ev, --eventHandlers <eventHandlers>', 'Comma-separated string to filter EdgeWorkers by the event that triggers them. Values: onClientRequest, onOriginRequest, onOriginResponse, onClientResponse, onBotSegmentAvailable, responseProvider.')
   .option('--coe, --continueOnErrorOnly <continueOnErrorOnly>', 'Boolean flag to include only executions where "continue on error" was applied OR attempted to be applied, defaults to false. Values: true, false.' )
+  .option('--vcd, <vcd>', 'Comma-separated integers to filter Reports by the customer VCD.')
   .action(async function (reportId: number, edgeworkerId: string, options) {
     reportId = reportId || configUtils.searchProperty(REPORT_ID);
     if (!reportId){
@@ -745,14 +761,16 @@ get
     options['status'] = options.status || configUtils.searchProperty(STATUS);
     options['eventHandlers'] = options.eventHandlers || configUtils.searchProperty(EVENT_HANDLERS);
     options['continueOnErrorOnly'] = options.continueOnErrorOnly || configUtils.searchProperty(CONTINUE_ON_ERROR_ONLY);
+    options['vcd'] = options.vcd || configUtils.searchProperty(VCD);
 
-    const {startDate, endDate, status, eventHandlers, continueOnErrorOnly} = options;
+    const {startDate, endDate, status, eventHandlers, continueOnErrorOnly, vcd} = options;
 
     const statusArray = status ? status.split(',') : [];
     const eventHandlersArray = eventHandlers ? eventHandlers.split(',') : [];
+    const vcdArray = vcd ? vcd.split(',') : [];
 
     try {
-      await cliHandler.getReport(reportId, startDate, endDate, edgeworkerId, statusArray, eventHandlersArray, continueOnErrorOnly);
+      await cliHandler.getReport(reportId, startDate, endDate, edgeworkerId, statusArray, eventHandlersArray, continueOnErrorOnly, vcdArray);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }

@@ -573,6 +573,31 @@ export async function getResourceTierForEwid(ewId: string) {
   }
 }
 
+export async function getActiveCustomersForEwId(ewId: string) {
+  const activeCustomers = await cliUtils.spinner(
+    edgeWorkersSvc.getActiveCustomers(ewId),
+    `Retrieving active customers for Edgeworker ID ${ewId}...`
+  );
+  if (activeCustomers && !activeCustomers.isError) {
+    if (ewJsonOutput.isJSONOutputMode()) {
+      const msg = `The following active customers are associated with the EdgeWorker ID ${ewId}`;
+      ewJsonOutput.writeJSONOutput(0, msg, activeCustomers);
+    } else {
+      if(activeCustomers['customers'].length === 0) {
+        cliUtils.logAndExit(0, `INFO: There are currently no active customers associated with the Partner EdgeWorker ID: ${ewId}`);
+      } else {
+        const tableData = activeCustomers['customers'].map(customer => ({
+          'Customer Name': customer.customerName,
+          'VCDs': customer.vcds.map(v => v.vcd).join(', ')
+        }));
+        console.table(tableData);
+      }
+    }
+  } else {
+    cliUtils.logAndExit(1, activeCustomers.error_reason);
+  }
+}
+
 async function getResourceTierList(contractId) {
   const resourceTierList = await cliUtils.spinner(
     edgeWorkersSvc.getResourceTiers(contractId),
@@ -1672,10 +1697,11 @@ export async function getReport(
   ewid: string,
   statuses: Array<string>,
   eventHandlers: Array<string>,
-  continueOnErrorOnly: boolean
+  continueOnErrorOnly: boolean,
+  vcds: Array<number>
 ) {
   const report = await cliUtils.spinner(
-    edgeWorkersSvc.getReport(reportId, ewid, start, statuses, eventHandlers, end, continueOnErrorOnly),
+    edgeWorkersSvc.getReport(reportId, ewid, start, statuses, eventHandlers, end, continueOnErrorOnly, vcds),
     'Getting report...'
   );
 
