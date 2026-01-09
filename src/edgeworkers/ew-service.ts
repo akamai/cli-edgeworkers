@@ -627,15 +627,17 @@ export function getAvailableReports() {
 
 export function getReport(
   reportId: number,
-  ewid: string,
+  ewId: string,
   start: string,
   statuses: Array<string>,
   eventHandlers: Array<string>,
   end?: string,
   continueOnErrorOnly?: boolean,
-  vcds?: Array<number>
+  vcds?: Array<number>,
+  revisionIds?: Array<string>,
+  network?: string
 ) {
-  let queryString = `?start=${start}&edgeWorker=${ewid}`;
+  let queryString = `?start=${start}&edgeWorker=${ewId}`;
   if (end) queryString += `&end=${end}`;
   if (continueOnErrorOnly) queryString += `&continueOnErrorOnly=${continueOnErrorOnly}`;
   for (const status of statuses) {
@@ -646,6 +648,20 @@ export function getReport(
   }
   for (const vcd of vcds) {
     queryString += `&vcd=${vcd}`;
+  }
+  if (revisionIds?.length > 10) {
+    cliUtils.logAndExit(1, `ERROR: Invalid number of revision IDs (${revisionIds.length}). Allowed maximum is 10.`);
+  }
+  if (revisionIds) {
+    for (const revisionId of revisionIds) {
+      queryString += `&edgeWorkerRevision=${ewId}-${revisionId}`;
+    }
+  }
+  if (network && network !== 'STAGING' && network !== 'PRODUCTION') {
+    cliUtils.logAndExit(1, `ERROR: Invalid network "${network}". Allowed values are STAGING or PRODUCTION.`);
+  }
+  if (network) {
+    queryString += `&network=${network}`;
   }
 
   return httpEdge

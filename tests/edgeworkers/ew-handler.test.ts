@@ -224,7 +224,7 @@ describe('ew handler tests', () => {
       };
       mockSpinner.mockResolvedValue(reportResponse);
 
-      await ewHandler.getReport(1, '2025-09-19T20:54:57Z', '2025-12-19T21:41:38Z', '1234', [], [], false, []);
+      await ewHandler.getReport(1, '2025-09-19T20:54:57Z', '2025-12-19T21:41:38Z', '1234', [], [], false, [], [], 'STAGING');
 
       expect(mockSpinner).toHaveBeenCalledWith(
         undefined,
@@ -267,7 +267,7 @@ describe('ew handler tests', () => {
       };
       mockSpinner.mockResolvedValue(reportResponse);
 
-      await ewHandler.getReport(1, '2025-09-19T20:54:57Z', '2025-12-19T21:41:38Z', '4321', [], [], true, []);
+      await ewHandler.getReport(1, '2025-09-19T20:54:57Z', '2025-12-19T21:41:38Z', '4321', [], [], true, [], [], 'STAGING');
 
       expect(mockSpinner).toHaveBeenCalledWith(
         undefined,
@@ -348,7 +348,7 @@ describe('ew handler tests', () => {
       };
       mockSpinner.mockResolvedValue(reportResponse);
 
-      await ewHandler.getReport(3, '2025-09-19T20:54:57Z', '2025-12-19T21:41:38Z', '5678', [], [], false, []);
+      await ewHandler.getReport(3, '2025-09-19T20:54:57Z', '2025-12-19T21:41:38Z', '5678', [], [], false, [], [], 'STAGING');
 
       expect(mockSpinner).toHaveBeenCalledWith(
         undefined,
@@ -422,7 +422,7 @@ describe('ew handler tests', () => {
       };
       mockSpinner.mockResolvedValue(reportResponse);
 
-      await ewHandler.getReport(3, '2025-09-19T20:54:57Z', '2025-12-19T21:41:38Z', '8765', [], [], true, []);
+      await ewHandler.getReport(3, '2025-09-19T20:54:57Z', '2025-12-19T21:41:38Z', '8765', [], [], true, [], [], 'STAGING');
 
       expect(mockSpinner).toHaveBeenCalledWith(
         undefined,

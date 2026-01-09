@@ -1698,20 +1698,22 @@ export async function getReport(
   statuses: Array<string>,
   eventHandlers: Array<string>,
   continueOnErrorOnly: boolean,
-  vcds: Array<number>
+  vcds: Array<number>,
+  revisionIds: Array<string>,
+  network: string
 ) {
   const report = await cliUtils.spinner(
-    edgeWorkersSvc.getReport(reportId, ewid, start, statuses, eventHandlers, end, continueOnErrorOnly, vcds),
+    edgeWorkersSvc.getReport(reportId, ewid, start, statuses, eventHandlers, end, continueOnErrorOnly, vcds, revisionIds, network),
     'Getting report...'
   );
 
   const EVENT_HANDLERS = ['onClientRequest', 'onOriginRequest', 'onOriginResponse', 'onClientResponse', 'onBotSegmentAvailable', 'responseProvider'];
   let executionEventHandlers: Array<string>;
-  if (eventHandlers.length !== 0) {
+  if (eventHandlers.length === 0) {
+    executionEventHandlers = EVENT_HANDLERS;
+  } else {
     // remove unwanted event handlers
     executionEventHandlers = EVENT_HANDLERS.filter((event) => eventHandlers.includes(event));
-  } else {
-    executionEventHandlers = EVENT_HANDLERS;
   }
 
 
