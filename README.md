@@ -725,7 +725,7 @@ Usage: `akamai show-restier <edgeworkerId>`
 
 ### Get Available EdgeWorkers Report Types
 
-List the available report types that can be generated for an EdgeWorker ID.
+List the available report types that can be generated for an EdgeWorker ID. Note that reports 2 and 4 have been deprecated.
 
 Usage: `akamai get reports`
 
@@ -740,7 +740,7 @@ Usage: `akamai get reports`
 
 ### Get EdgeWorker Report
 
-Get a report for a given EdgeWorker ID.
+Get a report for a given EdgeWorker ID. Note that reports 2 and 4 have been deprecated.
 
 Usage: `akamai get report <reportId> <edgeworker-identifier>`
 
