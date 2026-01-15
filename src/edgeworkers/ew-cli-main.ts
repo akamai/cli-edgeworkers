@@ -26,7 +26,8 @@ import {
   ACTIVE_VERSIONS,
   CURRENTLY_PINNED_REVISIONS,
   CONTINUE_ON_ERROR_ONLY,
-  VCD
+  VCD,
+  REVISION_IDS
 } from './../utils/constants';
 import * as cliHandler from './ew-handler';
 import * as httpEdge from '../cli-httpRequest';
@@ -751,6 +752,8 @@ get
   .option('--ev, --eventHandlers <eventHandlers>', 'Comma-separated string to filter EdgeWorkers by the event that triggers them. Values: onClientRequest, onOriginRequest, onOriginResponse, onClientResponse, onBotSegmentAvailable, responseProvider.')
   .option('--coe, --continueOnErrorOnly <continueOnErrorOnly>', 'Boolean flag to include only executions where "continue on error" was applied OR attempted to be applied, defaults to false. Values: true, false.' )
   .option('--vcd, <vcd>', 'Comma-separated integers to filter Reports by the customer VCD.')
+  .option('--revisionIds <revisionIds>', 'Comma-separated string to filter by revision IDs. Select up to 10 revisions for your report. Example: `3-10,3-11`.')
+  .option('--network <network>', 'Filter by a specific network. Value can be `STAGING` or `PRODUCTION`.')
   .action(async function (reportId: number, edgeworkerId: string, options) {
     reportId = reportId || configUtils.searchProperty(REPORT_ID);
     if (!reportId){
@@ -762,15 +765,28 @@ get
     options['eventHandlers'] = options.eventHandlers || configUtils.searchProperty(EVENT_HANDLERS);
     options['continueOnErrorOnly'] = options.continueOnErrorOnly || configUtils.searchProperty(CONTINUE_ON_ERROR_ONLY);
     options['vcd'] = options.vcd || configUtils.searchProperty(VCD);
+    options['revisionIds'] = options.revisionIds || configUtils.searchProperty(REVISION_IDS);
+    options['network'] = options.network || configUtils.searchProperty(NETWORK);
 
-    const {startDate, endDate, status, eventHandlers, continueOnErrorOnly, vcd} = options;
+    const {startDate, endDate, status, eventHandlers, continueOnErrorOnly, vcd, revisionIds, network} = options;
 
     const statusArray = status ? status.split(',') : [];
     const eventHandlersArray = eventHandlers ? eventHandlers.split(',') : [];
     const vcdArray = vcd ? vcd.split(',') : [];
+    const revisionIdsArray = revisionIds ? revisionIds.split(',') : [];
 
     try {
-      await cliHandler.getReport(reportId, startDate, endDate, edgeworkerId, statusArray, eventHandlersArray, continueOnErrorOnly, vcdArray);
+      await cliHandler.getReport(
+        reportId,
+        startDate,
+        endDate,
+        edgeworkerId,
+        statusArray,
+        eventHandlersArray,
+        continueOnErrorOnly,
+        vcdArray,
+        revisionIdsArray,
+        network);
     } catch (e) {
       cliUtils.logAndExit(1, e);
     }

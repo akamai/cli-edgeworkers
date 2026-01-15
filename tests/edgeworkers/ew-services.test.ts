@@ -111,7 +111,7 @@ describe('ew service tests', () => {
     const reportId = 1;
     const start = 'startDate';
     const end = 'endDate';
-    const ewid = '123';
+    const ewId = '123';
     const mockResponse = {report: 'someData'};
 
     let getReportSpy;
@@ -119,12 +119,16 @@ describe('ew service tests', () => {
       getReportSpy = jest.spyOn(ewService, 'getReport');
     });
 
-    it('should return the report and set query params for the ewid and start date', async () => {
+    afterEach(() => {
+      getJsonSpy.mockReset();
+    });
+
+    it('should return the report and set query params for the EW ID and start date', async () => {
       getJsonSpy.mockImplementation((path, timeout) => {
         expect(path).toContain(
           `${ewService.EDGEWORKERS_API_BASE}/reports/${reportId}`
         );
-        expect(path).toContain(`?start=${start}&edgeWorker=${ewid}`);
+        expect(path).toContain(`?start=${start}&edgeWorker=${ewId}`);
         expect(path).not.toContain('&end=');
         expect(path).not.toContain('&status=');
         expect(path).not.toContain('&eventHandler=');
@@ -134,18 +138,18 @@ describe('ew service tests', () => {
         });
       });
 
-      const res = await ewService.getReport(reportId, ewid, start, [], [], undefined, false, []);
+      const res = await ewService.getReport(reportId, ewId, start, [], [], undefined, false, []);
 
       expect(getReportSpy).toHaveBeenCalled();
       expect(res).toEqual(mockResponse);
     });
 
-    it('should return the report and set query params for the ewid, start, and end', async () => {
+    it('should return the report and set query params for the EW ID, start, and end', async () => {
       getJsonSpy.mockImplementation((path, timeout) => {
         expect(path).toContain(
           `${ewService.EDGEWORKERS_API_BASE}/reports/${reportId}`
         );
-        expect(path).toContain(`?start=${start}&edgeWorker=${ewid}`);
+        expect(path).toContain(`?start=${start}&edgeWorker=${ewId}`);
         expect(path).toContain(`&end=${end}`);
         expect(path).not.toContain('&status=');
         expect(path).not.toContain('&eventHandler=');
@@ -155,18 +159,18 @@ describe('ew service tests', () => {
         });
       });
 
-      const res = await ewService.getReport(reportId, ewid, start, [], [], end, false, []);
+      const res = await ewService.getReport(reportId, ewId, start, [], [], end, false, []);
 
       expect(getReportSpy).toHaveBeenCalled();
       expect(res).toEqual(mockResponse);
     });
 
-    it('should return the report and set query params for the ewid, start, end, and status', async () => {
+    it('should return the report and set query params for the EW ID, start, end, and status', async () => {
       getJsonSpy.mockImplementation((path, timeout) => {
         expect(path).toContain(
           `${ewService.EDGEWORKERS_API_BASE}/reports/${reportId}`
         );
-        expect(path).toContain(`?start=${start}&edgeWorker=${ewid}`);
+        expect(path).toContain(`?start=${start}&edgeWorker=${ewId}`);
         expect(path).toContain(`&end=${end}`);
         expect(path).toContain('&status=stat1&status=stat2');
         expect(path).not.toContain('&eventHandler=');
@@ -178,7 +182,7 @@ describe('ew service tests', () => {
 
       const res = await ewService.getReport(
         reportId,
-        ewid,
+        ewId,
         start,
         ['stat1', 'stat2'],
         [],
@@ -191,12 +195,12 @@ describe('ew service tests', () => {
       expect(res).toEqual(mockResponse);
     });
 
-    it('should return the report and set query params for the ewid, start, end, status, and eventHandler', async () => {
+    it('should return the report and set query params for the EW ID, start, end, status, and eventHandler', async () => {
       getJsonSpy.mockImplementation((path, timeout) => {
         expect(path).toContain(
           `${ewService.EDGEWORKERS_API_BASE}/reports/${reportId}`
         );
-        expect(path).toContain(`?start=${start}&edgeWorker=${ewid}`);
+        expect(path).toContain(`?start=${start}&edgeWorker=${ewId}`);
         expect(path).toContain(`&end=${end}`);
         expect(path).toContain('&status=stat1&status=stat2');
         expect(path).toContain('&eventHandler=ev1&eventHandler=ev2');
@@ -208,7 +212,7 @@ describe('ew service tests', () => {
 
       const res = await ewService.getReport(
         reportId,
-        ewid,
+        ewId,
         start,
         ['stat1', 'stat2'],
         ['ev1', 'ev2'],
@@ -221,6 +225,119 @@ describe('ew service tests', () => {
       expect(res).toEqual(mockResponse);
     });
 
+    it('should return the report and set query params for the EW ID, start date, and revision IDs', async () => {
+      getJsonSpy.mockImplementation((path, timeout) => {
+        expect(path).toContain(
+          `${ewService.EDGEWORKERS_API_BASE}/reports/${reportId}`
+        );
+        expect(path).toContain(`?start=${start}&edgeWorker=${ewId}`);
+        expect(path).toContain(`&edgeWorkerRevision=${ewId}-1-0&edgeWorkerRevision=${ewId}-2-3`);
+        expect(timeout).toEqual(defaultTimeout);
+        return Promise.resolve({
+          body: mockResponse,
+        });
+      });
+
+      const res = await ewService.getReport(
+        reportId,
+        ewId,
+        start,
+        [],
+        [],
+        null,
+        null,
+        [],
+        ['1-0', '2-3'],
+        null
+      );
+
+      expect(getReportSpy).toHaveBeenCalled();
+      expect(res).toEqual(mockResponse);
+    });
+
+    it('should return an error if revisionIds filter has more than 10 revisions', async () => {
+      const exitSpy = jest.spyOn(process, 'exit').mockImplementation(jest.fn() as unknown as (code?: number | string) => never);
+      const logSpy = jest.spyOn(console, 'log').mockImplementation(jest.fn());
+
+      getJsonSpy.mockResolvedValue({ body: {} });
+
+      await ewService.getReport(
+        reportId,
+        ewId,
+        start,
+        [],
+        [],
+        null,
+        null,
+        [],
+        ['1-0', '1-1', '1-2', '1-3', '1-4', '1-5', '1-6', '1-7', '1-8', '1-9', '1-10'],
+        'STAGING'
+      );
+
+      expect(logSpy).toHaveBeenCalledWith('ERROR: Invalid number of revision IDs (11). Allowed maximum is 10.');
+      expect(exitSpy).toHaveBeenCalledWith(1);
+
+      exitSpy.mockRestore();
+      logSpy.mockRestore();
+    });
+
+
+    it('should return the report and set query params for the EW ID, start date, and network', async () => {
+      getJsonSpy.mockImplementation((path, timeout) => {
+        expect(path).toContain(
+          `${ewService.EDGEWORKERS_API_BASE}/reports/${reportId}`
+        );
+        expect(path).toContain(`?start=${start}&edgeWorker=${ewId}`);
+        expect(path).toContain('&network=PRODUCTION');
+        expect(timeout).toEqual(defaultTimeout);
+        return Promise.resolve({
+          body: mockResponse,
+        });
+      });
+
+      const res = await ewService.getReport(
+        reportId,
+        ewId,
+        start,
+        [],
+        [],
+        null,
+        null,
+        [],
+        null,
+        'PRODUCTION'
+      );
+
+      expect(getReportSpy).toHaveBeenCalled();
+      expect(res).toEqual(mockResponse);
+    });
+
+    it('should return an error if network is invalid', async () => {
+      const exitSpy = jest.spyOn(process, 'exit').mockImplementation(jest.fn() as unknown as (code?: number | string) => never);
+      const logSpy = jest.spyOn(console, 'log').mockImplementation(jest.fn());
+
+      getJsonSpy.mockResolvedValue({ body: {} });
+
+      await ewService.getReport(
+        reportId,
+        ewId,
+        start,
+        [],
+        [],
+        null,
+        null,
+        [],
+        null,
+        'test'
+      );
+
+      expect(logSpy).toHaveBeenCalledWith('ERROR: Invalid network "test". Allowed values are STAGING or PRODUCTION.');
+      expect(exitSpy).toHaveBeenCalledWith(1);
+
+      exitSpy.mockRestore();
+      logSpy.mockRestore();
+    });
+
     it('should handle errors correctly', async () => {
       const mockError = {
         status: 404,
@@ -231,12 +348,12 @@ describe('ew service tests', () => {
         expect(path).toContain(
           `${ewService.EDGEWORKERS_API_BASE}/reports/${reportId}`
         );
-        expect(path).toContain(`?start=${start}&edgeWorker=${ewid}`);
+        expect(path).toContain(`?start=${start}&edgeWorker=${ewId}`);
         expect(timeout).toEqual(defaultTimeout);
         return Promise.reject(JSON.stringify(mockError));
       });
 
-      const error = await ewService.getReport(reportId, ewid, start, [], [], end, false, []);
+      const error = await ewService.getReport(reportId, ewId, start, [], [], end, false, []);
 
       expect(getReportSpy).toHaveBeenCalled();
       expect(error).not.toBeUndefined;

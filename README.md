@@ -150,11 +150,11 @@ List EdgeWorker ids currently registered.
 
 Usage: `akamai edgeworkers list-ids [options] [edgeworker-identifier]`
 
-| Option                              | Description                                                                                                                                                                                                               |
-|-------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| -h, --help                          | output usage information                                                                                                                                                                                                  |
-| --groupId `<groupId>`               | Filter EdgeWorker Id list by Permission Group                                                                                                                                                                             |
-| --resourceTierId `<resourceTierId>` | Filter EdgeWorker Id by Resource Tier                                                                                                                                                                                     |
+| Option                              | Description                                   |
+|-------------------------------------|-----------------------------------------------|
+| -h, --help                          | output usage information                      |
+| --groupId `<groupId>`               | Filter EdgeWorker Id list by Permission Group |
+| --resourceTierId `<resourceTierId>` | Filter EdgeWorker Id by Resource Tier         |
 
 | Argument              | Existence | Description                                        |
 |-----------------------|-----------|----------------------------------------------------|
@@ -725,7 +725,7 @@ Usage: `akamai show-restier <edgeworkerId>`
 
 ### Get Available EdgeWorkers Report Types
 
-List the available report types that can be generated for an EdgeWorker ID.
+List the available report types that can be generated for an EdgeWorker ID. Note that reports 2 and 4 have been deprecated.
 
 Usage: `akamai get reports`
 
@@ -740,18 +740,20 @@ Usage: `akamai get reports`
 
 ### Get EdgeWorker Report
 
-Get a report for a given EdgeWorker ID.
+Get a report for a given EdgeWorker ID. Note that reports 2 and 4 have been deprecated.
 
 Usage: `akamai get report <reportId> <edgeworker-identifier>`
 
-| Option                                  | Existence | Description                                                                                                                                                                                                                                                                                                |
-|-----------------------------------------|-----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| -h, --help                              | optional  | output usage information                                                                                                                                                                                                                                                                                   |
-| -s, --startDate `<startDate>`           | required  | ISO 8601 timestamp indicating the start time of the EdgeWorkers report.                                                                                                                                                                                                                                    |
-| -e, --endDate `<startDate>`             | optional  | ISO 8601 timestamp indicating the end time of the EdgeWorkers report. If not specified, the end time defaults to the current time.                                                                                                                                                                         |
-| --status `<status>`                     | optional  | Comma-separated string to filter by EdgeWorkers status. Values: `success`, `genericError`, `unknownEdgeWorkerId`, `unimplementedEventHandler`, `runtimeError`, `executionError`, `timeoutError`, `resourceLimitHit`, `cpuTimeoutError`, `wallTimeoutError`, `initCpuTimeoutError`, `initWallTimeoutError`. |
-| --ev, --eventHandlers `<eventHandlers>` | optional  | Comma-separated string to filter EdgeWorkers by the event that triggers them. Values: `onClientRequest`, `onOriginRequest`, `onOriginResponse`, `onClientResponse`, `onBotSegmentAvailable`, `responseProvider`.                                                                                           |
-| --coe, --continueOnErrorOnly `<continueOnErrorOnly>` | optional  | Boolean flag to include only executions where "continue on error" was applied OR attempted to be applied, defaults to false. Values: `true`, `false`.                                                                                           |
+| Option                                               | Existence | Description                                                                                                                                                                                                                                                                                                |
+|------------------------------------------------------|-----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -h, --help                                           | optional  | output usage information                                                                                                                                                                                                                                                                                   |
+| -s, --startDate `<startDate>`                        | required  | ISO 8601 timestamp indicating the start time of the EdgeWorkers report.                                                                                                                                                                                                                                    |
+| -e, --endDate `<startDate>`                          | optional  | ISO 8601 timestamp indicating the end time of the EdgeWorkers report. If not specified, the end time defaults to the current time.                                                                                                                                                                         |
+| --status `<status>`                                  | optional  | Comma-separated string to filter by EdgeWorkers status. Values: `success`, `genericError`, `unknownEdgeWorkerId`, `unimplementedEventHandler`, `runtimeError`, `executionError`, `timeoutError`, `resourceLimitHit`, `cpuTimeoutError`, `wallTimeoutError`, `initCpuTimeoutError`, `initWallTimeoutError`. |
+| --ev, --eventHandlers `<eventHandlers>`              | optional  | Comma-separated string to filter EdgeWorkers by the event that triggers them. Values: `onClientRequest`, `onOriginRequest`, `onOriginResponse`, `onClientResponse`, `onBotSegmentAvailable`, `responseProvider`.                                                                                           |
+| --coe, --continueOnErrorOnly `<continueOnErrorOnly>` | optional  | Boolean flag to include only executions where "continue on error" was applied OR attempted to be applied, defaults to false. Values: `true`, `false`.                                                                                                                                                      |
+| --rev, --revisionId `<revisionIds>`                  | optional  | Comma-separated string to filter by revision IDs. Select up to 10 revisions for your report. Example: `3-10,3-11`.                                                                                                                                                                                         |
+| --network `<network>`                                | optional  | Filter by a specific network. Value can be `STAGING` or `PRODUCTION`.                                                                                                                                                                                                                                      |
 
 | Argument              | Existence | Description            |
 |-----------------------|-----------|------------------------|
