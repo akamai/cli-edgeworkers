@@ -8,7 +8,7 @@ import * as chrono from 'chrono-node';
 
 import CryptoJS from 'crypto-js';
 const groupColumnsToKeep = ['groupId', 'groupName', 'capabilities'];
-const idColumnsToKeep = ['edgeWorkerId', 'name', 'groupId', 'resourceTierId'];
+const idColumnsToKeep = ['edgeWorkerId', 'name', 'groupId', 'resourceTierId', 'isPartner'];
 const clonedColumnsToKeep = [
   'edgeWorkerId',
   'name',
@@ -200,7 +200,8 @@ export async function showGroupOverview(groupId: string) {
 export async function showEdgeWorkerIdOverview(
   ewId: string,
   groupId: string,
-  resourceTierId: string
+  resourceTierId: string,
+  isPartner: boolean
 ) {
   let ids = null;
   const id = [];
@@ -208,7 +209,7 @@ export async function showEdgeWorkerIdOverview(
 
   if (!ewId) {
     ids = await cliUtils.spinner(
-      edgeWorkersSvc.getAllEdgeWorkerIds(groupId, resourceTierId),
+      edgeWorkersSvc.getAllEdgeWorkerIds(groupId, resourceTierId, isPartner),
       'Fetching EdgeWorker Ids...'
     );
     // remove outer envelope of JSON data
