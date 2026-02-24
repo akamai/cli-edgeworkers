@@ -2,7 +2,7 @@ import * as cliUtils from '../utils/cli-utils';
 import * as os from 'os';
 import fs from 'fs';
 import path from 'path';
-import tar from 'tar';
+import * as tar from 'tar';
 import untildify from 'untildify';
 import sha256File from 'sha256-file';
 import { glob } from 'glob';

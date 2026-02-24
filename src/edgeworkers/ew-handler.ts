@@ -7,6 +7,7 @@ import * as readline from 'readline-sync';
 import * as chrono from 'chrono-node';
 
 import CryptoJS from 'crypto-js';
+import {askYesNoQuestion} from "../utils/cli-utils";
 const groupColumnsToKeep = ['groupId', 'groupName', 'capabilities'];
 const idColumnsToKeep = ['edgeWorkerId', 'name', 'groupId', 'resourceTierId', 'isPartner'];
 const clonedColumnsToKeep = [
@@ -301,11 +302,8 @@ export async function deleteEdgeWorkerId(ewId: string, noPrompt: boolean) {
       `Deleting EdgeWorker Id ${ewId}`
     );
   } else {
-    if (
-      readline.keyInYN(
-        `Have you checked to make sure that EdgeWorker Id ${ewId} is not in use on any active properties? You can check for active properties by using the list-properties command.`
-      )
-    ) {
+    const deleteEwId: boolean = await askYesNoQuestion(`Have you checked to make sure that EdgeWorker Id ${ewId} is not in use on any active properties? You can check for active properties by using the list-properties command.`);
+    if (deleteEwId) {
       deletion = await cliUtils.spinner(
         edgeWorkersSvc.deleteEdgeWorkerId(ewId),
         `Deleting EdgeWorker Id ${ewId}`
@@ -466,6 +464,7 @@ export async function getProperties(ewId: string, activeOnly: boolean, details: 
           const propertiesWithoutBehaviorLocations = properties.map(prop => {
             delete prop['stagingVersionLink'];
             delete prop['productionVersionLink'];
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const {stagingEdgeWorkersBehaviorLocations, productionEdgeWorkersBehaviorLocations, ...rest} = prop;
             return rest;
           }).sort((a, b) => a.propertyId - b.propertyId);
@@ -805,11 +804,8 @@ export async function deleteVersion(
       `Deleting version ${versionId} of EdgeWorker Id ${ewId}`
     );
   } else {
-    if (
-      readline.keyInYN(
-        `Are you sure you want to delete version ${versionId} of EdgeWorker Id ${ewId}?`
-      )
-    ) {
+    const deleteVersion: boolean = await askYesNoQuestion(`Are you sure you want to delete version ${versionId} of EdgeWorker Id ${ewId}?`);
+    if (deleteVersion) {
       deletion = await cliUtils.spinner(
         edgeWorkersSvc.deleteVersion(ewId, versionId),
         `Deleting version ${versionId} of EdgeWorker Id ${ewId}`

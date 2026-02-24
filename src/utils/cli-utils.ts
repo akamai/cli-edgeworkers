@@ -3,6 +3,7 @@ import inquirer from 'inquirer';
 import { Spinner } from 'cli-spinner';
 import { ewJsonOutput } from '../edgeworkers/client-manager';
 import { ekvJsonOutput } from '../edgekv/client-manager';
+
 const TIME_UNITS: string[] = ['ms', 's', 'min', 'h'];
 const MEMORY_UNITS: string[] = ['B', 'kB', 'MB', 'GB', 'TB'];
 const COUNT_UNITS: string[] = [
@@ -293,5 +294,44 @@ export function changeObjectName(array: any, newObjName: string, oldObjName: str
   array.forEach(i => {
     i[newObjName] = i[oldObjName];
     delete i[oldObjName];
+  });
+}
+
+export function askYesNoQuestion(prompt: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    process.stdout.write(`${prompt} [y/n]: `);
+
+    // Set raw mode to true to capture single keypress
+    process.stdin.setRawMode(true);
+    process.stdin.resume();
+    process.stdin.setEncoding('utf8');
+
+    function onData(key: string) {
+      if (key === '\u0003') { // Ctrl+C
+        process.stdout.write('\n');
+        process.exit(1);
+      }
+      if (key === 'y' || key === 'Y') {
+        process.stdout.write(`${key}\n`);
+        cleanup();
+        resolve(true);
+      } else {
+        if (key === 'n' || key === 'N') {
+          process.stdout.write(`${key}\n`);
+        } else {
+          process.stdout.write('\n');
+        }
+        cleanup();
+        resolve(false);
+      }
+    }
+
+    function cleanup() {
+      process.stdin.setRawMode(false);
+      process.stdin.pause();
+      process.stdin.removeListener('data', onData);
+    }
+
+    process.stdin.on('data', onData);
   });
 }

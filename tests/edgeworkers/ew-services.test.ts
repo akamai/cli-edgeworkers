@@ -3,7 +3,6 @@ import * as ewService from '../../src/edgeworkers/ew-service';
 import {ErrorMessage} from '../../src/utils/http-error-message';
 import * as error from '../../src/edgeworkers/ew-error';
 import * as cliUtils from '../../src/utils/cli-utils';
-import {getActiveCustomers} from '../../src/edgeworkers/ew-service';
 
 describe('ew service tests', () => {
   // Test variables
@@ -745,7 +744,6 @@ describe('ew service tests', () => {
   });
 
   describe('getAllEdgeWorkerIds', () => {
-    const mockGetJson = httpEdge.getJson as jest.Mock;
     let mockHandleError;
 
     beforeEach(() => {
