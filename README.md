@@ -150,11 +150,12 @@ List EdgeWorker ids currently registered.
 
 Usage: `akamai edgeworkers list-ids [options] [edgeworker-identifier]`
 
-| Option                              | Description                                   |
-|-------------------------------------|-----------------------------------------------|
-| -h, --help                          | output usage information                      |
-| --groupId `<groupId>`               | Filter EdgeWorker Id list by Permission Group |
-| --resourceTierId `<resourceTierId>` | Filter EdgeWorker Id by Resource Tier         |
+| Option                              | Description                                                                                                                                                                                                               |
+|-------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -h, --help                          | output usage information                                                                                                                                                                                                  |
+| --groupId `<groupId>`               | Filter EdgeWorker Id list by Permission Group                                                                                                                                                                             |
+| --resourceTierId `<resourceTierId>` | Filter EdgeWorker Id by Resource Tier                                                                                                                                                                                     |
+| --isPartner `<boolean>`             | Filter EdgeWorker IDs by partner identifier. A partner EdgeWorker ID is referenced by a Property Manager behavior enrolled in the partner program. If not provided, both partner and regular EdgeWorker IDs are returned. |
 
 | Argument              | Existence | Description                                        |
 |-----------------------|-----------|----------------------------------------------------|
