@@ -110,7 +110,7 @@ describe('ew service tests', () => {
     const reportId = 1;
     const start = 'startDate';
     const end = 'endDate';
-    const ewid = '123';
+    const ewId = '123';
     const mockResponse = {report: 'someData'};
 
     let getReportSpy;
@@ -118,12 +118,16 @@ describe('ew service tests', () => {
       getReportSpy = jest.spyOn(ewService, 'getReport');
     });
 
-    it('should return the report and set query params for the ewid and start date', async () => {
+    afterEach(() => {
+      getJsonSpy.mockReset();
+    });
+
+    it('should return the report and set query params for the EW ID and start date', async () => {
       getJsonSpy.mockImplementation((path, timeout) => {
         expect(path).toContain(
           `${ewService.EDGEWORKERS_API_BASE}/reports/${reportId}`
         );
-        expect(path).toContain(`?start=${start}&edgeWorker=${ewid}`);
+        expect(path).toContain(`?start=${start}&edgeWorker=${ewId}`);
         expect(path).not.toContain('&end=');
         expect(path).not.toContain('&status=');
         expect(path).not.toContain('&eventHandler=');
@@ -133,18 +137,18 @@ describe('ew service tests', () => {
         });
       });
 
-      const res = await ewService.getReport(reportId, ewid, start, [], []);
+      const res = await ewService.getReport(reportId, ewId, start, [], [], undefined, false, []);
 
       expect(getReportSpy).toHaveBeenCalled();
       expect(res).toEqual(mockResponse);
     });
 
-    it('should return the report and set query params for the ewid, start, and end', async () => {
+    it('should return the report and set query params for the EW ID, start, and end', async () => {
       getJsonSpy.mockImplementation((path, timeout) => {
         expect(path).toContain(
           `${ewService.EDGEWORKERS_API_BASE}/reports/${reportId}`
         );
-        expect(path).toContain(`?start=${start}&edgeWorker=${ewid}`);
+        expect(path).toContain(`?start=${start}&edgeWorker=${ewId}`);
         expect(path).toContain(`&end=${end}`);
         expect(path).not.toContain('&status=');
         expect(path).not.toContain('&eventHandler=');
@@ -154,18 +158,18 @@ describe('ew service tests', () => {
         });
       });
 
-      const res = await ewService.getReport(reportId, ewid, start, [], [], end);
+      const res = await ewService.getReport(reportId, ewId, start, [], [], end, false, []);
 
       expect(getReportSpy).toHaveBeenCalled();
       expect(res).toEqual(mockResponse);
     });
 
-    it('should return the report and set query params for the ewid, start, end, and status', async () => {
+    it('should return the report and set query params for the EW ID, start, end, and status', async () => {
       getJsonSpy.mockImplementation((path, timeout) => {
         expect(path).toContain(
           `${ewService.EDGEWORKERS_API_BASE}/reports/${reportId}`
         );
-        expect(path).toContain(`?start=${start}&edgeWorker=${ewid}`);
+        expect(path).toContain(`?start=${start}&edgeWorker=${ewId}`);
         expect(path).toContain(`&end=${end}`);
         expect(path).toContain('&status=stat1&status=stat2');
         expect(path).not.toContain('&eventHandler=');
@@ -177,23 +181,25 @@ describe('ew service tests', () => {
 
       const res = await ewService.getReport(
         reportId,
-        ewid,
+        ewId,
         start,
         ['stat1', 'stat2'],
         [],
-        end
+        end,
+        false,
+        []
       );
 
       expect(getReportSpy).toHaveBeenCalled();
       expect(res).toEqual(mockResponse);
     });
 
-    it('should return the report and set query params for the ewid, start, end, status, and eventHandler', async () => {
+    it('should return the report and set query params for the EW ID, start, end, status, and eventHandler', async () => {
       getJsonSpy.mockImplementation((path, timeout) => {
         expect(path).toContain(
           `${ewService.EDGEWORKERS_API_BASE}/reports/${reportId}`
         );
-        expect(path).toContain(`?start=${start}&edgeWorker=${ewid}`);
+        expect(path).toContain(`?start=${start}&edgeWorker=${ewId}`);
         expect(path).toContain(`&end=${end}`);
         expect(path).toContain('&status=stat1&status=stat2');
         expect(path).toContain('&eventHandler=ev1&eventHandler=ev2');
@@ -205,15 +211,130 @@ describe('ew service tests', () => {
 
       const res = await ewService.getReport(
         reportId,
-        ewid,
+        ewId,
         start,
         ['stat1', 'stat2'],
         ['ev1', 'ev2'],
-        end
+        end,
+        false,
+        []
       );
 
       expect(getReportSpy).toHaveBeenCalled();
       expect(res).toEqual(mockResponse);
+    });
+
+    it('should return the report and set query params for the EW ID, start date, and revision IDs', async () => {
+      getJsonSpy.mockImplementation((path, timeout) => {
+        expect(path).toContain(
+          `${ewService.EDGEWORKERS_API_BASE}/reports/${reportId}`
+        );
+        expect(path).toContain(`?start=${start}&edgeWorker=${ewId}`);
+        expect(path).toContain(`&edgeWorkerRevision=${ewId}-1-0&edgeWorkerRevision=${ewId}-2-3`);
+        expect(timeout).toEqual(defaultTimeout);
+        return Promise.resolve({
+          body: mockResponse,
+        });
+      });
+
+      const res = await ewService.getReport(
+        reportId,
+        ewId,
+        start,
+        [],
+        [],
+        null,
+        null,
+        [],
+        ['1-0', '2-3'],
+        null
+      );
+
+      expect(getReportSpy).toHaveBeenCalled();
+      expect(res).toEqual(mockResponse);
+    });
+
+    it('should return an error if revisionIds filter has more than 10 revisions', async () => {
+      const exitSpy = jest.spyOn(process, 'exit').mockImplementation(jest.fn() as unknown as (code?: number | string) => never);
+      const logSpy = jest.spyOn(console, 'log').mockImplementation(jest.fn());
+
+      getJsonSpy.mockResolvedValue({ body: {} });
+
+      await ewService.getReport(
+        reportId,
+        ewId,
+        start,
+        [],
+        [],
+        null,
+        null,
+        [],
+        ['1-0', '1-1', '1-2', '1-3', '1-4', '1-5', '1-6', '1-7', '1-8', '1-9', '1-10'],
+        'STAGING'
+      );
+
+      expect(logSpy).toHaveBeenCalledWith('ERROR: Invalid number of revision IDs (11). Allowed maximum is 10.');
+      expect(exitSpy).toHaveBeenCalledWith(1);
+
+      exitSpy.mockRestore();
+      logSpy.mockRestore();
+    });
+
+
+    it('should return the report and set query params for the EW ID, start date, and network', async () => {
+      getJsonSpy.mockImplementation((path, timeout) => {
+        expect(path).toContain(
+          `${ewService.EDGEWORKERS_API_BASE}/reports/${reportId}`
+        );
+        expect(path).toContain(`?start=${start}&edgeWorker=${ewId}`);
+        expect(path).toContain('&network=PRODUCTION');
+        expect(timeout).toEqual(defaultTimeout);
+        return Promise.resolve({
+          body: mockResponse,
+        });
+      });
+
+      const res = await ewService.getReport(
+        reportId,
+        ewId,
+        start,
+        [],
+        [],
+        null,
+        null,
+        [],
+        null,
+        'PRODUCTION'
+      );
+
+      expect(getReportSpy).toHaveBeenCalled();
+      expect(res).toEqual(mockResponse);
+    });
+
+    it('should return an error if network is invalid', async () => {
+      const exitSpy = jest.spyOn(process, 'exit').mockImplementation(jest.fn() as unknown as (code?: number | string) => never);
+      const logSpy = jest.spyOn(console, 'log').mockImplementation(jest.fn());
+
+      getJsonSpy.mockResolvedValue({ body: {} });
+
+      await ewService.getReport(
+        reportId,
+        ewId,
+        start,
+        [],
+        [],
+        null,
+        null,
+        [],
+        null,
+        'test'
+      );
+
+      expect(logSpy).toHaveBeenCalledWith('ERROR: Invalid network "test". Allowed values are STAGING or PRODUCTION.');
+      expect(exitSpy).toHaveBeenCalledWith(1);
+
+      exitSpy.mockRestore();
+      logSpy.mockRestore();
     });
 
     it('should handle errors correctly', async () => {
@@ -226,12 +347,12 @@ describe('ew service tests', () => {
         expect(path).toContain(
           `${ewService.EDGEWORKERS_API_BASE}/reports/${reportId}`
         );
-        expect(path).toContain(`?start=${start}&edgeWorker=${ewid}`);
+        expect(path).toContain(`?start=${start}&edgeWorker=${ewId}`);
         expect(timeout).toEqual(defaultTimeout);
         return Promise.reject(JSON.stringify(mockError));
       });
 
-      const error = await ewService.getReport(reportId, ewid, start, [], []);
+      const error = await ewService.getReport(reportId, ewId, start, [], [], end, false, []);
 
       expect(getReportSpy).toHaveBeenCalled();
       expect(error).not.toBeUndefined;
@@ -623,7 +744,6 @@ describe('ew service tests', () => {
   });
 
   describe('getAllEdgeWorkerIds', () => {
-    const mockGetJson = httpEdge.getJson as jest.Mock;
     let mockHandleError;
 
     beforeEach(() => {
@@ -686,6 +806,50 @@ describe('ew service tests', () => {
         '/edgeworkers/v1/ids',
         1000
       );
+    });
+  });
+
+  // THIS TEST WAS GENERATED BY AN AI LANGUAGE MODEL (GitHub Copilot)
+  describe('getActiveCustomers', () => {
+    let getActiveCustomersForEwIdSpy;
+
+    beforeEach(() => {
+      getActiveCustomersForEwIdSpy = jest.spyOn(ewService, 'getActiveCustomers');
+    });
+
+    it('should handle invalid ewId input', async () => {
+      // THIS TEST WAS GENERATED BY AN AI LANGUAGE MODEL (GitHub Copilot)
+      getJsonSpy.mockImplementation(() => Promise.reject('Invalid ewId'));
+      const error = await ewService.getActiveCustomers(undefined);
+      expect(error).not.toBeUndefined();
+    });
+
+    it('should handle API error response', async () => {
+      // THIS TEST WAS GENERATED BY AN AI LANGUAGE MODEL (GitHub Copilot)
+      getJsonSpy.mockImplementation(() => Promise.reject(new Error('API error')));
+      const error = await ewService.getActiveCustomers('bad-id');
+      expect(error).not.toBeUndefined();
+    });
+
+    const ewId = '1';
+    it('should return active customers for a valid ewId', async () => {
+      // THIS TEST WAS GENERATED BY AN AI LANGUAGE MODEL (GitHub Copilot)
+      const mockResponse = {
+        'customers': [
+          {
+            'customerName': 'Akamai Technologies, Inc.',
+            'vcds': [
+              {
+                'vcd': 112233
+              }
+            ]
+          }
+        ]
+      };
+      getJsonSpy.mockResolvedValue({body: mockResponse});
+      const result = await ewService.getActiveCustomers(ewId);
+      expect(getActiveCustomersForEwIdSpy).toHaveBeenCalled();
+      expect(result).toEqual(mockResponse);
     });
   });
 });

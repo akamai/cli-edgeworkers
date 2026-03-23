@@ -7,6 +7,7 @@ import * as readline from 'readline-sync';
 import * as chrono from 'chrono-node';
 
 import CryptoJS from 'crypto-js';
+import {askYesNoQuestion} from "../utils/cli-utils";
 const groupColumnsToKeep = ['groupId', 'groupName', 'capabilities'];
 const idColumnsToKeep = ['edgeWorkerId', 'name', 'groupId', 'resourceTierId', 'isPartner'];
 const clonedColumnsToKeep = [
@@ -301,11 +302,8 @@ export async function deleteEdgeWorkerId(ewId: string, noPrompt: boolean) {
       `Deleting EdgeWorker Id ${ewId}`
     );
   } else {
-    if (
-      readline.keyInYN(
-        `Have you checked to make sure that EdgeWorker Id ${ewId} is not in use on any active properties? You can check for active properties by using the list-properties command.`
-      )
-    ) {
+    const deleteEwId: boolean = await askYesNoQuestion(`Have you checked to make sure that EdgeWorker Id ${ewId} is not in use on any active properties? You can check for active properties by using the list-properties command.`);
+    if (deleteEwId) {
       deletion = await cliUtils.spinner(
         edgeWorkersSvc.deleteEdgeWorkerId(ewId),
         `Deleting EdgeWorker Id ${ewId}`
@@ -422,9 +420,9 @@ export async function getContracts() {
   }
 }
 
-export async function getProperties(ewId: string, activeOnly: boolean) {
+export async function getProperties(ewId: string, activeOnly: boolean, details: boolean) {
   const propList = await cliUtils.spinner(
-    edgeWorkersSvc.getProperties(ewId, activeOnly),
+    edgeWorkersSvc.getProperties(ewId, activeOnly, details),
     `Retrieving properties for EdgeWorker Id ${ewId}...`
   );
   if (propList && !propList.isError) {
@@ -437,7 +435,49 @@ export async function getProperties(ewId: string, activeOnly: boolean) {
         ewJsonOutput.writeJSONOutput(0, msg, propList);
       } else {
         cliUtils.logWithBorder(msg);
-        console.table(properties);
+        if (details) {
+          let stagingEdgeWorkersBehaviorLocations = [];
+          let productionEdgeWorkersBehaviorLocations = [];
+          properties.forEach(prop => {
+            prop.stagingEdgeWorkersBehaviorLocations.forEach(behaviorLocation => {
+              stagingEdgeWorkersBehaviorLocations.push({
+                propertyId: prop.propertyId,
+                location: behaviorLocation.location,
+                continueOnError: behaviorLocation.continueOnError,
+                versionLink: prop.stagingVersionLink
+              });
+            });
+
+            prop.productionEdgeWorkersBehaviorLocations.forEach(behaviorLocation => {
+              productionEdgeWorkersBehaviorLocations.push({
+                propertyId: prop.propertyId,
+                location: behaviorLocation.location,
+                continueOnError: behaviorLocation.continueOnError,
+                versionLink: prop.productionVersionLink
+              });
+            });
+          });
+
+          stagingEdgeWorkersBehaviorLocations = stagingEdgeWorkersBehaviorLocations.sort((a, b) => a.propertyId - b.propertyId);
+          productionEdgeWorkersBehaviorLocations = productionEdgeWorkersBehaviorLocations.sort((a, b) => a.propertyId - b.propertyId);
+
+          const propertiesWithoutBehaviorLocations = properties.map(prop => {
+            delete prop['stagingVersionLink'];
+            delete prop['productionVersionLink'];
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const {stagingEdgeWorkersBehaviorLocations, productionEdgeWorkersBehaviorLocations, ...rest} = prop;
+            return rest;
+          }).sort((a, b) => a.propertyId - b.propertyId);
+          console.table(propertiesWithoutBehaviorLocations);
+
+          cliUtils.logWithBorder('Staging EdgeWorkers Behavior Locations');
+          console.table(stagingEdgeWorkersBehaviorLocations);
+          cliUtils.logWithBorder('Production EdgeWorkers Behavior Locations');
+          console.table(productionEdgeWorkersBehaviorLocations);
+        } else {
+          console.table(properties);
+        }
+
         console.log(
           `limitedAccessToProperties: ${propList.limitedAccessToProperties}`
         );
@@ -529,6 +569,31 @@ export async function getResourceTierForEwid(ewId: string) {
     }
   } else {
     cliUtils.logAndExit(1, resourceTier.error_reason);
+  }
+}
+
+export async function getActiveCustomersForEwId(ewId: string) {
+  const activeCustomers = await cliUtils.spinner(
+    edgeWorkersSvc.getActiveCustomers(ewId),
+    `Retrieving active customers for Edgeworker ID ${ewId}...`
+  );
+  if (activeCustomers && !activeCustomers.isError) {
+    if (ewJsonOutput.isJSONOutputMode()) {
+      const msg = `The following active customers are associated with the EdgeWorker ID ${ewId}`;
+      ewJsonOutput.writeJSONOutput(0, msg, activeCustomers);
+    } else {
+      if(activeCustomers['customers'].length === 0) {
+        cliUtils.logAndExit(0, `INFO: There are currently no active customers associated with the Partner EdgeWorker ID: ${ewId}`);
+      } else {
+        const tableData = activeCustomers['customers'].map(customer => ({
+          'Customer Name': customer.customerName,
+          'VCDs': customer.vcds.map(v => v.vcd).join(', ')
+        }));
+        console.table(tableData);
+      }
+    }
+  } else {
+    cliUtils.logAndExit(1, activeCustomers.error_reason);
   }
 }
 
@@ -739,11 +804,8 @@ export async function deleteVersion(
       `Deleting version ${versionId} of EdgeWorker Id ${ewId}`
     );
   } else {
-    if (
-      readline.keyInYN(
-        `Are you sure you want to delete version ${versionId} of EdgeWorker Id ${ewId}?`
-      )
-    ) {
+    const deleteVersion: boolean = await askYesNoQuestion(`Are you sure you want to delete version ${versionId} of EdgeWorker Id ${ewId}?`);
+    if (deleteVersion) {
       deletion = await cliUtils.spinner(
         edgeWorkersSvc.deleteVersion(ewId, versionId),
         `Deleting version ${versionId} of EdgeWorker Id ${ewId}`
@@ -1590,6 +1652,15 @@ interface Execution {
   memory?: Record<string, number>,
 }
 
+interface ExecutionForReport3 {
+  startDateTime: string,
+  edgeWorkerVersion: string,
+  invocations: number,
+  status?: string,
+  continueOnErrorApplied?: number,
+  continueOnErrorNotApplied?: number
+}
+
 const getExecutionAverages = (executionArray: Array<Execution>, executionKey: string) => {
   if (executionArray) {
     let totalAvg = 0, totalInvocations = 0, eventMax = -1, eventMin = Number.MAX_SAFE_INTEGER;
@@ -1622,19 +1693,23 @@ export async function getReport(
   ewid: string,
   statuses: Array<string>,
   eventHandlers: Array<string>,
+  continueOnErrorOnly: boolean,
+  vcds: Array<number>,
+  revisionIds: Array<string>,
+  network: string
 ) {
   const report = await cliUtils.spinner(
-    edgeWorkersSvc.getReport(reportId, ewid, start, statuses, eventHandlers, end),
+    edgeWorkersSvc.getReport(reportId, ewid, start, statuses, eventHandlers, end, continueOnErrorOnly, vcds, revisionIds, network),
     'Getting report...'
   );
 
   const EVENT_HANDLERS = ['onClientRequest', 'onOriginRequest', 'onOriginResponse', 'onClientResponse', 'onBotSegmentAvailable', 'responseProvider'];
   let executionEventHandlers: Array<string>;
-  if (eventHandlers.length !== 0) {
+  if (eventHandlers.length === 0) {
+    executionEventHandlers = EVENT_HANDLERS;
+  } else {
     // remove unwanted event handlers
     executionEventHandlers = EVENT_HANDLERS.filter((event) => eventHandlers.includes(event));
-  } else {
-    executionEventHandlers = EVENT_HANDLERS;
   }
 
 
@@ -1659,7 +1734,10 @@ export async function getReport(
             errors,
             invocations
           } = report.data;
+
           let initDurationMapped = {}; // init duration might be undefined
+          let execDurationMapped = {};
+          let memoryMapped = {};
 
           if (initDuration) {
             Object.keys(initDuration).forEach((key) => {
@@ -1669,18 +1747,39 @@ export async function getReport(
             initDurationMapped = {avg: 'N/A', max: 'N/A', min: 'N/A'};
           }
 
-          Object.keys(execDuration).forEach((key) => {
-            execDuration[key] = execDuration[key].toFixed(4);
-          });
-          Object.keys(memory).forEach((key) => {
-            memory[key] = memory[key].toFixed(4);
-          });
+          if (execDuration) {
+            Object.keys(execDuration).forEach((key) => {
+              execDurationMapped[key] = execDuration[key].toFixed(4);
+            });
+          }
+          else {
+            execDurationMapped = {avg: 'N/A', max: 'N/A', min: 'N/A'};
+          }
 
-          reportOutput = [
-            {successes, errors, invocations},
-            {initDuration: initDurationMapped, execDuration},
-            {memory}
-          ];
+          if (memory) {
+            Object.keys(memory).forEach((key) => {
+              memoryMapped[key] = memory[key].toFixed(4);
+            });
+          }
+          else {
+            memoryMapped = {avg: 'N/A', max: 'N/A', min: 'N/A'};
+          }
+
+          if (errors?.continueOnErrorApplied || errors?.continueOnErrorNotApplied) {
+            reportOutput = [
+              {successes: {total: successes?.total}, invocations: {total: invocations?.total}},
+              {errors},
+              {initDuration: initDurationMapped, execDuration: execDurationMapped},
+              {memory : memoryMapped},
+            ];
+          } else {
+            reportOutput = [
+              {successes: {total: successes?.total}, errors: {total: errors?.total}, invocations: {total: invocations?.total}},
+              {initDuration: initDurationMapped, execDuration: execDurationMapped},
+              {memory: memoryMapped},
+            ];
+          }
+
           break;
         }
 
@@ -1701,15 +1800,21 @@ export async function getReport(
         case 3: {
           // execution status
           reportOutput = {};
-          const executionCategories: Record<string, Array<Execution>> = report.data[0].data;
-          let errors = 0;
+          const executionCategories: Record<string, Array<ExecutionForReport3>> = report.data[0].data;
+          const errors = {invocations: 0, continueOnErrorApplied: 0, continueOnErrorNotApplied: 0};
 
           for (const executionArray of Object.values(executionCategories)) {
             for (const execution of executionArray) {
               const {status, invocations} = execution;
               reportOutput[status] = reportOutput[status] + invocations || invocations;
               if (status !== 'success' && status !== 'unimplementedEventHandler') {
-                errors += invocations;
+                errors.invocations += invocations;
+                if (execution.continueOnErrorApplied) {
+                  errors['continueOnErrorApplied'] = (errors['continueOnErrorApplied'] || 0) + execution.continueOnErrorApplied;
+                }
+                if (execution.continueOnErrorNotApplied) {
+                  errors['continueOnErrorNotApplied'] = (errors['continueOnErrorNotApplied'] || 0) + execution.continueOnErrorNotApplied;
+                }
               }
             }
           }
@@ -1718,8 +1823,13 @@ export async function getReport(
             // add success count if no successful executions
             reportOutput['success'] = 0;
           }
-          //add property for total errors
-          reportOutput['errors'] = errors;
+
+          if (errors?.continueOnErrorApplied || errors?.continueOnErrorNotApplied) {
+            reportOutput = [ {...reportOutput}, {errors}];
+          } else {
+            //add property for total errors
+            reportOutput['errors'] = errors.invocations;
+          }
 
           break;
         }
@@ -1735,6 +1845,41 @@ export async function getReport(
 
           break;
         }
+
+        case 5: {
+          // execution time
+          reportOutput = {};
+          const executionCategories: Record<string, Array<Execution>> = report.data[0].data;
+
+          for (const event of executionEventHandlers) {
+            reportOutput[event] = getExecutionAverages(executionCategories[event], 'execDuration');
+          }
+
+          // execution time has an additional property for init times
+          reportOutput['init'] = getExecutionAverages(executionCategories['init'], 'initDuration');
+
+          break;
+        }
+
+        case 6: {
+          // memory usage
+          reportOutput = {};
+          const executionCategories: Record<string, Array<Execution>> = report.data[0].data;
+
+          for (const event of executionEventHandlers) {
+            reportOutput[event] = getExecutionAverages(executionCategories[event], 'memory');
+          }
+
+          break;
+        }
+
+        case 7: {
+          // subrequests total
+          reportOutput = {};
+          reportOutput['subRequests'] = {'total' : report.data['subRequests']['total']};
+          break;
+        }
+
       }
       if (ewJsonOutput.isJSONOutputMode()) {
         ewJsonOutput.writeJSONOutput(0, msg, reportOutput);
