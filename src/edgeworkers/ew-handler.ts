@@ -8,7 +8,7 @@ import * as chrono from 'chrono-node';
 
 import CryptoJS from 'crypto-js';
 import {askYesNoQuestion} from "../utils/cli-utils";
-import {writeReportOutput} from "./report-builder";
+import {writeReportOutputToConsole} from "./report-builder";
 const groupColumnsToKeep = ['groupId', 'groupName', 'capabilities'];
 const idColumnsToKeep = ['edgeWorkerId', 'name', 'groupId', 'resourceTierId', 'isPartner'];
 const clonedColumnsToKeep = [
@@ -1680,7 +1680,7 @@ export async function getReport(
     } else {
       const msg = `Printing ${report.name} from ${report.start} to ${report.end}`;
       cliUtils.logWithBorder(msg);
-      writeReportOutput(report, executionEventHandlers, msg);
+      writeReportOutputToConsole(report, executionEventHandlers, msg);
     }
   } else {
     cliUtils.logAndExit(1, report.error_reason);

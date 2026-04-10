@@ -282,7 +282,7 @@ function buildReportEight(report) {
   return [summaryTable, performanceTable];
 }
 
-export function writeReportOutput(report, executionEventHandlers: Array<string>, msg: string) {
+export function writeReportOutputToConsole(report, executionEventHandlers: Array<string>, msg: string) {
   let reportOutput;
 
   switch (report.reportId) {
