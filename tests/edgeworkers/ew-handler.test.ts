@@ -199,6 +199,7 @@ describe('ew handler tests', () => {
     const mockLogWithBorder = cliUtils.logWithBorder as jest.Mock;
     const mockLogAndExit = cliUtils.logAndExit as jest.Mock;
     const mockIsJSONOutputMode = ewJsonOutput.ewJsonOutput.isJSONOutputMode as jest.Mock;
+    const mockWriteJSONOutput = ewJsonOutput.ewJsonOutput.writeJSONOutput as jest.Mock;
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -446,6 +447,143 @@ describe('ew handler tests', () => {
         }
       });
       expect(mockLogAndExit).not.toHaveBeenCalled();
+    });
+
+    it('should print customer summary and performance tables for report 8', async () => {
+      const reportResponse = {
+        isError: false,
+        reportId: 8,
+        name: 'Customers',
+        start: '2026-02-25T00:00:00Z',
+        end: '2026-02-25T20:00:00Z',
+        data: [
+          {
+            customerName: 'Tiktok.com',
+            vcds: [{vcd: 112232}],
+            errors: {continueOnErrorApplied: 12, continueOnErrorNotApplied: 5, total: 37},
+            execDuration: {avg: 95.432, max: 156, min: 42},
+            initDuration: {avg: 24.237, max: 31, min: 14},
+            invocations: {total: 158},
+            memory: {avg: 53701.9876, max: 132432, min: 22567},
+            successes: {total: 121},
+            subRequests: {total: 0}
+          },
+          {
+            customerName: 'Microsoft INC',
+            vcds: [{vcd: 235433}, {vcd: 123434}],
+            errors: {continueOnErrorApplied: 45, continueOnErrorNotApplied: 0, total: 45},
+            execDuration: {avg: 32.123, max: 56, min: 21},
+            initDuration: {avg: 24.237, max: 31, min: 14},
+            invocations: {total: 158},
+            memory: {avg: 53701.9876, max: 132432, min: 22567},
+            successes: {total: 324},
+            subRequests: {total: 12}
+          }
+        ]
+      };
+      mockSpinner.mockResolvedValue(reportResponse);
+
+      await ewHandler.getReport(8, '2026-02-25T00:00:00Z', '2026-02-25T20:00:00Z', '1234', [], [], false, [], [], 'STAGING');
+
+      expect(console.table).toHaveBeenCalledTimes(2);
+      expect(console.table).toHaveBeenNthCalledWith(1, [
+        {
+          'Customer Name (VCDs)': 'Microsoft INC (235433,123434)',
+          'Success Count': '324',
+          'Error Count': '45',
+          'Error Rate': '28.48 %',
+          'COE Applied': '45',
+          'COE Not Applied': '0',
+          'Sub-request Count': '12'
+        },
+        {
+          'Customer Name (VCDs)': 'Tiktok.com (112232)',
+          'Success Count': '121',
+          'Error Count': '37',
+          'Error Rate': '23.42 %',
+          'COE Applied': '12',
+          'COE Not Applied': '5',
+          'Sub-request Count': '0'
+        }
+      ]);
+      expect(console.table).toHaveBeenNthCalledWith(2, [
+        {
+          'Customer Name (VCDs)': 'Microsoft INC (235433,123434)',
+          'Avg CPU Time': '32.12 ms',
+          'Max CPU Time': '56.00 ms',
+          'Avg Init Time': '24.24 ms',
+          'Max Init Time': '31.00 ms',
+          'Avg Mem Usage': '52.44 KB',
+          'Max Mem Usage': '129.33 KB'
+        },
+        {
+          'Customer Name (VCDs)': 'Tiktok.com (112232)',
+          'Avg CPU Time': '95.43 ms',
+          'Max CPU Time': '156.00 ms',
+          'Avg Init Time': '24.24 ms',
+          'Max Init Time': '31.00 ms',
+          'Avg Mem Usage': '52.44 KB',
+          'Max Mem Usage': '129.33 KB'
+        }
+      ]);
+      expect(mockLogAndExit).not.toHaveBeenCalled();
+    });
+
+    it('should write report 8 output as JSON when JSON mode is enabled', async () => {
+      mockIsJSONOutputMode.mockReturnValue(true);
+      const reportResponse = {
+        isError: false,
+        reportId: 8,
+        name: 'Customers',
+        start: '2026-02-25T00:00:00Z',
+        end: '2026-02-25T20:00:00Z',
+        data: [
+          {
+            customerName: 'IPQA Akamai Alta-WAA',
+            vcds: [{vcd: 1234}],
+            errors: {continueOnErrorApplied: 0, continueOnErrorNotApplied: 0, total: 0},
+            execDuration: {avg: 10, max: 12, min: 8},
+            initDuration: {avg: 2, max: 3, min: 1},
+            invocations: {total: 5},
+            memory: {avg: 2048, max: 4096, min: 1024},
+            successes: {total: 5},
+            subRequests: {total: 1}
+          }
+        ]
+      };
+      mockSpinner.mockResolvedValue(reportResponse);
+
+      await ewHandler.getReport(8, '2026-02-25T00:00:00Z', '2026-02-25T20:00:00Z', '1234', [], [], false, [], [], 'STAGING');
+
+      expect(console.table).not.toHaveBeenCalled();
+      expect(mockWriteJSONOutput).toHaveBeenCalledWith(
+        0,
+        'Printing Customers from 2026-02-25T00:00:00Z to 2026-02-25T20:00:00Z',
+        [
+          [
+            {
+              'Customer Name (VCDs)': 'IPQA Akamai Alta-WAA (1234)',
+              'Success Count': '5',
+              'Error Count': '0',
+              'Error Rate': '0.00 %',
+              'COE Applied': '0',
+              'COE Not Applied': '0',
+              'Sub-request Count': '1'
+            }
+          ],
+          [
+            {
+              'Customer Name (VCDs)': 'IPQA Akamai Alta-WAA (1234)',
+              'Avg CPU Time': '10.00 ms',
+              'Max CPU Time': '12.00 ms',
+              'Avg Init Time': '2.00 ms',
+              'Max Init Time': '3.00 ms',
+              'Avg Mem Usage': '2.00 KB',
+              'Max Mem Usage': '4.00 KB'
+            }
+          ]
+        ]
+      );
     });
   });
 
