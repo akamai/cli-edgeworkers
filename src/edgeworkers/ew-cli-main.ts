@@ -756,7 +756,7 @@ get
   .option('--network <network>', 'Filter by a specific network. Value can be `STAGING` or `PRODUCTION`.')
   .action(async function (reportId: number, edgeworkerId: string, options) {
     reportId = reportId || configUtils.searchProperty(REPORT_ID);
-    if (!reportId){
+    if (!reportId) {
       cliUtils.logAndExit(1, 'ERROR: Please specify a reportId. To obtain the available report ID run "akamai edgeworkers get reports".');
     }
 
