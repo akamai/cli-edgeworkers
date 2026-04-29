@@ -157,10 +157,14 @@ export function getContracts() {
     .catch((err) => error.handleError(err, 'GET_CONTRACT'));
 }
 
-export function getProperties(ewId: string, activeOnly: boolean) {
+export function getProperties(ewId: string, activeOnly: boolean, details: boolean) {
   let queryString = '';
   if (activeOnly !== undefined) {
     queryString = '?activeOnly=true';
+  }
+  if (details !== undefined) {
+    queryString += queryString === '' ? '?' : '&';
+    queryString += 'details=true';
   }
   return httpEdge
     .getJson(
@@ -189,6 +193,16 @@ export function getResourceTierForEwid(ewId: string) {
     )
     .then((r) => r.body)
     .catch((err) => error.handleError(err, 'GET_RESTR_FOR_EW'));
+}
+
+export function getActiveCustomers(ewId: string) {
+  return httpEdge
+    .getJson(
+      `${EDGEWORKERS_API_BASE}/ids/${ewId}/active-customers`,
+      cliUtils.getTimeout(DEFAULT_EW_TIMEOUT)
+    )
+    .then((r) => r.body)
+    .catch((err) => error.handleError(err, 'GET_ACT_CUST_FOR_EW'));
 }
 
 export function updateEdgeWorkerId(
@@ -613,19 +627,45 @@ export function getAvailableReports() {
 
 export function getReport(
   reportId: number,
-  ewid: string,
+  ewId: string,
   start: string,
   statuses: Array<string>,
   eventHandlers: Array<string>,
   end?: string,
+  continueOnErrorOnly?: boolean,
+  vcds?: Array<number>,
+  revisionIds?: Array<string>,
+  network?: string
 ) {
-  let queryString = `?start=${start}&edgeWorker=${ewid}`;
+  let queryString = `?start=${start}&edgeWorker=${ewId}`;
   if (end) queryString += `&end=${end}`;
+  if (continueOnErrorOnly) queryString += `&continueOnErrorOnly=${continueOnErrorOnly}`;
   for (const status of statuses) {
     queryString += `&status=${status}`;
   }
   for (const eventHandler of eventHandlers) {
     queryString += `&eventHandler=${eventHandler}`;
+  }
+  for (const vcd of vcds) {
+    queryString += `&vcd=${vcd}`;
+  }
+
+  if (revisionIds) {
+    if (revisionIds.length > 10) {
+      cliUtils.logAndExit(1, `ERROR: Invalid number of revision IDs (${revisionIds.length}). Allowed maximum is 10.`);
+    } else {
+      for (const revisionId of revisionIds) {
+        queryString += `&edgeWorkerRevision=${ewId}-${revisionId}`;
+      }
+    }
+  }
+  if (network) {
+    if (network !== 'STAGING' && network !== 'PRODUCTION') {
+      cliUtils.logAndExit(1, `ERROR: Invalid network "${network}". Allowed values are STAGING or PRODUCTION.`);
+    }
+    else {
+      queryString += `&network=${network}`;
+    }
   }
 
   return httpEdge
