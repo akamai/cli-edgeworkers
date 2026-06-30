@@ -16,6 +16,7 @@ describe('cli utils tests', () => {
   });
 
   describe('askYesNoQuestion', () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     let setRawModeMock, resumeMock, pauseMock, setEncodingMock, removeListenerMock, writeMock, exitMock;
 
     beforeEach(() => {
@@ -70,7 +71,7 @@ describe('cli utils tests', () => {
     });
 
     it('calls process.exit on Ctrl+C', async () => {
-      const promise = cliUtils.askYesNoQuestion('Continue?');
+      cliUtils.askYesNoQuestion('Continue?');
       expect(() => emitKey('\u0003')).toThrow('process.exit');
       // No need to await promise, as process.exit is called
     });

@@ -98,6 +98,7 @@ export function toJsonPretty(obj) {
 export function parseIfJSON(value) {
   try {
     return JSON.parse(value);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
     return value;
   }
@@ -109,6 +110,7 @@ export function isJSON(str) {
     const result = JSON.parse(str);
     const type = Object.prototype.toString.call(result);
     return type === '[object Object]' || type === '[object Array]';
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (err) {
     return false;
   }

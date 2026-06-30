@@ -5,6 +5,7 @@ export function handleError(err) {
 
     try {
         err = JSON.parse(err);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
         return {
             isError: true,
