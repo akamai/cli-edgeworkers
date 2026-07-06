@@ -1,0 +1,52 @@
+name: OSV Scanner
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'package-lock.json'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'package-lock.json'
+  schedule:
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  security-events: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install osv-scanner
+        run: |
+          curl -sSfL https://github.com/google/osv-scanner/releases/latest/download/osv-scanner_linux_amd64 \
+            -o /usr/local/bin/osv-scanner
+          chmod +x /usr/local/bin/osv-scanner
+      - name: Run osv-scanner
+        id: scan
+        run: osv-scanner scan --format sarif --output-file results.sarif --lockfile=package-lock.json
+        continue-on-error: true
+      - name: Upload SARIF to Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
+      - name: Comment on PR with results link
+        if: github.event_name == 'pull_request' && steps.scan.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.issue.number;
+            const url = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/security/code-scanning?query=is%3Aopen+ref%3Arefs%2Fpull%2F${pr}%2Fmerge+tool%3Aosv-scanner`;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr,
+              body: `### OSV Scanner found vulnerabilities\nView the results in the [Security tab](${url}).`
+            });

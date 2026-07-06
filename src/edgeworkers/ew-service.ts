@@ -43,7 +43,7 @@ function fetchTarball(
     edge.send(function (error, response, body) {
       if (!error && httpEdge.isOkStatus(response.status)) {
         const contentType = response.headers['content-type'];
-        if (contentType.indexOf('gzip') > -1) {
+        if (String(contentType).includes('gzip')) {
           const buffer = Buffer.from(response.data, 'utf8');
           fs.writeFileSync(downloadPath, buffer);
           resolve({state: true});
@@ -57,7 +57,7 @@ function fetchTarball(
           reject(errorObj.toString());
         } catch (ex) {
           console.error(
-            `Got error code: ${error.response.status} calling ${method} ${path}\n${body}`
+            `Got error code: ${error.response.status} calling ${method} ${path}\n${body}`, ex
           );
           reject(body);
         }

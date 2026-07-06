@@ -34,6 +34,7 @@ export class Config {
         fs.writeFileSync(this.path, '');
       }
       this.config = ini.parse(fs.readFileSync(this.path, 'utf8'));
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       // When fail to write or read the config file, treat it as an empty config file
       console.error(`File path not found: ${this.path}`);
