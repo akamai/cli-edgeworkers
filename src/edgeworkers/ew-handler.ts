@@ -7,8 +7,8 @@ import * as readline from 'readline-sync';
 import * as chrono from 'chrono-node';
 
 import CryptoJS from 'crypto-js';
-import {askYesNoQuestion} from "../utils/cli-utils";
-import {writeReportOutputToConsole} from "./report-builder";
+import {askYesNoQuestion} from '../utils/cli-utils';
+import {writeReportOutputToConsole} from './report-builder';
 const groupColumnsToKeep = ['groupId', 'groupName', 'capabilities'];
 const idColumnsToKeep = ['edgeWorkerId', 'name', 'groupId', 'resourceTierId', 'isPartner'];
 const clonedColumnsToKeep = [

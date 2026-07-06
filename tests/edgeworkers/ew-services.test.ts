@@ -53,6 +53,7 @@ describe('ew service tests', () => {
       const error = await ewService.getLimits();
 
       expect(getLimitsSpy).toHaveBeenCalled();
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(error).not.toBeUndefined;
       expect(error.isError).toEqual(true);
       expect(error.error_reason).toEqual(
@@ -98,6 +99,7 @@ describe('ew service tests', () => {
       const error = await ewService.getAvailableReports();
 
       expect(getAvailableReportsSpy).toHaveBeenCalled();
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(error).not.toBeUndefined;
       expect(error.isError).toEqual(true);
       expect(error.error_reason).toEqual(
@@ -355,6 +357,7 @@ describe('ew service tests', () => {
       const error = await ewService.getReport(reportId, ewId, start, [], [], end, false, []);
 
       expect(getReportSpy).toHaveBeenCalled();
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(error).not.toBeUndefined;
       expect(error.isError).toEqual(true);
       expect(error.error_reason).toEqual(
@@ -494,6 +497,7 @@ describe('ew service tests', () => {
       const error = await ewService.getActivations(ewId);
 
       expect(getActivationsSpy).toHaveBeenCalled();
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(error).not.toBeUndefined;
       expect(error.isError).toEqual(true);
       expect(error.error_reason).toEqual(
@@ -735,6 +739,7 @@ describe('ew service tests', () => {
       const error = await ewService.getLogLevel(ewId, loggingId);
 
       expect(getLogLevelSpy).toHaveBeenCalled();
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(error).not.toBeUndefined;
       expect(error.isError).toEqual(true);
       expect(error.error_reason).toEqual(
