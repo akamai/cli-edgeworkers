@@ -2,11 +2,11 @@ name: OSV Scanner
 
 on:
   push:
-    branches: [main]
+    branches: [master]
     paths:
       - 'package-lock.json'
   pull_request:
-    branches: [main]
+    branches: [master]
     paths:
       - 'package-lock.json'
   schedule:
