@@ -207,6 +207,48 @@ describe('ew handler tests', () => {
       console.table = jest.fn();
     });
 
+    it('should display wall time durations for report 1 when wall time data is present', async () => {
+      const reportResponse = {
+        isError: false,
+        reportId: 1,
+        name: 'Execution Summary',
+        start: '2025-09-19T20:54:57Z',
+        end: '2025-12-19T21:41:38Z',
+        data: {
+          memory: { avg: 18.5, min: 5, max: 120 },
+          successes: { total: 50 },
+          initDuration: { avg: 5.123, min: 4.5, max: 6.8 },
+          execDuration: { avg: 2.456, min: 1.2, max: 5.9 },
+          wallTimeInitDuration: { avg: 8.234, min: 7.1, max: 10.5 },
+          wallTimeExecDuration: { avg: 3.789, min: 2.3, max: 8.1 },
+          errors: { total: 5 },
+          invocations: { total: 55 }
+        }
+      };
+      mockSpinner.mockResolvedValue(reportResponse);
+
+      await ewHandler.getReport(1, '2025-09-19T20:54:57Z', '2025-12-19T21:41:38Z', '9999', [], [], false, [], [], 'STAGING');
+
+      expect(console.table).toHaveBeenCalledTimes(4);
+      expect(console.table).toHaveBeenNthCalledWith(1, {
+        successes: {total: 50},
+        errors: {total: 5},
+        invocations: {total: 55}
+      });
+      expect(console.table).toHaveBeenNthCalledWith(2, {
+        initDuration: {avg: '5.1230', min: '4.5000', max: '6.8000'},
+        execDuration: {avg: '2.4560', min: '1.2000', max: '5.9000'}
+      });
+      expect(console.table).toHaveBeenNthCalledWith(3, {
+        wallTimeInitDuration: {avg: '8.2340', min: '7.1000', max: '10.5000'},
+        wallTimeExecDuration: {avg: '3.7890', min: '2.3000', max: '8.1000'}
+      });
+      expect(console.table).toHaveBeenNthCalledWith(4, {
+        memory: {avg: '18.5000', min: '5.0000', max: '120.0000'}
+      });
+      expect(mockLogAndExit).not.toHaveBeenCalled();
+    });
+
     it('should print summary tables for report 1 when continueOnErrorOnly is false', async () => {
       const reportResponse = {
         isError: false,
@@ -234,7 +276,7 @@ describe('ew handler tests', () => {
       expect(mockLogWithBorder).toHaveBeenCalledWith(
         'Printing Execution Summary from 2025-09-19T20:54:57Z to 2025-12-19T21:41:38Z'
       );
-      expect(console.table).toHaveBeenCalledTimes(3);
+      expect(console.table).toHaveBeenCalledTimes(4);
       expect(console.table).toHaveBeenNthCalledWith(1, {
         successes: {total: 12},
         errors: {total: 13},
@@ -245,6 +287,10 @@ describe('ew handler tests', () => {
         execDuration: {avg: '0.5622', min: '0.3090', max: '1.2700'}
       });
       expect(console.table).toHaveBeenNthCalledWith(3, {
+        wallTimeInitDuration: {avg: 'N/A', min: 'N/A', max: 'N/A'},
+        wallTimeExecDuration: {avg: 'N/A', min: 'N/A', max: 'N/A'}
+      });
+      expect(console.table).toHaveBeenNthCalledWith(4, {
         memory: {avg: '24.9231', min: '6.0000', max: '241.0000'}
       });
       expect(mockLogAndExit).not.toHaveBeenCalled();
@@ -277,7 +323,7 @@ describe('ew handler tests', () => {
       expect(mockLogWithBorder).toHaveBeenCalledWith(
         'Printing Execution Summary from 2025-09-19T20:54:57Z to 2025-12-19T21:41:38Z'
       );
-      expect(console.table).toHaveBeenCalledTimes(4);
+      expect(console.table).toHaveBeenCalledTimes(5);
       expect(console.table).toHaveBeenNthCalledWith(1, {
         successes: {total: 13},
         invocations: {total: 13}
@@ -294,6 +340,10 @@ describe('ew handler tests', () => {
         execDuration: {avg: '0.5622', min: '0.3090', max: '1.2700'}
       });
       expect(console.table).toHaveBeenNthCalledWith(4, {
+        wallTimeInitDuration: {avg: 'N/A', min: 'N/A', max: 'N/A'},
+        wallTimeExecDuration: {avg: 'N/A', min: 'N/A', max: 'N/A'}
+      });
+      expect(console.table).toHaveBeenNthCalledWith(5, {
         memory: {avg: '24.9231', min: '6.0000', max: '241.0000'}
       });
       expect(mockLogAndExit).not.toHaveBeenCalled();
@@ -583,6 +633,939 @@ describe('ew handler tests', () => {
             }
           ]
         ]
+      );
+    });
+    
+    it('should display wall time execution data for report 9', async () => {
+      const reportResponse = {
+        reportId: 9,
+        name: 'Initialization and execution wall times with percentiles by EdgeWorker ID and event handler',
+        description: 'This report lists execution and initialization wall times with percentiles, grouped by EdgeWorker ID and event handler.',
+        start: '2026-06-01T20:36:08Z',
+        end: '2026-06-04T20:36:08Z',
+        data: [
+          {
+            edgeWorkerId: 54321,
+            data: {
+              init: [
+                {
+                  startDateTime: '2026-06-02T17:15:00Z',
+                  edgeWorkerVersion: 'pm-modify-v1.19',
+                  invocations: 1,
+                  wallTimeInitDuration: {
+                    avg: 0.149,
+                    min: 0.149,
+                    max: 0.149,
+                    twentyFivePercentile: 1.0,
+                    fiftyPercentile: 1.0,
+                    seventyFivePercentile: 1.0,
+                    ninetyFivePercentile: 1.0,
+                    ninetyNinePercentile: 1.0
+                  }
+                },
+                {
+                  startDateTime: '2026-06-03T17:25:00Z',
+                  edgeWorkerVersion: 'pm-modify-v1.19',
+                  invocations: 1,
+                  wallTimeInitDuration: {
+                    avg: 0.134,
+                    min: 0.134,
+                    max: 0.134,
+                    twentyFivePercentile: 1.0,
+                    fiftyPercentile: 1.0,
+                    seventyFivePercentile: 1.0,
+                    ninetyFivePercentile: 1.0,
+                    ninetyNinePercentile: 1.0
+                  }
+                }
+              ],
+              onOriginRequest: [
+                {
+                  startDateTime: '2026-06-02T17:15:00Z',
+                  edgeWorkerVersion: 'pm-modify-v1.19',
+                  invocations: 6,
+                  wallTimeExecDuration: {
+                    avg: 0.10616666666666667,
+                    min: 0.069,
+                    max: 0.186,
+                    twentyFivePercentile: 0.05,
+                    fiftyPercentile: 0.05,
+                    seventyFivePercentile: 0.05,
+                    ninetyFivePercentile: 0.05,
+                    ninetyNinePercentile: 0.05
+                  }
+                },
+                {
+                  startDateTime: '2026-06-03T17:25:00Z',
+                  edgeWorkerVersion: 'pm-modify-v1.19',
+                  invocations: 6,
+                  wallTimeExecDuration: {
+                    avg: 0.08483333333333333,
+                    min: 0.056,
+                    max: 0.199,
+                    twentyFivePercentile: 0.05,
+                    fiftyPercentile: 0.05,
+                    seventyFivePercentile: 0.05,
+                    ninetyFivePercentile: 0.05,
+                    ninetyNinePercentile: 0.05
+                  }
+                }
+              ],
+              onClientResponse: [
+                {
+                  startDateTime: '2026-06-02T17:15:00Z',
+                  edgeWorkerVersion: 'pm-modify-v1.19',
+                  invocations: 6,
+                  wallTimeExecDuration: {
+                    avg: 0.13066666666666665,
+                    min: 0.106,
+                    max: 0.206,
+                    twentyFivePercentile: 0.05,
+                    fiftyPercentile: 0.05,
+                    seventyFivePercentile: 0.05,
+                    ninetyFivePercentile: 0.05,
+                    ninetyNinePercentile: 0.05
+                  }
+                },
+                {
+                  startDateTime: '2026-06-03T17:25:00Z',
+                  edgeWorkerVersion: 'pm-modify-v1.19',
+                  invocations: 6,
+                  wallTimeExecDuration: {
+                    avg: 0.1185,
+                    min: 0.096,
+                    max: 0.186,
+                    twentyFivePercentile: 0.05,
+                    fiftyPercentile: 0.05,
+                    seventyFivePercentile: 0.05,
+                    ninetyFivePercentile: 0.05,
+                    ninetyNinePercentile: 0.05
+                  }
+                }
+              ],
+              onOriginResponse: [
+                {
+                  startDateTime: '2026-06-02T17:15:00Z',
+                  edgeWorkerVersion: 'pm-modify-v1.19',
+                  invocations: 6,
+                  wallTimeExecDuration: {
+                    avg: 0.1035,
+                    min: 0.077,
+                    max: 0.171,
+                    twentyFivePercentile: 0.05,
+                    fiftyPercentile: 0.05,
+                    seventyFivePercentile: 0.05,
+                    ninetyFivePercentile: 0.05,
+                    ninetyNinePercentile: 0.05
+                  }
+                },
+                {
+                  startDateTime: '2026-06-03T17:25:00Z',
+                  edgeWorkerVersion: 'pm-modify-v1.19',
+                  invocations: 6,
+                  wallTimeExecDuration: {
+                    avg: 0.09816666666666667,
+                    min: 0.08,
+                    max: 0.168,
+                    twentyFivePercentile: 0.05,
+                    fiftyPercentile: 0.05,
+                    seventyFivePercentile: 0.05,
+                    ninetyFivePercentile: 0.05,
+                    ninetyNinePercentile: 0.05
+                  }
+                }
+              ],
+              onClientRequest: [
+                {
+                  startDateTime: '2026-06-02T17:15:00Z',
+                  edgeWorkerVersion: 'pm-modify-v1.19',
+                  invocations: 6,
+                  wallTimeExecDuration: {
+                    avg: 0.12483333333333332,
+                    min: 0.101,
+                    max: 0.162,
+                    twentyFivePercentile: 0.05,
+                    fiftyPercentile: 0.05,
+                    seventyFivePercentile: 0.05,
+                    ninetyFivePercentile: 0.05,
+                    ninetyNinePercentile: 0.05
+                  }
+                },
+                {
+                  startDateTime: '2026-06-03T17:25:00Z',
+                  edgeWorkerVersion: 'pm-modify-v1.19',
+                  invocations: 6,
+                  wallTimeExecDuration: {
+                    avg: 0.11733333333333333,
+                    min: 0.106,
+                    max: 0.158,
+                    twentyFivePercentile: 0.05,
+                    fiftyPercentile: 0.05,
+                    seventyFivePercentile: 0.05,
+                    ninetyFivePercentile: 0.05,
+                    ninetyNinePercentile: 0.05
+                  }
+                }
+              ]
+            },
+            summaryStatistics: {
+              init: {
+                twentyFivePercentile: 1.0,
+                fiftyPercentile: 1.0,
+                seventyFivePercentile: 1.0,
+                ninetyFivePercentile: 1.0,
+                ninetyNinePercentile: 1.0
+              },
+              responseProvider: {
+                twentyFivePercentile: 0.0,
+                fiftyPercentile: 0.0,
+                seventyFivePercentile: 0.0,
+                ninetyFivePercentile: 0.0,
+                ninetyNinePercentile: 0.0
+              },
+              onOriginRequest: {
+                twentyFivePercentile: 0.05,
+                fiftyPercentile: 0.05,
+                seventyFivePercentile: 0.05,
+                ninetyFivePercentile: 0.05,
+                ninetyNinePercentile: 0.05
+              },
+              onBotSegmentAvailable: {
+                twentyFivePercentile: 0.0,
+                fiftyPercentile: 0.0,
+                seventyFivePercentile: 0.0,
+                ninetyFivePercentile: 0.0,
+                ninetyNinePercentile: 0.0
+              },
+              onClientResponse: {
+                twentyFivePercentile: 0.05,
+                fiftyPercentile: 0.05,
+                seventyFivePercentile: 0.05,
+                ninetyFivePercentile: 0.05,
+                ninetyNinePercentile: 0.05
+              },
+              totalWallTime: {
+                twentyFivePercentile: 0.05,
+                fiftyPercentile: 0.05,
+                seventyFivePercentile: 0.05,
+                ninetyFivePercentile: 0.05,
+                ninetyNinePercentile: 0.05
+              },
+              onOriginResponse: {
+                twentyFivePercentile: 0.05,
+                fiftyPercentile: 0.05,
+                seventyFivePercentile: 0.05,
+                ninetyFivePercentile: 0.05,
+                ninetyNinePercentile: 0.05
+              },
+              onClientRequest: {
+                twentyFivePercentile: 0.05,
+                fiftyPercentile: 0.05,
+                seventyFivePercentile: 0.05,
+                ninetyFivePercentile: 0.05,
+                ninetyNinePercentile: 0.05
+              }
+            }
+          }
+        ],
+        summaryStatistics: {
+          init: {
+            twentyFivePercentile: 1.0,
+            fiftyPercentile: 1.0,
+            seventyFivePercentile: 1.0,
+            ninetyFivePercentile: 1.0,
+            ninetyNinePercentile: 1.0
+          },
+          responseProvider: {
+            twentyFivePercentile: 0.0,
+            fiftyPercentile: 0.0,
+            seventyFivePercentile: 0.0,
+            ninetyFivePercentile: 0.0,
+            ninetyNinePercentile: 0.0
+          },
+          onOriginRequest: {
+            twentyFivePercentile: 0.05,
+            fiftyPercentile: 0.05,
+            seventyFivePercentile: 0.05,
+            ninetyFivePercentile: 0.05,
+            ninetyNinePercentile: 0.05
+          },
+          onBotSegmentAvailable: {
+            twentyFivePercentile: 0.0,
+            fiftyPercentile: 0.0,
+            seventyFivePercentile: 0.0,
+            ninetyFivePercentile: 0.0,
+            ninetyNinePercentile: 0.0
+          },
+          onClientResponse: {
+            twentyFivePercentile: 0.05,
+            fiftyPercentile: 0.05,
+            seventyFivePercentile: 0.05,
+            ninetyFivePercentile: 0.05,
+            ninetyNinePercentile: 0.05
+          },
+          totalWallTime: {
+            twentyFivePercentile: 0.05,
+            fiftyPercentile: 0.05,
+            seventyFivePercentile: 0.05,
+            ninetyFivePercentile: 0.05,
+            ninetyNinePercentile: 0.05
+          },
+          onOriginResponse: {
+            twentyFivePercentile: 0.05,
+            fiftyPercentile: 0.05,
+            seventyFivePercentile: 0.05,
+            ninetyFivePercentile: 0.05,
+            ninetyNinePercentile: 0.05
+          },
+          onClientRequest: {
+            twentyFivePercentile: 0.05,
+            fiftyPercentile: 0.05,
+            seventyFivePercentile: 0.05,
+            ninetyFivePercentile: 0.05,
+            ninetyNinePercentile: 0.05
+          }
+        }
+      };
+      mockSpinner.mockResolvedValue(reportResponse);
+
+        await ewHandler.getReport(9, '2026-03-05T20:36:08Z', '2026-06-04T20:36:08Z', '54321', [], ['onOriginRequest', 'onClientResponse', 'onClientRequest'], false, [], [], 'STAGING');
+
+      expect(mockSpinner).toHaveBeenCalledWith(
+        undefined,
+        'Getting report...'
+      );
+      expect(mockLogWithBorder).toHaveBeenCalledWith(
+        'Printing Initialization and execution wall times with percentiles by EdgeWorker ID and event handler from 2026-06-01T20:36:08Z to 2026-06-04T20:36:08Z'
+      );
+      expect(console.table).toHaveBeenCalledTimes(1);
+      expect(console.table).toHaveBeenCalledWith({
+        onOriginRequest: { avg: '0.0955', min: '0.06', max: '0.20' },
+        onClientResponse: { avg: '0.1246', min: '0.10', max: '0.21' },
+        onClientRequest: { avg: '0.1211', min: '0.10', max: '0.16' },
+        init: { avg: '0.1415', min: '0.13', max: '0.15' }
+      });
+      expect(mockLogAndExit).not.toHaveBeenCalled();
+    });
+
+    it('should handle multiple EdgeWorker data entries for report 9', async () => {
+      const reportResponse = {
+        reportId: 9,
+        name: 'Initialization and execution wall times with percentiles by EdgeWorker ID and event handler',
+        description: 'This report lists execution and initialization wall times with percentiles, grouped by EdgeWorker ID and event handler.',
+        start: '2026-06-01T20:36:08Z',
+        end: '2026-06-04T20:36:08Z',
+        data: [
+          {
+            edgeWorkerId: 89456,
+            data: {
+              init: [
+                {
+                  startDateTime: '2026-06-02T17:15:00Z',
+                  edgeWorkerVersion: 'pm-modify-v1.19',
+                  invocations: 1,
+                  wallTimeInitDuration: {
+                    avg: 0.149,
+                    min: 0.149,
+                    max: 0.149,
+                    twentyFivePercentile: 1.0,
+                    fiftyPercentile: 1.0,
+                    seventyFivePercentile: 1.0,
+                    ninetyFivePercentile: 1.0,
+                    ninetyNinePercentile: 1.0
+                  }
+                },
+                {
+                  startDateTime: '2026-06-03T17:25:00Z',
+                  edgeWorkerVersion: 'pm-modify-v1.19',
+                  invocations: 1,
+                  wallTimeInitDuration: {
+                    avg: 0.134,
+                    min: 0.134,
+                    max: 0.134,
+                    twentyFivePercentile: 1.0,
+                    fiftyPercentile: 1.0,
+                    seventyFivePercentile: 1.0,
+                    ninetyFivePercentile: 1.0,
+                    ninetyNinePercentile: 1.0
+                  }
+                }
+              ],
+              onOriginRequest: [
+                {
+                  startDateTime: '2026-06-02T17:15:00Z',
+                  edgeWorkerVersion: 'pm-modify-v1.19',
+                  invocations: 6,
+                  wallTimeExecDuration: {
+                    avg: 0.10616666666666667,
+                    min: 0.069,
+                    max: 0.186,
+                    twentyFivePercentile: 0.05,
+                    fiftyPercentile: 0.05,
+                    seventyFivePercentile: 0.05,
+                    ninetyFivePercentile: 0.05,
+                    ninetyNinePercentile: 0.05
+                  }
+                },
+                {
+                  startDateTime: '2026-06-03T17:25:00Z',
+                  edgeWorkerVersion: 'pm-modify-v1.19',
+                  invocations: 6,
+                  wallTimeExecDuration: {
+                    avg: 0.08483333333333333,
+                    min: 0.056,
+                    max: 0.199,
+                    twentyFivePercentile: 0.05,
+                    fiftyPercentile: 0.05,
+                    seventyFivePercentile: 0.05,
+                    ninetyFivePercentile: 0.05,
+                    ninetyNinePercentile: 0.05
+                  }
+                }
+              ],
+              onClientResponse: [
+                {
+                  startDateTime: '2026-06-02T17:15:00Z',
+                  edgeWorkerVersion: 'pm-modify-v1.19',
+                  invocations: 6,
+                  wallTimeExecDuration: {
+                    avg: 0.13066666666666665,
+                    min: 0.106,
+                    max: 0.206,
+                    twentyFivePercentile: 0.05,
+                    fiftyPercentile: 0.05,
+                    seventyFivePercentile: 0.05,
+                    ninetyFivePercentile: 0.05,
+                    ninetyNinePercentile: 0.05
+                  }
+                },
+                {
+                  startDateTime: '2026-06-03T17:25:00Z',
+                  edgeWorkerVersion: 'pm-modify-v1.19',
+                  invocations: 6,
+                  wallTimeExecDuration: {
+                    avg: 0.1185,
+                    min: 0.096,
+                    max: 0.186,
+                    twentyFivePercentile: 0.05,
+                    fiftyPercentile: 0.05,
+                    seventyFivePercentile: 0.05,
+                    ninetyFivePercentile: 0.05,
+                    ninetyNinePercentile: 0.05
+                  }
+                }
+              ],
+              onOriginResponse: [
+                {
+                  startDateTime: '2026-06-02T17:15:00Z',
+                  edgeWorkerVersion: 'pm-modify-v1.19',
+                  invocations: 6,
+                  wallTimeExecDuration: {
+                    avg: 0.1035,
+                    min: 0.077,
+                    max: 0.171,
+                    twentyFivePercentile: 0.05,
+                    fiftyPercentile: 0.05,
+                    seventyFivePercentile: 0.05,
+                    ninetyFivePercentile: 0.05,
+                    ninetyNinePercentile: 0.05
+                  }
+                },
+                {
+                  startDateTime: '2026-06-03T17:25:00Z',
+                  edgeWorkerVersion: 'pm-modify-v1.19',
+                  invocations: 6,
+                  wallTimeExecDuration: {
+                    avg: 0.09816666666666667,
+                    min: 0.08,
+                    max: 0.168,
+                    twentyFivePercentile: 0.05,
+                    fiftyPercentile: 0.05,
+                    seventyFivePercentile: 0.05,
+                    ninetyFivePercentile: 0.05,
+                    ninetyNinePercentile: 0.05
+                  }
+                }
+              ],
+              onClientRequest: [
+                {
+                  startDateTime: '2026-06-02T17:15:00Z',
+                  edgeWorkerVersion: 'pm-modify-v1.19',
+                  invocations: 6,
+                  wallTimeExecDuration: {
+                    avg: 0.12483333333333332,
+                    min: 0.101,
+                    max: 0.162,
+                    twentyFivePercentile: 0.05,
+                    fiftyPercentile: 0.05,
+                    seventyFivePercentile: 0.05,
+                    ninetyFivePercentile: 0.05,
+                    ninetyNinePercentile: 0.05
+                  }
+                },
+                {
+                  startDateTime: '2026-06-03T17:25:00Z',
+                  edgeWorkerVersion: 'pm-modify-v1.19',
+                  invocations: 6,
+                  wallTimeExecDuration: {
+                    avg: 0.11733333333333333,
+                    min: 0.106,
+                    max: 0.158,
+                    twentyFivePercentile: 0.05,
+                    fiftyPercentile: 0.05,
+                    seventyFivePercentile: 0.05,
+                    ninetyFivePercentile: 0.05,
+                    ninetyNinePercentile: 0.05
+                  }
+                }
+              ]
+            },
+            summaryStatistics: {
+              init: {
+                twentyFivePercentile: 1.0,
+                fiftyPercentile: 1.0,
+                seventyFivePercentile: 1.0,
+                ninetyFivePercentile: 1.0,
+                ninetyNinePercentile: 1.0
+              },
+              responseProvider: {
+                twentyFivePercentile: 0.0,
+                fiftyPercentile: 0.0,
+                seventyFivePercentile: 0.0,
+                ninetyFivePercentile: 0.0,
+                ninetyNinePercentile: 0.0
+              },
+              onOriginRequest: {
+                twentyFivePercentile: 0.05,
+                fiftyPercentile: 0.05,
+                seventyFivePercentile: 0.05,
+                ninetyFivePercentile: 0.05,
+                ninetyNinePercentile: 0.05
+              },
+              onBotSegmentAvailable: {
+                twentyFivePercentile: 0.0,
+                fiftyPercentile: 0.0,
+                seventyFivePercentile: 0.0,
+                ninetyFivePercentile: 0.0,
+                ninetyNinePercentile: 0.0
+              },
+              onClientResponse: {
+                twentyFivePercentile: 0.05,
+                fiftyPercentile: 0.05,
+                seventyFivePercentile: 0.05,
+                ninetyFivePercentile: 0.05,
+                ninetyNinePercentile: 0.05
+              },
+              totalWallTime: {
+                twentyFivePercentile: 0.05,
+                fiftyPercentile: 0.05,
+                seventyFivePercentile: 0.05,
+                ninetyFivePercentile: 0.05,
+                ninetyNinePercentile: 0.05
+              },
+              onOriginResponse: {
+                twentyFivePercentile: 0.05,
+                fiftyPercentile: 0.05,
+                seventyFivePercentile: 0.05,
+                ninetyFivePercentile: 0.05,
+                ninetyNinePercentile: 0.05
+              },
+              onClientRequest: {
+                twentyFivePercentile: 0.05,
+                fiftyPercentile: 0.05,
+                seventyFivePercentile: 0.05,
+                ninetyFivePercentile: 0.05,
+                ninetyNinePercentile: 0.05
+              }
+            }
+          }
+        ],
+        summaryStatistics: {
+          init: {
+            twentyFivePercentile: 1.0,
+            fiftyPercentile: 1.0,
+            seventyFivePercentile: 1.0,
+            ninetyFivePercentile: 1.0,
+            ninetyNinePercentile: 1.0
+          },
+          responseProvider: {
+            twentyFivePercentile: 0.0,
+            fiftyPercentile: 0.0,
+            seventyFivePercentile: 0.0,
+            ninetyFivePercentile: 0.0,
+            ninetyNinePercentile: 0.0
+          },
+          onOriginRequest: {
+            twentyFivePercentile: 0.05,
+            fiftyPercentile: 0.05,
+            seventyFivePercentile: 0.05,
+            ninetyFivePercentile: 0.05,
+            ninetyNinePercentile: 0.05
+          },
+          onBotSegmentAvailable: {
+            twentyFivePercentile: 0.0,
+            fiftyPercentile: 0.0,
+            seventyFivePercentile: 0.0,
+            ninetyFivePercentile: 0.0,
+            ninetyNinePercentile: 0.0
+          },
+          onClientResponse: {
+            twentyFivePercentile: 0.05,
+            fiftyPercentile: 0.05,
+            seventyFivePercentile: 0.05,
+            ninetyFivePercentile: 0.05,
+            ninetyNinePercentile: 0.05
+          },
+          totalWallTime: {
+            twentyFivePercentile: 0.05,
+            fiftyPercentile: 0.05,
+            seventyFivePercentile: 0.05,
+            ninetyFivePercentile: 0.05,
+            ninetyNinePercentile: 0.05
+          },
+          onOriginResponse: {
+            twentyFivePercentile: 0.05,
+            fiftyPercentile: 0.05,
+            seventyFivePercentile: 0.05,
+            ninetyFivePercentile: 0.05,
+            ninetyNinePercentile: 0.05
+          },
+          onClientRequest: {
+            twentyFivePercentile: 0.05,
+            fiftyPercentile: 0.05,
+            seventyFivePercentile: 0.05,
+            ninetyFivePercentile: 0.05,
+            ninetyNinePercentile: 0.05
+          }
+        }
+      };
+      mockSpinner.mockResolvedValue(reportResponse);
+
+        await ewHandler.getReport(9, '2026-06-01T20:36:08Z', '2026-06-04T20:36:08Z', '89456', [], ['onOriginRequest', 'onClientResponse', 'onClientRequest'], false, [], [], 'STAGING');
+
+      expect(mockSpinner).toHaveBeenCalledWith(
+        undefined,
+        'Getting report...'
+      );
+      expect(mockLogWithBorder).toHaveBeenCalledWith(
+        'Printing Initialization and execution wall times with percentiles by EdgeWorker ID and event handler from 2026-06-01T20:36:08Z to 2026-06-04T20:36:08Z'
+      );
+      expect(console.table).toHaveBeenCalledTimes(1);
+      expect(console.table).toHaveBeenCalledWith({
+        onOriginRequest: { avg: '0.0955', min: '0.06', max: '0.20' },
+        onClientResponse: { avg: '0.1246', min: '0.10', max: '0.21' },
+        onClientRequest: { avg: '0.1211', min: '0.10', max: '0.16' },
+        init: { avg: '0.1415', min: '0.13', max: '0.15' }
+      });
+      expect(mockLogAndExit).not.toHaveBeenCalled();
+    });
+
+    it('should write report 9 output as JSON when JSON mode is enabled', async () => {
+      mockIsJSONOutputMode.mockReturnValue(true);
+      const reportResponse = {
+        reportId: 9,
+        name: 'Initialization and execution wall times with percentiles by EdgeWorker ID and event handler',
+        description: 'This report lists execution and initialization wall times with percentiles, grouped by EdgeWorker ID and event handler.',
+        start: '2026-05-20T07:30:00Z',
+        end: '2026-05-20T10:40:00Z',
+        data: [
+          {
+            edgeWorkerId: 67113,
+            data: {
+              init: [
+                {
+                  startDateTime: '2026-05-20T07:30:00Z',
+                  edgeWorkerVersion: 'cache-control-v2.5',
+                  invocations: 1,
+                  wallTimeInitDuration: {
+                    avg: 0.218,
+                    min: 0.218,
+                    max: 0.218,
+                    twentyFivePercentile: 1.0,
+                    fiftyPercentile: 1.0,
+                    seventyFivePercentile: 1.0,
+                    ninetyFivePercentile: 1.0,
+                    ninetyNinePercentile: 1.0
+                  }
+                },
+                {
+                  startDateTime: '2026-05-20T10:40:00Z',
+                  edgeWorkerVersion: 'cache-control-v2.5',
+                  invocations: 1,
+                  wallTimeInitDuration: {
+                    avg: 0.138,
+                    min: 0.138,
+                    max: 0.138,
+                    twentyFivePercentile: 1.0,
+                    fiftyPercentile: 1.0,
+                    seventyFivePercentile: 1.0,
+                    ninetyFivePercentile: 1.0,
+                    ninetyNinePercentile: 1.0
+                  }
+                }
+              ],
+              onOriginRequest: [
+                {
+                  startDateTime: '2026-05-20T07:30:00Z',
+                  edgeWorkerVersion: 'cache-control-v2.5',
+                  invocations: 6,
+                  wallTimeExecDuration: {
+                    avg: 0.097,
+                    min: 0.069,
+                    max: 0.167,
+                    twentyFivePercentile: 0.05,
+                    fiftyPercentile: 0.05,
+                    seventyFivePercentile: 0.05,
+                    ninetyFivePercentile: 0.05,
+                    ninetyNinePercentile: 0.05
+                  }
+                },
+                {
+                  startDateTime: '2026-05-20T10:40:00Z',
+                  edgeWorkerVersion: 'cache-control-v2.5',
+                  invocations: 6,
+                  wallTimeExecDuration: {
+                    avg: 0.09933333333333333,
+                    min: 0.058,
+                    max: 0.221,
+                    twentyFivePercentile: 0.05,
+                    fiftyPercentile: 0.05,
+                    seventyFivePercentile: 0.05,
+                    ninetyFivePercentile: 0.05,
+                    ninetyNinePercentile: 0.05
+                  }
+                }
+              ],
+              onClientResponse: [
+                {
+                  startDateTime: '2026-05-20T07:30:00Z',
+                  edgeWorkerVersion: 'cache-control-v2.5',
+                  invocations: 6,
+                  wallTimeExecDuration: {
+                    avg: 0.16566666666666666,
+                    min: 0.12,
+                    max: 0.234,
+                    twentyFivePercentile: 0.05,
+                    fiftyPercentile: 0.05,
+                    seventyFivePercentile: 0.05,
+                    ninetyFivePercentile: 0.05,
+                    ninetyNinePercentile: 0.05
+                  }
+                },
+                {
+                  startDateTime: '2026-05-20T10:40:00Z',
+                  edgeWorkerVersion: 'cache-control-v2.5',
+                  invocations: 6,
+                  wallTimeExecDuration: {
+                    avg: 0.14283333333333334,
+                    min: 0.097,
+                    max: 0.254,
+                    twentyFivePercentile: 0.05,
+                    fiftyPercentile: 0.05,
+                    seventyFivePercentile: 0.05,
+                    ninetyFivePercentile: 0.05,
+                    ninetyNinePercentile: 0.05
+                  }
+                }
+               ],
+               onClientRequest: [
+                 {
+                   startDateTime: '2026-05-20T07:30:00Z',
+                   edgeWorkerVersion: 'cache-control-v2.5',
+                   invocations: 6,
+                   wallTimeExecDuration: {
+                     avg: 0.3601666666666667,
+                     min: 0.149,
+                     max: 1.225,
+                     twentyFivePercentile: 0.05,
+                     fiftyPercentile: 0.05,
+                     seventyFivePercentile: 0.05,
+                     ninetyFivePercentile: 0.09,
+                     ninetyNinePercentile: 0.1
+                   }
+                 },
+                 {
+                   startDateTime: '2026-05-20T10:40:00Z',
+                   edgeWorkerVersion: 'cache-control-v2.5',
+                   invocations: 6,
+                   wallTimeExecDuration: {
+                     avg: 0.12433333333333332,
+                     min: 0.101,
+                     max: 0.192,
+                     twentyFivePercentile: 0.05,
+                     fiftyPercentile: 0.05,
+                     seventyFivePercentile: 0.05,
+                     ninetyFivePercentile: 0.05,
+                     ninetyNinePercentile: 0.05
+                   }
+                 }
+               ],
+               onOriginResponse: [
+                 {
+                   startDateTime: '2026-05-20T07:30:00Z',
+                   edgeWorkerVersion: 'cache-control-v2.5',
+                   invocations: 6,
+                   wallTimeExecDuration: {
+                     avg: 0.1035,
+                     min: 0.077,
+                     max: 0.171,
+                     twentyFivePercentile: 0.05,
+                     fiftyPercentile: 0.05,
+                     seventyFivePercentile: 0.05,
+                     ninetyFivePercentile: 0.05,
+                     ninetyNinePercentile: 0.05
+                   }
+                 },
+                 {
+                   startDateTime: '2026-05-20T10:40:00Z',
+                   edgeWorkerVersion: 'cache-control-v2.5',
+                   invocations: 6,
+                   wallTimeExecDuration: {
+                     avg: 0.09816666666666667,
+                     min: 0.08,
+                     max: 0.168,
+                     twentyFivePercentile: 0.05,
+                     fiftyPercentile: 0.05,
+                     seventyFivePercentile: 0.05,
+                     ninetyFivePercentile: 0.05,
+                     ninetyNinePercentile: 0.05
+                   }
+                 }
+               ]
+             },
+             summaryStatistics: {
+               init: {
+                 twentyFivePercentile: 1.0,
+                 fiftyPercentile: 1.0,
+                 seventyFivePercentile: 1.0,
+                 ninetyFivePercentile: 1.0,
+                 ninetyNinePercentile: 1.0
+               },
+               responseProvider: {
+                 twentyFivePercentile: 0.0,
+                 fiftyPercentile: 0.0,
+                 seventyFivePercentile: 0.0,
+                 ninetyFivePercentile: 0.0,
+                 ninetyNinePercentile: 0.0
+               },
+               onOriginRequest: {
+                 twentyFivePercentile: 0.05,
+                 fiftyPercentile: 0.05,
+                 seventyFivePercentile: 0.05,
+                 ninetyFivePercentile: 0.05,
+                 ninetyNinePercentile: 0.05
+               },
+               onBotSegmentAvailable: {
+                 twentyFivePercentile: 0.0,
+                 fiftyPercentile: 0.0,
+                 seventyFivePercentile: 0.0,
+                 ninetyFivePercentile: 0.0,
+                 ninetyNinePercentile: 0.0
+               },
+               onClientResponse: {
+                 twentyFivePercentile: 0.05,
+                 fiftyPercentile: 0.05,
+                 seventyFivePercentile: 0.05,
+                 ninetyFivePercentile: 0.05,
+                 ninetyNinePercentile: 0.05
+               },
+               totalWallTime: {
+                 twentyFivePercentile: 0.05,
+                 fiftyPercentile: 0.05,
+                 seventyFivePercentile: 0.05,
+                 ninetyFivePercentile: 0.05,
+                 ninetyNinePercentile: 0.05
+               },
+               onOriginResponse: {
+                 twentyFivePercentile: 0.05,
+                 fiftyPercentile: 0.05,
+                 seventyFivePercentile: 0.05,
+                 ninetyFivePercentile: 0.05,
+                 ninetyNinePercentile: 0.05
+               },
+               onClientRequest: {
+                 twentyFivePercentile: 0.05,
+                 fiftyPercentile: 0.05,
+                 seventyFivePercentile: 0.05,
+                 ninetyFivePercentile: 0.05,
+                 ninetyNinePercentile: 0.05
+               }
+             }
+           }
+         ],
+         summaryStatistics: {
+           init: {
+             twentyFivePercentile: 1.0,
+             fiftyPercentile: 1.0,
+             seventyFivePercentile: 1.0,
+             ninetyFivePercentile: 1.0,
+             ninetyNinePercentile: 1.0
+           },
+           responseProvider: {
+             twentyFivePercentile: 0.0,
+             fiftyPercentile: 0.0,
+             seventyFivePercentile: 0.0,
+             ninetyFivePercentile: 0.0,
+             ninetyNinePercentile: 0.0
+           },
+           onOriginRequest: {
+             twentyFivePercentile: 0.05,
+             fiftyPercentile: 0.05,
+             seventyFivePercentile: 0.05,
+             ninetyFivePercentile: 0.05,
+             ninetyNinePercentile: 0.05
+           },
+           onBotSegmentAvailable: {
+             twentyFivePercentile: 0.0,
+             fiftyPercentile: 0.0,
+             seventyFivePercentile: 0.0,
+             ninetyFivePercentile: 0.0,
+             ninetyNinePercentile: 0.0
+           },
+           onClientResponse: {
+             twentyFivePercentile: 0.05,
+             fiftyPercentile: 0.05,
+             seventyFivePercentile: 0.05,
+             ninetyFivePercentile: 0.05,
+             ninetyNinePercentile: 0.05
+           },
+           totalWallTime: {
+             twentyFivePercentile: 0.05,
+             fiftyPercentile: 0.05,
+             seventyFivePercentile: 0.05,
+             ninetyFivePercentile: 0.05,
+             ninetyNinePercentile: 0.05
+           },
+           onOriginResponse: {
+             twentyFivePercentile: 0.05,
+             fiftyPercentile: 0.05,
+             seventyFivePercentile: 0.05,
+             ninetyFivePercentile: 0.05,
+             ninetyNinePercentile: 0.05
+           },
+           onClientRequest: {
+             twentyFivePercentile: 0.05,
+             fiftyPercentile: 0.05,
+             seventyFivePercentile: 0.05,
+             ninetyFivePercentile: 0.05,
+             ninetyNinePercentile: 0.05
+           }
+         }
+      };
+      mockSpinner.mockResolvedValue(reportResponse);
+
+      await ewHandler.getReport(9, '2026-05-20T07:30:00Z', '2026-05-20T10:40:00Z', '67113', [], ['onOriginRequest', 'onClientRequest', 'onClientResponse'], false, [], [], 'STAGING');
+
+      expect(console.table).not.toHaveBeenCalled();
+      expect(mockWriteJSONOutput).toHaveBeenCalledWith(
+        0,
+        'Printing Initialization and execution wall times with percentiles by EdgeWorker ID and event handler from 2026-05-20T07:30:00Z to 2026-05-20T10:40:00Z',
+        {
+          onOriginRequest: { avg: '0.0982', min: '0.06', max: '0.22' },
+          onClientRequest: { avg: '0.2422', min: '0.10', max: '1.23' },
+          onClientResponse: { avg: '0.1542', min: '0.10', max: '0.25' },
+          init: { avg: '0.1780', min: '0.14', max: '0.22' }
+        }
       );
     });
   });
