@@ -1592,4 +1592,95 @@ describe('ew handler tests', () => {
       await expect(ewHandler.getActiveCustomersForEwId('bad-id')).rejects.toThrow('API error');
     });
   });
+
+  describe('getAvailableReports', () => {
+    const mockSpinner = cliUtils.spinner as jest.Mock;
+    const mockLogWithBorder = cliUtils.logWithBorder as jest.Mock;
+    const mockLogAndExit = cliUtils.logAndExit as jest.Mock;
+    const mockIsJSONOutputMode = ewJsonOutput.ewJsonOutput.isJSONOutputMode as jest.Mock;
+    const mockWriteJSONOutput = ewJsonOutput.ewJsonOutput.writeJSONOutput as jest.Mock;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockIsJSONOutputMode.mockReturnValue(false);
+      console.table = jest.fn();
+    });
+
+    it('should filter out unavailable reports', async () => {
+      const mockReports = {
+        reports: [
+          {reportId: 1, name: 'Report 1'},
+          {reportId: 2, name: 'Report 2'},
+          {reportId: 4, name: 'Memory usage by EdgeWorker ID and event handler', description: 'Report ID 4 is deprecated. Use report ID 6 for memory usage.', unavailable: true},
+          {reportId: 6, name: 'Memory usage report'}
+        ]
+      };
+      mockSpinner.mockResolvedValue(mockReports);
+
+      await ewHandler.getAvailableReports();
+
+      expect(mockSpinner).toHaveBeenCalledWith(
+        undefined,
+        'Getting list of available reports...'
+      );
+      expect(mockLogWithBorder).toHaveBeenCalledWith('The following reports are available:');
+      expect(console.table).toHaveBeenCalledWith([
+        {ReportId: 1, ReportType: 'Report 1'},
+        {ReportId: 2, ReportType: 'Report 2'},
+        {ReportId: 6, ReportType: 'Memory usage report'}
+      ]);
+    });
+
+    it('should display all reports when none are unavailable', async () => {
+      const mockReports = {
+        reports: [
+          {reportId: 1, name: 'Report 1'},
+          {reportId: 2, name: 'Report 2'}
+        ]
+      };
+      mockSpinner.mockResolvedValue(mockReports);
+
+      await ewHandler.getAvailableReports();
+
+      expect(console.table).toHaveBeenCalledWith([
+        {ReportId: 1, ReportType: 'Report 1'},
+        {ReportId: 2, ReportType: 'Report 2'}
+      ]);
+    });
+
+    it('should output filtered reports in JSON mode', async () => {
+      mockIsJSONOutputMode.mockReturnValue(true);
+      const mockReports = {
+        reports: [
+          {reportId: 1, name: 'Report 1'},
+          {reportId: 4, name: 'Deprecated report', unavailable: true},
+          {reportId: 6, name: 'Report 6'}
+        ]
+      };
+      mockSpinner.mockResolvedValue(mockReports);
+
+      await ewHandler.getAvailableReports();
+
+      expect(mockWriteJSONOutput).toHaveBeenCalledWith(
+        0,
+        'The following reports are available:',
+        [
+          {ReportId: 1, ReportType: 'Report 1'},
+          {ReportId: 6, ReportType: 'Report 6'}
+        ]
+      );
+    });
+
+    it('should handle errors properly', async () => {
+      const mockError = {
+        isError: true,
+        error_reason: 'Unable to fetch reports'
+      };
+      mockSpinner.mockResolvedValue(mockError);
+
+      await ewHandler.getAvailableReports();
+
+      expect(mockLogAndExit).toHaveBeenCalledWith(1, 'Unable to fetch reports');
+    });
+  });
 });
