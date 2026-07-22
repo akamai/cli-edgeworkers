@@ -1664,6 +1664,11 @@ export async function getReport(
     'Getting report...'
   );
 
+  if (report && report.unavailable) {
+    cliUtils.logAndExit(0, 'INFO: This report is currently unavailable.');
+    return;
+  }
+
   const EVENT_HANDLERS = ['onClientRequest', 'onOriginRequest', 'onOriginResponse', 'onClientResponse', 'onBotSegmentAvailable', 'responseProvider'];
   let executionEventHandlers: Array<string>;
   if (eventHandlers.length === 0) {
