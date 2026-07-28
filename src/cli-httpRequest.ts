@@ -10,7 +10,6 @@ import { EDGEKV_API_BASE } from './edgekv/ekv-service';
 
 export let accountKey = null;
 export let ideExtensionType = null;
-export const timeoutVal = 120000;
 const versionHeader = 'X-AK-EDGEKV-CLI-VER';
 const ekvcliHeader = 'X-AK-EDGEKV-CLI';
 import * as pjson from '../package.json';
@@ -33,7 +32,7 @@ export function sendEdgeRequest(
   headers,
   timeout: number,
   metricType?: string,
-  requestConfig? : Record<string, unknown> 
+  requestConfig? : Record<string, unknown>
 ) {
   const edge = envUtils.getEdgeGrid();
 
@@ -105,7 +104,7 @@ export function sendEdgeRequest(
             }
 
             console.error(
-              `Got error code: ${error.response.status} calling ${method} ${path}\n${body}`
+              `Got error code: ${error.response.status} calling ${method} ${path}\n${body}`, ex
             );
             reject(body);
           }
@@ -170,7 +169,7 @@ export function getJson(
 export function deleteReq(path: string,
   timeout: number,
   metricType?: string,
-  requestConfig? : Record<string, unknown> 
+  requestConfig? : Record<string, unknown>
   ) {
   return sendEdgeRequest(path, 'DELETE', '', {}, timeout, metricType, requestConfig);
 }

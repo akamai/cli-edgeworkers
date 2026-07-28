@@ -90,6 +90,7 @@ describe('ekv-services tests', () => {
 
       expect(nsListSpy).toHaveBeenCalled();
       // Check the details of error object
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(error).not.toBeUndefined;
       expect(error.isError).toEqual(true);
       expect(error.status).toEqual(mockError.status);
@@ -136,6 +137,7 @@ describe('ekv-services tests', () => {
 
       expect(groupsListSpy).toHaveBeenCalled();
       // Check the details of error object
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(error).not.toBeUndefined;
       expect(error.isError).toEqual(true);
       expect(error.status).toEqual(mockError.status);
@@ -210,6 +212,7 @@ describe('ekv-services tests', () => {
 
       expect(createNsSpy).toHaveBeenCalled();
       // Check the details of error object
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(error).not.toBeUndefined;
       expect(error.isError).toEqual(true);
       expect(error.status).toEqual(mockError.status);
@@ -257,6 +260,7 @@ describe('ekv-services tests', () => {
 
       expect(getNsSpy).toHaveBeenCalled();
       // Check the details of error object
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(error).not.toBeUndefined;
       expect(error.isError).toEqual(true);
       expect(error.status).toEqual(mockError.status);
@@ -325,6 +329,7 @@ describe('ekv-services tests', () => {
 
       expect(updateNsSpy).toHaveBeenCalled();
       // Check the details of error object
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(error).not.toBeUndefined;
       expect(error.isError).toEqual(true);
       expect(error.status).toEqual(mockError.status);
@@ -380,6 +385,7 @@ describe('ekv-services tests', () => {
 
       expect(initializeSpy).toHaveBeenCalled();
       // Check the details of error object
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(error).not.toBeUndefined;
       expect(error.isError).toEqual(true);
       expect(error.status).toEqual(mockError.status);
@@ -427,6 +433,7 @@ describe('ekv-services tests', () => {
 
       expect(initializeSpy).toHaveBeenCalled();
       // Check the details of error object
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(error).not.toBeUndefined;
       expect(error.isError).toEqual(true);
       expect(error.status).toEqual(mockError.status);
@@ -484,6 +491,7 @@ describe('ekv-services tests', () => {
 
       expect(updateDatabaseSpy).toHaveBeenCalled();
       // Check the details of error object
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(error).not.toBeUndefined;
       expect(error.isError).toEqual(true);
       expect(error.status).toEqual(mockError.status);
@@ -628,6 +636,7 @@ describe('ekv-services tests', () => {
 
       expect(writeItemsSpy).toHaveBeenCalled();
       // Check the details of error object
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(error).not.toBeUndefined;
       expect(error.isError).toEqual(true);
       expect(error.status).toEqual(mockError.status);
@@ -750,6 +759,7 @@ describe('ekv-services tests', () => {
 
       expect(writeItemsFromFileSpy).toHaveBeenCalled();
       // Check the details of error object
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(error).not.toBeUndefined;
       expect(error.isError).toEqual(true);
       expect(error.status).toEqual(mockError.status);
@@ -842,6 +852,7 @@ describe('ekv-services tests', () => {
 
       expect(readItemSpy).toHaveBeenCalled();
       // Check the details of error object
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(error).not.toBeUndefined;
       expect(error.isError).toEqual(true);
       expect(error.status).toEqual(mockError.status);
@@ -932,6 +943,7 @@ describe('ekv-services tests', () => {
 
       expect(deleteItemSpy).toHaveBeenCalled();
       // Check the details of error object
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(error).not.toBeUndefined;
       expect(error.isError).toEqual(true);
       expect(error.status).toEqual(mockError.status);
@@ -1114,6 +1126,7 @@ describe('ekv-services tests', () => {
 
       expect(getItemsFromGroupSpy).toHaveBeenCalled();
       // Check the details of error object
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(error).not.toBeUndefined;
       expect(error.isError).toEqual(true);
       expect(error.status).toEqual(mockError.status);
@@ -1184,6 +1197,7 @@ describe('ekv-services tests', () => {
 
       expect(createEdgeKVTokenSpy).toHaveBeenCalled();
       // Check the details of error object
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(error).not.toBeUndefined;
       expect(error.isError).toEqual(true);
       expect(error.status).toEqual(mockError.status);
@@ -1233,6 +1247,7 @@ describe('ekv-services tests', () => {
 
       expect(getSingleTokenSpy).toHaveBeenCalled();
       // Check the details of error object
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(error).not.toBeUndefined;
       expect(error.isError).toEqual(true);
       expect(error.status).toEqual(mockError.status);
@@ -1303,6 +1318,7 @@ describe('ekv-services tests', () => {
 
       expect(getTokenListSpy).toHaveBeenCalled();
       // Check the details of error object
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(error).not.toBeUndefined;
       expect(error.isError).toEqual(true);
       expect(error.status).toEqual(mockError.status);
@@ -1351,6 +1367,7 @@ describe('ekv-services tests', () => {
 
       expect(revokeTokenSpy).toHaveBeenCalled();
       // Check the details of error object
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(error).not.toBeUndefined;
       expect(error.isError).toEqual(true);
       expect(error.status).toEqual(mockError.status);
@@ -1416,6 +1433,7 @@ describe('ekv-services tests', () => {
 
       expect(modifyAuthGroupPermissionSpy).toHaveBeenCalled();
       // Check the details of error object
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(error).not.toBeUndefined;
       expect(error.isError).toEqual(true);
       expect(error.status).toEqual(mockError.status);
@@ -1484,6 +1502,7 @@ describe('ekv-services tests', () => {
 
       expect(listAuthGroupsSpy).toHaveBeenCalled();
       // Check the details of error object
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(error).not.toBeUndefined;
       expect(error.isError).toEqual(true);
       expect(error.status).toEqual(mockError.status);

@@ -779,6 +779,7 @@ function getExpiryDate(expiry: string) {
     }
     expiry = new Date(expiry).toISOString().split('.').shift() + 'Z';
     return expiry;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (ex) {
     cliUtils.logAndExit(1, errorMsg);
   }

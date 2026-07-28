@@ -3,7 +3,8 @@ import {ErrorMessage} from '../utils/http-error-message';
 
 export function handleError(err, commandId) {
     try {
-        err = JSON.parse(err); 
+        err = JSON.parse(err);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
         return {
             isError: true,
@@ -32,7 +33,7 @@ export function handleError(err, commandId) {
                     isError: true,
                     error_reason: ErrorMessage[commandId + '_ERROR'] + ' ' + detail
                 };
-            }    
+            }
             case 400: {
                 let errorMessage = ErrorMessage[commandId + '_400'];
                 if (errorMessage === undefined) {
@@ -49,14 +50,14 @@ export function handleError(err, commandId) {
                     isError: true,
                     error_reason: ErrorMessage[commandId + '_ERROR'] + ' ' + ErrorMessage.EW_TIMEOUT_ERROR
                 };
-            }    
+            }
             default: {
                 const detail = err['detail'] == undefined ? '' : err['detail'];
                 return {
                     isError: true,
                     error_reason: ErrorMessage[commandId + '_ERROR'] + ' ' + detail
                 };
-            }    
+            }
 
         }
     }

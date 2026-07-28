@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, rmdirSync } from 'fs';
+import { existsSync, mkdirSync, rmSync } from 'fs';
 import { buildTarball, validateTarballLocally } from '../src/edgeworkers/client-manager';
 
 const TAR_TEMP_DIR = __dirname + '/tmp_tar/';
@@ -12,7 +12,7 @@ describe('client-manager tests', () => {
 
     afterAll(() => {
         if (existsSync(TAR_TEMP_DIR)) {
-            rmdirSync(TAR_TEMP_DIR, { recursive: true });
+           rmSync(TAR_TEMP_DIR, { recursive: true });
         }
     });
 

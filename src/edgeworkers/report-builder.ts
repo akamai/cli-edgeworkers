@@ -102,6 +102,8 @@ function buildReportOne(report) {
     memory,
     initDuration,
     execDuration,
+    wallTimeInitDuration,
+    wallTimeExecDuration,
     successes,
     errors,
     invocations
@@ -109,6 +111,8 @@ function buildReportOne(report) {
 
   let initDurationMapped = {}; // init duration might be undefined
   let execDurationMapped = {};
+  let wallTimeInitDurationMapped = {};
+  let wallTimeExecDurationMapped = {};
   let memoryMapped = {};
 
   if (initDuration) {
@@ -127,6 +131,22 @@ function buildReportOne(report) {
     execDurationMapped = {avg: 'N/A', max: 'N/A', min: 'N/A'};
   }
 
+  if (wallTimeInitDuration) {
+    Object.keys(wallTimeInitDuration).forEach((key) => {
+      wallTimeInitDurationMapped[key] = wallTimeInitDuration[key].toFixed(4);
+    });
+  } else {
+    wallTimeInitDurationMapped = {avg: 'N/A', max: 'N/A', min: 'N/A'};
+  }
+
+  if (wallTimeExecDuration) {
+    Object.keys(wallTimeExecDuration).forEach((key) => {
+      wallTimeExecDurationMapped[key] = wallTimeExecDuration[key].toFixed(4);
+    });
+  } else {
+    wallTimeExecDurationMapped = {avg: 'N/A', max: 'N/A', min: 'N/A'};
+  }
+
   if (memory) {
     Object.keys(memory).forEach((key) => {
       memoryMapped[key] = memory[key].toFixed(4);
@@ -140,6 +160,7 @@ function buildReportOne(report) {
       {successes: {total: successes?.total}, invocations: {total: invocations?.total}},
       {errors},
       {initDuration: initDurationMapped, execDuration: execDurationMapped},
+      {wallTimeInitDuration: wallTimeInitDurationMapped, wallTimeExecDuration: wallTimeExecDurationMapped},
       {memory: memoryMapped},
     ];
   } else {
@@ -150,6 +171,7 @@ function buildReportOne(report) {
         invocations: {total: invocations?.total}
       },
       {initDuration: initDurationMapped, execDuration: execDurationMapped},
+      {wallTimeInitDuration: wallTimeInitDurationMapped, wallTimeExecDuration: wallTimeExecDurationMapped},
       {memory: memoryMapped},
     ];
   }
@@ -282,6 +304,20 @@ function buildReportEight(report) {
   return [summaryTable, performanceTable];
 }
 
+function buildReportNine(report, executionEventHandlers: Array<string>) {
+  // wall time
+  const reportOutput = {};
+  const executionCategories: Record<string, Array<Execution>> = report.data[0].data;
+
+  for (const event of executionEventHandlers) {
+    reportOutput[event] = getExecutionAverages(executionCategories[event], 'wallTimeExecDuration');
+  }
+
+  // wall time has an additional property for init times
+  reportOutput['init'] = getExecutionAverages(executionCategories['init'], 'wallTimeInitDuration');
+  return reportOutput;
+}
+
 export function writeReportOutputToConsole(report, executionEventHandlers: Array<string>, msg: string) {
   let reportOutput;
 
@@ -316,6 +352,10 @@ export function writeReportOutputToConsole(report, executionEventHandlers: Array
     }
     case 8: {
       reportOutput = buildReportEight(report);
+      break;
+    }
+    case 9: {
+      reportOutput = buildReportNine(report, executionEventHandlers);
       break;
     }
   }

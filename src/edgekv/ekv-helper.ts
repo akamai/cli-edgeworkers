@@ -162,6 +162,7 @@ export function decodeJWTToken(token): object {
     try {
         const decodedToken: object = jwt_decode(token);
         return decodedToken;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (ex) {
         cliUtils.logAndExit(1, 'Error while trying to decode the JWT token');
     }
@@ -183,6 +184,7 @@ export function checkIfFileExists(filePath) {
         const jsFilePath = untildify(filePath);
         fs.accessSync(jsFilePath, fs.constants.R_OK && fs.constants.W_OK);
         return true;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
         return false;
     }
