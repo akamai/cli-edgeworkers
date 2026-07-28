@@ -1260,6 +1260,26 @@ describe('ew handler tests', () => {
       expect(mockLogAndExit).not.toHaveBeenCalled();
     });
 
+    it('should exit with info message when report is unavailable', async () => {
+      const reportResponse = {
+        unavailable: true
+      };
+      mockSpinner.mockResolvedValue(reportResponse);
+
+      await ewHandler.getReport(4, '2025-09-19T20:54:57Z', '2025-12-19T21:41:38Z', '1234', [], [], false, [], [], 'STAGING');
+
+      expect(mockSpinner).toHaveBeenCalledWith(
+        undefined,
+        'Getting report...'
+      );
+      expect(mockLogAndExit).toHaveBeenCalledWith(
+        0,
+        'INFO: This report is currently unavailable.'
+      );
+      expect(mockLogWithBorder).not.toHaveBeenCalled();
+      expect(console.table).not.toHaveBeenCalled();
+    });
+
     it('should write report 9 output as JSON when JSON mode is enabled', async () => {
       mockIsJSONOutputMode.mockReturnValue(true);
       const reportResponse = {
