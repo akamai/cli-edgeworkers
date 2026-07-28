@@ -1630,9 +1630,11 @@ export async function getAvailableReports() {
 
   if (availableReports && !availableReports.isError) {
     const msg = 'The following reports are available:';
-    const reportList = availableReports.reports.map((report) => {
-      return {ReportId: report.reportId, ReportType: report.name};
-    });
+    const reportList = availableReports.reports
+      .filter((report) => !report.unavailable)
+      .map((report) => {
+        return {ReportId: report.reportId, ReportType: report.name};
+      });
 
     if (ewJsonOutput.isJSONOutputMode()) {
       ewJsonOutput.writeJSONOutput(0, msg, reportList);
@@ -1661,6 +1663,11 @@ export async function getReport(
     edgeWorkersSvc.getReport(reportId, ewid, start, statuses, eventHandlers, end, continueOnErrorOnly, vcds, revisionIds, network),
     'Getting report...'
   );
+
+  if (report && report.unavailable) {
+    cliUtils.logAndExit(0, 'INFO: This report is currently unavailable.');
+    return;
+  }
 
   const EVENT_HANDLERS = ['onClientRequest', 'onOriginRequest', 'onOriginResponse', 'onClientResponse', 'onBotSegmentAvailable', 'responseProvider'];
   let executionEventHandlers: Array<string>;
