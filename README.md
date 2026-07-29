@@ -113,6 +113,8 @@ Commands:
 | clone \| clone `<edgeworker-identifier> <resourceTierId> [options]`                           | Clones an EdgeWorker from the existing EdgeWorker Id.                                                                                                                             |
 | list-contracts \| li-contracts `[options]`                                                    | List of contract ids that user has access to.                                                                                                                                     |
 | list-properties \| lp `<edgeworker-identifier> [options]`                                     | List of properties associated with a given EdgeWorker Id.                                                                                                                         |
+| list-environments \| le `<edgeworker-identifier> [options]`                                   | List of environments associated with a given EdgeWorker Id.                                                                                                                       |
+| list-environment-locations \| lel `<edgeworker-identifier> [options]`                         | List of behavior locations associated to a specific environment within a workspace for an EdgeWorker Id.                                                                                 |
 | list-limits \| li-limits                                                                      | View the various limits EdgeWorkers imposes on the number of activations, EdgeWorkers IDs, and versions you can deploy.                                                           |
 | list-restiers \| li-restiers `[options]`                                                      | List Resource Tiers that can be used to create or clone EdgeWorker Id.                                                                                                            |
 | show-restier \| show-restier `<edgeworker-identifier>`                                        | Customers can get Resource Tier details for a specific EdgeWorker Id.                                                                                                             |
@@ -681,6 +683,42 @@ Usage: `akamai edgeworkers list-properties <edgeworker-identifier> [options]`
 
 1. Note that the returned boolean limitedAccessToProperties is true if the user doesn't have access to the top level
    group under the account, or if they don't have the admin role for this group.
+
+### List Environments
+
+List of environments associated to a specific EdgeWorker Id.
+
+Usage: `akamai edgeworkers list-environments <edgeworker-identifier> [options]`
+
+| Option       | Description                                                                                                    |
+|--------------|----------------------------------------------------------------------------------------------------------------|
+| -h, --help   | output usage information                                                                                       |
+| --activeOnly | Return only environments where any version is currently active on Production, Staging, or Dev-Test             |
+
+| Argument              | Existence | Description            |
+|-----------------------|-----------|------------------------|
+| edgeworker-identifier | required  | EdgeWorker identifier. |
+
+#### Key Details
+
+1. Note that the returned boolean `limitedAccessToEnvironments` is true if the user doesn't have access to the top level group under the account, or if they don't have the admin role for this group.
+
+### List EdgeWorkers Behavior Locations for an Environment
+
+List of EdgeWorkers behavior locations associated to a specific environment within a workspace for an EdgeWorker Id.
+
+Usage: `akamai edgeworkers list-environment-locations <edgeworker-identifier> [options]`
+
+| Option                                              | Existence | Description                             |
+|-----------------------------------------------------|-----------|-----------------------------------------|
+| -h, --help                                          | optional  | output usage information                |
+| -envName, --environmentName `<environmentName>`     | required  | Environment name.                       |
+| -wsName, --workspaceName `<workspaceName>`          | required  | Workspace name.                         |
+| -envVer, --environmentVersion `<environmentVersion>`| required  | Environment version.                    |
+
+| Argument              | Existence | Description            |
+|-----------------------|-----------|------------------------|
+| edgeworker-identifier | required  | EdgeWorker identifier. |
 
 ### List Limits
 

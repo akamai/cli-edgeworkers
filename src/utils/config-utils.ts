@@ -21,7 +21,7 @@ export const Operations = {
 export class Config {
   path: string;
   section: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   config: any;
 
   constructor(path: string, section: string) {
@@ -47,7 +47,7 @@ export class Config {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   save(context: any=null) {
     try {
       if (context) {

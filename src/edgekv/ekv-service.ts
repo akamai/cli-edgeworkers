@@ -150,7 +150,7 @@ export function writeItems(
     writeItemPath += `?sandboxId=${sandboxid}`;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   let request: Promise<any>;
   if (typeof body === 'string') {
     // If the body is a string

@@ -230,6 +230,40 @@ program
   });
 
 program
+  .command('list-environments <edgeworker-identifier>')
+  .description('View the list of environments associated with an EdgeWorker ID')
+  .option('--activeOnly', 'Return only environments where any version is currently active on Production, Staging, or Dev-Test')
+  .alias('le')
+  .action(async function (edgeWorkerId, options) {
+    try {
+      await cliHandler.getEnvironments(edgeWorkerId, options.activeOnly);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on('--help', function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+program
+  .command('list-environment-locations <edgeworker-identifier>')
+  .description('View the list of EdgeWorker ruleset locations and Continue on Error status for a specific environment version')
+  .requiredOption('-envName, --environmentName <environmentName>', 'Environment name')
+  .requiredOption('-wsName, --workspaceName <workspaceName>', 'Workspace name')
+  .requiredOption('-envVer, --environmentVersion <environmentVersion>', 'Environment version')
+  .alias('lel')
+  .action(async function (edgeWorkerId, options) {
+    try {
+      await cliHandler.getEnvironmentLocations(edgeWorkerId, options.environmentName, options.workspaceName, options.environmentVersion);
+    } catch (e) {
+      cliUtils.logAndExit(1, e);
+    }
+  })
+  .on('--help', function () {
+    cliUtils.logAndExit(0, copywrite);
+  });
+
+program
   .command('list-restiers')
   .description('View the list of resource tiers available for a specified contract')
   .option('--contractId <contractId>', 'Contract ID for the resource tiers')

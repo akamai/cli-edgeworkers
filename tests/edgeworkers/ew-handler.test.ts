@@ -1590,6 +1590,173 @@ describe('ew handler tests', () => {
     });
   });
 
+  describe('getEnvironments', () => {
+    const mockSpinner = cliUtils.spinner as jest.Mock;
+    const mockLogWithBorder = cliUtils.logWithBorder as jest.Mock;
+    const mockLogAndExit = cliUtils.logAndExit as jest.Mock;
+    const mockIsJSONOutputMode = ewJsonOutput.ewJsonOutput.isJSONOutputMode as jest.Mock;
+    const mockWriteJSONOutput = ewJsonOutput.ewJsonOutput.writeJSONOutput as jest.Mock;
+
+    const environments = [
+      {
+        environmentName: 'env-1',
+        workspaceName: 'ws-1',
+        environmentVersion: '2',
+        stagingVersionLink: '/staging/link',
+        productionVersionLink: '/prod/link',
+        devTestVersionLink: '/devtest/link'
+      }
+    ];
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockIsJSONOutputMode.mockReturnValue(false);
+      console.table = jest.fn();
+      console.log = jest.fn();
+    });
+
+    it('should display environments in table mode', async () => {
+      mockSpinner.mockResolvedValue({ environments, limitedAccessToEnvironments: false });
+
+      await ewHandler.getEnvironments('101', false);
+
+      expect(mockSpinner).toHaveBeenCalledWith(
+        undefined,
+        'Retrieving environments for EdgeWorker Id 101...'
+      );
+      expect(mockLogWithBorder).toHaveBeenCalledWith(
+        expect.stringContaining('EdgeWorker Id 101')
+      );
+      expect(console.table).toHaveBeenCalledTimes(1);
+      expect(console.table).toHaveBeenCalledWith([
+        { environmentName: 'env-1', workspaceName: 'ws-1', environmentVersion: '2' }
+      ]);
+      expect(console.log).toHaveBeenCalledWith('limitedAccessToEnvironments: false');
+      expect(mockLogAndExit).not.toHaveBeenCalled();
+    });
+
+    it('should write environments as JSON when JSON mode is enabled', async () => {
+      mockIsJSONOutputMode.mockReturnValue(true);
+      const result = { environments, limitedAccessToEnvironments: true };
+      mockSpinner.mockResolvedValue(result);
+
+      await ewHandler.getEnvironments('101', false);
+
+      expect(console.table).not.toHaveBeenCalled();
+      expect(mockWriteJSONOutput).toHaveBeenCalledWith(
+        0,
+        expect.stringContaining('EdgeWorker Id 101'),
+        result
+      );
+      expect(mockLogAndExit).not.toHaveBeenCalled();
+    });
+
+    it('should log an empty message when no environments exist', async () => {
+      mockSpinner.mockResolvedValue({ environments: [], limitedAccessToEnvironments: false });
+
+      await ewHandler.getEnvironments('55', false);
+
+      expect(mockLogAndExit).toHaveBeenCalledWith(
+        0,
+        expect.stringContaining('no   environments')
+      );
+      expect(console.table).not.toHaveBeenCalled();
+    });
+
+    it('should include "active" in the empty message when activeOnly is true', async () => {
+      mockSpinner.mockResolvedValue({ environments: [], limitedAccessToEnvironments: false });
+
+      await ewHandler.getEnvironments('55', true);
+
+      expect(mockLogAndExit).toHaveBeenCalledWith(
+        0,
+        expect.stringContaining(' active ')
+      );
+    });
+
+    it('should exit with error when result has isError', async () => {
+      mockSpinner.mockResolvedValue({ isError: true, error_reason: 'Not found' });
+
+      await ewHandler.getEnvironments('99', false);
+
+      expect(mockLogAndExit).toHaveBeenCalledWith(1, 'Not found');
+      expect(console.table).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getEnvironmentLocations', () => {
+    const mockSpinner = cliUtils.spinner as jest.Mock;
+    const mockLogWithBorder = cliUtils.logWithBorder as jest.Mock;
+    const mockLogAndExit = cliUtils.logAndExit as jest.Mock;
+    const mockIsJSONOutputMode = ewJsonOutput.ewJsonOutput.isJSONOutputMode as jest.Mock;
+    const mockWriteJSONOutput = ewJsonOutput.ewJsonOutput.writeJSONOutput as jest.Mock;
+
+    const locations = [
+      { location: '/default/loc', continueOnError: true },
+      { location: '/fallback/loc', continueOnError: false }
+    ];
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockIsJSONOutputMode.mockReturnValue(false);
+      console.table = jest.fn();
+    });
+
+    it('should display locations in table mode', async () => {
+      mockSpinner.mockResolvedValue({ locations });
+
+      await ewHandler.getEnvironmentLocations('101', 'my-env', 'my-ws', '3');
+
+      expect(mockSpinner).toHaveBeenCalledWith(
+        undefined,
+        'Retrieving EdgeWorkers behavior locations for EdgeWorker Id 101...'
+      );
+      expect(mockLogWithBorder).toHaveBeenCalledWith(
+        expect.stringContaining('EdgeWorker Id 101')
+      );
+      expect(console.table).toHaveBeenCalledTimes(1);
+      expect(console.table).toHaveBeenCalledWith(locations);
+      expect(mockLogAndExit).not.toHaveBeenCalled();
+    });
+
+    it('should write locations as JSON when JSON mode is enabled', async () => {
+      mockIsJSONOutputMode.mockReturnValue(true);
+      const result = { locations };
+      mockSpinner.mockResolvedValue(result);
+
+      await ewHandler.getEnvironmentLocations('101', 'my-env', 'my-ws', '3');
+
+      expect(console.table).not.toHaveBeenCalled();
+      expect(mockWriteJSONOutput).toHaveBeenCalledWith(
+        0,
+        expect.stringContaining('EdgeWorker Id 101'),
+        result
+      );
+      expect(mockLogAndExit).not.toHaveBeenCalled();
+    });
+
+    it('should log an empty message when no locations exist', async () => {
+      mockSpinner.mockResolvedValue({ locations: [] });
+
+      await ewHandler.getEnvironmentLocations('55', 'staging-env', 'my-ws', '1');
+
+      expect(mockLogAndExit).toHaveBeenCalledWith(
+        0,
+        expect.stringContaining('no EdgeWorkers Behavior Locations for EdgeWorker Id: 55 in environment staging-env')
+      );
+      expect(console.table).not.toHaveBeenCalled();
+    });
+
+    it('should exit with error when result has isError', async () => {
+      mockSpinner.mockResolvedValue({ isError: true, error_reason: 'Unauthorized' });
+
+      await ewHandler.getEnvironmentLocations('99', 'env', 'ws', '1');
+
+      expect(mockLogAndExit).toHaveBeenCalledWith(1, 'Unauthorized');
+      expect(console.table).not.toHaveBeenCalled();
+    });
+  });
+
   // THIS TEST WAS GENERATED BY AN AI LANGUAGE MODEL (GitHub Copilot)
   describe('getActiveCustomersForEwId', () => {
     const mockSpinner = cliUtils.spinner as jest.Mock;

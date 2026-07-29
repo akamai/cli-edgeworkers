@@ -14,6 +14,8 @@ export enum ErrorMessage {
     LISTALL_EW_ERROR = 'ERROR: Unable to retrieve Edgeworkers list.',
     GET_CONTRACT_ERROR = 'ERROR: Unable to retrieve contracts for your account.',
     GET_PROPERTIES_ERROR = 'ERROR: Unable to retrieve properties for the specified Edgeworker ID.',
+    GET_ENVIRONMENTS_ERROR = 'ERROR: Unable to retrieve environments for the specified Edgeworker ID.',
+    GET_ENVIRONMENT_LOCATIONS_ERROR = 'ERROR: Unable to retrieve environment locations for the specified Edgeworker ID and environment.',
     GET_RESTIER_ERROR = 'ERROR: Unable to retrieve resource tiers for the contract.',
     GET_RESTR_FOR_EW_ERROR = 'ERROR: Unable to retrieve resource tiers for the specified Edgeworker ID.',
     GET_RESTR_FOR_EW_404 = 'Unable to find the requested EdgeWorker ID.',
