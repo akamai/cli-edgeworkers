@@ -34,7 +34,7 @@ jobs:
         run: osv-scanner scan --format sarif --output-file results.sarif --lockfile=package-lock.json
         continue-on-error: true
       - name: Upload SARIF to Code Scanning
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: results.sarif
       - name: Comment on PR with results link
