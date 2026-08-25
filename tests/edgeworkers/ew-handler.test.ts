@@ -27,10 +27,10 @@ describe('ew handler tests', () => {
 
     it('should fetch and display all EdgeWorker IDs', async () => {
       const ids = [
-        { edgeWorkerId: 1, name: 'A', groupId: 10, resourceTierId: 100, isPartner: true, accountId: 'acc1' },
-        { edgeWorkerId: 2, name: 'B', groupId: 20, resourceTierId: 200, isPartner: false, accountId: 'acc1' }
+        {edgeWorkerId: 1, name: 'A', groupId: 10, resourceTierId: 100, isPartner: true, accountId: 'acc1'},
+        {edgeWorkerId: 2, name: 'B', groupId: 20, resourceTierId: 200, isPartner: false, accountId: 'acc1'}
       ];
-      mockSpinner.mockResolvedValue({ edgeWorkerIds: ids });
+      mockSpinner.mockResolvedValue({edgeWorkerIds: ids});
 
       await ewHandler.showEdgeWorkerIdOverview(null, 'groupX', 'tierY', false);
 
@@ -45,7 +45,7 @@ describe('ew handler tests', () => {
     });
 
     it('should fetch and display a single EdgeWorker ID', async () => {
-      const id = { edgeWorkerId: 3, name: 'EW1', groupId: 30, resourceTierId: 100, isPartner: true, accountId: 'acc2' };
+      const id = {edgeWorkerId: 3, name: 'EW1', groupId: 30, resourceTierId: 100, isPartner: true, accountId: 'acc2'};
       mockSpinner.mockResolvedValue(id);
 
       await ewHandler.showEdgeWorkerIdOverview('3', 'groupY', '200', true);
@@ -63,9 +63,9 @@ describe('ew handler tests', () => {
     it('should output JSON if JSON mode is enabled', async () => {
       mockIsJSONOutputMode.mockReturnValue(true);
       const ids = [
-        { edgeWorkerId: 4, name: 'EW2', groupId: 40, resourceTierId: 280, isPartner: false, accountId: 'acc3' }
+        {edgeWorkerId: 4, name: 'EW2', groupId: 40, resourceTierId: 280, isPartner: false, accountId: 'acc3'}
       ];
-      mockSpinner.mockResolvedValue({ edgeWorkerIds: ids });
+      mockSpinner.mockResolvedValue({edgeWorkerIds: ids});
 
       await ewHandler.showEdgeWorkerIdOverview(null, null, null, false);
 
@@ -77,7 +77,7 @@ describe('ew handler tests', () => {
     });
 
     it('should handle empty result', async () => {
-      mockSpinner.mockResolvedValue({ edgeWorkerIds: [] });
+      mockSpinner.mockResolvedValue({edgeWorkerIds: []});
 
       await ewHandler.showEdgeWorkerIdOverview(null, '50', '100', false);
 
@@ -145,11 +145,11 @@ describe('ew handler tests', () => {
           productionVersionLink: '/papi/v1/properties/55/versions/7/rules',
           stagingVersionLink: '/papi/v1/properties/55/versions/7/rules',
           stagingEdgeWorkersBehaviorLocations: [
-            { location: 'stage-loc', continueOnError: true },
-            { location: 'stage-loc2', continueOnError: false },
+            {location: 'stage-loc', continueOnError: true},
+            {location: 'stage-loc2', continueOnError: false},
           ],
           productionEdgeWorkersBehaviorLocations: [
-            { location: 'prod-loc', continueOnError: false }
+            {location: 'prod-loc', continueOnError: false}
           ]
         }
       ];
@@ -178,16 +178,33 @@ describe('ew handler tests', () => {
       );
       expect(console.table).toHaveBeenCalledTimes(3);
       expect(console.table).toHaveBeenNthCalledWith(1, [
-        { propertyId: 55, propertyName: 'prop-55', stagingVersion: 7,
+        {
+          propertyId: 55, propertyName: 'prop-55', stagingVersion: 7,
           productionVersion: 7,
-          latestVersion: 7, }
+          latestVersion: 7,
+        }
       ]);
       expect(console.table).toHaveBeenNthCalledWith(2, [
-        { propertyId: 55, location: 'stage-loc', continueOnError: true, versionLink: '/papi/v1/properties/55/versions/7/rules' },
-        { propertyId: 55, location: 'stage-loc2', continueOnError: false, versionLink: '/papi/v1/properties/55/versions/7/rules' }
+        {
+          propertyId: 55,
+          location: 'stage-loc',
+          continueOnError: true,
+          versionLink: '/papi/v1/properties/55/versions/7/rules'
+        },
+        {
+          propertyId: 55,
+          location: 'stage-loc2',
+          continueOnError: false,
+          versionLink: '/papi/v1/properties/55/versions/7/rules'
+        }
       ]);
       expect(console.table).toHaveBeenNthCalledWith(3, [
-        { propertyId: 55, location: 'prod-loc', continueOnError: false, versionLink: '/papi/v1/properties/55/versions/7/rules' }
+        {
+          propertyId: 55,
+          location: 'prod-loc',
+          continueOnError: false,
+          versionLink: '/papi/v1/properties/55/versions/7/rules'
+        }
       ]);
       expect(console.log).toHaveBeenCalledWith('limitedAccessToProperties: true');
       expect(mockLogAndExit).not.toHaveBeenCalled();
@@ -215,14 +232,14 @@ describe('ew handler tests', () => {
         start: '2025-09-19T20:54:57Z',
         end: '2025-12-19T21:41:38Z',
         data: {
-          memory: { avg: 18.5, min: 5, max: 120 },
-          successes: { total: 50 },
-          initDuration: { avg: 5.123, min: 4.5, max: 6.8 },
-          execDuration: { avg: 2.456, min: 1.2, max: 5.9 },
-          wallTimeInitDuration: { avg: 8.234, min: 7.1, max: 10.5 },
-          wallTimeExecDuration: { avg: 3.789, min: 2.3, max: 8.1 },
-          errors: { total: 5 },
-          invocations: { total: 55 }
+          memory: {avg: 18.5, min: 5, max: 120},
+          successes: {total: 50},
+          initDuration: {avg: 5.123, min: 4.5, max: 6.8},
+          execDuration: {avg: 2.456, min: 1.2, max: 5.9},
+          wallTimeInitDuration: {avg: 8.234, min: 7.1, max: 10.5},
+          wallTimeExecDuration: {avg: 3.789, min: 2.3, max: 8.1},
+          errors: {total: 5},
+          invocations: {total: 55}
         }
       };
       mockSpinner.mockResolvedValue(reportResponse);
@@ -231,20 +248,20 @@ describe('ew handler tests', () => {
 
       expect(console.table).toHaveBeenCalledTimes(4);
       expect(console.table).toHaveBeenNthCalledWith(1, {
-        successes: {total: 50},
-        errors: {total: 5},
-        invocations: {total: 55}
+        successes: {total: '50'},
+        errors: {total: '5'},
+        invocations: {total: '55'}
       });
       expect(console.table).toHaveBeenNthCalledWith(2, {
-        initDuration: {avg: '5.1230', min: '4.5000', max: '6.8000'},
-        execDuration: {avg: '2.4560', min: '1.2000', max: '5.9000'}
+        initDuration: {avg: '5.12 ms', min: '4.50 ms', max: '6.80 ms'},
+        execDuration: {avg: '2.46 ms', min: '1.20 ms', max: '5.90 ms'}
       });
       expect(console.table).toHaveBeenNthCalledWith(3, {
-        wallTimeInitDuration: {avg: '8.2340', min: '7.1000', max: '10.5000'},
-        wallTimeExecDuration: {avg: '3.7890', min: '2.3000', max: '8.1000'}
+        wallTimeInitDuration: {avg: '8.23 ms', min: '7.10 ms', max: '10.50 ms'},
+        wallTimeExecDuration: {avg: '3.79 ms', min: '2.30 ms', max: '8.10 ms'}
       });
       expect(console.table).toHaveBeenNthCalledWith(4, {
-        memory: {avg: '18.5000', min: '5.0000', max: '120.0000'}
+        memory: {avg: '18.50 B', min: '5.00 B', max: '120.00 B'}
       });
       expect(mockLogAndExit).not.toHaveBeenCalled();
     });
@@ -257,12 +274,12 @@ describe('ew handler tests', () => {
         start: '2025-09-19T20:54:57Z',
         end: '2025-12-19T21:41:38Z',
         data: {
-          memory: { avg: 24.923076923076923, min: 6, max: 241 },
-          successes: { total: 12 },
-          initDuration: { avg: 4.874, min: 4.703, max: 4.997 },
-          execDuration: { avg: 0.5621538461538461, min: 0.309, max: 1.27 },
-          errors: { total: 13},
-          invocations: { total: 13 }
+          memory: {avg: 24.923076923076923, min: 6, max: 241},
+          successes: {total: 12},
+          initDuration: {avg: 4.874, min: 4.703, max: 4.997},
+          execDuration: {avg: 0.5621538461538461, min: 0.309, max: 1.27},
+          errors: {total: 13},
+          invocations: {total: 13}
         }
       };
       mockSpinner.mockResolvedValue(reportResponse);
@@ -278,20 +295,20 @@ describe('ew handler tests', () => {
       );
       expect(console.table).toHaveBeenCalledTimes(4);
       expect(console.table).toHaveBeenNthCalledWith(1, {
-        successes: {total: 12},
-        errors: {total: 13},
-        invocations: {total: 13}
+        successes: {total: '12'},
+        errors: {total: '13'},
+        invocations: {total: '13'}
       });
       expect(console.table).toHaveBeenNthCalledWith(2, {
-        initDuration: {avg: '4.8740', min: '4.7030', max: '4.9970'},
-        execDuration: {avg: '0.5622', min: '0.3090', max: '1.2700'}
+        initDuration: {avg: '4.87 ms', min: '4.70 ms', max: '5.00 ms'},
+        execDuration: {avg: '0.56 ms', min: '0.31 ms', max: '1.27 ms'}
       });
       expect(console.table).toHaveBeenNthCalledWith(3, {
         wallTimeInitDuration: {avg: 'N/A', min: 'N/A', max: 'N/A'},
         wallTimeExecDuration: {avg: 'N/A', min: 'N/A', max: 'N/A'}
       });
       expect(console.table).toHaveBeenNthCalledWith(4, {
-        memory: {avg: '24.9231', min: '6.0000', max: '241.0000'}
+        memory: {avg: '24.92 B', min: '6.00 B', max: '241.00 B'}
       });
       expect(mockLogAndExit).not.toHaveBeenCalled();
     });
@@ -304,12 +321,12 @@ describe('ew handler tests', () => {
         start: '2025-09-19T20:54:57Z',
         end: '2025-12-19T21:41:38Z',
         data: {
-          memory: { avg: 24.923076923076923, min: 6, max: 241 },
-          successes: { total: 13 },
-          initDuration: { avg: 4.874, min: 4.703, max: 4.997 },
-          execDuration: { avg: 0.5621538461538461, min: 0.309, max: 1.27 },
-          errors: { total: 13, continueOnErrorApplied: 7, continueOnErrorNotApplied: 3 },
-          invocations: { total: 13 }
+          memory: {avg: 24.923076923076923, min: 6, max: 241},
+          successes: {total: 13},
+          initDuration: {avg: 4.874, min: 4.703, max: 4.997},
+          execDuration: {avg: 0.5621538461538461, min: 0.309, max: 1.27},
+          errors: {total: 13, continueOnErrorApplied: 7, continueOnErrorNotApplied: 3},
+          invocations: {total: 13}
         }
       };
       mockSpinner.mockResolvedValue(reportResponse);
@@ -325,26 +342,26 @@ describe('ew handler tests', () => {
       );
       expect(console.table).toHaveBeenCalledTimes(5);
       expect(console.table).toHaveBeenNthCalledWith(1, {
-        successes: {total: 13},
-        invocations: {total: 13}
+        successes: {total: '13'},
+        invocations: {total: '13'}
       });
       expect(console.table).toHaveBeenNthCalledWith(2, {
         errors: {
-          total: 13,
-          continueOnErrorApplied: 7,
-          continueOnErrorNotApplied: 3
+          total: '13',
+          continueOnErrorApplied: '7',
+          continueOnErrorNotApplied: '3'
         }
       });
       expect(console.table).toHaveBeenNthCalledWith(3, {
-        initDuration: {avg: '4.8740', min: '4.7030', max: '4.9970'},
-        execDuration: {avg: '0.5622', min: '0.3090', max: '1.2700'}
+        initDuration: {avg: '4.87 ms', min: '4.70 ms', max: '5.00 ms'},
+        execDuration: {avg: '0.56 ms', min: '0.31 ms', max: '1.27 ms'}
       });
       expect(console.table).toHaveBeenNthCalledWith(4, {
         wallTimeInitDuration: {avg: 'N/A', min: 'N/A', max: 'N/A'},
         wallTimeExecDuration: {avg: 'N/A', min: 'N/A', max: 'N/A'}
       });
       expect(console.table).toHaveBeenNthCalledWith(5, {
-        memory: {avg: '24.9231', min: '6.0000', max: '241.0000'}
+        memory: {avg: '24.92 B', min: '6.00 B', max: '241.00 B'}
       });
       expect(mockLogAndExit).not.toHaveBeenCalled();
     });
@@ -410,11 +427,11 @@ describe('ew handler tests', () => {
       );
       expect(console.table).toHaveBeenCalledTimes(1);
       expect(console.table).toHaveBeenCalledWith({
-        errors: 4,
-        success: 5,
-        timeout: 2,
-        unimplementedEventHandler: 1,
-        executionError: 2
+        errors: '4',
+        success: '5',
+        timeout: '2',
+        unimplementedEventHandler: '1',
+        executionError: '2'
       });
       expect(mockLogAndExit).not.toHaveBeenCalled();
     });
@@ -484,16 +501,16 @@ describe('ew handler tests', () => {
       );
       expect(console.table).toHaveBeenCalledTimes(2);
       expect(console.table).toHaveBeenNthCalledWith(1, {
-        success: 5,
-        timeout: 2,
-        unimplementedEventHandler: 1,
-        executionError: 2
+        success: '5',
+        timeout: '2',
+        unimplementedEventHandler: '1',
+        executionError: '2'
       });
       expect(console.table).toHaveBeenNthCalledWith(2, {
         errors: {
-          invocations: 4,
-          continueOnErrorApplied: 2,
-          continueOnErrorNotApplied: 1
+          invocations: '4',
+          continueOnErrorApplied: '2',
+          continueOnErrorNotApplied: '1'
         }
       });
       expect(mockLogAndExit).not.toHaveBeenCalled();
@@ -521,13 +538,13 @@ describe('ew handler tests', () => {
           {
             customerName: 'Microsoft INC',
             vcds: [{vcd: 235433}, {vcd: 123434}],
-            errors: {continueOnErrorApplied: 45, continueOnErrorNotApplied: 0, total: 45},
+            errors: {continueOnErrorApplied: 1250, continueOnErrorNotApplied: 0, total: 6774740},
             execDuration: {avg: 32.123, max: 56, min: 21},
             initDuration: {avg: 24.237, max: 31, min: 14},
-            invocations: {total: 158},
+            invocations: {total: 1250000000},
             memory: {avg: 53701.9876, max: 132432, min: 22567},
-            successes: {total: 324},
-            subRequests: {total: 12}
+            successes: {total: 1250000000},
+            subRequests: {total: 9876543210000}
           }
         ]
       };
@@ -539,12 +556,12 @@ describe('ew handler tests', () => {
       expect(console.table).toHaveBeenNthCalledWith(1, [
         {
           'Customer Name (VCDs)': 'Microsoft INC (235433,123434)',
-          'Success Count': '324',
-          'Error Count': '45',
-          'Error Rate': '28.48 %',
-          'COE Applied': '45',
+          'Success Count': '1.25 B',
+          'Error Count': '6.77 M',
+          'Error Rate': '0.54 %',
+          'COE Applied': '1.25 k',
           'COE Not Applied': '0',
-          'Sub-request Count': '12'
+          'Sub-request Count': '9.88 T'
         },
         {
           'Customer Name (VCDs)': 'Tiktok.com (112232)',
@@ -563,8 +580,8 @@ describe('ew handler tests', () => {
           'Max CPU Time': '56.00 ms',
           'Avg Init Time': '24.24 ms',
           'Max Init Time': '31.00 ms',
-          'Avg Mem Usage': '52.44 KB',
-          'Max Mem Usage': '129.33 KB'
+          'Avg Mem Usage': '52.44 kB',
+          'Max Mem Usage': '129.33 kB'
         },
         {
           'Customer Name (VCDs)': 'Tiktok.com (112232)',
@@ -572,8 +589,8 @@ describe('ew handler tests', () => {
           'Max CPU Time': '156.00 ms',
           'Avg Init Time': '24.24 ms',
           'Max Init Time': '31.00 ms',
-          'Avg Mem Usage': '52.44 KB',
-          'Max Mem Usage': '129.33 KB'
+          'Avg Mem Usage': '52.44 kB',
+          'Max Mem Usage': '129.33 kB'
         }
       ]);
       expect(mockLogAndExit).not.toHaveBeenCalled();
@@ -628,14 +645,14 @@ describe('ew handler tests', () => {
               'Max CPU Time': '12.00 ms',
               'Avg Init Time': '2.00 ms',
               'Max Init Time': '3.00 ms',
-              'Avg Mem Usage': '2.00 KB',
-              'Max Mem Usage': '4.00 KB'
+              'Avg Mem Usage': '2.00 kB',
+              'Max Mem Usage': '4.00 kB'
             }
           ]
         ]
       );
     });
-    
+
     it('should display wall time execution data for report 9', async () => {
       const reportResponse = {
         reportId: 9,
@@ -929,7 +946,7 @@ describe('ew handler tests', () => {
       };
       mockSpinner.mockResolvedValue(reportResponse);
 
-        await ewHandler.getReport(9, '2026-03-05T20:36:08Z', '2026-06-04T20:36:08Z', '54321', [], ['onOriginRequest', 'onClientResponse', 'onClientRequest'], false, [], [], 'STAGING');
+      await ewHandler.getReport(9, '2026-03-05T20:36:08Z', '2026-06-04T20:36:08Z', '54321', [], ['onOriginRequest', 'onClientResponse', 'onClientRequest'], false, [], [], 'STAGING');
 
       expect(mockSpinner).toHaveBeenCalledWith(
         undefined,
@@ -940,10 +957,10 @@ describe('ew handler tests', () => {
       );
       expect(console.table).toHaveBeenCalledTimes(1);
       expect(console.table).toHaveBeenCalledWith({
-        onOriginRequest: { avg: '0.0955', min: '0.06', max: '0.20' },
-        onClientResponse: { avg: '0.1246', min: '0.10', max: '0.21' },
-        onClientRequest: { avg: '0.1211', min: '0.10', max: '0.16' },
-        init: { avg: '0.1415', min: '0.13', max: '0.15' }
+        onOriginRequest: {avg: '0.0955', min: '0.06', max: '0.20'},
+        onClientResponse: {avg: '0.1246', min: '0.10', max: '0.21'},
+        onClientRequest: {avg: '0.1211', min: '0.10', max: '0.16'},
+        init: {avg: '0.1415', min: '0.13', max: '0.15'}
       });
       expect(mockLogAndExit).not.toHaveBeenCalled();
     });
@@ -1241,7 +1258,7 @@ describe('ew handler tests', () => {
       };
       mockSpinner.mockResolvedValue(reportResponse);
 
-        await ewHandler.getReport(9, '2026-06-01T20:36:08Z', '2026-06-04T20:36:08Z', '89456', [], ['onOriginRequest', 'onClientResponse', 'onClientRequest'], false, [], [], 'STAGING');
+      await ewHandler.getReport(9, '2026-06-01T20:36:08Z', '2026-06-04T20:36:08Z', '89456', [], ['onOriginRequest', 'onClientResponse', 'onClientRequest'], false, [], [], 'STAGING');
 
       expect(mockSpinner).toHaveBeenCalledWith(
         undefined,
@@ -1252,10 +1269,10 @@ describe('ew handler tests', () => {
       );
       expect(console.table).toHaveBeenCalledTimes(1);
       expect(console.table).toHaveBeenCalledWith({
-        onOriginRequest: { avg: '0.0955', min: '0.06', max: '0.20' },
-        onClientResponse: { avg: '0.1246', min: '0.10', max: '0.21' },
-        onClientRequest: { avg: '0.1211', min: '0.10', max: '0.16' },
-        init: { avg: '0.1415', min: '0.13', max: '0.15' }
+        onOriginRequest: {avg: '0.0955', min: '0.06', max: '0.20'},
+        onClientResponse: {avg: '0.1246', min: '0.10', max: '0.21'},
+        onClientRequest: {avg: '0.1211', min: '0.10', max: '0.16'},
+        init: {avg: '0.1415', min: '0.13', max: '0.15'}
       });
       expect(mockLogAndExit).not.toHaveBeenCalled();
     });
@@ -1387,190 +1404,190 @@ describe('ew handler tests', () => {
                     ninetyNinePercentile: 0.05
                   }
                 }
-               ],
-               onClientRequest: [
-                 {
-                   startDateTime: '2026-05-20T07:30:00Z',
-                   edgeWorkerVersion: 'cache-control-v2.5',
-                   invocations: 6,
-                   wallTimeExecDuration: {
-                     avg: 0.3601666666666667,
-                     min: 0.149,
-                     max: 1.225,
-                     twentyFivePercentile: 0.05,
-                     fiftyPercentile: 0.05,
-                     seventyFivePercentile: 0.05,
-                     ninetyFivePercentile: 0.09,
-                     ninetyNinePercentile: 0.1
-                   }
-                 },
-                 {
-                   startDateTime: '2026-05-20T10:40:00Z',
-                   edgeWorkerVersion: 'cache-control-v2.5',
-                   invocations: 6,
-                   wallTimeExecDuration: {
-                     avg: 0.12433333333333332,
-                     min: 0.101,
-                     max: 0.192,
-                     twentyFivePercentile: 0.05,
-                     fiftyPercentile: 0.05,
-                     seventyFivePercentile: 0.05,
-                     ninetyFivePercentile: 0.05,
-                     ninetyNinePercentile: 0.05
-                   }
-                 }
-               ],
-               onOriginResponse: [
-                 {
-                   startDateTime: '2026-05-20T07:30:00Z',
-                   edgeWorkerVersion: 'cache-control-v2.5',
-                   invocations: 6,
-                   wallTimeExecDuration: {
-                     avg: 0.1035,
-                     min: 0.077,
-                     max: 0.171,
-                     twentyFivePercentile: 0.05,
-                     fiftyPercentile: 0.05,
-                     seventyFivePercentile: 0.05,
-                     ninetyFivePercentile: 0.05,
-                     ninetyNinePercentile: 0.05
-                   }
-                 },
-                 {
-                   startDateTime: '2026-05-20T10:40:00Z',
-                   edgeWorkerVersion: 'cache-control-v2.5',
-                   invocations: 6,
-                   wallTimeExecDuration: {
-                     avg: 0.09816666666666667,
-                     min: 0.08,
-                     max: 0.168,
-                     twentyFivePercentile: 0.05,
-                     fiftyPercentile: 0.05,
-                     seventyFivePercentile: 0.05,
-                     ninetyFivePercentile: 0.05,
-                     ninetyNinePercentile: 0.05
-                   }
-                 }
-               ]
-             },
-             summaryStatistics: {
-               init: {
-                 twentyFivePercentile: 1.0,
-                 fiftyPercentile: 1.0,
-                 seventyFivePercentile: 1.0,
-                 ninetyFivePercentile: 1.0,
-                 ninetyNinePercentile: 1.0
-               },
-               responseProvider: {
-                 twentyFivePercentile: 0.0,
-                 fiftyPercentile: 0.0,
-                 seventyFivePercentile: 0.0,
-                 ninetyFivePercentile: 0.0,
-                 ninetyNinePercentile: 0.0
-               },
-               onOriginRequest: {
-                 twentyFivePercentile: 0.05,
-                 fiftyPercentile: 0.05,
-                 seventyFivePercentile: 0.05,
-                 ninetyFivePercentile: 0.05,
-                 ninetyNinePercentile: 0.05
-               },
-               onBotSegmentAvailable: {
-                 twentyFivePercentile: 0.0,
-                 fiftyPercentile: 0.0,
-                 seventyFivePercentile: 0.0,
-                 ninetyFivePercentile: 0.0,
-                 ninetyNinePercentile: 0.0
-               },
-               onClientResponse: {
-                 twentyFivePercentile: 0.05,
-                 fiftyPercentile: 0.05,
-                 seventyFivePercentile: 0.05,
-                 ninetyFivePercentile: 0.05,
-                 ninetyNinePercentile: 0.05
-               },
-               totalWallTime: {
-                 twentyFivePercentile: 0.05,
-                 fiftyPercentile: 0.05,
-                 seventyFivePercentile: 0.05,
-                 ninetyFivePercentile: 0.05,
-                 ninetyNinePercentile: 0.05
-               },
-               onOriginResponse: {
-                 twentyFivePercentile: 0.05,
-                 fiftyPercentile: 0.05,
-                 seventyFivePercentile: 0.05,
-                 ninetyFivePercentile: 0.05,
-                 ninetyNinePercentile: 0.05
-               },
-               onClientRequest: {
-                 twentyFivePercentile: 0.05,
-                 fiftyPercentile: 0.05,
-                 seventyFivePercentile: 0.05,
-                 ninetyFivePercentile: 0.05,
-                 ninetyNinePercentile: 0.05
-               }
-             }
-           }
-         ],
-         summaryStatistics: {
-           init: {
-             twentyFivePercentile: 1.0,
-             fiftyPercentile: 1.0,
-             seventyFivePercentile: 1.0,
-             ninetyFivePercentile: 1.0,
-             ninetyNinePercentile: 1.0
-           },
-           responseProvider: {
-             twentyFivePercentile: 0.0,
-             fiftyPercentile: 0.0,
-             seventyFivePercentile: 0.0,
-             ninetyFivePercentile: 0.0,
-             ninetyNinePercentile: 0.0
-           },
-           onOriginRequest: {
-             twentyFivePercentile: 0.05,
-             fiftyPercentile: 0.05,
-             seventyFivePercentile: 0.05,
-             ninetyFivePercentile: 0.05,
-             ninetyNinePercentile: 0.05
-           },
-           onBotSegmentAvailable: {
-             twentyFivePercentile: 0.0,
-             fiftyPercentile: 0.0,
-             seventyFivePercentile: 0.0,
-             ninetyFivePercentile: 0.0,
-             ninetyNinePercentile: 0.0
-           },
-           onClientResponse: {
-             twentyFivePercentile: 0.05,
-             fiftyPercentile: 0.05,
-             seventyFivePercentile: 0.05,
-             ninetyFivePercentile: 0.05,
-             ninetyNinePercentile: 0.05
-           },
-           totalWallTime: {
-             twentyFivePercentile: 0.05,
-             fiftyPercentile: 0.05,
-             seventyFivePercentile: 0.05,
-             ninetyFivePercentile: 0.05,
-             ninetyNinePercentile: 0.05
-           },
-           onOriginResponse: {
-             twentyFivePercentile: 0.05,
-             fiftyPercentile: 0.05,
-             seventyFivePercentile: 0.05,
-             ninetyFivePercentile: 0.05,
-             ninetyNinePercentile: 0.05
-           },
-           onClientRequest: {
-             twentyFivePercentile: 0.05,
-             fiftyPercentile: 0.05,
-             seventyFivePercentile: 0.05,
-             ninetyFivePercentile: 0.05,
-             ninetyNinePercentile: 0.05
-           }
-         }
+              ],
+              onClientRequest: [
+                {
+                  startDateTime: '2026-05-20T07:30:00Z',
+                  edgeWorkerVersion: 'cache-control-v2.5',
+                  invocations: 6,
+                  wallTimeExecDuration: {
+                    avg: 0.3601666666666667,
+                    min: 0.149,
+                    max: 1.225,
+                    twentyFivePercentile: 0.05,
+                    fiftyPercentile: 0.05,
+                    seventyFivePercentile: 0.05,
+                    ninetyFivePercentile: 0.09,
+                    ninetyNinePercentile: 0.1
+                  }
+                },
+                {
+                  startDateTime: '2026-05-20T10:40:00Z',
+                  edgeWorkerVersion: 'cache-control-v2.5',
+                  invocations: 6,
+                  wallTimeExecDuration: {
+                    avg: 0.12433333333333332,
+                    min: 0.101,
+                    max: 0.192,
+                    twentyFivePercentile: 0.05,
+                    fiftyPercentile: 0.05,
+                    seventyFivePercentile: 0.05,
+                    ninetyFivePercentile: 0.05,
+                    ninetyNinePercentile: 0.05
+                  }
+                }
+              ],
+              onOriginResponse: [
+                {
+                  startDateTime: '2026-05-20T07:30:00Z',
+                  edgeWorkerVersion: 'cache-control-v2.5',
+                  invocations: 6,
+                  wallTimeExecDuration: {
+                    avg: 0.1035,
+                    min: 0.077,
+                    max: 0.171,
+                    twentyFivePercentile: 0.05,
+                    fiftyPercentile: 0.05,
+                    seventyFivePercentile: 0.05,
+                    ninetyFivePercentile: 0.05,
+                    ninetyNinePercentile: 0.05
+                  }
+                },
+                {
+                  startDateTime: '2026-05-20T10:40:00Z',
+                  edgeWorkerVersion: 'cache-control-v2.5',
+                  invocations: 6,
+                  wallTimeExecDuration: {
+                    avg: 0.09816666666666667,
+                    min: 0.08,
+                    max: 0.168,
+                    twentyFivePercentile: 0.05,
+                    fiftyPercentile: 0.05,
+                    seventyFivePercentile: 0.05,
+                    ninetyFivePercentile: 0.05,
+                    ninetyNinePercentile: 0.05
+                  }
+                }
+              ]
+            },
+            summaryStatistics: {
+              init: {
+                twentyFivePercentile: 1.0,
+                fiftyPercentile: 1.0,
+                seventyFivePercentile: 1.0,
+                ninetyFivePercentile: 1.0,
+                ninetyNinePercentile: 1.0
+              },
+              responseProvider: {
+                twentyFivePercentile: 0.0,
+                fiftyPercentile: 0.0,
+                seventyFivePercentile: 0.0,
+                ninetyFivePercentile: 0.0,
+                ninetyNinePercentile: 0.0
+              },
+              onOriginRequest: {
+                twentyFivePercentile: 0.05,
+                fiftyPercentile: 0.05,
+                seventyFivePercentile: 0.05,
+                ninetyFivePercentile: 0.05,
+                ninetyNinePercentile: 0.05
+              },
+              onBotSegmentAvailable: {
+                twentyFivePercentile: 0.0,
+                fiftyPercentile: 0.0,
+                seventyFivePercentile: 0.0,
+                ninetyFivePercentile: 0.0,
+                ninetyNinePercentile: 0.0
+              },
+              onClientResponse: {
+                twentyFivePercentile: 0.05,
+                fiftyPercentile: 0.05,
+                seventyFivePercentile: 0.05,
+                ninetyFivePercentile: 0.05,
+                ninetyNinePercentile: 0.05
+              },
+              totalWallTime: {
+                twentyFivePercentile: 0.05,
+                fiftyPercentile: 0.05,
+                seventyFivePercentile: 0.05,
+                ninetyFivePercentile: 0.05,
+                ninetyNinePercentile: 0.05
+              },
+              onOriginResponse: {
+                twentyFivePercentile: 0.05,
+                fiftyPercentile: 0.05,
+                seventyFivePercentile: 0.05,
+                ninetyFivePercentile: 0.05,
+                ninetyNinePercentile: 0.05
+              },
+              onClientRequest: {
+                twentyFivePercentile: 0.05,
+                fiftyPercentile: 0.05,
+                seventyFivePercentile: 0.05,
+                ninetyFivePercentile: 0.05,
+                ninetyNinePercentile: 0.05
+              }
+            }
+          }
+        ],
+        summaryStatistics: {
+          init: {
+            twentyFivePercentile: 1.0,
+            fiftyPercentile: 1.0,
+            seventyFivePercentile: 1.0,
+            ninetyFivePercentile: 1.0,
+            ninetyNinePercentile: 1.0
+          },
+          responseProvider: {
+            twentyFivePercentile: 0.0,
+            fiftyPercentile: 0.0,
+            seventyFivePercentile: 0.0,
+            ninetyFivePercentile: 0.0,
+            ninetyNinePercentile: 0.0
+          },
+          onOriginRequest: {
+            twentyFivePercentile: 0.05,
+            fiftyPercentile: 0.05,
+            seventyFivePercentile: 0.05,
+            ninetyFivePercentile: 0.05,
+            ninetyNinePercentile: 0.05
+          },
+          onBotSegmentAvailable: {
+            twentyFivePercentile: 0.0,
+            fiftyPercentile: 0.0,
+            seventyFivePercentile: 0.0,
+            ninetyFivePercentile: 0.0,
+            ninetyNinePercentile: 0.0
+          },
+          onClientResponse: {
+            twentyFivePercentile: 0.05,
+            fiftyPercentile: 0.05,
+            seventyFivePercentile: 0.05,
+            ninetyFivePercentile: 0.05,
+            ninetyNinePercentile: 0.05
+          },
+          totalWallTime: {
+            twentyFivePercentile: 0.05,
+            fiftyPercentile: 0.05,
+            seventyFivePercentile: 0.05,
+            ninetyFivePercentile: 0.05,
+            ninetyNinePercentile: 0.05
+          },
+          onOriginResponse: {
+            twentyFivePercentile: 0.05,
+            fiftyPercentile: 0.05,
+            seventyFivePercentile: 0.05,
+            ninetyFivePercentile: 0.05,
+            ninetyNinePercentile: 0.05
+          },
+          onClientRequest: {
+            twentyFivePercentile: 0.05,
+            fiftyPercentile: 0.05,
+            seventyFivePercentile: 0.05,
+            ninetyFivePercentile: 0.05,
+            ninetyNinePercentile: 0.05
+          }
+        }
       };
       mockSpinner.mockResolvedValue(reportResponse);
 
@@ -1581,12 +1598,187 @@ describe('ew handler tests', () => {
         0,
         'Printing Initialization and execution wall times with percentiles by EdgeWorker ID and event handler from 2026-05-20T07:30:00Z to 2026-05-20T10:40:00Z',
         {
-          onOriginRequest: { avg: '0.0982', min: '0.06', max: '0.22' },
-          onClientRequest: { avg: '0.2422', min: '0.10', max: '1.23' },
-          onClientResponse: { avg: '0.1542', min: '0.10', max: '0.25' },
-          init: { avg: '0.1780', min: '0.14', max: '0.22' }
+          onOriginRequest: {avg: '0.0982', min: '0.06', max: '0.22'},
+          onClientRequest: {avg: '0.2422', min: '0.10', max: '1.23'},
+          onClientResponse: {avg: '0.1542', min: '0.10', max: '0.25'},
+          init: {avg: '0.1780', min: '0.14', max: '0.22'}
         }
       );
+    });
+
+    it('should display the expanded statistics for report 7', async () => {
+      mockSpinner.mockResolvedValue({
+        reportId: 7,
+        name: 'Sub-requests',
+        start: '2026-04-11T18:51:00Z',
+        end: '2026-07-09T18:51:00Z',
+        data: {
+          subRequests: {
+            total: 157821580,
+            errors: {total: 6774740, errorCount: 3250685, timeoutCount: 3524055},
+            responseBodySize: {avg: 2.1323945749370905, min: 0, max: 907},
+            wallTime: {avg: 5.5115091300948835, min: 0.165, max: 17312.211}
+          }
+        }
+      });
+
+      await ewHandler.getReport(7, '2026-04-11T18:51:00Z', '2026-07-09T18:51:00Z', '7915', [], [], false, [], [], 'STAGING');
+
+      expect(console.table).toHaveBeenNthCalledWith(1, {subRequests: {total: '157.82 M'}});
+      expect(console.table).toHaveBeenNthCalledWith(2, {
+        errors: {total: '6.77 M', errorCount: '3.25 M', timeoutCount: '3.52 M'}
+      });
+      expect(console.table).toHaveBeenNthCalledWith(3, {
+        responseBodySize: {avg: '2.13 B', min: '0.00 B', max: '907.00 B'},
+        wallTime: {avg: '5.51 ms', min: '0.17 ms', max: '17.31 s'}
+      });
+    });
+
+    it('should display report 10 rows sorted by hostname and status', async () => {
+      mockSpinner.mockResolvedValue({
+        reportId: 10,
+        name: 'Sub-request statistics',
+        start: '2026-03-21T04:30:00Z',
+        end: '2026-03-21T05:00:00Z',
+        data: [{
+          edgeWorkerId: 7915,
+          data: {
+            '4xx': [{
+              hostname: 'z.example.com',
+              statusCodeBreakdown: [{httpStatus: 403, invocations: 2, errorCount: 1, timeoutCount: 0}]
+            }],
+            '2xx': [{
+              hostname: 'a.example.com',
+              statusCodeBreakdown: [
+                {httpStatus: 200, invocations: 3, errorCount: 0, timeoutCount: 0},
+                {httpStatus: 200, invocations: 7, errorCount: 2, timeoutCount: 1}
+              ]
+            }, {
+              hostname: 'a.example.com',
+              statusCodeBreakdown: [{httpStatus: 201, invocations: 4, errorCount: 0, timeoutCount: 0}]
+            }, {
+              hostname: 'b.example.com',
+              statusCodeBreakdown: [{httpStatus: 200, invocations: 5, errorCount: 0, timeoutCount: 0}]
+            }]
+          }
+        }],
+        summaryStatistics: {
+          totalWallTime: {twentyFivePercentile: 999, fiftyPercentile: 999, seventyFivePercentile: 999, ninetyFivePercentile: 999, ninetyNinePercentile: 999},
+          200: {twentyFivePercentile: 11, fiftyPercentile: 22, seventyFivePercentile: 33, ninetyFivePercentile: 44, ninetyNinePercentile: 55},
+          403: {twentyFivePercentile: 66, fiftyPercentile: 77, seventyFivePercentile: 88, ninetyFivePercentile: 99, ninetyNinePercentile: 111}
+        }
+      });
+
+      await ewHandler.getReport(10, '2026-03-21T04:30:00Z', '2026-03-21T05:00:00Z', '7915', [], [], false, [], [], 'STAGING');
+
+      expect(console.table).toHaveBeenCalledWith([
+        {Hostname: 'a.example.com', 'HTTP Status': 200, Invocations: '10', 'Error Count': '2', 'Timeout Count': '1'},
+        {Hostname: 'a.example.com', 'HTTP Status': 201, Invocations: '4', 'Error Count': '0', 'Timeout Count': '0'},
+        {Hostname: 'b.example.com', 'HTTP Status': 200, Invocations: '5', 'Error Count': '0', 'Timeout Count': '0'},
+        {Hostname: 'z.example.com', 'HTTP Status': 403, Invocations: '2', 'Error Count': '1', 'Timeout Count': '0'}
+      ]);
+    });
+
+    it('should display hostname-aware wall time statistics for report 11', async () => {
+      mockSpinner.mockResolvedValue({
+        reportId: 11,
+        name: 'Sub-request wall time',
+        start: '2026-03-21T04:30:00Z',
+        end: '2026-06-16T16:05:00Z',
+        data: [{
+          edgeWorkerId: 7915, data: {
+            '4xx': [{
+              hostname: 'b.example.com',
+              wallTime: {
+                twentyFivePercentile: 30,
+                fiftyPercentile: 60,
+                seventyFivePercentile: 90,
+                ninetyFivePercentile: 110,
+                ninetyNinePercentile: 120
+              },
+              statusCodeBreakdown: [{
+                httpStatus: 403, wallTime: {
+                  avg: 100, min: 50, max: 150, twentyFivePercentile: 25,
+                  fiftyPercentile: 50, seventyFivePercentile: 75, ninetyFivePercentile: 95, ninetyNinePercentile: 99
+                }
+              }]
+            }, {
+              hostname: 'a.example.com',
+              wallTime: {
+                twentyFivePercentile: 10,
+                fiftyPercentile: 20,
+                seventyFivePercentile: 30,
+                ninetyFivePercentile: 40,
+                ninetyNinePercentile: 50
+              },
+              statusCodeBreakdown: [{
+                httpStatus: 200, wallTime: {
+                  avg: 10, min: 5, max: 20, twentyFivePercentile: 7, fiftyPercentile: 10,
+                  seventyFivePercentile: 13, ninetyFivePercentile: 18, ninetyNinePercentile: 20
+                }
+              }]
+            }]
+          }
+        }],
+        summaryStatistics: {
+          totalWallTime: {twentyFivePercentile: 999, fiftyPercentile: 999, seventyFivePercentile: 999, ninetyFivePercentile: 999, ninetyNinePercentile: 999},
+          200: {twentyFivePercentile: 11, fiftyPercentile: 22, seventyFivePercentile: 33, ninetyFivePercentile: 44, ninetyNinePercentile: 55},
+          403: {twentyFivePercentile: 66, fiftyPercentile: 77, seventyFivePercentile: 88, ninetyFivePercentile: 99, ninetyNinePercentile: 111}
+        }
+      });
+
+      await ewHandler.getReport(11, '2026-03-21T04:30:00Z', '2026-06-16T16:05:00Z', '7915', [], [], false, [], [], 'STAGING');
+
+      expect(console.table).toHaveBeenNthCalledWith(1, [
+        {Hostname: 'a.example.com', 'HTTP Status': 200, avg: '10.00 ms', min: '5.00 ms', max: '20.00 ms'},
+        {Hostname: 'b.example.com', 'HTTP Status': 403, avg: '100.00 ms', min: '50.00 ms', max: '150.00 ms'}
+      ]);
+      expect(console.table).toHaveBeenNthCalledWith(2, [
+        {'HTTP Status': 200, p25: '11.00 ms', p50: '22.00 ms', p75: '33.00 ms', p95: '44.00 ms', p99: '55.00 ms'},
+        {'HTTP Status': 403, p25: '66.00 ms', p50: '77.00 ms', p75: '88.00 ms', p95: '99.00 ms', p99: '111.00 ms'}
+      ]);
+    });
+
+    it('should display hostname-aware body size statistics for report 12', async () => {
+      mockSpinner.mockResolvedValue({
+        reportId: 12,
+        name: 'Sub-request body size',
+        start: '2026-03-21T04:30:00Z',
+        end: '2026-06-16T16:05:00Z',
+        data: [{
+          edgeWorkerId: 7915, data: {
+            '4xx': [{
+              hostname: 'a.example.com',
+          responseBodySize: {
+            twentyFivePercentile: 75,
+                fiftyPercentile: 150,
+                seventyFivePercentile: 225,
+                ninetyFivePercentile: 285,
+                ninetyNinePercentile: 297
+              },
+              statusCodeBreakdown: [{
+                httpStatus: 403, responseBodySize: {
+                  avg: 50000, min: 150, max: 450, twentyFivePercentile: 75,
+                  fiftyPercentile: 150, seventyFivePercentile: 225, ninetyFivePercentile: 285, ninetyNinePercentile: 297
+                }
+              }]
+            }]
+          }
+        }],
+        summaryStatistics: {
+          totalResponseBodySize: {twentyFivePercentile: 999, fiftyPercentile: 999, seventyFivePercentile: 999, ninetyFivePercentile: 999, ninetyNinePercentile: 999},
+          403: {twentyFivePercentile: 75, fiftyPercentile: 150, seventyFivePercentile: 225, ninetyFivePercentile: 285, ninetyNinePercentile: 297}
+        }
+      });
+
+      await ewHandler.getReport(12, '2026-03-21T04:30:00Z', '2026-06-16T16:05:00Z', '7915', [], [], false, [], [], 'STAGING');
+
+      expect(console.table).toHaveBeenNthCalledWith(1, [
+        {Hostname: 'a.example.com', 'HTTP Status': 403, avg: '48.83 kB', min: '150.00 B', max: '450.00 B'}
+      ]);
+      expect(console.table).toHaveBeenNthCalledWith(2, [
+        {'HTTP Status': 403, p25: '75.00 B', p50: '150.00 B', p75: '225.00 B', p95: '285.00 B', p99: '297.00 B'}
+      ]);
     });
   });
 
@@ -1616,7 +1808,7 @@ describe('ew handler tests', () => {
     });
 
     it('should display environments in table mode', async () => {
-      mockSpinner.mockResolvedValue({ environments, limitedAccessToEnvironments: false });
+      mockSpinner.mockResolvedValue({environments, limitedAccessToEnvironments: false});
 
       await ewHandler.getEnvironments('101', false);
 
@@ -1629,7 +1821,7 @@ describe('ew handler tests', () => {
       );
       expect(console.table).toHaveBeenCalledTimes(1);
       expect(console.table).toHaveBeenCalledWith([
-        { environmentName: 'env-1', workspaceName: 'ws-1', environmentVersion: '2' }
+        {environmentName: 'env-1', workspaceName: 'ws-1', environmentVersion: '2'}
       ]);
       expect(console.log).toHaveBeenCalledWith('limitedAccessToEnvironments: false');
       expect(mockLogAndExit).not.toHaveBeenCalled();
@@ -1637,7 +1829,7 @@ describe('ew handler tests', () => {
 
     it('should write environments as JSON when JSON mode is enabled', async () => {
       mockIsJSONOutputMode.mockReturnValue(true);
-      const result = { environments, limitedAccessToEnvironments: true };
+      const result = {environments, limitedAccessToEnvironments: true};
       mockSpinner.mockResolvedValue(result);
 
       await ewHandler.getEnvironments('101', false);
@@ -1652,7 +1844,7 @@ describe('ew handler tests', () => {
     });
 
     it('should log an empty message when no environments exist', async () => {
-      mockSpinner.mockResolvedValue({ environments: [], limitedAccessToEnvironments: false });
+      mockSpinner.mockResolvedValue({environments: [], limitedAccessToEnvironments: false});
 
       await ewHandler.getEnvironments('55', false);
 
@@ -1664,7 +1856,7 @@ describe('ew handler tests', () => {
     });
 
     it('should include "active" in the empty message when activeOnly is true', async () => {
-      mockSpinner.mockResolvedValue({ environments: [], limitedAccessToEnvironments: false });
+      mockSpinner.mockResolvedValue({environments: [], limitedAccessToEnvironments: false});
 
       await ewHandler.getEnvironments('55', true);
 
@@ -1675,7 +1867,7 @@ describe('ew handler tests', () => {
     });
 
     it('should exit with error when result has isError', async () => {
-      mockSpinner.mockResolvedValue({ isError: true, error_reason: 'Not found' });
+      mockSpinner.mockResolvedValue({isError: true, error_reason: 'Not found'});
 
       await ewHandler.getEnvironments('99', false);
 
@@ -1692,8 +1884,8 @@ describe('ew handler tests', () => {
     const mockWriteJSONOutput = ewJsonOutput.ewJsonOutput.writeJSONOutput as jest.Mock;
 
     const locations = [
-      { location: '/default/loc', continueOnError: true },
-      { location: '/fallback/loc', continueOnError: false }
+      {location: '/default/loc', continueOnError: true},
+      {location: '/fallback/loc', continueOnError: false}
     ];
 
     beforeEach(() => {
@@ -1703,7 +1895,7 @@ describe('ew handler tests', () => {
     });
 
     it('should display locations in table mode', async () => {
-      mockSpinner.mockResolvedValue({ locations });
+      mockSpinner.mockResolvedValue({locations});
 
       await ewHandler.getEnvironmentLocations('101', 'my-env', 'my-ws', '3');
 
@@ -1721,7 +1913,7 @@ describe('ew handler tests', () => {
 
     it('should write locations as JSON when JSON mode is enabled', async () => {
       mockIsJSONOutputMode.mockReturnValue(true);
-      const result = { locations };
+      const result = {locations};
       mockSpinner.mockResolvedValue(result);
 
       await ewHandler.getEnvironmentLocations('101', 'my-env', 'my-ws', '3');
@@ -1736,7 +1928,7 @@ describe('ew handler tests', () => {
     });
 
     it('should log an empty message when no locations exist', async () => {
-      mockSpinner.mockResolvedValue({ locations: [] });
+      mockSpinner.mockResolvedValue({locations: []});
 
       await ewHandler.getEnvironmentLocations('55', 'staging-env', 'my-ws', '1');
 
@@ -1748,7 +1940,7 @@ describe('ew handler tests', () => {
     });
 
     it('should exit with error when result has isError', async () => {
-      mockSpinner.mockResolvedValue({ isError: true, error_reason: 'Unauthorized' });
+      mockSpinner.mockResolvedValue({isError: true, error_reason: 'Unauthorized'});
 
       await ewHandler.getEnvironmentLocations('99', 'env', 'ws', '1');
 
@@ -1798,7 +1990,12 @@ describe('ew handler tests', () => {
         reports: [
           {reportId: 1, name: 'Report 1'},
           {reportId: 2, name: 'Report 2'},
-          {reportId: 4, name: 'Memory usage by EdgeWorker ID and event handler', description: 'Report ID 4 is deprecated. Use report ID 6 for memory usage.', unavailable: true},
+          {
+            reportId: 4,
+            name: 'Memory usage by EdgeWorker ID and event handler',
+            description: 'Report ID 4 is deprecated. Use report ID 6 for memory usage.',
+            unavailable: true
+          },
           {reportId: 6, name: 'Memory usage report'}
         ]
       };

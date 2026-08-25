@@ -114,7 +114,7 @@ Commands:
 | list-contracts \| li-contracts `[options]`                                                    | List of contract ids that user has access to.                                                                                                                                     |
 | list-properties \| lp `<edgeworker-identifier> [options]`                                     | List of properties associated with a given EdgeWorker Id.                                                                                                                         |
 | list-environments \| le `<edgeworker-identifier> [options]`                                   | List of environments associated with a given EdgeWorker Id.                                                                                                                       |
-| list-environment-locations \| lel `<edgeworker-identifier> [options]`                         | List of behavior locations associated to a specific environment within a workspace for an EdgeWorker Id.                                                                                 |
+| list-environment-locations \| lel `<edgeworker-identifier> [options]`                         | List of behavior locations associated to a specific environment within a workspace for an EdgeWorker Id.                                                                          |
 | list-limits \| li-limits                                                                      | View the various limits EdgeWorkers imposes on the number of activations, EdgeWorkers IDs, and versions you can deploy.                                                           |
 | list-restiers \| li-restiers `[options]`                                                      | List Resource Tiers that can be used to create or clone EdgeWorker Id.                                                                                                            |
 | show-restier \| show-restier `<edgeworker-identifier>`                                        | Customers can get Resource Tier details for a specific EdgeWorker Id.                                                                                                             |
@@ -763,7 +763,7 @@ Usage: `akamai show-restier <edgeworkerId>`
 
 ### Get Available EdgeWorkers Report Types
 
-List the available report types that can be generated for an EdgeWorker ID. Note that reports 2 and 4 have been deprecated.
+List the available report types that can be generated for an EdgeWorker ID. Reports 2 and 4 became unavailable in the EdgeWorkers API on August 12, 2026. Use report 5 instead of report 2 for initialization and execution times, and report 6 instead of report 4 for memory usage.
 
 Usage: `akamai get reports`
 
@@ -778,7 +778,7 @@ Usage: `akamai get reports`
 
 ### Get EdgeWorker Report
 
-Get a report for a given EdgeWorker ID. Note that reports 2 and 4 have been deprecated.
+Get a report for a given EdgeWorker ID. Reports 2 and 4 are deprecated and became unavailable on August 12, 2026. Use report 5 instead of report 2 for initialization and execution times, and report 6 instead of report 4 for memory usage.
 
 Usage: `akamai get report <reportId> <edgeworker-identifier>`
 
