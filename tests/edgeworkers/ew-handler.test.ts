@@ -1615,7 +1615,7 @@ describe('ew handler tests', () => {
         data: {
           subRequests: {
             total: 157821580,
-            errors: {total: 6774740, errorCount: 3250685, timeoutCount: 3524055},
+            errors: {total: 6774740, genericErrorCount: 3250685, timeoutCount: 3524055},
             responseBodySize: {avg: 2.1323945749370905, min: 0, max: 907},
             wallTime: {avg: 5.5115091300948835, min: 0.165, max: 17312.211}
           }
@@ -1626,7 +1626,7 @@ describe('ew handler tests', () => {
 
       expect(console.table).toHaveBeenNthCalledWith(1, {subRequests: {total: '157.82 M'}});
       expect(console.table).toHaveBeenNthCalledWith(2, {
-        errors: {total: '6.77 M', errorCount: '3.25 M', timeoutCount: '3.52 M'}
+        errors: {total: '6.77 M', genericErrorCount: '3.25 M', timeoutCount: '3.52 M'}
       });
       expect(console.table).toHaveBeenNthCalledWith(3, {
         responseBodySize: {avg: '2.13 B', min: '0.00 B', max: '907.00 B'},

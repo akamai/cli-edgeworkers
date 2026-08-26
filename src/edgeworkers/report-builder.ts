@@ -316,7 +316,7 @@ function buildReportSeven(report) {
     {
       errors: {
         total: formatCountShort(subRequests.errors?.total),
-        errorCount: formatCountShort(subRequests.errors?.errorCount),
+        genericErrorCount: formatCountShort(subRequests.errors?.genericErrorCount),
         timeoutCount: formatCountShort(subRequests.errors?.timeoutCount)
       }
     },
