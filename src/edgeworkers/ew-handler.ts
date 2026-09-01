@@ -303,7 +303,7 @@ export async function deleteEdgeWorkerId(ewId: string, noPrompt: boolean) {
       `Deleting EdgeWorker Id ${ewId}`
     );
   } else {
-    const deleteEwId: boolean = await askYesNoQuestion(`Have you checked to make sure that EdgeWorker Id ${ewId} is not in use on any active properties? You can check for active properties by using the list-properties command.`);
+    const deleteEwId: boolean = await askYesNoQuestion(`Have you checked to make sure that EdgeWorker Id ${ewId} is not in use on any active properties or environments? You can check for active properties by using the list-properties command and for active environments by using the list-environments command.`);
     if (deleteEwId) {
       deletion = await cliUtils.spinner(
         edgeWorkersSvc.deleteEdgeWorkerId(ewId),
@@ -437,8 +437,8 @@ export async function getProperties(ewId: string, activeOnly: boolean, details: 
       } else {
         cliUtils.logWithBorder(msg);
         if (details) {
-          let stagingEdgeWorkersBehaviorLocations = [];
-          let productionEdgeWorkersBehaviorLocations = [];
+          let stagingEdgeWorkersBehaviorLocations: any = [];
+          let productionEdgeWorkersBehaviorLocations: any = [];
           properties.forEach(prop => {
             prop.stagingEdgeWorkersBehaviorLocations.forEach(behaviorLocation => {
               stagingEdgeWorkersBehaviorLocations.push({
@@ -492,6 +492,56 @@ export async function getProperties(ewId: string, activeOnly: boolean, details: 
     }
   } else {
     cliUtils.logAndExit(1, propList.error_reason);
+  }
+}
+
+export async function getEnvironments(ewId: string, activeOnly: boolean) {
+  const result = await cliUtils.spinner(
+    edgeWorkersSvc.getEnvironments(ewId, activeOnly),
+    `Retrieving environments for EdgeWorker Id ${ewId}...`
+  );
+  if (result && !result.isError) {
+    const environments = result.environments;
+    if (environments.length > 0) {
+      const msg = `The following environments are associated with the EdgeWorker Id ${ewId}`;
+      if (ewJsonOutput.isJSONOutputMode()) {
+        ewJsonOutput.writeJSONOutput(0, msg, result);
+      } else {
+        cliUtils.logWithBorder(msg);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const rows = environments.map(({stagingVersionLink, productionVersionLink, devTestVersionLink, ...rest}) => rest);
+        console.table(rows);
+        console.log(`limitedAccessToEnvironments: ${result.limitedAccessToEnvironments}`);
+      }
+    } else {
+      const optionalParam = activeOnly ? ' active ' : ' ';
+      cliUtils.logAndExit(0, `INFO: There are currently no ${optionalParam} environments associated with the EdgeWorker Id: ${ewId}`);
+    }
+  } else {
+    cliUtils.logAndExit(1, result.error_reason);
+  }
+}
+
+export async function getEnvironmentLocations(ewId: string, environmentName: string, workspaceName: string, environmentVersion: string) {
+  const result = await cliUtils.spinner(
+    edgeWorkersSvc.getEnvironmentLocations(ewId, environmentName, workspaceName, environmentVersion),
+    `Retrieving EdgeWorkers behavior locations for EdgeWorker Id ${ewId}...`
+  );
+  if (result && !result.isError) {
+    const locations = result.locations;
+    if (locations.length > 0) {
+      const msg = `EdgeWorkers Behavior Locations for EdgeWorker Id ${ewId}`;
+      if (ewJsonOutput.isJSONOutputMode()) {
+        ewJsonOutput.writeJSONOutput(0, msg, result);
+      } else {
+        cliUtils.logWithBorder(msg);
+        console.table(locations);
+      }
+    } else {
+      cliUtils.logAndExit(0, `INFO: There are currently no EdgeWorkers Behavior Locations for EdgeWorker Id: ${ewId} in environment ${environmentName}`);
+    }
+  } else {
+    cliUtils.logAndExit(1, result.error_reason);
   }
 }
 

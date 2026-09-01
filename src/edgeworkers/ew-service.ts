@@ -30,7 +30,7 @@ function fetchTarball(
   // headers[EDGEWORKERS_IDE_HEADER] = 'VSCODE';
   headers['Accept'] = 'application/gzip';
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   return new Promise<any>((resolve, reject) => {
     edge.auth({
       path,
@@ -173,6 +173,28 @@ export function getProperties(ewId: string, activeOnly: boolean, details: boolea
     )
     .then((r) => r.body)
     .catch((err) => error.handleError(err, 'GET_PROPERTIES'));
+}
+
+export function getEnvironments(ewId: string, activeOnly: boolean) {
+  const queryString = activeOnly !== undefined ? '?activeOnly=true' : '';
+  return httpEdge
+    .getJson(
+      `${EDGEWORKERS_API_BASE}/ids/${ewId}/environments${queryString}`,
+      cliUtils.getTimeout(DEFAULT_EW_TIMEOUT)
+    )
+    .then((r) => r.body)
+    .catch((err) => error.handleError(err, 'GET_ENVIRONMENTS'));
+}
+
+export function getEnvironmentLocations(ewId: string, environmentName: string, workspaceName: string, environmentVersion: string) {
+  const queryString = `?workspaceName=${encodeURIComponent(workspaceName)}&environmentName=${encodeURIComponent(environmentName)}&environmentVersion=${encodeURIComponent(environmentVersion)}`;
+  return httpEdge
+    .getJson(
+      `${EDGEWORKERS_API_BASE}/ids/${ewId}/environments/edgeworker-locations${queryString}`,
+      cliUtils.getTimeout(DEFAULT_EW_TIMEOUT)
+    )
+    .then((r) => r.body)
+    .catch((err) => error.handleError(err, 'GET_ENVIRONMENT_LOCATIONS'));
 }
 
 export function getResourceTiers(contractId: string) {

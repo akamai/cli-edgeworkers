@@ -1,6 +1,6 @@
 {
   "name": "akamai-edgeworkers-cli",
-  "version": "1.17.0",
+  "version": "1.18.0",
   "description": "A tool that makes it easier to manage Akamai EdgeWorkers code bundles and EdgeKV databases. Call the EdgeWorkers and EdgeKV API from the command line.",
   "repository": "https://github.com/akamai/cli-edgeworkers",
   "scripts": {
@@ -8,7 +8,7 @@
     "clean": "rm -rf node_modules",
     "build-ts": "tsc",
     "postinstall": "node scripts/postinstall.js",
-    "lint": "eslint . --ext .ts",
+    "lint": "eslint .",
     "lint:fix": "npm run lint -- --fix",
     "test": "npm run lint; npm run test:run",
     "test:run": "jest"
@@ -29,7 +29,7 @@
     "console.table": "0.10.0",
     "crypto-js": "^4.2.0",
     "from-seconds": "^1.0.2",
-    "glob": "^8.1.0",
+    "glob": "^13.0.6",
     "ini": "^3.0.1",
     "inquirer": "^12.9.6",
     "is-valid-domain": "^0.1.5",
@@ -37,7 +37,7 @@
     "readline-sync": "^1.4.10",
     "sha256-file": "^1.0.0",
     "table-layout": "^4.1.1",
-    "tar": "^7.5.8",
+    "tar": "^7.5.20",
     "tar-stream": "^2.1.4",
     "untildify": "3.0.3"
   },
@@ -60,15 +60,17 @@
     "@types/request": "^2.48.3",
     "@types/sha256-file": "^1.0.1",
     "@types/tar-stream": "^2.2.2",
-    "@typescript-eslint/eslint-plugin": "^8.56.0",
-    "@typescript-eslint/parser": "^8.56.0",
+    "@typescript-eslint/eslint-plugin": "^8.65.0",
+    "@typescript-eslint/parser": "^8.65.0",
     "babel-jest": "^29.7.0",
     "dotenv": "^16.0.1",
-    "eslint": "^8.20.0",
+    "eslint": "^10.8.0",
+    "globals": "^17.8.0",
     "jest": "^29.7.0",
     "pre-commit": "^1.2.2",
     "ts-jest": "^29.4.11",
-    "typescript": "^5.2.0"
+    "typescript": "^5.2.0",
+    "typescript-eslint": "^8.65.0"
   },
   "overrides": {
     "pre-commit": {
