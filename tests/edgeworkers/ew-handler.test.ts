@@ -1791,12 +1791,16 @@ describe('ew handler tests', () => {
 
     const environments = [
       {
-        environmentName: 'env-1',
-        workspaceName: 'ws-1',
-        environmentVersion: '2',
+        environmentName: 'my-prod-env-1223434',
+        environmentDisplayName: 'my-prod-env',
+        profile: {useCase: 'PRODUCTION'},
+        workspaceName: 'my-site-ws-5678',
+        workspaceDisplayName: 'my-site-ws',
+        latestVersion: 11,
+        stagingVersion: 10,
         stagingVersionLink: '/staging/link',
-        productionVersionLink: '/prod/link',
-        devTestVersionLink: '/devtest/link'
+        productionVersion: 9,
+        productionVersionLink: '/prod/link'
       }
     ];
 
@@ -1821,7 +1825,18 @@ describe('ew handler tests', () => {
       );
       expect(console.table).toHaveBeenCalledTimes(1);
       expect(console.table).toHaveBeenCalledWith([
-        {environmentName: 'env-1', workspaceName: 'ws-1', environmentVersion: '2'}
+        {
+          environmentName: 'my-prod-env-1223434',
+          environmentDisplayName: 'my-prod-env',
+          workspaceName: 'my-site-ws-5678',
+          workspaceDisplayName: 'my-site-ws',
+          profileUsecase: 'PRODUCTION',
+          latestVersion: 11,
+          stagingVersion: 10,
+          stagingVersionLink: '/staging/link',
+          productionVersion: 9,
+          productionVersionLink: '/prod/link'
+        }
       ]);
       expect(console.log).toHaveBeenCalledWith('limitedAccessToEnvironments: false');
       expect(mockLogAndExit).not.toHaveBeenCalled();
@@ -1838,7 +1853,21 @@ describe('ew handler tests', () => {
       expect(mockWriteJSONOutput).toHaveBeenCalledWith(
         0,
         expect.stringContaining('EdgeWorker Id 101'),
-        result
+        {
+          limitedAccessToEnvironments: true,
+          environments: [{
+            environmentName: 'my-prod-env-1223434',
+            environmentDisplayName: 'my-prod-env',
+            profileUsecase: 'PRODUCTION',
+            workspaceName: 'my-site-ws-5678',
+            workspaceDisplayName: 'my-site-ws',
+            latestVersion: 11,
+            stagingVersion: 10,
+            stagingVersionLink: '/staging/link',
+            productionVersion: 9,
+            productionVersionLink: '/prod/link'
+          }]
+        }
       );
       expect(mockLogAndExit).not.toHaveBeenCalled();
     });

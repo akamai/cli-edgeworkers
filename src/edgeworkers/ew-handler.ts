@@ -504,13 +504,67 @@ export async function getEnvironments(ewId: string, activeOnly: boolean) {
     const environments = result.environments;
     if (environments.length > 0) {
       const msg = `The following environments are associated with the EdgeWorker Id ${ewId}`;
+      environments.forEach((environment) => {
+        const {
+          environmentName,
+          environmentDisplayName,
+          workspaceName,
+          workspaceDisplayName,
+          profile,
+          latestVersion,
+          stagingVersion,
+          stagingVersionLink,
+          productionVersion,
+          productionVersionLink,
+          devVersion,
+          devVersionLink,
+          ...rest
+        } = environment;
+        Object.keys(environment).forEach((key) => delete environment[key]);
+        Object.assign(environment, {
+          environmentName,
+          environmentDisplayName,
+          workspaceName,
+          workspaceDisplayName,
+          ...(profile?.useCase !== undefined && {profileUsecase: profile.useCase}),
+          ...(latestVersion !== undefined && {latestVersion}),
+          ...(stagingVersion !== undefined && {stagingVersion}),
+          ...(stagingVersionLink !== undefined && {stagingVersionLink}),
+          ...(productionVersion !== undefined && {productionVersion}),
+          ...(productionVersionLink !== undefined && {productionVersionLink}),
+          ...(devVersion !== undefined && {devVersion}),
+          ...(devVersionLink !== undefined && {devVersionLink}),
+          ...rest
+        });
+      });
       if (ewJsonOutput.isJSONOutputMode()) {
         ewJsonOutput.writeJSONOutput(0, msg, result);
       } else {
         cliUtils.logWithBorder(msg);
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const rows = environments.map(({stagingVersionLink, productionVersionLink, devTestVersionLink, ...rest}) => rest);
-        console.table(rows);
+        const columnOrder = [
+          'environmentName',
+          'environmentDisplayName',
+          'workspaceName',
+          'workspaceDisplayName',
+          'profileUsecase',
+          'latestVersion',
+          'stagingVersion',
+          'stagingVersionLink',
+          'productionVersion',
+          'productionVersionLink',
+          'devVersion',
+          'devVersionLink'
+        ];
+        const columns = columnOrder.filter((column) => environments.some((environment) => {
+          const value = environment[column];
+          return value !== undefined && value !== null && value !== '';
+        }));
+        const tableRows = environments.map((environment) => Object.fromEntries(
+          columns
+            .filter((column) => environment[column] !== undefined)
+            .map((column) => [column, environment[column]])
+        ));
+        console.table(tableRows);
         console.log(`limitedAccessToEnvironments: ${result.limitedAccessToEnvironments}`);
       }
     } else {
